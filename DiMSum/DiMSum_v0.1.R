@@ -8,9 +8,7 @@ print(version_info)
 
 #TODO:
 #dedicated stderr and stdout subfolders
-#parse stderr and stdout files to generate reports
 #Gzipped files assumed to have .gz extension
-#Add dirpath to exp_design objects (rather than separate exp_metadata items)
 
 ###########################
 ### PACKAGES
@@ -32,6 +30,7 @@ option_list <- list(
   make_option(opt_str=c("--fastqFileDir", "-i"), help = "Path to directory with input FASTQ files"),
   make_option(opt_str=c("--fastqFileExtension", "-l"), default='.fastq', help = "FASTQ file extension"),
   make_option(opt_str=c("--gzipped", "-g"), type="logical", default=T, help = "Are FASTQ files are gzipped?"),
+  make_option(opt_str=c("--barcodeDesignPath", "-b"), help = "Path to barcode design file (tab-separated plain text file with barcode design)"),
   make_option(opt_str=c("--experimentDesignPath", "-e"), help = "Path to experimental design file (tab-separated plain text file with replicate structure)"),
   make_option(opt_str=c("--cutadapt5First"), help = "cutadapt: sequence of an adapter ligated to the 5' end (of the first read)"),
   make_option(opt_str=c("--cutadapt5Second"), help = "cutadapt: sequence of an adapter ligated to the 5' end (of the second read)"),
@@ -43,10 +42,10 @@ option_list <- list(
   make_option(opt_str=c("--usearchMaxee", "-m"), type="double", help = "USEARCH: maximum number of expected errors to retain read pair"),
   make_option(opt_str=c("--outputPath", "-o"), help = "Path to directory to use for output files"),
   make_option(opt_str=c("--projectName", "-p"), help = "Project name"),
-  make_option(opt_str=c("--startStage", "-s"), type="integer", default=1, help = "Start at a specified pipeline stage"),
-  make_option(opt_str=c("--stopStage", "-t"), type="integer", default=0, help = "Stop at specified pipeline stage (default:0, no stop condition)"),
   make_option(opt_str=c("--wildtypeSequence", "-w"), help = "Wild-type nucleotide sequence"),
   make_option(opt_str=c("--maxAAMutations", "-x"), type="integer", default=2, help = "Maximum considered amino acid sequence mutations"),
+  make_option(opt_str=c("--startStage", "-s"), type="integer", default=1, help = "Start at a specified pipeline stage"),
+  make_option(opt_str=c("--stopStage", "-t"), type="integer", default=0, help = "Stop at specified pipeline stage (default:0, no stop condition)"),
   make_option(opt_str=c("--numCores", "-c"), type="integer", default=1, help = "Number of available CPU cores")  
 )
 
@@ -79,6 +78,70 @@ sum_datatable_columns <- function(dt, column_patterns, suffix=""){
   }
   #Return data.table
   return(dt)
+}
+
+#dimsum_stage_sabre
+#
+# Run sabre on all fastq files.
+#
+# dimsum_meta: an experiment metadata object (required)
+# sabre_outpath: sabre output path (required)
+# execute: whether or not to execute the system command (default: TRUE)
+#
+# Returns: an updated experiment metadata object.
+#
+dimsum_stage_sabre <- function(
+  dimsum_meta,
+  sabre_outpath,
+  execute = TRUE
+  ){
+  #Create cutadapt directory (if doesn't already exist)
+  sabre_outpath <- gsub("/$", "", sabre_outpath)
+  dir.create(sabre_outpath)
+  #Cutadapt parameters specified?
+  if( !'barcode_design' %in% names(dimsum_meta) ){
+    message("Skipping demultiplexing (assuming all fastq files already demultiplexed)")
+    return(dimsum_meta)
+  }else{
+    fastq_pair_list <- unique(dimsum_meta[['barcode_design']][,c('pair1', 'pair2')])
+    rownames(fastq_pair_list) = 1:dim(fastq_pair_list)[1]
+    #Trim FASTQ file pairs
+    message("Demultiplexing FASTQ files with sabre:")
+    all_fastq <- file.path(dimsum_meta[["exp_design"]]$pair_directory, c(dimsum_meta[['barcode_design']]$pair1, dimsum_meta[['barcode_design']]$pair2))
+    print(unique(all_fastq))
+    message("Processing...")
+    for(pair_name in rownames(fastq_pair_list)){
+      #TODO: saber binary path specifiable on commandline?
+      print(fastq_pair_list[pair_name,])
+      #Check if this system command should be executed
+      if(execute){
+        #
+        temp_design <- dimsum_meta[['barcode_design']][grep(fastq_pair_list[pair_name,'pair1'], dimsum_meta[['barcode_design']][,'pair1']),]
+        temp_design$new_pair1 <- file.path(sabre_outpath, temp_design$new_pair1)
+        temp_design$new_pair2 <- file.path(sabre_outpath, temp_design$new_pair2)
+        write.table(temp_design[,c('barcode', 'new_pair1', 'new_pair2')], file = file.path(sabre_outpath, paste0('sabre_barcode-file_', pair_name, '.txt')), col.names = F, quote = F, row.names = F, sep = "\t")
+        temp_out = system(paste0(
+          "sabre pe -m 2 -c -f ",
+          file.path(dimsum_meta[["fastq_path_original"]], fastq_pair_list[pair_name,]$pair1),
+          " -r ",
+          file.path(dimsum_meta[["fastq_path_original"]], fastq_pair_list[pair_name,]$pair2),
+          " -b ",
+          file.path(sabre_outpath, paste0('sabre_barcode-file_', pair_name, '.txt')),
+          " -u ",
+          file.path(sabre_outpath, paste0('sabre_unknown-output1_', pair_name, '.txt')),
+          " -w ",
+          file.path(sabre_outpath, paste0('sabre_unknown-output2_', pair_name, '.txt')),
+          " > ",
+          file.path(sabre_outpath, paste0(fastq_pair_list[pair_name,]$pair1, ".cutadapt.stdout")),
+          " 2> ",
+          file.path(sabre_outpath, paste0(fastq_pair_list[pair_name,]$pair1, ".cutadapt.stderr"))))
+      }
+    }
+    #New experiment metadata
+    dimsum_meta_new <- dimsum_meta
+    #Update fastq metadata
+    dimsum_meta_new[['exp_design']]$pair_directory <- sabre_outpath
+  }
 }
 
 #dimsum_stage_fastqc_report
@@ -217,11 +280,11 @@ dimsum_stage_unzip <- function(
   fastq_outpath,
   execute = TRUE
   ){
-  #Create unzip directory (if doesn't already exist)
-  fastq_outpath <- gsub("/$", "", fastq_outpath)
-  dir.create(fastq_outpath)
   #All fastq files gzipped?
   if(dimsum_meta[["gzipped"]]){
+    #Create unzip directory (if doesn't already exist)
+    fastq_outpath <- gsub("/$", "", fastq_outpath)
+    dir.create(fastq_outpath)
     message("Unzipping FASTQ files:")
     all_fastq <- file.path(dimsum_meta[["exp_design"]]$pair_directory, c(dimsum_meta[['exp_design']]$pair1, dimsum_meta[['exp_design']]$pair2))
     print(all_fastq)
@@ -248,25 +311,9 @@ dimsum_stage_unzip <- function(
     return(dimsum_meta_new)
   }else{
     #Copy fastq files
-    message("Copying FASTQ files:")
-    all_fastq <- file.path(dimsum_meta[["exp_design"]]$pair_directory, c(dimsum_meta[['exp_design']]$pair1, dimsum_meta[['exp_design']]$pair2))
-    print(all_fastq)
-    message("Processing...")
-    for(f in all_fastq){
-      message(paste0("\t", f))
-      #Check if this system command should be executed
-      if(execute){
-        temp_out = system(paste0(
-          "cp ", 
-          f, 
-          " ", 
-          fastq_outpath))
-      }
-    }
+    message("FASTQ files already uncompressed.")
     #New experiment metadata
     dimsum_meta_new <- dimsum_meta
-    #Update fastq metadata
-    dimsum_meta_new[['exp_design']]$pair_directory <- fastq_outpath
     return(dimsum_meta_new)
   }
 }
@@ -928,7 +975,7 @@ dimsum_stage_merge <- function(
       #Calculate number of mutations
       temp_file[,Nmut_aa := adist(aa_seq,wt_AAseq)]
       #Save distribution
-      aa_mutation_dict[[count_file]] <- table(temp_file$Nmut_aa)
+      aa_mutation_dict[[count_file]] <- table(temp_file$Nmut_aa) #BUG: this only tallies the number of _unique_ variants with a given number of AA mutations
       #Number of sequences with greater than desired number of mutations
       aa_mutation_filter_dict[[count_file]] <- sum(temp_file[Nmut_aa > dimsum_meta[["maxAAMutations"]],]$count)
       #Subset to desired number of mutations
@@ -999,34 +1046,34 @@ exp_metadata <- list()
 
 # #TEMP: set arguments manually
 # arg_list <- list()
-# arg_list$fastqFileDir <- "/users/blehner/sequencing_data/Benedetta_Bolognesi/2017-06-13/"
+# arg_list$fastqFileDir <- "/users/blehner/sequencing_data/Xianghua_Li/cI_high_expression_2017-01-25-CA1FHANXX/"
 # arg_list$fastqFileExtension <- ".fastq"
-# arg_list$gzipped <- TRUE
-# arg_list$experimentDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180521/experimentDesign_290.txt"
-# arg_list$cutadapt5First <- "TGGCTTTGGGAATCAGGGTGGATTT"
-# arg_list$cutadapt5Second <- "ACATGCCCATCATACCCCAACTGCT"
-# arg_list$cutadapt3First <- NULL
-# arg_list$cutadapt3Second <- NULL
+# arg_list$gzipped <- FALSE
+# arg_list$barcodeDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180523/barcodeDesign_cI_high.txt"
+# arg_list$experimentDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180523/experimentDesign_cI_high.txt"
+# arg_list$cutadapt5First <- "GCTTGAGGACGCACGTCGC"
+# arg_list$cutadapt5Second <- "AGCCCTTCAATCGCCAGA"
+# arg_list$cutadapt3First <- "TCTGGCGATTGAAGGGCT"
+# arg_list$cutadapt3Second <- "GCGACGTGCGTCCTCAAGC"
 # arg_list$cutadaptMinLength <- 50
 # arg_list$cutadaptErrorRate <- 0.2
 # arg_list$usearchMinQual <- 30
 # arg_list$usearchMaxee <- 0.5
-# arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180521"
-# arg_list$projectName <- "BB_TDP43_290_2017-06-13"
-# arg_list$startStage <- 9
-# arg_list$stopStage <- 0
-# arg_list$wildtypeSequence <- "GGTAATAGCAGAGGGGGTGGAGCTGGTTTGGGAAACAATCAAGGTAGTAATATGGGTGGTGGGATGAACTTTGGTGCGTTCAGCATTAATCCAGCCATGATGGCTGCCGCCCAGGCAGCACTACAG"
+# arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180523"
+# arg_list$projectName <- "XL_cI_high_2017-01-26"
+# arg_list$wildtypeSequence <- "CTTAAAGCAATTTATGAAAAAAAGAAAAATGAACTTGGCTTATCCCAGGAATCTGTCGCAGACAAGATGGGGATGGGGCAGTCAGGCGTTGGTGCTTTATTTAATGGCATCAATGCATTAAATGCTTATAACGCCGCATTGCTTGCAAAAATTCTCAAAGTTAGCGTTGAAGAATTT"
 # arg_list$maxAAMutations <- 2
+# arg_list$startStage <- 1
+# arg_list$stopStage <- 0
 # arg_list$numCores <- 10
 
 ### Save metadata
 #Remove trailing "/" if present
-exp_metadata[["output_path"]] <- gsub("/$", "", arg_list$outputPath)
-exp_metadata[["project_name"]] <- arg_list$projectName
-#Remove trailing "/" if present
 exp_metadata[["fastq_path_original"]] <- gsub("/$", "", arg_list$fastqFileDir)
 exp_metadata[["fastq_file_extension"]] <- arg_list$fastqFileExtension
 exp_metadata[["gzipped"]] <- arg_list$gzipped
+exp_metadata[["barcode_design_path"]] <- arg_list$barcodeDesignPath
+exp_metadata[["experiment_design_path"]] <- arg_list$experimentDesignPath
 exp_metadata[["cutadapt5First"]] <- arg_list$cutadapt5First
 exp_metadata[["cutadapt5Second"]] <- arg_list$cutadapt5Second
 exp_metadata[["cutadapt3First"]] <- arg_list$cutadapt3First
@@ -1035,6 +1082,9 @@ exp_metadata[["cutadaptMinLength"]] <- arg_list$cutadaptMinLength
 exp_metadata[["cutadaptErrorRate"]] <- arg_list$cutadaptErrorRate
 exp_metadata[["usearchMinQual"]] <- arg_list$usearchMinQual
 exp_metadata[["usearchMaxee"]] <- arg_list$usearchMaxee
+#Remove trailing "/" if present
+exp_metadata[["output_path"]] <- gsub("/$", "", arg_list$outputPath)
+exp_metadata[["project_name"]] <- arg_list$projectName
 exp_metadata[["wildtypeSequence"]] <- arg_list$wildtypeSequence
 exp_metadata[["maxAAMutations"]] <- arg_list$maxAAMutations
 
@@ -1065,9 +1115,16 @@ dir.create(exp_metadata[["tmp_path"]])
 
 #TODO: check if file exists
 #TODO: check if all fastq files exist
-exp_metadata[["exp_design"]] <- read.table(arg_list$experimentDesignPath, header = T, stringsAsFactors = F, sep="\t")
+exp_metadata[["exp_design"]] <- read.table(exp_metadata[["experiment_design_path"]], header = T, stringsAsFactors = F, sep="\t")
 #Add original FASTQ directory
-exp_metadata[["exp_design"]]$pair_directory = exp_metadata[["fastq_path_original"]]
+exp_metadata[["exp_design"]]$pair_directory <- exp_metadata[["fastq_path_original"]]
+
+### Get barcode design (if provided)
+###########################
+
+if(!is.null(exp_metadata[["barcode_design_path"]])){
+  exp_metadata[["barcode_design"]] <- read.table(exp_metadata[["barcode_design_path"]], header = T, stringsAsFactors = F, sep="\t")
+}
 
 ### Pipeline stages
 ###########################
@@ -1076,43 +1133,47 @@ exp_metadata[["exp_design"]]$pair_directory = exp_metadata[["fastq_path_original
 pipeline <- list()
 pipeline[['0_original']] <- exp_metadata
 
-### Step 1: Run FASTQC on all fastq files
-pipeline[['1_fastqc']] <- dimsum_stage_fastqc(pipeline[['0_original']], file.path(pipeline[['0_original']][["tmp_path"]], "fastqc"), 
-  execute = (first_stage <= 1 & (last_stage == 0 | last_stage >= 1)), report_outpath = file.path(pipeline[['0_original']][["tmp_path"]], "reports"))
+### Step 1: Run sabre on all fastq files
+pipeline[['1_sabre']] <- dimsum_stage_sabre(pipeline[['0_original']], file.path(pipeline[['0_original']][["tmp_path"]], "sabre"), 
+  execute = (first_stage <= 1 & (last_stage == 0 | last_stage >= 1)))
 
-### Step 2: Unzip FASTQ files if necessary
-pipeline[['2_fastq']] <- dimsum_stage_unzip(pipeline[['1_fastqc']], file.path(pipeline[['1_fastqc']][["tmp_path"]], "fastq"), 
-  execute = (first_stage <= 2 & (last_stage == 0 | last_stage >= 2)))
+### Step 2: Run FASTQC on all fastq files
+pipeline[['2_fastqc']] <- dimsum_stage_fastqc(pipeline[['1_sabre']], file.path(pipeline[['1_sabre']][["tmp_path"]], "fastqc"), 
+  execute = (first_stage <= 2 & (last_stage == 0 | last_stage >= 2)), report_outpath = file.path(pipeline[['1_sabre']][["tmp_path"]], "reports"))
 
-### Step 3: Split FASTQ files
-pipeline[['3_split']] <- dimsum_stage_split(pipeline[['2_fastq']], file.path(pipeline[['2_fastq']][["tmp_path"]], "split"), 
+### Step 3: Unzip FASTQ files if necessary
+pipeline[['3_fastq']] <- dimsum_stage_unzip(pipeline[['2_fastqc']], file.path(pipeline[['2_fastqc']][["tmp_path"]], "fastq"), 
   execute = (first_stage <= 3 & (last_stage == 0 | last_stage >= 3)))
 
-### Step 4: Remove adapters from FASTQ files with cutadapt if necessary
-pipeline[['4_cutadapt']] <- dimsum_stage_cutadapt(pipeline[['3_split']], file.path(pipeline[['3_split']][["tmp_path"]], "cutadapt"), 
-  execute = (first_stage <= 4 & (last_stage == 0 | last_stage >= 4)), report_outpath = file.path(pipeline[['3_split']][["tmp_path"]], "reports"))
+### Step 4: Split FASTQ files
+pipeline[['4_split']] <- dimsum_stage_split(pipeline[['3_fastq']], file.path(pipeline[['3_fastq']][["tmp_path"]], "split"), 
+  execute = (first_stage <= 4 & (last_stage == 0 | last_stage >= 4)))
 
-### Step 5: Merge paired-end reads with USEARCH
-pipeline[['5_usearch']] <- dimsum_stage_usearch(pipeline[['4_cutadapt']], file.path(pipeline[['4_cutadapt']][["tmp_path"]], "usearch"), 
-  execute = (first_stage <= 5 & (last_stage == 0 | last_stage >= 5)), report_outpath = file.path(pipeline[['4_cutadapt']][["tmp_path"]], "reports"))
+### Step 5: Remove adapters from FASTQ files with cutadapt if necessary
+pipeline[['5_cutadapt']] <- dimsum_stage_cutadapt(pipeline[['4_split']], file.path(pipeline[['4_split']][["tmp_path"]], "cutadapt"), 
+  execute = (first_stage <= 5 & (last_stage == 0 | last_stage >= 5)), report_outpath = file.path(pipeline[['4_split']][["tmp_path"]], "reports"))
 
-### Step 6: Get unique aligned read counts with FASTX-Toolkit
-pipeline[['6_unique']] <- dimsum_stage_unique(pipeline[['5_usearch']], file.path(pipeline[['5_usearch']][["tmp_path"]], "usearch"), 
-  execute = (first_stage <= 6 & (last_stage == 0 | last_stage >= 6)))
+### Step 6: Merge paired-end reads with USEARCH
+pipeline[['6_usearch']] <- dimsum_stage_usearch(pipeline[['5_cutadapt']], file.path(pipeline[['5_cutadapt']][["tmp_path"]], "usearch"), 
+  execute = (first_stage <= 6 & (last_stage == 0 | last_stage >= 6)), report_outpath = file.path(pipeline[['5_cutadapt']][["tmp_path"]], "reports"))
 
-### Step 7: Construct filtered variant count table with corresponding amino acid sequences
-pipeline[['7_filter']] <- dimsum_stage_filter(pipeline[['6_unique']], file.path(pipeline[['6_unique']][["tmp_path"]], "usearch"), 
+### Step 7: Get unique aligned read counts with FASTX-Toolkit
+pipeline[['7_unique']] <- dimsum_stage_unique(pipeline[['6_usearch']], file.path(pipeline[['6_usearch']][["tmp_path"]], "usearch"), 
   execute = (first_stage <= 7 & (last_stage == 0 | last_stage >= 7)))
 
-### Step 8: Merge variant count tables
-pipeline[['8_merge']] <- dimsum_stage_merge(pipeline[['7_filter']], file.path(pipeline[['7_filter']][["tmp_path"]], "merge"), 
-  execute = (first_stage <= 8 & (last_stage == 0 | last_stage >= 8)), report_outpath = file.path(pipeline[['7_filter']][["tmp_path"]], "reports"))
+### Step 8: Construct filtered variant count table with corresponding amino acid sequences
+pipeline[['8_filter']] <- dimsum_stage_filter(pipeline[['7_unique']], file.path(pipeline[['7_unique']][["tmp_path"]], "usearch"), 
+  execute = (first_stage <= 8 & (last_stage == 0 | last_stage >= 8)))
+
+### Step 9: Merge variant count tables
+pipeline[['9_merge']] <- dimsum_stage_merge(pipeline[['8_filter']], file.path(pipeline[['8_filter']][["tmp_path"]], "merge"), 
+  execute = (first_stage <= 9 & (last_stage == 0 | last_stage >= 9)), report_outpath = file.path(pipeline[['8_filter']][["tmp_path"]], "reports"))
 
 ### Save workspace
 ###########################
 
 message("Saving workspace image...")
-save.image(file=file.path(pipeline[['8_merge']][["tmp_path"]], paste0(pipeline[['8_merge']][["project_name"]], '_workspace.RData')))
+save.image(file=file.path(pipeline[['9_merge']][["tmp_path"]], paste0(pipeline[['9_merge']][["project_name"]], '_workspace.RData')))
 message("Done")
 
 
