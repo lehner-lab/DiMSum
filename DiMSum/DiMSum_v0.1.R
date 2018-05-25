@@ -7,6 +7,9 @@ version_info <- "DiMSum_v0.1"
 print(version_info)
 
 #TODO:
+#check for required binaries and scripts before starting pipeline (exit gracefully)
+#sabre stdout and stderr files have cutadapt extensions
+#look for custom python scripts in path not in output folder 
 #dedicated stderr and stdout subfolders
 #Gzipped files assumed to have .gz extension
 
@@ -141,6 +144,7 @@ dimsum_stage_sabre <- function(
     dimsum_meta_new <- dimsum_meta
     #Update fastq metadata
     dimsum_meta_new[['exp_design']]$pair_directory <- sabre_outpath
+    return(dimsum_meta_new)
   }
 }
 
