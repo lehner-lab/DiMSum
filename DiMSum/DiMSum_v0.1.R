@@ -9,7 +9,6 @@ print(version_info)
 #TODO:
 #check for required binaries and scripts before starting pipeline (exit gracefully)
 #sabre stdout and stderr files have cutadapt extensions
-#look for custom python scripts in path not in output folder 
 #dedicated stderr and stdout subfolders
 #Gzipped files assumed to have .gz extension
 
@@ -203,7 +202,7 @@ dimsum_stage_fastqc_report <- function(
       label = rownames(fastqc_df1)[seq(1, length(rownames(fastqc_df1)), 5)]) +
       labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Quality socres across all bases (", encoding, ")"))
     d <- d + facet_wrap(~statistic, nrow=2, ncol=1)
-    ggsave(file.path(report_outpath, paste0('dimsum_stage_fastqc_report_', col_name, '.pdf')), d, width=12, height=8)
+    ggsave(file.path(report_outpath, paste0('dimsum_stage_fastqc_report_', col_name, '.png')), d, width=12, height=8)
   }
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
@@ -352,7 +351,7 @@ dimsum_stage_split <- function(
     if(execute){
       if(num_records == 0){
         temp_out = system(paste0(
-          dimsum_meta[["output_path"]], "/fastq_splitter.py -i ", 
+          "fastq_splitter.py -i ", 
           f, 
           " -o ", 
           file.path(split_outpath, paste0(basename(f), ".split")), 
@@ -364,7 +363,7 @@ dimsum_stage_split <- function(
         num_records = as.integer(read.table(file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', basename(f)), ".split.stdout"))))
       }else{
         temp_out = system(paste0(
-          dimsum_meta[["output_path"]], "/fastq_splitter.py -i ", 
+          "fastq_splitter.py -i ", 
           f, 
           " -o ", 
           file.path(split_outpath, paste0(basename(f), ".split")), 
@@ -458,7 +457,7 @@ dimsum_stage_cutadapt_report <- function(
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     labs(x = "FASTQ files", y = "Reads with adapters (percentage)", title = paste0("Percentage first read trimmed with cutadapt"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_cutadapt_report_pair1.pdf')), d, width=12, height=8)
+  ggsave(file.path(report_outpath, paste0('dimsum_stage_cutadapt_report_pair1.png')), d, width=12, height=8)
   #Second read
   plot_df2 <- plot_df[grep('read2_', plot_df$variable),]
   plot_df2$variable <- gsub('read2_', '', plot_df2$variable)
@@ -467,7 +466,7 @@ dimsum_stage_cutadapt_report <- function(
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     labs(x = "FASTQ files", y = "Reads with adapters (percentage)", title = paste0("Percentage second read trimmed with cutadapt"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_cutadapt_report_pair2.pdf')), d, width=12, height=8)
+  ggsave(file.path(report_outpath, paste0('dimsum_stage_cutadapt_report_pair2.png')), d, width=12, height=8)
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Update fastq metadata
@@ -650,7 +649,7 @@ dimsum_stage_usearch_report <- function(
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     labs(x = "Sample names", y = "Pairs (percentage)", title = paste0("Read pair alignment statistics"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_usearch_report_paircounts.pdf')), d, width=12, height=8)
+  ggsave(file.path(report_outpath, paste0('dimsum_stage_usearch_report_paircounts.png')), d, width=12, height=8)
   #Plot2: read pair merge length statistics
   plot_df <- melt(usearch_df[,grep('pairname|usearch_merge_', colnames(usearch_df))], id="pairname")
   d <- ggplot(plot_df, aes(pairname, value)) +
@@ -659,7 +658,7 @@ dimsum_stage_usearch_report <- function(
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     coord_cartesian(ylim = c(0, max(plot_df$value))) +
     labs(x = "Sample names", y = "Merged length", title = paste0("Alignment length distributions (over splits)"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_usearch_report_mergedlength.pdf')), d, width=12, height=8)
+  ggsave(file.path(report_outpath, paste0('dimsum_stage_usearch_report_mergedlength.png')), d, width=12, height=8)
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Update fastq metadata
@@ -817,7 +816,7 @@ dimsum_stage_filter <- function(
     #Check if this system command should be executed
     if(execute){
       temp_out = system(paste0(
-        dimsum_meta[["output_path"]], "/fastx_collapser2AAtable.py -i ", 
+        "fastx_collapser2AAtable.py -i ", 
         file.path(dimsum_meta[["exp_design"]]$aligned_pair_unique_directory, read_pair), 
         " -o ", 
         file.path(filter_outpath, paste0(read_pair, ".tsv")), 
@@ -883,7 +882,7 @@ dimsum_stage_merge_report <- function(
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     labs(x = "Sample names", y = "Total read pairs (variants)", title = paste0("Read pairs to filtered variant statistics"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_variantcounts.pdf')), d, width=12, height=8)
+  ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_variantcounts.png')), d, width=12, height=8)
   #Plot 2: final results for all samples (percentages)
   plot_df <- melt(merge_df_collapse_perc, id="pairname")
   d <- ggplot(plot_df, aes(pairname, value)) +
@@ -891,7 +890,7 @@ dimsum_stage_merge_report <- function(
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     labs(x = "Sample names", y = "Percentage of initial read pairs (variants)", title = paste0("Read pairs to filtered variant statistics (percentage)"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_variantpercentages.pdf')), d, width=12, height=8)
+  ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_variantpercentages.png')), d, width=12, height=8)
   #Plot 3: AA mutation counts
   aa_mut_df <- data.frame(
     'AA_mut_0'=sapply(dimsum_meta[['aa_mutation_counts']], '[', '0'),
@@ -917,7 +916,7 @@ dimsum_stage_merge_report <- function(
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     labs(x = "Sample names", y = "Total variants", title = paste0("Variant amino acid mutation statistics"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_aamutationcounts.pdf')), d, width=12, height=8)
+  ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_aamutationcounts.png')), d, width=12, height=8)
   #Plot 4: AA mutation percentages
   plot_df <- melt(aa_mut_df_collapse_perc, id="pairname")
   d <- ggplot(plot_df, aes(pairname, value)) +
@@ -925,7 +924,7 @@ dimsum_stage_merge_report <- function(
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     labs(x = "Sample names", y = "Percentage of variants", title = paste0("Variant amino acid mutation statistics (percentage)"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_aamutationpercentages.pdf')), d, width=12, height=8)
+  ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_aamutationpercentages.png')), d, width=12, height=8)
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   return(dimsum_meta_new)
