@@ -91,7 +91,7 @@ while True:
 		break
 	if count == 0:
 		count += 1
-		output_FASTQ = output_prefix + str(count)
+		output_FASTQ = output_prefix + str(count) + '.fastq'
 		#Check whether output files already exist
 		if os.path.isfile(output_FASTQ):
 		    print("file output path exists")
@@ -107,7 +107,7 @@ while True:
 		#Reset record cout
 		records = 0
 		#Open new file
-		output_FASTQ = output_prefix + str(count)
+		output_FASTQ = output_prefix + str(count) + '.fastq'
 		#Check whether output files already exist
 		if os.path.isfile(output_FASTQ):
 		    print("file output path exists")

@@ -8,8 +8,6 @@ print(version_info)
 
 #TODO:
 #check for required binaries and scripts before starting pipeline (exit gracefully)
-#sabre stdout and stderr files have cutadapt extensions
-#dedicated stderr and stdout subfolders
 #Gzipped files assumed to have .gz extension
 
 ###########################
@@ -32,14 +30,19 @@ option_list <- list(
   make_option(opt_str=c("--fastqFileDir", "-i"), help = "Path to directory with input FASTQ files"),
   make_option(opt_str=c("--fastqFileExtension", "-l"), default='.fastq', help = "FASTQ file extension"),
   make_option(opt_str=c("--gzipped", "-g"), type="logical", default=T, help = "Are FASTQ files are gzipped?"),
+  make_option(opt_str=c("--stranded"), type="logical", default=T, help = "Is the library design stranded?"),
   make_option(opt_str=c("--barcodeDesignPath", "-b"), help = "Path to barcode design file (tab-separated plain text file with barcode design)"),
   make_option(opt_str=c("--experimentDesignPath", "-e"), help = "Path to experimental design file (tab-separated plain text file with replicate structure)"),
+  make_option(opt_str=c("--cutadaptCut5First"), type="integer", help = "cutadapt: remove bases from start of first read (before adapter trimming)"),
+  make_option(opt_str=c("--cutadaptCut5Second"), type="integer", help = "cutadapt: remove bases from start of second read (before adapter trimming)"),
+  make_option(opt_str=c("--cutadaptCut3First"), type="integer", help = "cutadapt: remove bases from end of first read (before adapter trimming)"),
+  make_option(opt_str=c("--cutadaptCut3Second"), type="integer", help = "cutadapt: remove bases from end of second read (before adapter trimming)"),
   make_option(opt_str=c("--cutadapt5First"), help = "cutadapt: sequence of an adapter ligated to the 5' end (of the first read)"),
   make_option(opt_str=c("--cutadapt5Second"), help = "cutadapt: sequence of an adapter ligated to the 5' end (of the second read)"),
   make_option(opt_str=c("--cutadapt3First"), help = "cutadapt: sequence of an adapter ligated to the 3' end (of the first read)"),
   make_option(opt_str=c("--cutadapt3Second"), help = "cutadapt: sequence of an adapter ligated to the 3' end (of the second read)"),
-  make_option(opt_str=c("--cutadaptMinLength", "-n"), type="integer", help = "cutadapt: Discard reads shorter than LENGTH"),
-  make_option(opt_str=c("--cutadaptErrorRate", "-a"), type="double", help = "cutadapt: Maximum allowed error rate"),
+  make_option(opt_str=c("--cutadaptMinLength", "-n"), type="integer", default=50, help = "cutadapt: Discard reads shorter than LENGTH (default:50)"),
+  make_option(opt_str=c("--cutadaptErrorRate", "-a"), type="double", default=0.2, help = "cutadapt: Maximum allowed error rate (default:0.2)"),
   make_option(opt_str=c("--usearchMinQual", "-q"), type="integer", help = "USEARCH: minimum observed base quality to retain read pair"),
   make_option(opt_str=c("--usearchMaxee", "-m"), type="double", help = "USEARCH: maximum number of expected errors to retain read pair"),
   make_option(opt_str=c("--outputPath", "-o"), help = "Path to directory to use for output files"),
@@ -82,6 +85,24 @@ sum_datatable_columns <- function(dt, column_patterns, suffix=""){
   return(dt)
 }
 
+#cbind.fill
+#
+# cbind a list of data.frames of same row names but unequal number.
+#
+# df_list: a list of data.frames (required)
+#
+# Returns: a single data.frame where empty rows are filled with NAs.
+#
+cbind.fill <- function(df_list){
+    nm <- lapply(df_list, as.matrix)
+    n <- max(sapply(nm, nrow)) 
+    temp_rownames <- unique(as.character(unlist(sapply(nm, rownames))))
+    temp_df <- as.data.frame(do.call(cbind, lapply(nm, function (x) 
+        rbind(x, matrix(, n-nrow(x), ncol(x))))))
+    rownames(temp_df) <- temp_rownames
+    temp_df
+  }
+
 #dimsum_stage_sabre
 #
 # Run sabre on all fastq files.
@@ -97,7 +118,7 @@ dimsum_stage_sabre <- function(
   sabre_outpath,
   execute = TRUE
   ){
-  #Create cutadapt directory (if doesn't already exist)
+  #Create sabre directory (if doesn't already exist)
   sabre_outpath <- gsub("/$", "", sabre_outpath)
   dir.create(sabre_outpath)
   #Cutadapt parameters specified?
@@ -134,9 +155,9 @@ dimsum_stage_sabre <- function(
           " -w ",
           file.path(sabre_outpath, paste0('sabre_unknown-output2_', pair_name, '.txt')),
           " > ",
-          file.path(sabre_outpath, paste0(fastq_pair_list[pair_name,]$pair1, ".cutadapt.stdout")),
+          file.path(sabre_outpath, paste0(fastq_pair_list[pair_name,]$pair1, ".sabre.stdout")),
           " 2> ",
-          file.path(sabre_outpath, paste0(fastq_pair_list[pair_name,]$pair1, ".cutadapt.stderr"))))
+          file.path(sabre_outpath, paste0(fastq_pair_list[pair_name,]$pair1, ".sabre.stderr"))))
       }
     }
     #New experiment metadata
@@ -180,10 +201,10 @@ dimsum_stage_fastqc_report <- function(
       colnames(temp_df) <- unlist(strsplit(temp_out[1], '\\t'))[-1]
       fastqc_list[[filename]] <- temp_df
     }
-    fastqc_df1 <- as.data.frame(do.call('cbind', lapply(fastqc_list, '[', 'Mean')))
+    fastqc_df1 <- cbind.fill(lapply(fastqc_list, '[', 'Mean'))
     colnames(fastqc_df1) <- names(fastqc_list)
     fastqc_df1$base_position <- 1:length(rownames(fastqc_df1))
-    fastqc_df2 <- as.data.frame(do.call('cbind', lapply(fastqc_list, '[', '10th Percentile')))
+    fastqc_df2 <- cbind.fill(lapply(fastqc_list, '[', '10th Percentile'))
     colnames(fastqc_df2) <- names(fastqc_list)
     fastqc_df2$base_position <- 1:length(rownames(fastqc_df1))
     #Plot
@@ -192,6 +213,8 @@ dimsum_stage_fastqc_report <- function(
     plot_df2 <- melt(fastqc_df2, id="base_position")
     plot_df2$statistic <- '10th Percentile'
     plot_df <- rbind(plot_df1, plot_df2)
+    #Remove NAs
+    plot_df <- plot_df[!is.na(plot_df$value),]
     d <- ggplot(plot_df, aes(base_position, value, color = variable)) +
       geom_line() +
       geom_hline(yintercept=c(20, 28), linetype = 2) +
@@ -200,7 +223,7 @@ dimsum_stage_fastqc_report <- function(
       scale_x_continuous(
       breaks = (1:length(rownames(fastqc_df1)))[seq(1, length(rownames(fastqc_df1)), 5)],
       label = rownames(fastqc_df1)[seq(1, length(rownames(fastqc_df1)), 5)]) +
-      labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Quality socres across all bases (", encoding, ")"))
+      labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Quality scores across all bases (", encoding, ")"))
     d <- d + facet_wrap(~statistic, nrow=2, ncol=1)
     ggsave(file.path(report_outpath, paste0('dimsum_stage_fastqc_report_', col_name, '.png')), d, width=12, height=8)
   }
@@ -259,7 +282,7 @@ dimsum_stage_fastqc <- function(
   dimsum_meta_new[['exp_design']]$pair1_fastqc <- gsub(dimsum_meta_new[["fastq_file_extension"]], '_fastqc/fastqc_data.txt', gsub('.gz', '', dimsum_meta_new[['exp_design']][,"pair1"]))
   dimsum_meta_new[['exp_design']]$pair2_fastqc <- gsub(dimsum_meta_new[["fastq_file_extension"]], '_fastqc/fastqc_data.txt', gsub('.gz', '', dimsum_meta_new[['exp_design']][,"pair2"]))
   dimsum_meta_new[['exp_design']]$fastqc_directory <- fastqc_outpath
-  #Generate cutadapt report
+  #Generate FASTQC report
   if(report){
     dimsum_meta_new_report <- dimsum_stage_fastqc_report(dimsum_meta_new, report_outpath)
     return(dimsum_meta_new_report)
@@ -339,41 +362,39 @@ dimsum_stage_split <- function(
   #Create unzip directory (if doesn't already exist)
   split_outpath <- gsub("/$", "", split_outpath)
   dir.create(split_outpath)
+  fastq_pair_list <- dimsum_meta[['exp_design']][,c('pair1', 'pair2')]
+  rownames(fastq_pair_list) = 1:dim(fastq_pair_list)[1]
   #Split FASTQ files
   message("Splitting FASTQ files:")
   all_fastq <- file.path(dimsum_meta[["exp_design"]]$pair_directory, c(dimsum_meta[['exp_design']]$pair1, dimsum_meta[['exp_design']]$pair2))
   print(all_fastq)
   message("Processing...")
-  num_records = 0
-  for(f in all_fastq){
-    message(paste0("\t", f))
+  for(pair_name in rownames(fastq_pair_list)){
+    print(fastq_pair_list[pair_name,])
     #Check if this system command should be executed
     if(execute){
-      if(num_records == 0){
-        temp_out = system(paste0(
-          "fastq_splitter.py -i ", 
-          f, 
-          " -o ", 
-          file.path(split_outpath, paste0(basename(f), ".split")), 
-          " -c 3758096384",
-          " > ",
-          file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', basename(f)), ".split.stdout")),
-          " 2> ",
-          file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', basename(f)), ".split.stderr"))))
-        num_records = as.integer(read.table(file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', basename(f)), ".split.stdout"))))
-      }else{
-        temp_out = system(paste0(
-          "fastq_splitter.py -i ", 
-          f, 
-          " -o ", 
-          file.path(split_outpath, paste0(basename(f), ".split")), 
-          " -n ", 
-          num_records,
-          " >> ",
-          file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', basename(f)), ".split.stdout")),
-          " 2>> ",
-          file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', basename(f)), ".split.stderr"))))
-      }
+      temp_out = system(paste0(
+        "fastq_splitter.py -i ", 
+        file.path(dimsum_meta[["exp_design"]]$pair_directory, fastq_pair_list[pair_name,][1]), 
+        " -o ", 
+        file.path(split_outpath, paste0(fastq_pair_list[pair_name,][1], ".split")), 
+        " -c 3758096384",
+        " > ",
+        file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', fastq_pair_list[pair_name,][1]), ".split.stdout")),
+        " 2> ",
+        file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', fastq_pair_list[pair_name,][1]), ".split.stderr"))))
+      num_records = as.integer(read.table(file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', fastq_pair_list[pair_name,][1]), ".split.stdout"))))
+      temp_out = system(paste0(
+        "fastq_splitter.py -i ", 
+        file.path(dimsum_meta[["exp_design"]]$pair_directory, fastq_pair_list[pair_name,][2]), 
+        " -o ", 
+        file.path(split_outpath, paste0(fastq_pair_list[pair_name,][2], ".split")), 
+        " -n ", 
+        num_records,
+        " >> ",
+        file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', fastq_pair_list[pair_name,][2]), ".split.stdout")),
+        " 2>> ",
+        file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', fastq_pair_list[pair_name,][2]), ".split.stderr"))))
     }
   }
   #New experiment metadata
@@ -389,8 +410,8 @@ dimsum_stage_split <- function(
   temp_rownames = rownames(dimsum_meta_new[["exp_design"]])
   temp_suffix = rep('.split1', dim(dimsum_meta_new[["exp_design"]])[1])
   temp_suffix[grepl('\\.', temp_rownames)] = paste0('.split', as.integer(sapply(strsplit(temp_rownames[grepl('\\.', temp_rownames)], '\\.'), '[', 2))+1)
-  dimsum_meta_new[["exp_design"]]$pair1 = paste0(dimsum_meta_new[["exp_design"]]$pair1, temp_suffix)
-  dimsum_meta_new[["exp_design"]]$pair2 = paste0(dimsum_meta_new[["exp_design"]]$pair2, temp_suffix)
+  dimsum_meta_new[["exp_design"]]$pair1 = paste0(dimsum_meta_new[["exp_design"]]$pair1, temp_suffix, '.fastq')
+  dimsum_meta_new[["exp_design"]]$pair2 = paste0(dimsum_meta_new[["exp_design"]]$pair2, temp_suffix, '.fastq')
   dimsum_meta_new[["exp_design"]]$split = as.integer(gsub(".split", "", temp_suffix))
   dimsum_meta_new[['exp_design']]$pair_directory <- split_outpath
   return(dimsum_meta_new)
@@ -414,6 +435,11 @@ dimsum_stage_cutadapt_report <- function(
   dir.create(report_outpath)
   #Get cutadapt results for all read pairs
   cutadapt_files <- file.path(dimsum_meta[['exp_design']]$pair_directory, paste0(dimsum_meta[['exp_design']][,'pair1'], '.stdout'))
+  if(!dimsum_meta[['stranded']]){
+    cutadapt_files <- c(
+      file.path(dimsum_meta[['exp_design']]$pair_directory, paste0(dimsum_meta[['exp_design']][,'pair1'], '1.stdout')),
+      file.path(dimsum_meta[['exp_design']]$pair_directory, paste0(dimsum_meta[['exp_design']][,'pair1'], '2.stdout')))
+  }
   cutadapt_list <- list()
   total_reads_list <- list()
   for(i in 1:length(cutadapt_files)){
@@ -429,6 +455,15 @@ dimsum_stage_cutadapt_report <- function(
     total_read2_a3 <- as.integer(gsub(',', '', rev(unlist(strsplit(temp_out[8], ' ')))[2]))
     total_read2_a5 <- as.integer(gsub(',', '', rev(unlist(strsplit(temp_out[9], ' ')))[2]))
     total_read2_both <- total_read2_a3+total_read2_a5-total_read2_trimmed
+    #If linked adapter supplied
+    if(grepl('Type: linked', temp_out[6]) & grepl('Type: linked', temp_out[7])){
+      total_read1_a3 <- as.integer(gsub(',', '', rev(unlist(strsplit(temp_out[6], ' ')))[2]))
+      total_read1_a5 <- total_read1_a3
+      total_read1_both <- total_read1_a3
+      total_read2_a3 <- as.integer(gsub(',', '', rev(unlist(strsplit(temp_out[7], ' ')))[2]))
+      total_read2_a5 <- total_read2_a3
+      total_read2_both <- total_read2_a3
+    }
     cutadapt_list[[basename(cutadapt_files[i])]] <- c(
       total_read1_a5-total_read1_both, total_read1_a3-total_read1_both, total_read1_both,
       total_read2_a5-total_read2_both, total_read2_a3-total_read2_both, total_read2_both, total_reads)
@@ -497,10 +532,20 @@ dimsum_stage_cutadapt <- function(
   fastq_pair_list <- dimsum_meta[['exp_design']][,c('pair1', 'pair2')]
   rownames(fastq_pair_list) = 1:dim(fastq_pair_list)[1]
   #Cutadapt parameters specified?
-  if( is.null(dimsum_meta[["cutadapt5First"]]) | is.null(dimsum_meta[["cutadapt5Second"]]) | is.null(dimsum_meta[["cutadaptMinLength"]]) | is.null(dimsum_meta[["cutadaptErrorRate"]]) ){
+  if( is.null(dimsum_meta[["cutadapt5First"]]) | is.null(dimsum_meta[["cutadapt5Second"]]) ){
     message("Skipping cutadapt adapter removal (all catadapt arguments need to be specified)")
     return(dimsum_meta)
   }else{
+    #Options for removing constant regions from beginning or end of either read in pair
+    temp_options = paste0(' -g ', dimsum_meta[["cutadapt5First"]], ' -G ', dimsum_meta[["cutadapt5Second"]])
+    if( !is.null(dimsum_meta[["cutadapt3First"]]) ){temp_options = paste0(temp_options, " -a ", dimsum_meta[["cutadapt3First"]])}
+    if( !is.null(dimsum_meta[["cutadapt3Second"]]) ){temp_options = paste0(temp_options, " -A ", dimsum_meta[["cutadapt3Second"]])}
+    #Options for removing a fixed number of bases from beginning or end of either read in pair
+    temp_cut_options = ''
+    if( !is.null(dimsum_meta[["cutadaptCut5First"]]) ){temp_cut_options = paste0(temp_cut_options, " -u ", dimsum_meta[["cutadaptCut5First"]])}
+    if( !is.null(dimsum_meta[["cutadaptCut3First"]]) ){temp_cut_options = paste0(temp_cut_options, " -u ", -dimsum_meta[["cutadaptCut3First"]])}
+    if( !is.null(dimsum_meta[["cutadaptCut5Second"]]) ){temp_cut_options = paste0(temp_cut_options, " -U ", dimsum_meta[["cutadaptCut5Second"]])}
+    if( !is.null(dimsum_meta[["cutadaptCut3Second"]]) ){temp_cut_options = paste0(temp_cut_options, " -U ", -dimsum_meta[["cutadaptCut3Second"]])}
     #Trim FASTQ file pairs
     message("Trimming FASTQ files with cutadapt:")
     all_fastq <- file.path(dimsum_meta[["exp_design"]]$pair_directory, c(dimsum_meta[['exp_design']]$pair1, dimsum_meta[['exp_design']]$pair2))
@@ -512,13 +557,35 @@ dimsum_stage_cutadapt <- function(
       print(fastq_pair_list[pair_name,])
       #Check if this system command should be executed
       if(execute){
-        #Only 5-prime adapters supplied
-        if( is.null(dimsum_meta[["cutadapt3First"]]) | is.null(dimsum_meta[["cutadapt3Second"]]) ){
+        #Not stranded library
+        if( !dimsum_meta[["stranded"]] ){
           temp_out = system(paste0(
-            "cutadapt -g ",
-            dimsum_meta[["cutadapt5First"]],
-            " -G ",
-            dimsum_meta[["cutadapt5Second"]],
+            "cutadapt",
+            temp_options,
+            temp_cut_options,
+            " --minimum-length ",
+            as.character(dimsum_meta[["cutadaptMinLength"]]),
+            " -e ",
+            as.character(dimsum_meta[["cutadaptErrorRate"]]),
+            " --untrimmed-output ",
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][2], ".cutadapt.untrimmed.fastq")),
+            " --untrimmed-paired-output ",
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt.untrimmed.fastq")),
+            " -o ",
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt1")),
+            " -p ",
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][2], ".cutadapt1")),
+            " ",
+            file.path(dimsum_meta[["exp_design"]]$pair_directory, fastq_pair_list[pair_name,][1]),
+            " ",
+            file.path(dimsum_meta[["exp_design"]]$pair_directory, fastq_pair_list[pair_name,][2]),
+            " > ",
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt1.stdout")),
+            " 2> ",
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt1.stderr"))))     
+          temp_out = system(paste0(
+            "cutadapt",
+            temp_options,
             " --minimum-length ",
             as.character(dimsum_meta[["cutadaptMinLength"]]),
             " -e ",
@@ -526,28 +593,37 @@ dimsum_stage_cutadapt <- function(
             " -j ",
             num_cores,
             " -o ",
-            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt")),
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt2")),
             " -p ",
-            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][2], ".cutadapt")),
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][2], ".cutadapt2")),
             " ",
-            file.path(dimsum_meta[["exp_design"]]$pair_directory, fastq_pair_list[pair_name,][1]),
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt.untrimmed.fastq")),
             " ",
-            file.path(dimsum_meta[["exp_design"]]$pair_directory, fastq_pair_list[pair_name,][2]),
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][2], ".cutadapt.untrimmed.fastq")),
             " > ",
-            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt.stdout")),
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt2.stdout")),
             " 2> ",
-            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt.stderr"))))     
-        #Both 5 and 3-prime adapters supplied   
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt2.stderr"))))
+          temp_out = system(paste0(
+            "cat ",
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt1")),
+            " ",
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt2")),
+            " > ",
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt"))))    
+          temp_out = system(paste0(
+            "cat ",
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][2], ".cutadapt1")),
+            " ",
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][2], ".cutadapt2")),
+            " > ",
+            file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][2], ".cutadapt"))))    
+        #Stranded library   
         }else{
           temp_out = system(paste0(
-            "cutadapt -g ",
-            dimsum_meta[["cutadapt5First"]],
-            " -G ",
-            dimsum_meta[["cutadapt5Second"]],
-            " -a ",
-            dimsum_meta[["cutadapt3First"]],
-            " -A ",
-            dimsum_meta[["cutadapt3Second"]],
+            "cutadapt",
+            temp_options,
+            temp_cut_options,
             " --minimum-length ",
             as.character(dimsum_meta[["cutadaptMinLength"]]),
             " -e ",
@@ -1052,6 +1128,7 @@ exp_metadata <- list()
 # arg_list$fastqFileDir <- "/users/blehner/sequencing_data/Xianghua_Li/cI_high_expression_2017-01-25-CA1FHANXX/"
 # arg_list$fastqFileExtension <- ".fastq"
 # arg_list$gzipped <- FALSE
+# arg_list$stranded <- FALSE
 # arg_list$barcodeDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180523/barcodeDesign_cI_high.txt"
 # arg_list$experimentDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180523/experimentDesign_cI_high.txt"
 # arg_list$cutadapt5First <- "GCTTGAGGACGCACGTCGC"
@@ -1070,13 +1147,40 @@ exp_metadata <- list()
 # arg_list$stopStage <- 0
 # arg_list$numCores <- 10
 
+# #TEMP: set arguments manually
+# arg_list <- list()
+# arg_list$fastqFileDir <- "/users/blehner/jschmiedel/DMS2struct/datasets/tRNA_Li2016/FastQ//"
+# arg_list$fastqFileExtension <- ".fastq"
+# arg_list$gzipped <- FALSE
+# arg_list$stranded <- TRUE
+# arg_list$barcodeDesignPath <- NULL
+# arg_list$experimentDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180528/experimentDesign_tRNA_Li2016.txt"
+# arg_list$cutadapt5First <- "AGTTCAACCAAGTTG"
+# arg_list$cutadapt5Second <- "AAAAAAAAATAATCAA"
+# arg_list$cutadapt3First <- "TTGATTATTTTTTTTT"
+# arg_list$cutadapt3Second <- "CAACTTGGTTGAACT"
+# arg_list$cutadaptMinLength <- 50
+# arg_list$cutadaptErrorRate <- 0.2
+# arg_list$usearchMinQual <- 30
+# arg_list$usearchMaxee <- 0.5
+# arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180528"
+# arg_list$projectName <- "tRNA_Li2016"
+# arg_list$startStage <- 10
+# arg_list$stopStage <- 0
+# arg_list$numCores <- 10
+
 ### Save metadata
 #Remove trailing "/" if present
 exp_metadata[["fastq_path_original"]] <- gsub("/$", "", arg_list$fastqFileDir)
 exp_metadata[["fastq_file_extension"]] <- arg_list$fastqFileExtension
 exp_metadata[["gzipped"]] <- arg_list$gzipped
+exp_metadata[["stranded"]] <- arg_list$stranded
 exp_metadata[["barcode_design_path"]] <- arg_list$barcodeDesignPath
 exp_metadata[["experiment_design_path"]] <- arg_list$experimentDesignPath
+exp_metadata[["cutadaptCut5First"]] <- arg_list$cutadaptCut5First
+exp_metadata[["cutadaptCut5Second"]] <- arg_list$cutadaptCut5Second
+exp_metadata[["cutadaptCut3First"]] <- arg_list$cutadaptCut3First
+exp_metadata[["cutadaptCut3Second"]] <- arg_list$cutadaptCut3Second
 exp_metadata[["cutadapt5First"]] <- arg_list$cutadapt5First
 exp_metadata[["cutadapt5Second"]] <- arg_list$cutadapt5Second
 exp_metadata[["cutadapt3First"]] <- arg_list$cutadapt3First
@@ -1153,12 +1257,16 @@ pipeline[['4_split']] <- dimsum_stage_split(pipeline[['3_fastq']], file.path(pip
   execute = (first_stage <= 4 & (last_stage == 0 | last_stage >= 4)))
 
 ### Step 5: Remove adapters from FASTQ files with cutadapt if necessary
+# pipeline[['5_cutadapt']] <- dimsum_stage_cutadapt(pipeline[['4_split']], file.path(pipeline[['4_split']][["tmp_path"]], "cutadapt"), 
+#   execute = (first_stage <= 5 & (last_stage == 0 | last_stage >= 5)), report_outpath = file.path(pipeline[['4_split']][["tmp_path"]], "reports"))
 pipeline[['5_cutadapt']] <- dimsum_stage_cutadapt(pipeline[['4_split']], file.path(pipeline[['4_split']][["tmp_path"]], "cutadapt"), 
-  execute = (first_stage <= 5 & (last_stage == 0 | last_stage >= 5)), report_outpath = file.path(pipeline[['4_split']][["tmp_path"]], "reports"))
+  execute = (first_stage <= 5 & (last_stage == 0 | last_stage >= 5)), report_outpath = file.path(pipeline[['4_split']][["tmp_path"]], "reports"), report=F)
 
 ### Step 6: Merge paired-end reads with USEARCH
+# pipeline[['6_usearch']] <- dimsum_stage_usearch(pipeline[['5_cutadapt']], file.path(pipeline[['5_cutadapt']][["tmp_path"]], "usearch"), 
+#   execute = (first_stage <= 6 & (last_stage == 0 | last_stage >= 6)), report_outpath = file.path(pipeline[['5_cutadapt']][["tmp_path"]], "reports"), report=F)
 pipeline[['6_usearch']] <- dimsum_stage_usearch(pipeline[['5_cutadapt']], file.path(pipeline[['5_cutadapt']][["tmp_path"]], "usearch"), 
-  execute = (first_stage <= 6 & (last_stage == 0 | last_stage >= 6)), report_outpath = file.path(pipeline[['5_cutadapt']][["tmp_path"]], "reports"))
+  execute = (first_stage <= 6 & (last_stage == 0 | last_stage >= 6)), report_outpath = file.path(pipeline[['5_cutadapt']][["tmp_path"]], "reports"), report=F)
 
 ### Step 7: Get unique aligned read counts with FASTX-Toolkit
 pipeline[['7_unique']] <- dimsum_stage_unique(pipeline[['6_usearch']], file.path(pipeline[['6_usearch']][["tmp_path"]], "usearch"), 
@@ -1169,8 +1277,10 @@ pipeline[['8_filter']] <- dimsum_stage_filter(pipeline[['7_unique']], file.path(
   execute = (first_stage <= 8 & (last_stage == 0 | last_stage >= 8)))
 
 ### Step 9: Merge variant count tables
+# pipeline[['9_merge']] <- dimsum_stage_merge(pipeline[['8_filter']], file.path(pipeline[['8_filter']][["tmp_path"]], "merge"), 
+#   execute = (first_stage <= 9 & (last_stage == 0 | last_stage >= 9)), report_outpath = file.path(pipeline[['8_filter']][["tmp_path"]], "reports"))
 pipeline[['9_merge']] <- dimsum_stage_merge(pipeline[['8_filter']], file.path(pipeline[['8_filter']][["tmp_path"]], "merge"), 
-  execute = (first_stage <= 9 & (last_stage == 0 | last_stage >= 9)), report_outpath = file.path(pipeline[['8_filter']][["tmp_path"]], "reports"))
+  execute = (first_stage <= 9 & (last_stage == 0 | last_stage >= 9)), report_outpath = file.path(pipeline[['8_filter']][["tmp_path"]], "reports"), report=F)
 
 ### Save workspace
 ###########################
