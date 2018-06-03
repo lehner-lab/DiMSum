@@ -74,7 +74,7 @@ elif args.chunkSize != None:
 	#Close file
 	input_file.close()
 else:
-	print("Either --chunkSize or --numRecords argumnets need to be specified")
+	print("Either --chunkSize or --numRecords arguments need to be specified")
 	sys.exit()
 
 #######################
