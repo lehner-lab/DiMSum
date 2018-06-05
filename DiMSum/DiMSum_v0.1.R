@@ -47,6 +47,7 @@ option_list <- list(
   make_option(opt_str=c("--cutadaptDiscardUntrimmed"), type="logical", default=F, help = "cutadapt: Discard untrimmed read pairs (default:F)"),
   make_option(opt_str=c("--usearchMinQual", "-q"), type="integer", help = "USEARCH: minimum observed base quality to retain read pair"),
   make_option(opt_str=c("--usearchMaxee", "-m"), type="double", help = "USEARCH: maximum number of expected errors to retain read pair"),
+  make_option(opt_str=c("--usearchMinovlen"), type="integer", default=16, help = "USEARCH: discard pair if alignment is shorter than given value (default:16)"),
   make_option(opt_str=c("--outputPath", "-o"), help = "Path to directory to use for output files"),
   make_option(opt_str=c("--projectName", "-p"), help = "Project name"),
   make_option(opt_str=c("--wildtypeSequence", "-w"), help = "Wild-type nucleotide sequence"),
@@ -143,7 +144,7 @@ dimsum_stage_demultiplex <- function(
         #
         temp_design <- dimsum_meta[['barcode_design']][grep(fastq_pair_list[pair_name,'pair1'], dimsum_meta[['barcode_design']][,'pair1']),]
         write(
-          x = c(rbind(paste0('>', temp_design$new_pair_prefix), temp_design$barcode)), 
+          x = c(rbind(paste0('>', temp_design$new_pair_prefix), paste0('^', temp_design$barcode))), 
           file = file.path(demultiplex_outpath, paste0('demultiplex_barcode-file_', pair_name, '.fasta')), 
           sep="\n")
         #Demultiplex using cutadapt
@@ -155,6 +156,7 @@ dimsum_stage_demultiplex <- function(
           file.path(demultiplex_outpath, paste0('demultiplex_barcode-file_', pair_name, '.fasta')),
           " -e ",
           as.character(dimsum_meta[["barcodeErrorRate"]]),
+          " --no-indels ",
           " --untrimmed-output ",
           file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.unknown.fastq")),
           " --untrimmed-paired-output ",
@@ -800,6 +802,12 @@ dimsum_stage_usearch <- function(
     dimsum_meta[["exp_design"]]$biological_replicate, '_t', 
     dimsum_meta[["exp_design"]]$technical_replicate, '_split', 
     dimsum_meta[["exp_design"]]$split, sep = "")
+  #Additional usearch options related to alignment length
+  temp_options = paste0(' -fastq_minovlen ', dimsum_meta[["usearchMinovlen"]])
+  if( dimsum_meta[["usearchMinovlen"]] < 16 ){temp_options = paste0(temp_options, " -xdrop_nw ", dimsum_meta[["usearchMinovlen"]])}
+  if( dimsum_meta[["usearchMinovlen"]] < 16 ){temp_options = paste0(temp_options, " -minhsp ", dimsum_meta[["usearchMinovlen"]])}
+  if( dimsum_meta[["usearchMinovlen"]] < 16 ){temp_options = paste0(temp_options, " -band ", dimsum_meta[["usearchMinovlen"]])}
+  if( dimsum_meta[["usearchMinovlen"]] < 5 ){temp_options = paste0(temp_options, " -hspw ", dimsum_meta[["usearchMinovlen"]])}
   #Run USEARCH on all fastq file pairs
   message("Merging paired-end FASTQ files with USEARCH:")
   all_fastq <- file.path(dimsum_meta[["exp_design"]]$pair_directory, c(dimsum_meta[['exp_design']]$pair1, dimsum_meta[['exp_design']]$pair2))
@@ -824,6 +832,7 @@ dimsum_stage_usearch <- function(
         as.character(dimsum_meta[["usearchMinQual"]]),
         " -fastq_merge_maxee ",
         as.character(dimsum_meta[["usearchMaxee"]]),
+        temp_options,
         " -threads ",
         num_cores,
         " > ",
@@ -1031,6 +1040,40 @@ dimsum_stage_merge_report <- function(
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     labs(x = "Sample names", y = "Percentage of variants", title = paste0("Variant amino acid mutation statistics (percentage)"))
   ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_aamutationpercentages.png')), d, width=12, height=8)
+  #Plot 5: Nucleotide mutation counts
+  nuc_mut_df <- data.frame(
+    'nuc_mut_0'=sapply(dimsum_meta[['nuc_mutation_counts']], '[', '0'),
+    'nuc_mut_1'=sapply(dimsum_meta[['nuc_mutation_counts']], '[', '1'),
+    'nuc_mut_2'=sapply(dimsum_meta[['nuc_mutation_counts']], '[', '2'),
+    'nuc_mut_sum'=sapply(dimsum_meta[['nuc_mutation_counts']], sum))
+  nuc_mut_df[is.na(nuc_mut_df)] <- 0
+  nuc_mut_df$pairname <- sapply(strsplit(merge_df$aligned_pair, '.split'), '[', 1)
+  nuc_mut_df_collapse <- ddply(nuc_mut_df, "pairname", summarise, 
+    nuc_mut_0 = sum(nuc_mut_0), 
+    nuc_mut_1 = sum(nuc_mut_1), 
+    nuc_mut_2 = sum(nuc_mut_2),
+    nuc_mut_sum = sum(nuc_mut_sum))
+  nuc_mut_df_collapse$nuc_mut_3plus = nuc_mut_df_collapse$nuc_mut_sum-nuc_mut_df_collapse$nuc_mut_0-nuc_mut_df_collapse$nuc_mut_1-nuc_mut_df_collapse$nuc_mut_2
+  nuc_mut_df_collapse_perc = nuc_mut_df_collapse
+  nuc_mut_df_collapse_perc[,c(2:5, 6)] <- nuc_mut_df_collapse_perc[,c(2:5, 6)]/nuc_mut_df_collapse_perc$nuc_mut_sum*100
+  nuc_mut_df_collapse_perc <- nuc_mut_df_collapse_perc[,c(1:4, 6)]
+  nuc_mut_df_collapse <- nuc_mut_df_collapse[,c(1:4, 6)]
+  #Plot
+  plot_df <- melt(nuc_mut_df_collapse, id="pairname")
+  d <- ggplot(plot_df, aes(pairname, value)) +
+    geom_col(aes(fill = variable)) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    labs(x = "Sample names", y = "Total variants", title = paste0("Variant nucleotide mutation statistics"))
+  ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_nucmutationcounts.png')), d, width=12, height=8)
+  #Plot 6: Nucleotide mutation percentages
+  plot_df <- melt(nuc_mut_df_collapse_perc, id="pairname")
+  d <- ggplot(plot_df, aes(pairname, value)) +
+    geom_col(aes(fill = variable)) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    labs(x = "Sample names", y = "Percentage of variants", title = paste0("Variant nucleotide mutation statistics (percentage)"))
+  ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_nucmutationpercentages.png')), d, width=12, height=8)
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   return(dimsum_meta_new)
@@ -1064,11 +1107,13 @@ dimsum_stage_merge <- function(
   aa_dict <- list()
   #Initialise merged variant data object
   variant_data <- NULL
-  #AA mutation count dictionary
-  aa_mutation_dict <- list()
   #AA mutation filter dictionary
   aa_mutation_filter_dict <- list()
-
+  #Nucleotide mutation count dictionary
+  nuc_mutation_dict <- list()
+  #AA mutation count dictionary
+  aa_mutation_dict <- list()
+  
   #Load filtered variant count files
   message("Loading filtered variant count files:")
   all_count <- file.path(dimsum_meta[['exp_design']]$aligned_pair_unique_tsv_directory, dimsum_meta[['exp_design']]$aligned_pair_unique_tsv)
@@ -1081,12 +1126,16 @@ dimsum_stage_merge <- function(
       file_id <- gsub('.usearch.unique.tsv', '', basename(count_file))
       #Load file
       temp_file <- fread(count_file, header = T, sep="\t", stringsAsFactors = F)
-      #Calculate number of mutations
+      #Calculate number of aa mutations
       temp_file[,Nmut_aa := adist(aa_seq,wt_AAseq)]
-      #Save distribution
-      aa_mutation_dict[[count_file]] <- table(temp_file$Nmut_aa) #BUG: this only tallies the number of _unique_ variants with a given number of AA mutations
+      #Calculate number of nucleotide mutations
+      temp_file[,Nmut_nt := adist(nt_seq,wt_NTseq)]
       #Number of sequences with greater than desired number of mutations
       aa_mutation_filter_dict[[count_file]] <- sum(temp_file[Nmut_aa > dimsum_meta[["maxAAMutations"]],]$count)
+      #Save nucleotide mutation distribution
+      nuc_mutation_dict[[count_file]] <- tapply(temp_file$count, temp_file$Nmut_nt, sum)
+      #Save amino acid mutation distribution
+      aa_mutation_dict[[count_file]] <- tapply(temp_file$count, temp_file$Nmut_aa, sum)
       #Subset to desired number of mutations
       temp_file <- temp_file[Nmut_aa <= dimsum_meta[["maxAAMutations"]],]
       #Save AA mapping to dictionary
@@ -1133,10 +1182,12 @@ dimsum_stage_merge <- function(
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Merged variant data path
-  dimsum_meta_new[["variant_data_merge_path"]] <- file.path(merge_outpath, paste0(dimsum_meta[["project_name"]], '_variant_data_merge.RData'))
+  dimsum_meta_new[["variant_data_merge_path"]] <- file.path(merge_outpath, paste0(dimsum_meta[["project_name"]], '_variant_data_merge.RData')) 
   #AA mutation results
+  dimsum_meta_new[['exp_design']]$too_many_aa_mutations <- unlist(aa_mutation_filter_dict)  
   dimsum_meta_new[["aa_mutation_counts"]] <- aa_mutation_dict
-  dimsum_meta_new[['exp_design']]$too_many_aa_mutations = unlist(aa_mutation_filter_dict)  
+  #Nucleotide mutation results
+  dimsum_meta_new[["nuc_mutation_counts"]] <- nuc_mutation_dict 
   #Generate merge report
   if(report){
     dimsum_meta_new_report <- dimsum_stage_merge_report(dimsum_meta_new, report_outpath)
@@ -1152,6 +1203,58 @@ dimsum_stage_merge <- function(
 
 #Metadata object
 exp_metadata <- list()
+
+# #TEMP: set arguments manually (FOSintra_may2016)
+# arg_list <- list()
+# arg_list$fastqFileDir <- "/users/blehner/sequencing_data/Guillaume_Diss_EMBL/FOSintra_may2016/"
+# arg_list$fastqFileExtension <- ".txt"
+# arg_list$gzipped <- TRUE
+# arg_list$stranded <- FALSE
+# arg_list$experimentDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180604/experimentDesign_FOSintra.txt"
+# arg_list$cutadapt5First <- "AACCGGAGGAGGGAGCTG"
+# arg_list$cutadapt5Second <- "GCTGCCAGGATGAACTC"
+# arg_list$cutadapt3First <- "GAGTTCATCCTGGCAGC"
+# arg_list$cutadapt3Second <- "CAGCTCCCTCCTCCGGTT"
+# arg_list$cutadaptMinLength <- 50
+# arg_list$cutadaptErrorRate <- 0.2
+# arg_list$cutadaptDiscardUntrimmed <- F
+# arg_list$usearchMinQual <- 30
+# arg_list$usearchMaxee <- 0.5
+# arg_list$usearchMinovlen <- 16
+# arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180604"
+# arg_list$projectName <- "GD_FOSintra_2016-06-17"
+# arg_list$wildtypeSequence <- "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"
+# arg_list$maxAAMutations <- 2
+# arg_list$startStage <- 10
+# arg_list$stopStage <- 0
+# arg_list$numCores <- 10
+
+# #TEMP: set arguments manually (XL_cI_low)
+# arg_list <- list()
+# arg_list$fastqFileDir <- "/users/blehner/sequencing_data/Xianghua_Li/cI_low_expression/"
+# arg_list$fastqFileExtension <- ".fastq"
+# arg_list$gzipped <- FALSE
+# arg_list$stranded <- FALSE
+# arg_list$barcodeDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180603/barcodeDesign_cI_low_forcutadapt.txt"
+# arg_list$barcodeErrorRate <- 0.25
+# arg_list$experimentDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180603/experimentDesign_cI_low.txt"
+# arg_list$cutadapt5First <- "GCTTGAGGACGCACGTCGC"
+# arg_list$cutadapt5Second <- "TCTGGCGATTGAAGGGCT"
+# arg_list$cutadapt3First <- "AGCCCTTCAATCGCCAGA"
+# arg_list$cutadapt3Second <- "GCGACGTGCGTCCTCAAGC"
+# arg_list$cutadaptMinLength <- 50
+# arg_list$cutadaptErrorRate <- 0.2
+# arg_list$cutadaptDiscardUntrimmed <- T
+# arg_list$usearchMinQual <- 20
+# arg_list$usearchMaxee <- 0.5
+# arg_list$usearchMinovlen <- 16
+# arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180603"
+# arg_list$projectName <- "XL_cI_low_2015-09-15"
+# arg_list$wildtypeSequence <- "CTTAAAGCAATTTATGAAAAAAAGAAAAATGAACTTGGCTTATCCCAGGAATCTGTCGCAGACAAGATGGGGATGGGGCAGTCAGGCGTTGGTGCTTTATTTAATGGCATCAATGCATTAAATGCTTATAACGCCGCATTGCTTGCAAAAATTCTCAAAGTTAGCGTTGAAGAATTT"
+# arg_list$maxAAMutations <- 2
+# arg_list$startStage <- 10
+# arg_list$stopStage <- 0
+# arg_list$numCores <- 10
 
 # #TEMP: set arguments manually (XL_cI_high)
 # arg_list <- list()
@@ -1171,6 +1274,7 @@ exp_metadata <- list()
 # arg_list$cutadaptDiscardUntrimmed <- T
 # arg_list$usearchMinQual <- 25
 # arg_list$usearchMaxee <- 0.5
+# arg_list$usearchMinovlen <- 16
 # arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180523"
 # arg_list$projectName <- "XL_cI_high_2017-01-26"
 # arg_list$wildtypeSequence <- "CTTAAAGCAATTTATGAAAAAAAGAAAAATGAACTTGGCTTATCCCAGGAATCTGTCGCAGACAAGATGGGGATGGGGCAGTCAGGCGTTGGTGCTTTATTTAATGGCATCAATGCATTAAATGCTTATAACGCCGCATTGCTTGCAAAAATTCTCAAAGTTAGCGTTGAAGAATTT"
@@ -1196,6 +1300,7 @@ exp_metadata <- list()
 # arg_list$cutadaptDiscardUntrimmed <- F
 # arg_list$usearchMinQual <- 30
 # arg_list$usearchMaxee <- 0.5
+# arg_list$usearchMinovlen <- 16
 # arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180528"
 # arg_list$projectName <- "tRNA_Li2016_101"
 # arg_list$startStage <- 10
@@ -1221,6 +1326,7 @@ exp_metadata <- list()
 # arg_list$cutadaptDiscardUntrimmed <- F
 # arg_list$usearchMinQual <- 30
 # arg_list$usearchMaxee <- 0.5
+# arg_list$usearchMinovlen <- 16
 # arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180528"
 # arg_list$projectName <- "tRNA_Li2016_126"
 # arg_list$startStage <- 10
@@ -1246,6 +1352,7 @@ exp_metadata <- list()
 # arg_list$cutadaptDiscardUntrimmed <- F
 # arg_list$usearchMinQual <- 30
 # arg_list$usearchMaxee <- 0.5
+# arg_list$usearchMinovlen <- 16
 # arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180528"
 # arg_list$projectName <- "tRNA_Li2018"
 # arg_list$startStage <- 10
@@ -1276,6 +1383,7 @@ exp_metadata[["cutadaptErrorRate"]] <- arg_list$cutadaptErrorRate
 exp_metadata[["cutadaptDiscardUntrimmed"]] <- arg_list$cutadaptDiscardUntrimmed
 exp_metadata[["usearchMinQual"]] <- arg_list$usearchMinQual
 exp_metadata[["usearchMaxee"]] <- arg_list$usearchMaxee
+exp_metadata[["usearchMinovlen"]] <- arg_list$usearchMinovlen
 #Remove trailing "/" if present
 exp_metadata[["output_path"]] <- gsub("/$", "", arg_list$outputPath)
 exp_metadata[["project_name"]] <- arg_list$projectName
