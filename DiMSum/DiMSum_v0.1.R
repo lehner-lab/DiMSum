@@ -48,6 +48,7 @@ option_list <- list(
   make_option(opt_str=c("--usearchMinQual", "-q"), type="integer", help = "USEARCH: minimum observed base quality to retain read pair"),
   make_option(opt_str=c("--usearchMaxee", "-m"), type="double", help = "USEARCH: maximum number of expected errors to retain read pair"),
   make_option(opt_str=c("--usearchMinovlen"), type="integer", default=16, help = "USEARCH: discard pair if alignment is shorter than given value (default:16)"),
+  make_option(opt_str=c("--usearchAttemptExactMinovlen"), type="logical", default=F, help = "USEARCH: Attempt exact alignment of --usearchMinovlen (default:F)"),
   make_option(opt_str=c("--outputPath", "-o"), help = "Path to directory to use for output files"),
   make_option(opt_str=c("--projectName", "-p"), help = "Project name"),
   make_option(opt_str=c("--wildtypeSequence", "-w"), help = "Wild-type nucleotide sequence"),
@@ -819,26 +820,49 @@ dimsum_stage_usearch <- function(
     print(dimsum_meta[["exp_design"]][i,c('pair1', 'pair2')])
     #Check if this system command should be executed
     if(execute){
-      temp_out = system(paste0(
-        "usearch -fastq_mergepairs ",
-        file.path(dimsum_meta[["exp_design"]]$pair_directory, dimsum_meta[["exp_design"]][i,]$pair1),
-        " -reverse ",
-        file.path(dimsum_meta[["exp_design"]]$pair_directory, dimsum_meta[["exp_design"]][i,]$pair2),
-        " -fastqout ",
-        file.path(usearch_outpath, paste0(sample_names[i], '.usearch')),
-        " -report ",
-        file.path(usearch_outpath, paste0(sample_names[i], '.report')),
-        " -fastq_minqual ",
-        as.character(dimsum_meta[["usearchMinQual"]]),
-        " -fastq_merge_maxee ",
-        as.character(dimsum_meta[["usearchMaxee"]]),
-        temp_options,
-        " -threads ",
-        num_cores,
-        " > ",
-        file.path(usearch_outpath, paste0(sample_names[i], '.usearch.stdout')),
-        " 2> ",
-        file.path(usearch_outpath, paste0(sample_names[i], '.usearch.stderr'))))
+      if(dimsum_meta[["usearchAttemptExactMinovlen"]]){
+        temp_out = system(paste0(
+          "fastq_manualalign.py -i1 ",
+          file.path(dimsum_meta[["exp_design"]]$pair_directory, dimsum_meta[["exp_design"]][i,]$pair1),
+          " -i2 ",
+          file.path(dimsum_meta[["exp_design"]]$pair_directory, dimsum_meta[["exp_design"]][i,]$pair2),
+          " -o ",
+          file.path(usearch_outpath, paste0(sample_names[i], '.usearch')),
+          " -r ",
+          file.path(usearch_outpath, paste0(sample_names[i], '.report')),
+          " --minqual ",
+          as.character(dimsum_meta[["usearchMinQual"]]),
+          " --maxee ",
+          as.character(dimsum_meta[["usearchMaxee"]]),
+          " --numNuc ",
+          as.character(dimsum_meta[["usearchMinovlen"]]),
+          " > ",
+          file.path(usearch_outpath, paste0(sample_names[i], '.usearch.stdout')),
+          " 2> ",
+          file.path(usearch_outpath, paste0(sample_names[i], '.usearch.stderr'))))        
+      }
+      else{
+        temp_out = system(paste0(
+          "usearch -fastq_mergepairs ",
+          file.path(dimsum_meta[["exp_design"]]$pair_directory, dimsum_meta[["exp_design"]][i,]$pair1),
+          " -reverse ",
+          file.path(dimsum_meta[["exp_design"]]$pair_directory, dimsum_meta[["exp_design"]][i,]$pair2),
+          " -fastqout ",
+          file.path(usearch_outpath, paste0(sample_names[i], '.usearch')),
+          " -report ",
+          file.path(usearch_outpath, paste0(sample_names[i], '.report')),
+          " -fastq_minqual ",
+          as.character(dimsum_meta[["usearchMinQual"]]),
+          " -fastq_merge_maxee ",
+          as.character(dimsum_meta[["usearchMaxee"]]),
+          temp_options,
+          " -threads ",
+          num_cores,
+          " > ",
+          file.path(usearch_outpath, paste0(sample_names[i], '.usearch.stdout')),
+          " 2> ",
+          file.path(usearch_outpath, paste0(sample_names[i], '.usearch.stderr'))))
+      }
     }
   }
   #New experiment metadata
@@ -1384,6 +1408,7 @@ exp_metadata[["cutadaptDiscardUntrimmed"]] <- arg_list$cutadaptDiscardUntrimmed
 exp_metadata[["usearchMinQual"]] <- arg_list$usearchMinQual
 exp_metadata[["usearchMaxee"]] <- arg_list$usearchMaxee
 exp_metadata[["usearchMinovlen"]] <- arg_list$usearchMinovlen
+exp_metadata[["usearchAttemptExactMinovlen"]] <- arg_list$usearchAttemptExactMinovlen
 #Remove trailing "/" if present
 exp_metadata[["output_path"]] <- gsub("/$", "", arg_list$outputPath)
 exp_metadata[["project_name"]] <- arg_list$projectName
