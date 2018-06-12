@@ -909,7 +909,7 @@ dimsum_stage_unique <- function(
     #Check if this system command should be executed
     if(execute){
       temp_out = system(paste0(
-        "fastx_collapser -i ",
+        "fastx_collapser -Q33 -i ",
         file.path(dimsum_meta[["exp_design"]]$aligned_pair_directory, read_pair),
         " -o ",
         file.path(unique_outpath, paste0(read_pair, '.unique')),
@@ -1250,6 +1250,34 @@ exp_metadata <- list()
 # arg_list$wildtypeSequence <- "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"
 # arg_list$maxAAMutations <- 2
 # arg_list$startStage <- 10
+# arg_list$stopStage <- 0
+# arg_list$numCores <- 10
+
+# #TEMP: set arguments manually (XL_cI_low_output2)
+# arg_list <- list()
+# arg_list$fastqFileDir <- "/users/blehner/sequencing_data/Xianghua_Li/cI_low_expression/"
+# arg_list$fastqFileExtension <- ".fastq"
+# arg_list$gzipped <- FALSE
+# arg_list$stranded <- FALSE
+# arg_list$barcodeDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180603/barcodeDesign_cI_low_output2_forcutadapt.txt"
+# arg_list$barcodeErrorRate <- 0.25
+# arg_list$experimentDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180603/experimentDesign_cI_low_output2.txt"
+# arg_list$cutadapt5First <- "ACACAAGAGCAGCTTGAGGACGCACGTCGC"
+# arg_list$cutadapt5Second <- "ATTTCTCTGGCGATTGAAGGGCT"
+# arg_list$cutadapt3First <- "AGCCCTTCAATCGCCAGAGAAAT"
+# arg_list$cutadapt3Second <- "GCGACGTGCGTCCTCAAGCTGCTCTTGTGT"
+# arg_list$cutadaptMinLength <- 50
+# arg_list$cutadaptErrorRate <- 0.2
+# arg_list$cutadaptDiscardUntrimmed <- T
+# arg_list$usearchMinQual <- 10
+# arg_list$usearchMaxee <- 0.1
+# arg_list$usearchMinovlen <- 4
+# arg_list$usearchAttemptExactMinovlen <- T
+# arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180603"
+# arg_list$projectName <- "XL_cI_low_output2_2015-09-15"
+# arg_list$wildtypeSequence <- "CTTAAAGCAATTTATGAAAAAAAGAAAAATGAACTTGGCTTATCCCAGGAATCTGTCGCAGACAAGATGGGGATGGGGCAGTCAGGCGTTGGTGCTTTATTTAATGGCATCAATGCATTAAATGCTTATAACGCCGCATTGCTTGCAAAAATTCTCAAAGTTAGCGTTGAAGAATTT"
+# arg_list$maxAAMutations <- 2
+# arg_list$startStage <- 7
 # arg_list$stopStage <- 0
 # arg_list$numCores <- 10
 
