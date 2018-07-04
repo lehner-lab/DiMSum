@@ -1225,6 +1225,68 @@ dimsum_stage_merge <- function(
 ### GLOBALS
 ###########################
 
+#HTML results summary
+reports_summary_template <- "<html>\
+ <head>\
+  <title>PROJECT_NAME</title>\
+ </head>\
+ <body>\
+ \t<h1>DiMSum v0.1 Pipeline Report (PROJECT_NAME)</h1>\
+ \t\
+ \t<div>\
+ \t\t<a href=\"#FASTQC\"> 1. Raw FASTQ file quality control (FASTQC) </a><br>\
+ \t\t<a href=\"#CUTADAPT\"> 2. Trimming of constant regions (cutadapt) </a><br>\
+ \t\t<a href=\"#USEARCH1\"> 3. Alignment of overlapping paired-end reads (USEARCH) </a><br>\
+ \t\t<a href=\"#USEARCH2\"> 4. Alignment length (USEARCH) </a><br>\
+ \t\t<a href=\"#MERGE1\"> 5. Nucleotide mutation statistics </a><br>\
+ \t\t<a href=\"#MERGE2\"> 6. Amino acid mutation statistics </a><br>\
+    <a href=\"#SUMMARY\"> 7. Variant filtering summary statistics </a><br>\
+ \t</div>\
+\
+ \t<div id=\"FASTQC\">\
+ \t\t<h2>1. Raw FASTQ file quality control (FASTQC)</h2>\
+ \t\t<p><img src=\"reports/dimsum_stage_fastqc_report_pair1_fastqc.png\" width=\"1200\"></p>\
+ \t\t<p><img src=\"reports/dimsum_stage_fastqc_report_pair2_fastqc.png\" width=\"1200\"></p>\
+ \t</div>\
+\
+  \t<div id=\"CUTADAPT\">\
+  \t\t<h2>2. Trimming of constant regions (cutadapt)</h2>\
+\t \t<p><img src=\"reports/dimsum_stage_cutadapt_report_pair1.png\" width=\"1200\"></p>\
+\t \t<p><img src=\"reports/dimsum_stage_cutadapt_report_pair2.png\" width=\"1200\"></p>\
+ \t</div>\
+ \t\
+  \t<div id=\"USEARCH1\">\
+  \t\t<h2>3. Alignment of overlapping paired-end reads (USEARCH)</h2>\
+\t \t<p><img src=\"reports/dimsum_stage_usearch_report_paircounts.png\" width=\"1200\"></p>\
+ \t</div>\
+\
+  \t<div id=\"USEARCH2\">\
+  \t\t<h2>4. Alignment length (USEARCH)</h2>\
+\t \t<p><img src=\"reports/dimsum_stage_usearch_report_mergedlength.png\" width=\"1200\"></p>\
+ \t</div>\
+\
+    <div id=\"MERGE1\">\
+      <h2>5. Nucleotide mutation statistics</h2>\
+    <p><img src=\"reports/dimsum_stage_merge_report_nucmutationpercentages.png\" width=\"1200\"></p>\
+    <p><img src=\"reports/dimsum_stage_merge_report_nucmutationcounts.png\" width=\"1200\"></p>\
+  </div>\
+\
+  \t<div id=\"MERGE2\">\
+  \t\t<h2>6. Amino acid mutation statistics</h2>\
+\t \t<p><img src=\"reports/dimsum_stage_merge_report_aamutationpercentages.png\" width=\"1200\"></p>\
+\t \t<p><img src=\"reports/dimsum_stage_merge_report_aamutationcounts.png\" width=\"1200\"></p>\
+ \t</div>\
+\
+    <div id=\"SUMMARY\">\
+      <h2>7. Variant filtering statistics</h2>\
+    <p><img src=\"reports/dimsum_stage_merge_report_variantpercentages.png\" width=\"1200\"></p>\
+    <p><img src=\"reports/dimsum_stage_merge_report_variantcounts.png\" width=\"1200\"></p>\
+  </div>\
+\
+ </body>\
+</html>"
+
+
 #Metadata object
 exp_metadata <- list()
 
@@ -1494,7 +1556,7 @@ pipeline[['1_demultiplex']] <- dimsum_stage_demultiplex(pipeline[['0_original']]
 
 ### Step 2: Run FASTQC on all fastq files
 pipeline[['2_fastqc']] <- dimsum_stage_fastqc(pipeline[['1_demultiplex']], file.path(pipeline[['1_demultiplex']][["tmp_path"]], "fastqc"), 
-  execute = (first_stage <= 2 & (last_stage == 0 | last_stage >= 2)), report_outpath = file.path(pipeline[['1_demultiplex']][["tmp_path"]], "reports"))
+  execute = (first_stage <= 2 & (last_stage == 0 | last_stage >= 2)), report_outpath = file.path(pipeline[['1_demultiplex']][["project_path"]], "reports"))
 
 ### Step 3: Unzip FASTQ files if necessary
 pipeline[['3_fastq']] <- dimsum_stage_unzip(pipeline[['2_fastqc']], file.path(pipeline[['2_fastqc']][["tmp_path"]], "fastq"), 
@@ -1506,11 +1568,11 @@ pipeline[['4_split']] <- dimsum_stage_split(pipeline[['3_fastq']], file.path(pip
 
 ### Step 5: Remove adapters from FASTQ files with cutadapt if necessary
 pipeline[['5_cutadapt']] <- dimsum_stage_cutadapt(pipeline[['4_split']], file.path(pipeline[['4_split']][["tmp_path"]], "cutadapt"), 
-  execute = (first_stage <= 5 & (last_stage == 0 | last_stage >= 5)), report_outpath = file.path(pipeline[['4_split']][["tmp_path"]], "reports"))
+  execute = (first_stage <= 5 & (last_stage == 0 | last_stage >= 5)), report_outpath = file.path(pipeline[['4_split']][["project_path"]], "reports"))
 
 ### Step 6: Merge paired-end reads with USEARCH
 pipeline[['6_usearch']] <- dimsum_stage_usearch(pipeline[['5_cutadapt']], file.path(pipeline[['5_cutadapt']][["tmp_path"]], "usearch"), 
-  execute = (first_stage <= 6 & (last_stage == 0 | last_stage >= 6)), report_outpath = file.path(pipeline[['5_cutadapt']][["tmp_path"]], "reports"))
+  execute = (first_stage <= 6 & (last_stage == 0 | last_stage >= 6)), report_outpath = file.path(pipeline[['5_cutadapt']][["project_path"]], "reports"))
 
 ### Step 7: Get unique aligned read counts with FASTX-Toolkit
 pipeline[['7_unique']] <- dimsum_stage_unique(pipeline[['6_usearch']], file.path(pipeline[['6_usearch']][["tmp_path"]], "usearch"), 
@@ -1521,14 +1583,21 @@ pipeline[['8_filter']] <- dimsum_stage_filter(pipeline[['7_unique']], file.path(
   execute = (first_stage <= 8 & (last_stage == 0 | last_stage >= 8)))
 
 ### Step 9: Merge variant count tables
-pipeline[['9_merge']] <- dimsum_stage_merge(pipeline[['8_filter']], file.path(pipeline[['8_filter']][["tmp_path"]], "merge"), 
-  execute = (first_stage <= 9 & (last_stage == 0 | last_stage >= 9)), report_outpath = file.path(pipeline[['8_filter']][["tmp_path"]], "reports"))
+pipeline[['9_merge']] <- dimsum_stage_merge(pipeline[['8_filter']], pipeline[['8_filter']][["project_path"]], 
+  execute = (first_stage <= 9 & (last_stage == 0 | last_stage >= 9)), report_outpath = file.path(pipeline[['8_filter']][["project_path"]], "reports"))
 
 ### Save workspace
 ###########################
 
 message("Saving workspace image...")
-save.image(file=file.path(pipeline[['9_merge']][["tmp_path"]], paste0(pipeline[['9_merge']][["project_name"]], '_workspace.RData')))
+save.image(file=file.path(pipeline[['9_merge']][["project_path"]], paste0(pipeline[['9_merge']][["project_name"]], '_workspace.RData')))
+message("Done")
+
+### Save report html
+###########################
+
+message("Saving summary report...")
+write(gsub("PROJECT_NAME", pipeline[['9_merge']][["project_name"]], reports_summary_template), file = file.path(pipeline[['8_filter']][["project_path"]], "reports_summary.html"))
 message("Done")
 
 
