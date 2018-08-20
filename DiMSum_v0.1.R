@@ -148,6 +148,27 @@ dimsum_stage_demultiplex <- function(
           x = c(rbind(paste0('>', temp_design$new_pair_prefix), paste0('^', temp_design$barcode))), 
           file = file.path(demultiplex_outpath, paste0('demultiplex_barcode-file_', pair_name, '.fasta')), 
           sep="\n")
+        #Check if file extension compatible with cutadapt (i.e. ".fastq" or ".fastq.gz")
+        if(dimsum_meta[["fastq_file_extension"]]!="fastq"){
+          #Copy FASTQ files to temp directory and format extension
+          new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastq_file_extension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), ".fastq.gz", fastq_pair_list[pair_name,][1])
+          new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastq_file_extension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), ".fastq.gz", fastq_pair_list[pair_name,][2])
+          temp_out = system(paste0(
+            "cp ",
+            file.path(dimsum_meta[["exp_design"]]$pair_directory, fastq_pair_list[pair_name,][1]),
+            " ",
+            file.path(demultiplex_outpath, new_fastq_name1)))
+          temp_out = system(paste0(
+            "cp ",
+            file.path(dimsum_meta[["exp_design"]]$pair_directory, fastq_pair_list[pair_name,][2]),
+            " ",
+            file.path(demultiplex_outpath, new_fastq_name2)))
+          #Update names in list
+          fastq_pair_list[pair_name,][1] <- new_fastq_name1
+          fastq_pair_list[pair_name,][2] <- new_fastq_name2
+          #Update FASTQ file directory in list
+          dimsum_meta[["exp_design"]]$pair_directory <- demultiplex_outpath
+        }
         #Demultiplex using cutadapt
         temp_out = system(paste0(
           "cutadapt",
