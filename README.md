@@ -1,4 +1,6 @@
-[dumpling](./Dumpling.png)
+<p align="left">
+  <img src="./Dumpling.png">
+</p>
 
 # Overview
 
