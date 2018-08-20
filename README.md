@@ -19,4 +19,4 @@ To run this pipeline, you will first need to formalise your experiment design (e
 
 Additionally, if your raw FASTQ sequencing files contain multiplexed samples you will need to provide a tab-separated plain text file describing how barcodes map to samples. You can download an example file to use a template [here](./example_barcodeDesign.txt).
 
-Vector illustration credit: <a href="https://www.vecteezy.com">Vecteezy!</a>
+(Vector illustration credit: <a href="https://www.vecteezy.com">Vecteezy!</a>)
