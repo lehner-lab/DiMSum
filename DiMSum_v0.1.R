@@ -180,6 +180,7 @@ dimsum_stage_demultiplex <- function(
     dimsum_meta_new <- dimsum_meta
     #Update fastq metadata
     dimsum_meta_new[['exp_design']]$pair_directory <- demultiplex_outpath
+    dimsum_meta_new[["fastq_file_extension"]] <- ".fastq"
     return(dimsum_meta_new)
   }
 }
