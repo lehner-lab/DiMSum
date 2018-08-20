@@ -1,3 +1,7 @@
+<p align="left">
+  <img src="./Dumpling.png">
+</p>
+
 # Overview
 
 Welcome to the GitHub repository for DiMSum: A pipeline for pre-processing of paired-end reads from deep mutational scannning (DMS) data.
