@@ -4,7 +4,16 @@ Welcome to the GitHub repository for DiMSum: A pipeline for pre-processing of pa
 
 # Required Software
 
-To run these scripts you will need R (version 3.6) as well as the following R/Bioconductor packages:
+To run these scripts you will need the following software:
+
+* **Python 3.6**
+* **R 3.3**
+* **fastqc**
+* **cutadapt**
+* **usearch**
+* **fastx_collapser**
+
+as well as the following R/Bioconductor packages:
 
 * data.table
 * seqinr
@@ -13,3 +22,11 @@ To run these scripts you will need R (version 3.6) as well as the following R/Bi
 * reshape2
 * ggplot2
 * plyr
+
+and the following Python packages:
+
+* os
+* sys
+* argparse
+* biopython
+
