@@ -3,23 +3,13 @@
 #Software version
 version_info <- "DiMSum_v0.1"
 #Display software version
-print(version_info)
-
-###########################
-### PACKAGES
-###########################
-
-require(data.table)
-library(seqinr)
-library(optparse)
-library(parallel)
-library(reshape2)
-library(ggplot2)
-library(plyr)
+message(version_info)
 
 ###########################
 ### COMMAND-LINE OPTIONS
 ###########################
+
+library(optparse)
 
 option_list <- list(
   make_option(opt_str=c("--fastqFileDir", "-i"), help = "Path to directory with input FASTQ files"),
@@ -42,6 +32,7 @@ option_list <- list(
   make_option(opt_str=c("--cutadaptDiscardUntrimmed"), type="logical", default=F, help = "cutadapt: Discard untrimmed read pairs (default:F)"),
   make_option(opt_str=c("--usearchMinQual", "-q"), type="integer", help = "USEARCH: minimum observed base quality to retain read pair"),
   make_option(opt_str=c("--usearchMaxee", "-m"), type="double", help = "USEARCH: maximum number of expected errors to retain read pair"),
+  make_option(opt_str=c("--usearchMinlen"), type="integer", default=64, help = "USEARCH: Discard pair if either read is shorter than this (default:64)"),
   make_option(opt_str=c("--usearchMinovlen"), type="integer", default=16, help = "USEARCH: discard pair if alignment is shorter than given value (default:16)"),
   make_option(opt_str=c("--usearchAttemptExactMinovlen"), type="logical", default=F, help = "USEARCH: Attempt exact alignment of --usearchMinovlen (default:F)"),
   make_option(opt_str=c("--outputPath", "-o"), help = "Path to directory to use for output files"),
@@ -56,6 +47,17 @@ option_list <- list(
 arg_list <- parse_args(OptionParser(option_list=option_list))
 #Display arguments
 print(arg_list)
+
+###########################
+### PACKAGES
+###########################
+
+require(data.table)
+library(seqinr)
+library(parallel)
+library(reshape2)
+library(ggplot2)
+library(plyr)
 
 ###########################
 ### FUNCTIONS
@@ -900,6 +902,8 @@ dimsum_stage_usearch <- function(
           as.character(dimsum_meta[["usearchMinQual"]]),
           " -fastq_merge_maxee ",
           as.character(dimsum_meta[["usearchMaxee"]]),
+          " -fastq_minlen ",
+          as.character(dimsum_meta[["usearchMinlen"]]),
           temp_options,
           " -threads ",
           num_cores,
