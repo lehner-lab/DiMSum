@@ -1360,6 +1360,7 @@ exp_metadata[["cutadaptErrorRate"]] <- arg_list$cutadaptErrorRate
 exp_metadata[["cutadaptDiscardUntrimmed"]] <- arg_list$cutadaptDiscardUntrimmed
 exp_metadata[["usearchMinQual"]] <- arg_list$usearchMinQual
 exp_metadata[["usearchMaxee"]] <- arg_list$usearchMaxee
+exp_metadata[["usearchMinlen"]] <- arg_list$usearchMinlen
 exp_metadata[["usearchMinovlen"]] <- arg_list$usearchMinovlen
 exp_metadata[["usearchAttemptExactMinovlen"]] <- arg_list$usearchAttemptExactMinovlen
 #Remove trailing "/" if present
