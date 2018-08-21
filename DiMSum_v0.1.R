@@ -1,5 +1,4 @@
-#!/software/bl/el7.2/R-3.3.0/bin/Rscript
-.libPaths(c('/software/bl/el7.2/R/R-3.3.0_packages/', '/software/bl/el7.2/R/R-3.3.0/library/'))
+#!/usr/bin/env Rscript
 
 #Software version
 version_info <- "DiMSum_v0.1"
@@ -10,13 +9,13 @@ print(version_info)
 ### PACKAGES
 ###########################
 
-suppressMessages(require(data.table))
-suppressMessages(library(seqinr))
-suppressMessages(library(optparse))
-suppressMessages(library(parallel))
-suppressMessages(library(reshape2))
-suppressMessages(library(ggplot2))
-suppressMessages(library(plyr))
+require(data.table)
+library(seqinr)
+library(optparse)
+library(parallel)
+library(reshape2)
+library(ggplot2)
+library(plyr)
 
 ###########################
 ### COMMAND-LINE OPTIONS
