@@ -62,6 +62,33 @@ print(arg_list)
 ### FUNCTIONS
 ###########################
 
+#create_dimsum_dir
+#
+# Create results folder for dimsum pipeline stage.
+#
+# dimsum_dir: directory path string (required)
+# execute: whether or not the system command will be executed (required)
+# message: message string (optional, default: NULL i.e. no message displayed)
+# overwrite_dir: delete directory if already exists (optional, default: TRUE)
+#
+# Returns: nothing.
+#
+create_dimsum_dir <- function(dimsum_dir, execute, message = NULL, overwrite_dir = TRUE){
+  if(execute){
+    if(!is.null(message)){
+      message(paste("\n\n\n*******", message, "*******\n\n\n"))
+    }
+    if(dir.exists(dimsum_dir) & overwrite_dir){
+      unlink(dimsum_dir, recursive = TRUE)
+    }
+    dir.create(dimsum_dir, showWarnings = FALSE)
+  }else{
+    if(!is.null(message)){
+      message(paste("\n\n\n*******", message, "(not executed)", "*******\n\n\n"))
+    }
+  }
+}
+
 #sum_datatable_columns
 #
 # Replace a subset of columns with a single column containing the row sums.
@@ -118,10 +145,9 @@ dimsum_stage_demultiplex <- function(
   demultiplex_outpath,
   execute = TRUE
   ){
-  message("\n\n\n******* DiMSum STAGE 1: DEMULTIPLEX *******\n\n\n")
-  #Create demultiplex directory (if doesn't already exist)
+  #Create/overwrite demultiplex directory (if executed)
   demultiplex_outpath <- gsub("/$", "", demultiplex_outpath)
-  suppressWarnings(dir.create(demultiplex_outpath))
+  create_dimsum_dir(demultiplex_outpath, execute = execute, message = "DiMSum STAGE 1: DEMULTIPLEX")  
   #Demultiplex parameters specified?
   if( !'barcode_design' %in% names(dimsum_meta) ){
     message("Skipping this stage (assuming all fastq files already demultiplexed)")
@@ -286,10 +312,9 @@ dimsum_stage_fastqc <- function(
   report = TRUE,
   report_outpath = NULL
   ){
-  message("\n\n\n******* DiMSum STAGE 2: FASTQC *******\n\n\n")
-  #Create FASTQC directory (if doesn't already exist)
+  #Create/overwrite FASTQC directory (if executed)
   fastqc_outpath <- gsub("/$", "", fastqc_outpath)
-  suppressWarnings(dir.create(fastqc_outpath))
+  create_dimsum_dir(fastqc_outpath, execute = execute, message = "DiMSum STAGE 2: FASTQC")  
   #Run FASTQC on all fastq files
   message("Running FASTQC on all files:")
   all_fastq <- file.path(dimsum_meta[['exp_design']]$pair_directory, c(dimsum_meta[['exp_design']]$pair1, dimsum_meta[['exp_design']]$pair2))
@@ -343,12 +368,11 @@ dimsum_stage_unzip <- function(
   fastq_outpath,
   execute = TRUE
   ){
-  message("\n\n\n******* DiMSum STAGE 3: UNZIP *******\n\n\n")
+  #Create/overwrite unzip directory (if executed)
+  fastq_outpath <- gsub("/$", "", fastq_outpath)
+  create_dimsum_dir(fastq_outpath, execute = execute, message = "DiMSum STAGE 3: UNZIP")  
   #All fastq files gzipped?
   if(dimsum_meta[["gzipped"]]){
-    #Create unzip directory (if doesn't already exist)
-    fastq_outpath <- gsub("/$", "", fastq_outpath)
-    suppressWarnings(dir.create(fastq_outpath))
     message("Unzipping FASTQ files:")
     all_fastq <- file.path(dimsum_meta[["exp_design"]]$pair_directory, c(dimsum_meta[['exp_design']]$pair1, dimsum_meta[['exp_design']]$pair2))
     print(all_fastq)
@@ -397,10 +421,9 @@ dimsum_stage_split <- function(
   split_outpath,
   execute = TRUE
   ){
-  message("\n\n\n******* DiMSum STAGE 4: SPLIT *******\n\n\n")
-  #Create unzip directory (if doesn't already exist)
+  #Create/overwrite split directory (if executed)
   split_outpath <- gsub("/$", "", split_outpath)
-  suppressWarnings(dir.create(split_outpath))
+  create_dimsum_dir(split_outpath, execute = execute, message = "DiMSum STAGE 4: SPLIT")  
   fastq_pair_list <- dimsum_meta[['exp_design']][,c('pair1', 'pair2')]
   rownames(fastq_pair_list) = 1:dim(fastq_pair_list)[1]
   #Split FASTQ files
@@ -570,15 +593,14 @@ dimsum_stage_cutadapt <- function(
   report = TRUE,
   report_outpath = NULL
   ){
-  message("\n\n\n******* DiMSum STAGE 5: CUTADAPT *******\n\n\n")
-  #Create cutadapt directory (if doesn't already exist)
+  #Create/overwrite cutadapt directory (if executed)
   cutadapt_outpath <- gsub("/$", "", cutadapt_outpath)
-  suppressWarnings(dir.create(cutadapt_outpath))
+  create_dimsum_dir(cutadapt_outpath, execute = execute, message = "DiMSum STAGE 5: CUTADAPT")  
   fastq_pair_list <- dimsum_meta[['exp_design']][,c('pair1', 'pair2')]
   rownames(fastq_pair_list) = 1:dim(fastq_pair_list)[1]
   #Cutadapt parameters specified?
   if( is.null(dimsum_meta[["cutadapt5First"]]) | is.null(dimsum_meta[["cutadapt5Second"]]) ){
-    message("Skipping this stage (all catadapt arguments need to be specified)")
+    message("Skipping this stage (all cutadapt arguments need to be specified)")
     return(dimsum_meta)
   }else{
     #Options for removing constant regions from beginning or end of either read in pair
@@ -816,10 +838,9 @@ dimsum_stage_usearch <- function(
   report = TRUE,
   report_outpath = NULL
   ){
-  message("\n\n\n******* DiMSum STAGE 6: USEARCH *******\n\n\n")
-  #Create cutadapt directory (if doesn't already exist)
+  #Create/overwrite usearch directory (if executed)
   usearch_outpath <- gsub("/$", "", usearch_outpath)
-  suppressWarnings(dir.create(usearch_outpath))
+  create_dimsum_dir(usearch_outpath, execute = execute, message = "DiMSum STAGE 6: USEARCH")  
   #Sample names
   sample_names = paste0(
     dimsum_meta[["exp_design"]]$sample_name, '_e', 
@@ -919,10 +940,9 @@ dimsum_stage_unique <- function(
   unique_outpath,
   execute = TRUE
   ){
-  message("\n\n\n******* DiMSum STAGE 7: UNIQUE *******\n\n\n")
-  #Create cutadapt directory (if doesn't already exist)
+  #Create unique directory (if doesn't already exist)
   unique_outpath <- gsub("/$", "", unique_outpath)
-  suppressWarnings(dir.create(unique_outpath))
+  create_dimsum_dir(unique_outpath, execute = execute, message = "DiMSum STAGE 7: UNIQUE", overwrite_dir = FALSE)  
   #Run fastx_collapser on all aligned read pair fastq files
   message("Getting unique aligned read counts with fastx_collapser:")
   all_fasta <- file.path(dimsum_meta[["exp_design"]]$aligned_pair_directory, dimsum_meta[['exp_design']]$aligned_pair)
@@ -968,10 +988,9 @@ dimsum_stage_filter <- function(
   filter_outpath,
   execute = TRUE
   ){
-  message("\n\n\n******* DiMSum STAGE 8: FILTER *******\n\n\n")
-  #Create cutadapt directory (if doesn't already exist)
+  #Create filter directory (if doesn't already exist)
   filter_outpath <- gsub("/$", "", filter_outpath)
-  suppressWarnings(dir.create(filter_outpath))
+  create_dimsum_dir(filter_outpath, execute = execute, message = "DiMSum STAGE 8: FILTER", overwrite_dir = FALSE)  
   #Construct filtered variant count table with corresponding amino acid sequences
   message("Constructing filtered variant count table with corresponding amino acid sequences")
   all_fasta <- file.path(dimsum_meta[["exp_design"]]$aligned_pair_unique_directory, dimsum_meta[['exp_design']]$aligned_pair_unique)
@@ -1147,10 +1166,9 @@ dimsum_stage_merge <- function(
   report = TRUE,
   report_outpath = NULL
   ){
-  message("\n\n\n******* DiMSum STAGE 9: MERGE *******\n\n\n")
-  #Create cutadapt directory (if doesn't already exist)
+  #Create merge directory (if doesn't already exist)
   merge_outpath <- gsub("/$", "", merge_outpath)
-  suppressWarnings(dir.create(merge_outpath))
+  create_dimsum_dir(merge_outpath, execute = execute, message = "DiMSum STAGE 9: MERGE", overwrite_dir = FALSE)  
   #WT nucleotide sequence
   wt_NTseq <- tolower(dimsum_meta[['wildtypeSequence']])
   #WT AA sequence
