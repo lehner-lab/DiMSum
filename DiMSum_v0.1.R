@@ -199,6 +199,7 @@ dimsum_stage_demultiplex <- function(
     #Update fastq metadata
     dimsum_meta_new[['exp_design']]$pair_directory <- demultiplex_outpath
     dimsum_meta_new[["fastq_file_extension"]] <- ".fastq"
+    dimsum_meta_new[["gzipped"]] <- FALSE
     return(dimsum_meta_new)
   }
 }
