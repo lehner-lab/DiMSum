@@ -6,21 +6,17 @@ version_info <- "DiMSum_v0.1"
 #Display software version
 print(version_info)
 
-#TODO:
-#check for required binaries and scripts before starting pipeline (exit gracefully)
-#Gzipped files assumed to have .gz extension
-
 ###########################
 ### PACKAGES
 ###########################
 
-require(data.table)
-library(seqinr)
-library(optparse)
-library(parallel)
-library(reshape2)
-library(ggplot2)
-library(plyr)
+suppressMessages(require(data.table))
+suppressMessages(library(seqinr))
+suppressMessages(library(optparse))
+suppressMessages(library(parallel))
+suppressMessages(library(reshape2))
+suppressMessages(library(ggplot2))
+suppressMessages(library(plyr))
 
 ###########################
 ### COMMAND-LINE OPTIONS
@@ -122,12 +118,13 @@ dimsum_stage_demultiplex <- function(
   demultiplex_outpath,
   execute = TRUE
   ){
+  message("\n\n\n******* DiMSum STAGE 1: DEMULTIPLEX *******\n\n\n")
   #Create demultiplex directory (if doesn't already exist)
   demultiplex_outpath <- gsub("/$", "", demultiplex_outpath)
-  dir.create(demultiplex_outpath)
+  suppressWarnings(dir.create(demultiplex_outpath))
   #Demultiplex parameters specified?
   if( !'barcode_design' %in% names(dimsum_meta) ){
-    message("Skipping demultiplexing (assuming all fastq files already demultiplexed)")
+    message("Skipping this stage (assuming all fastq files already demultiplexed)")
     return(dimsum_meta)
   }else{
     fastq_pair_list <- unique(dimsum_meta[['barcode_design']][,c('pair1', 'pair2')])
@@ -221,7 +218,7 @@ dimsum_stage_fastqc_report <- function(
   ){
   #Create report directory (if doesn't already exist)
   report_outpath <- gsub("/$", "", report_outpath)
-  dir.create(report_outpath)
+  suppressWarnings(dir.create(report_outpath))
   #Get results for all fastq files
   for(col_name in c('pair1_fastqc', 'pair2_fastqc')){
     fastqc_files <- file.path(dimsum_meta[['exp_design']]$fastqc_directory, dimsum_meta[['exp_design']][,col_name])
@@ -288,9 +285,10 @@ dimsum_stage_fastqc <- function(
   report = TRUE,
   report_outpath = NULL
   ){
+  message("\n\n\n******* DiMSum STAGE 2: FASTQC *******\n\n\n")
   #Create FASTQC directory (if doesn't already exist)
   fastqc_outpath <- gsub("/$", "", fastqc_outpath)
-  dir.create(fastqc_outpath)
+  suppressWarnings(dir.create(fastqc_outpath))
   #Run FASTQC on all fastq files
   message("Running FASTQC on all files:")
   all_fastq <- file.path(dimsum_meta[['exp_design']]$pair_directory, c(dimsum_meta[['exp_design']]$pair1, dimsum_meta[['exp_design']]$pair2))
@@ -344,11 +342,12 @@ dimsum_stage_unzip <- function(
   fastq_outpath,
   execute = TRUE
   ){
+  message("\n\n\n******* DiMSum STAGE 3: UNZIP *******\n\n\n")
   #All fastq files gzipped?
   if(dimsum_meta[["gzipped"]]){
     #Create unzip directory (if doesn't already exist)
     fastq_outpath <- gsub("/$", "", fastq_outpath)
-    dir.create(fastq_outpath)
+    suppressWarnings(dir.create(fastq_outpath))
     message("Unzipping FASTQ files:")
     all_fastq <- file.path(dimsum_meta[["exp_design"]]$pair_directory, c(dimsum_meta[['exp_design']]$pair1, dimsum_meta[['exp_design']]$pair2))
     print(all_fastq)
@@ -375,7 +374,7 @@ dimsum_stage_unzip <- function(
     return(dimsum_meta_new)
   }else{
     #Copy fastq files
-    message("FASTQ files already uncompressed.")
+    message("Skipping this stage (FASTQ files already unzipped)")
     #New experiment metadata
     dimsum_meta_new <- dimsum_meta
     return(dimsum_meta_new)
@@ -397,9 +396,10 @@ dimsum_stage_split <- function(
   split_outpath,
   execute = TRUE
   ){
+  message("\n\n\n******* DiMSum STAGE 4: SPLIT *******\n\n\n")
   #Create unzip directory (if doesn't already exist)
   split_outpath <- gsub("/$", "", split_outpath)
-  dir.create(split_outpath)
+  suppressWarnings(dir.create(split_outpath))
   fastq_pair_list <- dimsum_meta[['exp_design']][,c('pair1', 'pair2')]
   rownames(fastq_pair_list) = 1:dim(fastq_pair_list)[1]
   #Split FASTQ files
@@ -470,7 +470,7 @@ dimsum_stage_cutadapt_report <- function(
   ){
   #Create report directory (if doesn't already exist)
   report_outpath <- gsub("/$", "", report_outpath)
-  dir.create(report_outpath)
+  suppressWarnings(dir.create(report_outpath))
   #Get cutadapt results for all read pairs
   cutadapt_files <- file.path(dimsum_meta[['exp_design']]$pair_directory, paste0(dimsum_meta[['exp_design']][,'pair1'], '.stdout'))
   cutadapt_read1_list <- list()
@@ -569,14 +569,15 @@ dimsum_stage_cutadapt <- function(
   report = TRUE,
   report_outpath = NULL
   ){
+  message("\n\n\n******* DiMSum STAGE 5: CUTADAPT *******\n\n\n")
   #Create cutadapt directory (if doesn't already exist)
   cutadapt_outpath <- gsub("/$", "", cutadapt_outpath)
-  dir.create(cutadapt_outpath)
+  suppressWarnings(dir.create(cutadapt_outpath))
   fastq_pair_list <- dimsum_meta[['exp_design']][,c('pair1', 'pair2')]
   rownames(fastq_pair_list) = 1:dim(fastq_pair_list)[1]
   #Cutadapt parameters specified?
   if( is.null(dimsum_meta[["cutadapt5First"]]) | is.null(dimsum_meta[["cutadapt5Second"]]) ){
-    message("Skipping cutadapt adapter removal (all catadapt arguments need to be specified)")
+    message("Skipping this stage (all catadapt arguments need to be specified)")
     return(dimsum_meta)
   }else{
     #Options for removing constant regions from beginning or end of either read in pair
@@ -732,7 +733,7 @@ dimsum_stage_usearch_report <- function(
   ){
   #Create report directory (if doesn't already exist)
   report_outpath <- gsub("/$", "", report_outpath)
-  dir.create(report_outpath)
+  suppressWarnings(dir.create(report_outpath))
   #Get cutadapt results for all read pairs
   usearch_files <- file.path(dimsum_meta[['exp_design']]$aligned_pair_directory, gsub('.usearch$', '.report', dimsum_meta[['exp_design']][,'aligned_pair']))
   usearch_list <- list()
@@ -814,9 +815,10 @@ dimsum_stage_usearch <- function(
   report = TRUE,
   report_outpath = NULL
   ){
+  message("\n\n\n******* DiMSum STAGE 6: USEARCH *******\n\n\n")
   #Create cutadapt directory (if doesn't already exist)
   usearch_outpath <- gsub("/$", "", usearch_outpath)
-  dir.create(usearch_outpath)
+  suppressWarnings(dir.create(usearch_outpath))
   #Sample names
   sample_names = paste0(
     dimsum_meta[["exp_design"]]$sample_name, '_e', 
@@ -916,9 +918,10 @@ dimsum_stage_unique <- function(
   unique_outpath,
   execute = TRUE
   ){
+  message("\n\n\n******* DiMSum STAGE 7: UNIQUE *******\n\n\n")
   #Create cutadapt directory (if doesn't already exist)
   unique_outpath <- gsub("/$", "", unique_outpath)
-  dir.create(unique_outpath)
+  suppressWarnings(dir.create(unique_outpath))
   #Run fastx_collapser on all aligned read pair fastq files
   message("Getting unique aligned read counts with fastx_collapser:")
   all_fasta <- file.path(dimsum_meta[["exp_design"]]$aligned_pair_directory, dimsum_meta[['exp_design']]$aligned_pair)
@@ -964,9 +967,10 @@ dimsum_stage_filter <- function(
   filter_outpath,
   execute = TRUE
   ){
+  message("\n\n\n******* DiMSum STAGE 8: FILTER *******\n\n\n")
   #Create cutadapt directory (if doesn't already exist)
   filter_outpath <- gsub("/$", "", filter_outpath)
-  dir.create(filter_outpath)
+  suppressWarnings(dir.create(filter_outpath))
   #Construct filtered variant count table with corresponding amino acid sequences
   message("Constructing filtered variant count table with corresponding amino acid sequences")
   all_fasta <- file.path(dimsum_meta[["exp_design"]]$aligned_pair_unique_directory, dimsum_meta[['exp_design']]$aligned_pair_unique)
@@ -1020,7 +1024,7 @@ dimsum_stage_merge_report <- function(
   ){
   #Create report directory (if doesn't already exist)
   report_outpath <- gsub("/$", "", report_outpath)
-  dir.create(report_outpath)
+  suppressWarnings(dir.create(report_outpath))
   #Final statistics
   merge_df <- dimsum_meta[['exp_design']]
   merge_df$pairname <- sapply(strsplit(merge_df$aligned_pair, '.split'), '[', 1)
@@ -1142,9 +1146,10 @@ dimsum_stage_merge <- function(
   report = TRUE,
   report_outpath = NULL
   ){
+  message("\n\n\n******* DiMSum STAGE 9: MERGE *******\n\n\n")
   #Create cutadapt directory (if doesn't already exist)
   merge_outpath <- gsub("/$", "", merge_outpath)
-  dir.create(merge_outpath)
+  suppressWarnings(dir.create(merge_outpath))
   #WT nucleotide sequence
   wt_NTseq <- tolower(dimsum_meta[['wildtypeSequence']])
   #WT AA sequence
@@ -1308,194 +1313,8 @@ reports_summary_template <- "<html>\
  </body>\
 </html>"
 
-
 #Metadata object
 exp_metadata <- list()
-
-# #TEMP: set arguments manually (FOSintra_may2016)
-# arg_list <- list()
-# arg_list$fastqFileDir <- "/users/blehner/sequencing_data/Guillaume_Diss_EMBL/FOSintra_may2016/"
-# arg_list$fastqFileExtension <- ".txt"
-# arg_list$gzipped <- TRUE
-# arg_list$stranded <- FALSE
-# arg_list$experimentDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180604/experimentDesign_FOSintra.txt"
-# arg_list$cutadapt5First <- "AACCGGAGGAGGGAGCTG"
-# arg_list$cutadapt5Second <- "GCTGCCAGGATGAACTC"
-# arg_list$cutadapt3First <- "GAGTTCATCCTGGCAGC"
-# arg_list$cutadapt3Second <- "CAGCTCCCTCCTCCGGTT"
-# arg_list$cutadaptMinLength <- 50
-# arg_list$cutadaptErrorRate <- 0.2
-# arg_list$cutadaptDiscardUntrimmed <- F
-# arg_list$usearchMinQual <- 30
-# arg_list$usearchMaxee <- 0.5
-# arg_list$usearchMinovlen <- 16
-# arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180604"
-# arg_list$projectName <- "GD_FOSintra_2016-06-17"
-# arg_list$wildtypeSequence <- "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"
-# arg_list$maxAAMutations <- 2
-# arg_list$startStage <- 10
-# arg_list$stopStage <- 0
-# arg_list$numCores <- 10
-
-# #TEMP: set arguments manually (XL_cI_low_output2)
-# arg_list <- list()
-# arg_list$fastqFileDir <- "/users/blehner/sequencing_data/Xianghua_Li/cI_low_expression/"
-# arg_list$fastqFileExtension <- ".fastq"
-# arg_list$gzipped <- FALSE
-# arg_list$stranded <- FALSE
-# arg_list$barcodeDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180603/barcodeDesign_cI_low_output2_forcutadapt.txt"
-# arg_list$barcodeErrorRate <- 0.25
-# arg_list$experimentDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180603/experimentDesign_cI_low_output2.txt"
-# arg_list$cutadapt5First <- "ACACAAGAGCAGCTTGAGGACGCACGTCGC"
-# arg_list$cutadapt5Second <- "ATTTCTCTGGCGATTGAAGGGCT"
-# arg_list$cutadapt3First <- "AGCCCTTCAATCGCCAGAGAAAT"
-# arg_list$cutadapt3Second <- "GCGACGTGCGTCCTCAAGCTGCTCTTGTGT"
-# arg_list$cutadaptMinLength <- 50
-# arg_list$cutadaptErrorRate <- 0.2
-# arg_list$cutadaptDiscardUntrimmed <- T
-# arg_list$usearchMinQual <- 10
-# arg_list$usearchMaxee <- 0.1
-# arg_list$usearchMinovlen <- 4
-# arg_list$usearchAttemptExactMinovlen <- T
-# arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180603"
-# arg_list$projectName <- "XL_cI_low_output2_2015-09-15"
-# arg_list$wildtypeSequence <- "CTTAAAGCAATTTATGAAAAAAAGAAAAATGAACTTGGCTTATCCCAGGAATCTGTCGCAGACAAGATGGGGATGGGGCAGTCAGGCGTTGGTGCTTTATTTAATGGCATCAATGCATTAAATGCTTATAACGCCGCATTGCTTGCAAAAATTCTCAAAGTTAGCGTTGAAGAATTT"
-# arg_list$maxAAMutations <- 2
-# arg_list$startStage <- 7
-# arg_list$stopStage <- 0
-# arg_list$numCores <- 10
-
-# #TEMP: set arguments manually (XL_cI_low)
-# arg_list <- list()
-# arg_list$fastqFileDir <- "/users/blehner/sequencing_data/Xianghua_Li/cI_low_expression/"
-# arg_list$fastqFileExtension <- ".fastq"
-# arg_list$gzipped <- FALSE
-# arg_list$stranded <- FALSE
-# arg_list$barcodeDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180603/barcodeDesign_cI_low_forcutadapt.txt"
-# arg_list$barcodeErrorRate <- 0.25
-# arg_list$experimentDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180603/experimentDesign_cI_low.txt"
-# arg_list$cutadapt5First <- "GCTTGAGGACGCACGTCGC"
-# arg_list$cutadapt5Second <- "TCTGGCGATTGAAGGGCT"
-# arg_list$cutadapt3First <- "AGCCCTTCAATCGCCAGA"
-# arg_list$cutadapt3Second <- "GCGACGTGCGTCCTCAAGC"
-# arg_list$cutadaptMinLength <- 50
-# arg_list$cutadaptErrorRate <- 0.2
-# arg_list$cutadaptDiscardUntrimmed <- T
-# arg_list$usearchMinQual <- 20
-# arg_list$usearchMaxee <- 0.5
-# arg_list$usearchMinovlen <- 16
-# arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180603"
-# arg_list$projectName <- "XL_cI_low_2015-09-15"
-# arg_list$wildtypeSequence <- "CTTAAAGCAATTTATGAAAAAAAGAAAAATGAACTTGGCTTATCCCAGGAATCTGTCGCAGACAAGATGGGGATGGGGCAGTCAGGCGTTGGTGCTTTATTTAATGGCATCAATGCATTAAATGCTTATAACGCCGCATTGCTTGCAAAAATTCTCAAAGTTAGCGTTGAAGAATTT"
-# arg_list$maxAAMutations <- 2
-# arg_list$startStage <- 10
-# arg_list$stopStage <- 0
-# arg_list$numCores <- 10
-
-# #TEMP: set arguments manually (XL_cI_high)
-# arg_list <- list()
-# arg_list$fastqFileDir <- "/users/blehner/sequencing_data/Xianghua_Li/cI_high_expression_2017-01-25-CA1FHANXX/"
-# arg_list$fastqFileExtension <- ".fastq"
-# arg_list$gzipped <- FALSE
-# arg_list$stranded <- FALSE
-# arg_list$barcodeDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180523/barcodeDesign_cI_high.txt"
-# arg_list$barcodeErrorRate <- 0.25
-# arg_list$experimentDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180523/experimentDesign_cI_high.txt"
-# arg_list$cutadapt5First <- "GCTTGAGGACGCACGTCGC"
-# arg_list$cutadapt5Second <- "TCTGGCGATTGAAGGGCT"
-# arg_list$cutadapt3First <- "AGCCCTTCAATCGCCAGA"
-# arg_list$cutadapt3Second <- "GCGACGTGCGTCCTCAAGC"
-# arg_list$cutadaptMinLength <- 50
-# arg_list$cutadaptErrorRate <- 0.2
-# arg_list$cutadaptDiscardUntrimmed <- T
-# arg_list$usearchMinQual <- 25
-# arg_list$usearchMaxee <- 0.5
-# arg_list$usearchMinovlen <- 16
-# arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180523"
-# arg_list$projectName <- "XL_cI_high_2017-01-26"
-# arg_list$wildtypeSequence <- "CTTAAAGCAATTTATGAAAAAAAGAAAAATGAACTTGGCTTATCCCAGGAATCTGTCGCAGACAAGATGGGGATGGGGCAGTCAGGCGTTGGTGCTTTATTTAATGGCATCAATGCATTAAATGCTTATAACGCCGCATTGCTTGCAAAAATTCTCAAAGTTAGCGTTGAAGAATTT"
-# arg_list$maxAAMutations <- 2
-# arg_list$startStage <- 10
-# arg_list$stopStage <- 0
-# arg_list$numCores <- 10
-
-# #TEMP: set arguments manually (Li2016_101)
-# arg_list <- list()
-# arg_list$fastqFileDir <- "/users/blehner/jschmiedel/DMS2struct/datasets/tRNA_Li2016/FastQ/"
-# arg_list$fastqFileExtension <- ".fastq"
-# arg_list$gzipped <- FALSE
-# arg_list$stranded <- TRUE
-# arg_list$barcodeDesignPath <- NULL
-# arg_list$experimentDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180528/experimentDesign_tRNA_Li2016_101.txt"
-# arg_list$cutadapt5First <- "AGTTCAACCAAGTTG...TTGATTATTTTTTTTT"
-# arg_list$cutadapt5Second <- "AAAAAAAAATAATCAA...CAACTTGGTTGAACT"
-# arg_list$cutadapt3First <- NULL
-# arg_list$cutadapt3Second <- NULL
-# arg_list$cutadaptMinLength <- 50
-# arg_list$cutadaptErrorRate <- 0.2
-# arg_list$cutadaptDiscardUntrimmed <- F
-# arg_list$usearchMinQual <- 30
-# arg_list$usearchMaxee <- 0.5
-# arg_list$usearchMinovlen <- 16
-# arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180528"
-# arg_list$projectName <- "tRNA_Li2016_101"
-# arg_list$startStage <- 10
-# arg_list$stopStage <- 0
-# wildtypeSequence <- "GTTCCGTTGGCGTAATGGTAACGCGTCTCCCTCCTAAGGAGAAGACTGCGGGTTCGAGTCCCGTACGGAACG"
-# maxAAMutations <- 2
-# numCores <- 10
-
-# #TEMP: set arguments manually (Li2016_126)
-# arg_list <- list()
-# arg_list$fastqFileDir <- "/users/blehner/jschmiedel/DMS2struct/datasets/tRNA_Li2016/FastQ/"
-# arg_list$fastqFileExtension <- ".fastq"
-# arg_list$gzipped <- FALSE
-# arg_list$stranded <- TRUE
-# arg_list$barcodeDesignPath <- NULL
-# arg_list$experimentDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180528/experimentDesign_tRNA_Li2016_126.txt"
-# arg_list$cutadapt5First <- "AGTTCAACCAAGTTG...TTGATTATTTTTTTTT"
-# arg_list$cutadapt5Second <- "AAAAAAAAATAATCAA...CAACTTGGTTGAACT"
-# arg_list$cutadapt3First <- NULL
-# arg_list$cutadapt3Second <- NULL
-# arg_list$cutadaptMinLength <- 50
-# arg_list$cutadaptErrorRate <- 0.2
-# arg_list$cutadaptDiscardUntrimmed <- F
-# arg_list$usearchMinQual <- 30
-# arg_list$usearchMaxee <- 0.5
-# arg_list$usearchMinovlen <- 16
-# arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180528"
-# arg_list$projectName <- "tRNA_Li2016_126"
-# arg_list$startStage <- 10
-# arg_list$stopStage <- 0
-# wildtypeSequence <- "GTTCCGTTGGCGTAATGGTAACGCGTCTCCCTCCTAAGGAGAAGACTGCGGGTTCGAGTCCCGTACGGAACG"
-# maxAAMutations <- 2
-# numCores <- 10
-
-# #TEMP: set arguments manually (Li2018)
-# arg_list <- list()
-# arg_list$fastqFileDir <- "/users/blehner/jschmiedel/DMS2struct/datasets/tRNA_Li2018/FastQ/"
-# arg_list$fastqFileExtension <- ".fastq"
-# arg_list$gzipped <- FALSE
-# arg_list$stranded <- TRUE
-# arg_list$barcodeDesignPath <- NULL
-# arg_list$experimentDesignPath <- "/users/blehner/afaure/DMS/pipelinetest_20180528/experimentDesign_tRNA_Li2018.txt"
-# arg_list$cutadapt5First <- "AGTTCAACCAAGTTG...TTGATTATTTTTTTTT"
-# arg_list$cutadapt5Second <- "AAAAAAAAATAATCAA...CAACTTGGTTGAACT"
-# arg_list$cutadapt3First <- NULL
-# arg_list$cutadapt3Second <- NULL
-# arg_list$cutadaptMinLength <- 50
-# arg_list$cutadaptErrorRate <- 0.2
-# arg_list$cutadaptDiscardUntrimmed <- F
-# arg_list$usearchMinQual <- 30
-# arg_list$usearchMaxee <- 0.5
-# arg_list$usearchMinovlen <- 16
-# arg_list$outputPath <- "/users/blehner/afaure/DMS/pipelinetest_20180528"
-# arg_list$projectName <- "tRNA_Li2018"
-# arg_list$startStage <- 10
-# arg_list$stopStage <- 0
-# wildtypeSequence <- "GTTCCGTTGGCGTAATGGTAACGCGTCTCCCTCCTAAGGAGAAGACTGCGGGTTCGAGTCCCGTACGGAACG"
-# maxAAMutations <- 2
-# numCores <- 10
 
 ### Save metadata
 #Remove trailing "/" if present
@@ -1542,12 +1361,12 @@ num_cores <- arg_list$numCores
 
 #Create working directory (if doesn't already exist)
 exp_metadata[["project_path"]] <- file.path(exp_metadata[["output_path"]], exp_metadata[["project_name"]])
-dir.create(exp_metadata[["project_path"]])
+suppressWarnings(dir.create(exp_metadata[["project_path"]]))
 #Set working directory
 setwd(exp_metadata[["project_path"]])
 #Create temp directory (if doesn't already exist)
 exp_metadata[["tmp_path"]] <- file.path(exp_metadata[["project_path"]], "tmp")
-dir.create(exp_metadata[["tmp_path"]])
+suppressWarnings(dir.create(exp_metadata[["tmp_path"]]))
 
 ### Get experiment design
 ###########################
@@ -1611,14 +1430,14 @@ pipeline[['9_merge']] <- dimsum_stage_merge(pipeline[['8_filter']], pipeline[['8
 ### Save workspace
 ###########################
 
-message("Saving workspace image...")
+message("\n\n\nSaving workspace image...")
 save.image(file=file.path(pipeline[['9_merge']][["project_path"]], paste0(pipeline[['9_merge']][["project_name"]], '_workspace.RData')))
 message("Done")
 
 ### Save report html
 ###########################
 
-message("Saving summary report...")
+message("\n\n\nSaving summary report...")
 write(gsub("PROJECT_NAME", pipeline[['9_merge']][["project_name"]], reports_summary_template), file = file.path(pipeline[['8_filter']][["project_path"]], "reports_summary.html"))
 message("Done")
 
