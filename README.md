@@ -41,8 +41,6 @@ Additionally, if your raw FASTQ sequencing files contain multiplexed samples you
 
 ## Stage 1: DEMULTIPLEX
 
-
-
 ## Stage 2: FASTQC
 
 ## Stage 3: UNZIP
