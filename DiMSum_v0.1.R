@@ -9,7 +9,7 @@ message(version_info)
 ### COMMAND-LINE OPTIONS
 ###########################
 
-library(optparse)
+suppressWarnings(suppressMessages(library(optparse)))
 
 option_list <- list(
   make_option(opt_str=c("--fastqFileDir", "-i"), help = "Path to directory with input FASTQ files"),
@@ -52,12 +52,12 @@ print(arg_list)
 ### PACKAGES
 ###########################
 
-require(data.table)
-library(seqinr)
-library(parallel)
-library(reshape2)
-library(ggplot2)
-library(plyr)
+suppressWarnings(suppressMessages(require(data.table)))
+suppressWarnings(suppressMessages(library(seqinr)))
+suppressWarnings(suppressMessages(library(parallel)))
+suppressWarnings(suppressMessages(library(reshape2)))
+suppressWarnings(suppressMessages(library(ggplot2)))
+suppressWarnings(suppressMessages(library(plyr)))
 
 ###########################
 ### FUNCTIONS
@@ -776,6 +776,12 @@ dimsum_stage_usearch_report <- function(
     usearch_list[[i]][['usearch_alignment_too_short']] <- as.integer(rev(unlist(strsplit(temp_out[grep('Alignment too short', temp_out)], ' ')))[8])
     usearch_list[[i]][['usearch_exp_errs_too_high']] <- as.integer(rev(unlist(strsplit(temp_out[grep('Exp.errs. too high', temp_out)], ' ')))[7])
     usearch_list[[i]][['usearch_min_Q_too_low']] <- as.integer(rev(unlist(strsplit(temp_out[grep('Min Q too low', temp_out)], ' ')))[8])
+    #Replace any missing values with zero
+    for(j in 1:length(usearch_list[[i]])){
+      if(length(usearch_list[[i]][[j]])==0){
+        usearch_list[[i]][[j]] <- 0
+      }
+    }
   }
   usearch_df <- as.data.frame(apply(as.data.frame(do.call('rbind', usearch_list)), 2, unlist))
   #Merge experimental design with USEARCH report statistics
