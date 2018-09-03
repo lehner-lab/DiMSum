@@ -172,11 +172,11 @@ dimsum_stage_demultiplex <- function(
           x = c(rbind(paste0('>', temp_design$new_pair_prefix), paste0('^', temp_design$barcode))), 
           file = file.path(demultiplex_outpath, paste0('demultiplex_barcode-file_', pair_name, '.fasta')), 
           sep="\n")
-        #Check if file extension compatible with cutadapt (i.e. ".fastq" or ".fastq.gz")
+        #Check if file extension incompatible with cutadapt (i.e. NOT ".fastq" or ".fastq.gz")
         if(dimsum_meta[["fastq_file_extension"]]!="fastq"){
           #Copy FASTQ files to temp directory and format extension
-          new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastq_file_extension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), ".fastq.gz", fastq_pair_list[pair_name,][1])
-          new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastq_file_extension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), ".fastq.gz", fastq_pair_list[pair_name,][2])
+          new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastq_file_extension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], fastq_pair_list[pair_name,][1])
+          new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastq_file_extension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], fastq_pair_list[pair_name,][2])
           temp_out = system(paste0(
             "cp ",
             file.path(dimsum_meta[["exp_design"]]$pair_directory, fastq_pair_list[pair_name,][1]),
