@@ -10,7 +10,9 @@
 #
 dimsum_stage_diagnostics_report <- function(
   variant_data,
-  report_outpath
+  report_outpath,
+  input_samples_pattern = "^input",
+  output_samples_pattern = "^output"
   ){
   #Create report directory (if doesn't already exist)
   report_outpath <- gsub("/$", "", report_outpath)
@@ -18,8 +20,8 @@ dimsum_stage_diagnostics_report <- function(
   #load variant data from RData file
   load(variant_data)
   #Sample names
-  input_samples <- colnames(variant_data_merge)[grep('^input', colnames(variant_data_merge))]
-  output_samples <- colnames(variant_data_merge)[grep('^output', colnames(variant_data_merge))]
+  input_samples <- colnames(variant_data_merge)[grep(input_samples_pattern, colnames(variant_data_merge))]
+  output_samples <- colnames(variant_data_merge)[grep(output_samples_pattern, colnames(variant_data_merge))]
   #Plot 1: bimodality of sequencing counts in input (per # nucleotide mutations)
   #Histogram of input counts split by number of nucleotide mutations (restricting to 1-4)
   if(length(input_samples)!=0){
