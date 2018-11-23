@@ -31,6 +31,8 @@ dimsum_stage_filter <- function(
         file.path(dimsum_meta[["exp_design"]]$aligned_pair_unique_directory, read_pair), 
         " -o ", 
         file.path(filter_outpath, paste0(read_pair, ".tsv")), 
+        " -d ", 
+        file.path(filter_outpath, paste0(read_pair, ".indels.tsv")), 
         " -n ", 
         nchar(dimsum_meta[['wildtypeSequence']]),
         " > ",
@@ -41,9 +43,12 @@ dimsum_stage_filter <- function(
   }
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
-  #Filtered fasta filenames
+  #Filtered tsv filenames
   dimsum_meta_new[["exp_design"]]$aligned_pair_unique_tsv <- paste0(dimsum_meta_new[["exp_design"]]$aligned_pair_unique, ".tsv")
   dimsum_meta_new[['exp_design']]$aligned_pair_unique_tsv_directory <- filter_outpath
+  #Indel tsv filenames
+  dimsum_meta_new[["exp_design"]]$aligned_pair_unique_indel_tsv <- paste0(dimsum_meta_new[["exp_design"]]$aligned_pair_unique, ".indels.tsv")
+  dimsum_meta_new[['exp_design']]$aligned_pair_unique_indel_tsv_directory <- filter_outpath
   #Get filter results for all samples
   filter_files <- file.path(dimsum_meta_new[['exp_design']]$aligned_pair_unique_tsv_directory, gsub('.tsv$', '.tsv.stdout', dimsum_meta_new[['exp_design']][,'aligned_pair_unique_tsv']))
   filter_list <- list()

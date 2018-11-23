@@ -194,6 +194,10 @@ pipeline[['8_filter']] <- dimsum_stage_filter(pipeline[['7_unique']], file.path(
 pipeline[['9_merge']] <- dimsum_stage_merge(pipeline[['8_filter']], pipeline[['8_filter']][["project_path"]], 
   execute = (first_stage <= 9 & (last_stage == 0 | last_stage >= 9)), report_outpath = file.path(pipeline[['8_filter']][["project_path"]], "reports"))
 
+### Step 10: Merge indel variant count tables
+pipeline[['10_mergeindel']] <- dimsum_stage_merge_indels(pipeline[['9_merge']], pipeline[['9_merge']][["project_path"]], 
+  execute = (first_stage <= 10 & (last_stage == 0 | last_stage >= 10)))
+
 ### Save workspace
 ###########################
 
