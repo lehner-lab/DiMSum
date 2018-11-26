@@ -38,7 +38,6 @@ option_list <- list(
   make_option(opt_str=c("--outputPath", "-o"), help = "Path to directory to use for output files"),
   make_option(opt_str=c("--projectName", "-p"), help = "Project name"),
   make_option(opt_str=c("--wildtypeSequence", "-w"), help = "Wild-type nucleotide sequence"),
-  make_option(opt_str=c("--maxAAMutations", "-x"), type="integer", default=2, help = "Maximum considered amino acid sequence mutations"),
   make_option(opt_str=c("--startStage", "-s"), type="integer", default=1, help = "Start at a specified pipeline stage"),
   make_option(opt_str=c("--stopStage", "-t"), type="integer", default=0, help = "Stop at specified pipeline stage (default:0, no stop condition)"),
   make_option(opt_str=c("--numCores", "-c"), type="integer", default=1, help = "Number of available CPU cores")  
@@ -111,7 +110,6 @@ exp_metadata[["usearchAttemptExactMinovlen"]] <- arg_list$usearchAttemptExactMin
 exp_metadata[["output_path"]] <- gsub("/$", "", arg_list$outputPath)
 exp_metadata[["project_name"]] <- arg_list$projectName
 exp_metadata[["wildtypeSequence"]] <- arg_list$wildtypeSequence
-exp_metadata[["maxAAMutations"]] <- arg_list$maxAAMutations
 
 #First pipeline stage to run
 first_stage <- arg_list$startStage
@@ -183,11 +181,11 @@ pipeline[['6_usearch']] <- dimsum_stage_usearch(pipeline[['5_cutadapt']], file.p
   execute = (first_stage <= 6 & (last_stage == 0 | last_stage >= 6)), report_outpath = file.path(pipeline[['5_cutadapt']][["project_path"]], "reports"))
 
 ### Step 7: Get unique aligned read counts with FASTX-Toolkit
-pipeline[['7_unique']] <- dimsum_stage_unique(pipeline[['6_usearch']], file.path(pipeline[['6_usearch']][["tmp_path"]], "usearch"), 
+pipeline[['7_unique']] <- dimsum_stage_unique(pipeline[['6_usearch']], file.path(pipeline[['6_usearch']][["tmp_path"]], "unique"), 
   execute = (first_stage <= 7 & (last_stage == 0 | last_stage >= 7)))
 
 ### Step 8: Construct filtered variant count table with corresponding amino acid sequences
-pipeline[['8_filter']] <- dimsum_stage_filter(pipeline[['7_unique']], file.path(pipeline[['7_unique']][["tmp_path"]], "usearch"), 
+pipeline[['8_filter']] <- dimsum_stage_filter(pipeline[['7_unique']], file.path(pipeline[['7_unique']][["tmp_path"]], "filter"), 
   execute = (first_stage <= 8 & (last_stage == 0 | last_stage >= 8)))
 
 ### Step 9: Merge variant count tables

@@ -14,8 +14,7 @@ reports_summary_template <- "<html>\
  \t\t<a href=\"#USEARCH2\"> 4. Alignment length (USEARCH) </a><br>\
  \t\t<a href=\"#MERGE1\"> 5. Nucleotide mutation statistics </a><br>\
  \t\t<a href=\"#MERGE2\"> 6. Amino acid mutation statistics </a><br>\
- \t\t<a href=\"#SUMMARY\"> 7. Variant filtering summary statistics </a><br>\
- \t\t<a href=\"#DIAGNOSTIC\"> 8. Variant count diagnostics </a><br>\
+ \t\t<a href=\"#DIAGNOSTIC\"> 7. Variant count diagnostics </a><br>\
  \t</div>\
 \
  \t<div id=\"FASTQC\">\
@@ -52,14 +51,8 @@ reports_summary_template <- "<html>\
 \t \t<p><img src=\"reports/dimsum_stage_merge_report_aamutationcounts.png\" width=\"1200\"></p>\
  \t</div>\
 \
-    <div id=\"SUMMARY\">\
-      <h2>7. Variant filtering statistics</h2>\
-    <p><img src=\"reports/dimsum_stage_merge_report_variantpercentages.png\" width=\"1200\"></p>\
-    <p><img src=\"reports/dimsum_stage_merge_report_variantcounts.png\" width=\"1200\"></p>\
-  </div>\
-\
     <div id=\"DIAGNOSTIC\">\
-      <h2>8. Variant count diagnostics</h2>\
+      <h2>7. Variant count diagnostics</h2>\
     <p><img src=\"reports/dimsum_stage_diagnostics_report_count_hist_input.png\" width=\"1200\"></p>\
     <p><img src=\"reports/dimsum_stage_diagnostics_report_count_hist_output.png\" width=\"1200\"></p>\
     <p><img src=\"reports/dimsum_stage_diagnostics_report_scatterplotmatrix_input.png\" width=\"1200\"></p>\

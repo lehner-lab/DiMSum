@@ -16,7 +16,7 @@ dimsum_stage_unique <- function(
   ){
   #Create unique directory (if doesn't already exist)
   unique_outpath <- gsub("/$", "", unique_outpath)
-  create_dimsum_dir(unique_outpath, execute = execute, message = "DiMSum STAGE 7: UNIQUE", overwrite_dir = FALSE)  
+  create_dimsum_dir(unique_outpath, execute = execute, message = "DiMSum STAGE 7: UNIQUE")  
   #Run fastx_collapser on all aligned read pair fastq files
   message("Getting unique aligned read counts with fastx_collapser:")
   all_fasta <- file.path(dimsum_meta[["exp_design"]]$aligned_pair_directory, dimsum_meta[['exp_design']]$aligned_pair)
