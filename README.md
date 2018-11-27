@@ -53,9 +53,7 @@ Additionally, if your raw FASTQ sequencing files contain multiplexed samples you
 
 ## Stage 7: UNIQUE
 
-## Stage 8: FILTER
-
-## Stage 9: MERGE
+## Stage 8: MERGE
 
 
 
