@@ -54,6 +54,7 @@ print(arg_list)
 
 suppressWarnings(suppressMessages(require(data.table)))
 suppressWarnings(suppressMessages(library(seqinr)))
+suppressWarnings(suppressMessages(library(ShortRead)))
 suppressWarnings(suppressMessages(library(parallel)))
 suppressWarnings(suppressMessages(library(reshape2)))
 suppressWarnings(suppressMessages(library(ggplot2)))
@@ -184,26 +185,22 @@ pipeline[['6_usearch']] <- dimsum_stage_usearch(pipeline[['5_cutadapt']], file.p
 pipeline[['7_unique']] <- dimsum_stage_unique(pipeline[['6_usearch']], file.path(pipeline[['6_usearch']][["tmp_path"]], "unique"), 
   execute = (first_stage <= 7 & (last_stage == 0 | last_stage >= 7)))
 
-### Step 8: Construct filtered variant count table with corresponding amino acid sequences
-pipeline[['8_filter']] <- dimsum_stage_filter(pipeline[['7_unique']], file.path(pipeline[['7_unique']][["tmp_path"]], "filter"), 
-  execute = (first_stage <= 8 & (last_stage == 0 | last_stage >= 8)))
-
-### Step 9: Merge variant count tables
-pipeline[['9_merge']] <- dimsum_stage_merge(pipeline[['8_filter']], pipeline[['8_filter']][["project_path"]], 
-  execute = (first_stage <= 9 & (last_stage == 0 | last_stage >= 9)), report_outpath = file.path(pipeline[['8_filter']][["project_path"]], "reports"))
+### Step 8: Merge variant count tables
+pipeline[['8_merge']] <- dimsum_stage_merge(pipeline[['7_unique']], pipeline[['7_unique']][["project_path"]], 
+  execute = (first_stage <= 8 & (last_stage == 0 | last_stage >= 8)), report_outpath = file.path(pipeline[['7_unique']][["project_path"]], "reports"))
 
 ### Save workspace
 ###########################
 
 message("\n\n\nSaving workspace image...")
-save.image(file=file.path(pipeline[['9_merge']][["project_path"]], paste0(pipeline[['9_merge']][["project_name"]], '_workspace.RData')))
+save.image(file=file.path(pipeline[['8_merge']][["project_path"]], paste0(pipeline[['8_merge']][["project_name"]], '_workspace.RData')))
 message("Done")
 
 ### Save report html
 ###########################
 
 message("\n\n\nSaving summary report...")
-write(gsub("PROJECT_NAME", pipeline[['9_merge']][["project_name"]], reports_summary_template), file = file.path(pipeline[['8_filter']][["project_path"]], "reports_summary.html"))
+write(gsub("PROJECT_NAME", pipeline[['8_merge']][["project_name"]], reports_summary_template), file = file.path(pipeline[['8_merge']][["project_path"]], "reports_summary.html"))
 message("Done")
 
 

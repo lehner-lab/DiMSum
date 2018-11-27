@@ -18,33 +18,7 @@ dimsum_stage_merge_report <- function(
   #Final statistics
   merge_df <- dimsum_meta[['exp_design']]
   merge_df$pairname <- sapply(strsplit(merge_df$aligned_pair, '.split'), '[', 1)
-  # merge_df_collapse <- ddply(merge_df, "pairname", summarise, 
-  #   total_read_pairs = sum(total_read_pairs), 
-  #   usearch_merged = sum(usearch_merged), 
-  #   cutadapt_pairs_too_short = sum(cutadapt_pairs_too_short))
-  # merge_df_collapse$usearch_not_merged <- merge_df_collapse$total_read_pairs-merge_df_collapse$cutadapt_pairs_too_short-merge_df_collapse$usearch_merged
-  # merge_df_collapse$retained <- merge_df_collapse$total_read_pairs-merge_df_collapse$cutadapt_pairs_too_short-merge_df_collapse$usearch_not_merged
-  # merge_df_collapse_perc <- merge_df_collapse
-  # merge_df_collapse_perc[,4:8] <- merge_df_collapse_perc[,4:8]/merge_df_collapse_perc$total_read_pairs*100
-  # merge_df_collapse_perc <- merge_df_collapse_perc[,c(1,4:8)]
-  # merge_df_collapse <- merge_df_collapse[,c(1,4:8)]
-  # #Plot 1: final results for all samples (total reads)
-  # plot_df <- melt(merge_df_collapse, id="pairname")
-  # d <- ggplot(plot_df, aes(pairname, value)) +
-  #   geom_col(aes(fill = variable)) +
-  #   theme_bw() +
-  #   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  #   labs(x = "Sample names", y = "Total read pairs (variants)", title = paste0("Read pairs to filtered variant statistics"))
-  # ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_variantcounts.png')), d, width=12, height=8)
-  # #Plot 2: final results for all samples (percentages)
-  # plot_df <- melt(merge_df_collapse_perc, id="pairname")
-  # d <- ggplot(plot_df, aes(pairname, value)) +
-  #   geom_col(aes(fill = variable)) +
-  #   theme_bw() +
-  #   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  #   labs(x = "Sample names", y = "Percentage of initial read pairs (variants)", title = paste0("Read pairs to filtered variant statistics (percentage)"))
-  # ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_variantpercentages.png')), d, width=12, height=8)
-  #Plot 3: AA mutation counts
+  #Plot 1: AA mutation counts
   aa_subst_df <- data.frame(
     'AA_subst_0'=sapply(dimsum_meta[['aa_subst_counts']], '[', '0'),
     'AA_subst_1'=sapply(dimsum_meta[['aa_subst_counts']], '[', '1'),
@@ -81,7 +55,7 @@ dimsum_stage_merge_report <- function(
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     labs(x = "Sample names", y = "Total variants", title = paste0("Variant amino acid mutation statistics"))
   ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_aamutationcounts.png')), d, width=12, height=8)
-  #Plot 4: AA mutation percentages
+  #Plot 2: AA mutation percentages
   plot_df <- melt(aa_subst_df_collapse_perc, id="pairname")
   plot_df$Mutation_type <- factor(plot_df$variable, levels=temp_colnames[order(temp_colnames)])
   d <- ggplot(plot_df, aes(pairname, value)) +

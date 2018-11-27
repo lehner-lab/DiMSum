@@ -18,7 +18,7 @@ dimsum_stage_merge <- function(
   ){
   #Create merge directory (if doesn't already exist)
   merge_outpath <- gsub("/$", "", merge_outpath)
-  create_dimsum_dir(merge_outpath, execute = execute, message = "DiMSum STAGE 9: MERGE", overwrite_dir = FALSE)  
+  create_dimsum_dir(merge_outpath, execute = execute, message = "DiMSum STAGE 8: MERGE", overwrite_dir = FALSE)  
   #WT nucleotide sequence
   wt_NTseq <- tolower(dimsum_meta[['wildtypeSequence']])
   #WT AA sequence
@@ -34,18 +34,22 @@ dimsum_stage_merge <- function(
   aa_subst_dict <- list()
   aa_indel_dict <- list()
   
-  #Load filtered variant count files
-  message("Loading filtered variant count files:")
-  all_count <- file.path(dimsum_meta[['exp_design']]$aligned_pair_unique_tsv_directory, dimsum_meta[['exp_design']]$aligned_pair_unique_tsv)
+  #Load variant count files
+  message("Loading variant count files:")
+  all_count <- file.path(dimsum_meta[['exp_design']]$aligned_pair_unique_directory, dimsum_meta[['exp_design']]$aligned_pair_unique)
   print(all_count)
   message("Processing...")
   for(count_file in all_count){
     print(count_file)
     #Check if this code should be executed
     if(execute){
-      file_id <- gsub('.usearch.unique.tsv', '', basename(count_file))
-      #Load file
-      count_dt <- fread(count_file, header = T, sep="\t", stringsAsFactors = F)
+      file_id <- gsub('.usearch.unique', '', basename(count_file))
+      #Load fasta file
+      rfa <- readFasta(count_file)
+      #Create variant count table with nucleotide and amino acid sequence
+      count_dt <- data.table(nt_seq = tolower(as.character(sread(rfa))))
+      count_dt[, count := as.numeric(sapply(strsplit(as.character(ShortRead::id(rfa)), "-"), "[", 2))]
+      suppressWarnings(count_dt[, aa_seq := as.character(translate(sread(rfa)))])
       #Calculate number of aa mutations (insertions, deletions, substitutions)
       mut_counts <- attr(adist(count_dt[,aa_seq], wt_AAseq, counts = T), "counts")
       count_dt[,Nins_aa := mut_counts[,1,2]]

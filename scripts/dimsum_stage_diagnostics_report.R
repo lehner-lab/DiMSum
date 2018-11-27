@@ -19,29 +19,31 @@ dimsum_stage_diagnostics_report <- function(
   suppressWarnings(dir.create(report_outpath))
   #load variant data from RData file
   load(variant_data)
+  #Exclude indel variants
+  vdm_noindel <- variant_data_merge[Nins_nt==0 & Ndel_nt ==0,]
   #Sample names
-  input_samples <- colnames(variant_data_merge)[grep(input_samples_pattern, colnames(variant_data_merge))]
-  output_samples <- colnames(variant_data_merge)[grep(output_samples_pattern, colnames(variant_data_merge))]
+  input_samples <- colnames(vdm_noindel)[grep(input_samples_pattern, colnames(vdm_noindel))]
+  output_samples <- colnames(vdm_noindel)[grep(output_samples_pattern, colnames(vdm_noindel))]
   #Plot 1: bimodality of sequencing counts in input (per # nucleotide mutations)
   #Histogram of input counts split by number of nucleotide mutations (restricting to 1-4)
   if(length(input_samples)!=0){
-    sample_count_distributions_by_ntmut(input_dt = variant_data_merge[between(Nmut_nt,1,4),.SD,.SDcols=c(input_samples, "Nmut_nt", "Nmut_aa")],
+    sample_count_distributions_by_ntmut(input_dt = vdm_noindel[between(Nmut_nt,1,4),.SD,.SDcols=c(input_samples, "Nmut_nt", "Nmut_aa")],
       output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_count_hist_input.png"))
   }
   #Histogram of output counts split by number of nucleotide mutations (restricting to 1-4)
   if(length(output_samples)!=0){
-    sample_count_distributions_by_ntmut(input_dt = variant_data_merge[between(Nmut_nt,1,4),.SD,.SDcols=c(output_samples, "Nmut_nt", "Nmut_aa")],
+    sample_count_distributions_by_ntmut(input_dt = vdm_noindel[between(Nmut_nt,1,4),.SD,.SDcols=c(output_samples, "Nmut_nt", "Nmut_aa")],
       output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_count_hist_output.png"))
   }
   #Plot 2: 'flaps' in replicate versus replicate plots (indicating some variants are 'highly' present in one replicate but just background noise in another)
   #Plot pairwise input sample count correlations (restricting to 1-2 nucleotide mutations)
   if(length(input_samples)!=0){
-    temp_dt <- variant_data_merge[,.SD,.SDcols = c(input_samples, "Nmut_nt")]
+    temp_dt <- vdm_noindel[,.SD,.SDcols = c(input_samples, "Nmut_nt")]
     ggpairs_binhex(log10(temp_dt[between(Nmut_nt,1,2),.SD,.SDcols = input_samples]+1), file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_input.png"))
   }
   #Plot pairwise output sample count correlations
   if(length(output_samples)!=0){
-    temp_dt <- variant_data_merge[,.SD,.SDcols = c(output_samples, "Nmut_nt")]
+    temp_dt <- vdm_noindel[,.SD,.SDcols = c(output_samples, "Nmut_nt")]
     ggpairs_binhex(log10(temp_dt[between(Nmut_nt,1,2),.SD,.SDcols = output_samples]+1), file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_output.png"))
   }
 }
