@@ -6,13 +6,15 @@
 # dimsum_meta: an experiment metadata object (required)
 # unique_outpath: fastx_collapser output path (required)
 # execute: whether or not to execute the system command (default: TRUE)
+# save_workspace: whether or not to save the current experiment metadata object (default: TRUE)
 #
 # Returns: an updated experiment metadata object.
 #
 dimsum_stage_unique <- function(
   dimsum_meta,
   unique_outpath,
-  execute = TRUE
+  execute = TRUE,
+  save_workspace = TRUE
   ){
   #Create unique directory (if doesn't already exist)
   unique_outpath <- gsub("/$", "", unique_outpath)
@@ -25,7 +27,7 @@ dimsum_stage_unique <- function(
   for(read_pair in dimsum_meta[["exp_design"]]$aligned_pair){
     #TODO: usearch binary path specifiable on commandline?
     #TODO: only run if usearch arguments specified
-    print(read_pair)
+    message(paste0("\t", read_pair))
     #Check if this system command should be executed
     if(execute){
       temp_out = system(paste0(
@@ -44,6 +46,8 @@ dimsum_stage_unique <- function(
   #Unique fasta filenames
   dimsum_meta_new[["exp_design"]]$aligned_pair_unique <- paste0(dimsum_meta_new[["exp_design"]]$aligned_pair, ".unique")
   dimsum_meta_new[['exp_design']]$aligned_pair_unique_directory <- unique_outpath
+  #Save workspace
+  if(save_workspace){save_metadata(dimsum_meta_new)}
   return(dimsum_meta_new)
 }
 

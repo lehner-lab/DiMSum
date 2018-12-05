@@ -17,7 +17,7 @@ dimsum_stage_fastqc_report <- function(
   suppressWarnings(dir.create(report_outpath))
   #Get results for all fastq files
   for(col_name in c('pair1_fastqc', 'pair2_fastqc')){
-    fastqc_files <- file.path(dimsum_meta[['exp_design']]$fastqc_directory, dimsum_meta[['exp_design']][,col_name])
+    fastqc_files <- file.path(dimsum_meta[['exp_design']][,'fastqc_directory'], dimsum_meta[['exp_design']][,col_name])
     fastqc_list <- list()
     encoding <- ''
     for(f in fastqc_files){
@@ -34,27 +34,49 @@ dimsum_stage_fastqc_report <- function(
     }
     fastqc_df1 <- cbind.fill(lapply(fastqc_list, '[', 'Mean'))
     colnames(fastqc_df1) <- names(fastqc_list)
-    fastqc_df1$base_position <- 1:length(rownames(fastqc_df1))
+    fastqc_df1[,'base_position'] <- 1:length(rownames(fastqc_df1))
     fastqc_df2 <- cbind.fill(lapply(fastqc_list, '[', '10th Percentile'))
     colnames(fastqc_df2) <- names(fastqc_list)
-    fastqc_df2$base_position <- 1:length(rownames(fastqc_df1))
+    fastqc_df2[,'base_position'] <- 1:length(rownames(fastqc_df1))
     #Plot
     plot_df1 <- melt(fastqc_df1, id="base_position")
-    plot_df1$statistic <- 'Mean'
+    plot_df1[,'statistic'] <- 'Mean'
     plot_df2 <- melt(fastqc_df2, id="base_position")
-    plot_df2$statistic <- '10th Percentile'
+    plot_df2[,'statistic'] <- '10th Percentile'
     plot_df <- rbind(plot_df1, plot_df2)
+    plot_df[,'Read_name'] <- factor(plot_df[,'variable'])
     #Remove NAs
-    plot_df <- plot_df[!is.na(plot_df$value),]
-    d <- ggplot(plot_df, aes(base_position, value, color = variable)) +
+    plot_df <- plot_df[!is.na(plot_df[,'value']),]
+    #Constant regions
+    pos_5 <- NULL
+    pos_3 <- NULL
+    temp_adapt5 <- c("cutadapt5First", "cutadapt5Second")[as.numeric(gsub("pair|_fastqc", "", col_name))]
+    if(grepl("\\.\\.\\.", dimsum_meta[[temp_adapt5]])){
+      #Linked adaptors
+      cr_5 <- nchar(unlist(strsplit(dimsum_meta[[temp_adapt5]], "\\.\\.\\."))[1])
+      cr_3 <- nchar(unlist(strsplit(dimsum_meta[[temp_adapt5]], "\\.\\.\\."))[2]) + nchar(dimsum_meta[["wildtypeSequence"]])
+      pos_start <- as.numeric(sapply(strsplit(rownames(fastqc_df1), "-"), '[', 1))
+      pos_5 <- which(pos_start/cr_5>1)[1]
+      pos_3 <- which(pos_start/cr_3>1)[1]
+    }else{
+      #Unlinked adaptors
+      temp_adapt3 <- c("cutadapt3First", "cutadapt3second")[as.numeric(gsub("pair|_fastqc", "", col_name))]
+      cr_5 <- nchar(dimsum_meta[[temp_adapt5]])
+      cr_3 <- nchar(dimsum_meta[[temp_adapt3]]) + nchar(dimsum_meta[["wildtypeSequence"]])
+      pos_start <- as.numeric(sapply(strsplit(rownames(fastqc_df1), "-"), '[', 1))
+      pos_5 <- which(pos_start/cr_5>1)[1]
+      pos_3 <- which(pos_start/cr_3>1)[1]
+    }
+    d <- ggplot(plot_df, aes(base_position, value, color = Read_name)) +
       geom_line() +
       geom_hline(yintercept=c(20, 28), linetype = 2) +
       theme_bw() +
-      coord_cartesian(ylim = c(0, max(plot_df$value))) +
+      coord_cartesian(ylim = c(0, max(plot_df[,'value']))) + geom_vline(xintercept = c(pos_5, pos_3), linetype = 2) +
+      annotate("text", label = "variable region" , x = median(unique(plot_df$base_position)), y = 0) + 
       scale_x_continuous(
       breaks = (1:length(rownames(fastqc_df1)))[seq(1, length(rownames(fastqc_df1)), 5)],
       label = rownames(fastqc_df1)[seq(1, length(rownames(fastqc_df1)), 5)]) +
-      labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Quality scores across all bases (", encoding, ")"))
+      labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Read ", gsub("pair|_fastqc", "", col_name), " quality scores across all bases (", encoding, ")"))
     d <- d + facet_wrap(~statistic, nrow=2, ncol=1)
     ggsave(file.path(report_outpath, paste0('dimsum_stage_fastqc_report_', col_name, '.png')), d, width=12, height=8)
   }

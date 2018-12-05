@@ -6,13 +6,15 @@
 # dimsum_meta: an experiment metadata object (required)
 # fastq_outpath: FASTQ output path (required)
 # execute: whether or not to execute the system command (default: TRUE)
+# save_workspace: whether or not to save the current experiment metadata object (default: TRUE)
 #
 # Returns: an updated experiment metadata object.
 #
 dimsum_stage_unzip <- function(
   dimsum_meta,
   fastq_outpath,
-  execute = TRUE
+  execute = TRUE,
+  save_workspace = TRUE
   ){
   #Create/overwrite unzip directory (if executed)
   fastq_outpath <- gsub("/$", "", fastq_outpath)
@@ -42,12 +44,16 @@ dimsum_stage_unzip <- function(
     dimsum_meta_new[['exp_design']]$pair1 <- gsub(".gz$", "", dimsum_meta_new[["exp_design"]][,"pair1"])
     dimsum_meta_new[['exp_design']]$pair2 <- gsub(".gz$", "", dimsum_meta_new[["exp_design"]][,"pair2"])
     dimsum_meta_new[['exp_design']]$pair_directory <- fastq_outpath
+    #Save workspace
+    if(save_workspace){save_metadata(dimsum_meta_new)}
     return(dimsum_meta_new)
   }else{
     #Copy fastq files
     message("Skipping this stage (FASTQ files already unzipped)")
     #New experiment metadata
     dimsum_meta_new <- dimsum_meta
+    #Save workspace
+    if(save_workspace){save_metadata(dimsum_meta_new)}
     return(dimsum_meta_new)
   }
 }

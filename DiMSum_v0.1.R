@@ -38,6 +38,7 @@ option_list <- list(
   make_option(opt_str=c("--outputPath", "-o"), help = "Path to directory to use for output files"),
   make_option(opt_str=c("--projectName", "-p"), help = "Project name"),
   make_option(opt_str=c("--wildtypeSequence", "-w"), help = "Wild-type nucleotide sequence"),
+  make_option(opt_str=c("--transLibrary", "-r"), type="logical", default=F, help = "Trans library design i.e. read pairs correspond to distinct peptides (no overlap)"),
   make_option(opt_str=c("--startStage", "-s"), type="integer", default=1, help = "Start at a specified pipeline stage"),
   make_option(opt_str=c("--stopStage", "-t"), type="integer", default=0, help = "Stop at specified pipeline stage (default:0, no stop condition)"),
   make_option(opt_str=c("--numCores", "-c"), type="integer", default=1, help = "Number of available CPU cores")  
@@ -111,12 +112,12 @@ exp_metadata[["usearchAttemptExactMinovlen"]] <- arg_list$usearchAttemptExactMin
 exp_metadata[["output_path"]] <- gsub("/$", "", arg_list$outputPath)
 exp_metadata[["project_name"]] <- arg_list$projectName
 exp_metadata[["wildtypeSequence"]] <- arg_list$wildtypeSequence
+exp_metadata[["transLibrary"]] <- arg_list$transLibrary
+exp_metadata[["num_cores"]] <- arg_list$numCores
 
 #First pipeline stage to run
 first_stage <- arg_list$startStage
 last_stage <- arg_list$stopStage
-#Number of cores
-num_cores <- arg_list$numCores
 
 ###########################
 ### MAIN
@@ -158,35 +159,35 @@ pipeline <- list()
 pipeline[['0_original']] <- exp_metadata
 
 ### Step 1: Run demultiplex on all fastq files
-pipeline[['1_demultiplex']] <- dimsum_stage_demultiplex(pipeline[['0_original']], file.path(pipeline[['0_original']][["tmp_path"]], "demultiplex"), 
+pipeline[['1_demultiplex']] <- dimsum_stage_demultiplex(dimsum_meta = pipeline[['0_original']], demultiplex_outpath = file.path(pipeline[['0_original']][["tmp_path"]], "demultiplex"), 
   execute = (first_stage <= 1 & (last_stage == 0 | last_stage >= 1)))
 
 ### Step 2: Run FASTQC on all fastq files
-pipeline[['2_fastqc']] <- dimsum_stage_fastqc(pipeline[['1_demultiplex']], file.path(pipeline[['1_demultiplex']][["tmp_path"]], "fastqc"), 
+pipeline[['2_fastqc']] <- dimsum_stage_fastqc(dimsum_meta = pipeline[['1_demultiplex']], fastqc_outpath = file.path(pipeline[['1_demultiplex']][["tmp_path"]], "fastqc"), 
   execute = (first_stage <= 2 & (last_stage == 0 | last_stage >= 2)), report_outpath = file.path(pipeline[['1_demultiplex']][["project_path"]], "reports"))
 
 ### Step 3: Unzip FASTQ files if necessary
-pipeline[['3_fastq']] <- dimsum_stage_unzip(pipeline[['2_fastqc']], file.path(pipeline[['2_fastqc']][["tmp_path"]], "fastq"), 
+pipeline[['3_fastq']] <- dimsum_stage_unzip(dimsum_meta = pipeline[['2_fastqc']], fastq_outpath = file.path(pipeline[['2_fastqc']][["tmp_path"]], "fastq"), 
   execute = (first_stage <= 3 & (last_stage == 0 | last_stage >= 3)))
 
 ### Step 4: Split FASTQ files
-pipeline[['4_split']] <- dimsum_stage_split(pipeline[['3_fastq']], file.path(pipeline[['3_fastq']][["tmp_path"]], "split"), 
+pipeline[['4_split']] <- dimsum_stage_split(dimsum_meta = pipeline[['3_fastq']], split_outpath = file.path(pipeline[['3_fastq']][["tmp_path"]], "split"), 
   execute = (first_stage <= 4 & (last_stage == 0 | last_stage >= 4)))
 
 ### Step 5: Remove adapters from FASTQ files with cutadapt if necessary
-pipeline[['5_cutadapt']] <- dimsum_stage_cutadapt(pipeline[['4_split']], file.path(pipeline[['4_split']][["tmp_path"]], "cutadapt"), 
+pipeline[['5_cutadapt']] <- dimsum_stage_cutadapt(dimsum_meta = pipeline[['4_split']], cutadapt_outpath = file.path(pipeline[['4_split']][["tmp_path"]], "cutadapt"), 
   execute = (first_stage <= 5 & (last_stage == 0 | last_stage >= 5)), report_outpath = file.path(pipeline[['4_split']][["project_path"]], "reports"))
 
 ### Step 6: Merge paired-end reads with USEARCH
-pipeline[['6_usearch']] <- dimsum_stage_usearch(pipeline[['5_cutadapt']], file.path(pipeline[['5_cutadapt']][["tmp_path"]], "usearch"), 
+pipeline[['6_usearch']] <- dimsum_stage_usearch(dimsum_meta = pipeline[['5_cutadapt']], usearch_outpath = file.path(pipeline[['5_cutadapt']][["tmp_path"]], "usearch"), 
   execute = (first_stage <= 6 & (last_stage == 0 | last_stage >= 6)), report_outpath = file.path(pipeline[['5_cutadapt']][["project_path"]], "reports"))
 
 ### Step 7: Get unique aligned read counts with FASTX-Toolkit
-pipeline[['7_unique']] <- dimsum_stage_unique(pipeline[['6_usearch']], file.path(pipeline[['6_usearch']][["tmp_path"]], "unique"), 
+pipeline[['7_unique']] <- dimsum_stage_unique(dimsum_meta = pipeline[['6_usearch']], unique_outpath = file.path(pipeline[['6_usearch']][["tmp_path"]], "unique"), 
   execute = (first_stage <= 7 & (last_stage == 0 | last_stage >= 7)))
 
 ### Step 8: Merge variant count tables
-pipeline[['8_merge']] <- dimsum_stage_merge(pipeline[['7_unique']], pipeline[['7_unique']][["project_path"]], 
+pipeline[['8_merge']] <- dimsum_stage_merge(dimsum_meta = pipeline[['7_unique']], merge_outpath = pipeline[['7_unique']][["project_path"]], 
   execute = (first_stage <= 8 & (last_stage == 0 | last_stage >= 8)), report_outpath = file.path(pipeline[['7_unique']][["project_path"]], "reports"))
 
 ### Save workspace

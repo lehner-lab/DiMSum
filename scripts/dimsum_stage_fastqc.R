@@ -6,6 +6,7 @@
 # dimsum_meta: an experiment metadata object (required)
 # fastqc_outpath: FASTQC output path (required)
 # execute: whether or not to execute the system command (default: TRUE)
+# save_workspace: whether or not to save the current experiment metadata object (default: TRUE)
 #
 # Returns: an updated experiment metadata object.
 #
@@ -14,7 +15,8 @@ dimsum_stage_fastqc <- function(
   fastqc_outpath,
   execute = TRUE,
   report = TRUE,
-  report_outpath = NULL
+  report_outpath = NULL,
+  save_workspace = TRUE
   ){
   #Create/overwrite FASTQC directory (if executed)
   fastqc_outpath <- gsub("/$", "", fastqc_outpath)
@@ -24,23 +26,21 @@ dimsum_stage_fastqc <- function(
   all_fastq <- file.path(dimsum_meta[['exp_design']]$pair_directory, c(dimsum_meta[['exp_design']]$pair1, dimsum_meta[['exp_design']]$pair2))
   print(all_fastq)
   message("Processing...")
-  for(f in all_fastq){
-    message(paste0("\t", f))
-    #Check if this system command should be executed
-    if(execute){
-      temp_out = system(paste0(
-        "fastqc -o ", 
-        fastqc_outpath,
-        " --extract ",
-        " -t ",
-        num_cores,
-        " ",
-        f,
-        " > ", 
-        file.path(fastqc_outpath, paste0(basename(f), '.stdout')),
-        " 2> ",
-        file.path(fastqc_outpath, paste0(basename(f), '.stderr'))))
-    }
+  message(paste0("\t", all_fastq, "\n"))
+  #Check if this system command should be executed
+  if(execute){
+    temp_out = system(paste0(
+      "fastqc -o ", 
+      fastqc_outpath,
+      " --extract ",
+      " -t ",
+      dimsum_meta[['num_cores']],
+      " ",
+      paste(all_fastq, collapse = " "),
+      " > ", 
+      file.path(fastqc_outpath, paste0('fastqc', '.stdout')),
+      " 2> ",
+      file.path(fastqc_outpath, paste0('fastqc', '.stderr'))))
   }
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
@@ -50,9 +50,13 @@ dimsum_stage_fastqc <- function(
   dimsum_meta_new[['exp_design']]$fastqc_directory <- fastqc_outpath
   #Generate FASTQC report
   if(report){
-    dimsum_meta_new_report <- dimsum_stage_fastqc_report(dimsum_meta_new, report_outpath)
+    dimsum_meta_new_report <- dimsum_stage_fastqc_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
+    #Save workspace
+    if(save_workspace){save_metadata(dimsum_meta_new_report)}
     return(dimsum_meta_new_report)
   }else{
+    #Save workspace
+    if(save_workspace){save_metadata(dimsum_meta_new)}
     return(dimsum_meta_new)
   }
 }

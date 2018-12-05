@@ -16,7 +16,7 @@ dimsum_stage_usearch_report <- function(
   report_outpath <- gsub("/$", "", report_outpath)
   suppressWarnings(dir.create(report_outpath))
   #Get cutadapt results for all read pairs
-  usearch_files <- file.path(dimsum_meta[['exp_design']]$aligned_pair_directory, gsub('.usearch$', '.report', dimsum_meta[['exp_design']][,'aligned_pair']))
+  usearch_files <- file.path(dimsum_meta[['exp_design']][,'aligned_pair_directory'], gsub('.usearch$', '.report', dimsum_meta[['exp_design']][,'aligned_pair']))
   usearch_list <- list()
   for(i in 1:length(usearch_files)){
     temp_out <- system(paste0("cat ", usearch_files[i]), intern=TRUE)
@@ -43,12 +43,12 @@ dimsum_stage_usearch_report <- function(
   usearch_df <- as.data.frame(apply(as.data.frame(do.call('rbind', usearch_list)), 2, unlist))
   #Merge experimental design with USEARCH report statistics
   usearch_df <- cbind(dimsum_meta[['exp_design']][,c('aligned_pair', 'total_read_pairs')], usearch_df)
-  usearch_df$cutadapt_pairs_too_short <- usearch_df$total_read_pairs - usearch_df$usearch_total_read_pairs
+  usearch_df[,'cutadapt_pairs_too_short'] <- usearch_df[,'total_read_pairs'] - usearch_df[,'usearch_total_read_pairs']
   #Plot 1: read pair count statistics
-  usearch_df$pairname <- sapply(strsplit(usearch_df$aligned_pair, '.split'), '[', 1)
+  usearch_df[,'pairname'] <- sapply(strsplit(usearch_df[,'aligned_pair'], '.split'), '[', 1)
   usearch_df_collapse <- ddply(usearch_df, "pairname", summarise, 
     total_read_pairs = sum(total_read_pairs), 
-    usearch_merged = sum(usearch_merged), 
+    usearch_aligned = sum(usearch_merged), 
     usearch_too_many_diffs = sum(usearch_too_many_diffs), 
     usearch_fwd_too_short = sum(usearch_fwd_too_short), 
     usearch_rev_too_short = sum(usearch_rev_too_short), 
@@ -59,24 +59,26 @@ dimsum_stage_usearch_report <- function(
     cutadapt_pairs_too_short = sum(cutadapt_pairs_too_short)
     )
   usearch_df_collapse_perc <- usearch_df_collapse
-  usearch_df_collapse_perc[,3:11] <- as.data.frame(t(scale(t(usearch_df_collapse_perc[,3:11]), center = F, scale = usearch_df_collapse_perc$total_read_pairs)))*100
+  usearch_df_collapse_perc[,3:11] <- as.data.frame(t(scale(t(usearch_df_collapse_perc[,3:11]), center = F, scale = usearch_df_collapse_perc[,'total_read_pairs'])))*100
   usearch_df_collapse_perc <- usearch_df_collapse_perc[,c(1, 3:11)]
   #Plot
   plot_df <- melt(usearch_df_collapse_perc, id="pairname")
+  plot_df[,'Alignment_status'] <- factor(plot_df[,'variable'])
   d <- ggplot(plot_df, aes(pairname, value)) +
-    geom_col(aes(fill = variable)) +
+    geom_col(aes(fill = Alignment_status)) +
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    labs(x = "Sample names", y = "Pairs (percentage)", title = paste0("Read pair alignment statistics"))
+    labs(x = "Sample names", y = "Read pairs (percentage)", title = paste0("Read pair alignment statistics"))
   ggsave(file.path(report_outpath, paste0('dimsum_stage_usearch_report_paircounts.png')), d, width=12, height=8)
   #Plot2: read pair merge length statistics
   plot_df <- melt(usearch_df[,grep('pairname|usearch_merge_', colnames(usearch_df))], id="pairname")
+  plot_df[,'Length_quantile'] <- factor(plot_df[,'variable'])
   d <- ggplot(plot_df, aes(pairname, value)) +
-    geom_boxplot(aes(color = variable)) +
+    geom_boxplot(aes(color = Length_quantile)) +
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    coord_cartesian(ylim = c(0, max(plot_df$value))) +
-    labs(x = "Sample names", y = "Merged length", title = paste0("Alignment length distributions (over splits)"))
+    coord_cartesian(ylim = c(0, max(plot_df[,'value'], na.rm = T))) +
+    labs(x = "Sample names", y = "Aligned length (bp)", title = paste0("Aligned length distributions (all splits)"))
   ggsave(file.path(report_outpath, paste0('dimsum_stage_usearch_report_mergedlength.png')), d, width=12, height=8)
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta

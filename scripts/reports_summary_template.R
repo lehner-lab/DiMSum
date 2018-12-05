@@ -11,10 +11,10 @@ reports_summary_template <- "<html>\
  \t\t<a href=\"#FASTQC\"> 1. Raw FASTQ file quality control (FASTQC) </a><br>\
  \t\t<a href=\"#CUTADAPT\"> 2. Trimming of constant regions (cutadapt) </a><br>\
  \t\t<a href=\"#USEARCH1\"> 3. Alignment of overlapping paired-end reads (USEARCH) </a><br>\
- \t\t<a href=\"#USEARCH2\"> 4. Alignment length (USEARCH) </a><br>\
+ \t\t<a href=\"#USEARCH2\"> 4. Aligned length (USEARCH) </a><br>\
  \t\t<a href=\"#MERGE1\"> 5. Nucleotide mutation statistics </a><br>\
  \t\t<a href=\"#MERGE2\"> 6. Amino acid mutation statistics </a><br>\
- \t\t<a href=\"#DIAGNOSTIC\"> 7. Variant count diagnostics </a><br>\
+ \t\t<a href=\"#DIAGNOSTIC\"> 7. Variant count diagnostic plots </a><br>\
  \t</div>\
 \
  \t<div id=\"FASTQC\">\
@@ -35,7 +35,7 @@ reports_summary_template <- "<html>\
  \t</div>\
 \
   \t<div id=\"USEARCH2\">\
-  \t\t<h2>4. Alignment length (USEARCH)</h2>\
+  \t\t<h2>4. Aligned length (USEARCH)</h2>\
 \t \t<p><img src=\"reports/dimsum_stage_usearch_report_mergedlength.png\" width=\"1200\"></p>\
  \t</div>\
 \
@@ -52,7 +52,7 @@ reports_summary_template <- "<html>\
  \t</div>\
 \
     <div id=\"DIAGNOSTIC\">\
-      <h2>7. Variant count diagnostics</h2>\
+      <h2>7. Variant count diagnostic plots</h2>\
     <p><img src=\"reports/dimsum_stage_diagnostics_report_count_hist_input.png\" width=\"1200\"></p>\
     <p><img src=\"reports/dimsum_stage_diagnostics_report_count_hist_output.png\" width=\"1200\"></p>\
     <p><img src=\"reports/dimsum_stage_diagnostics_report_scatterplotmatrix_input.png\" width=\"1200\"></p>\

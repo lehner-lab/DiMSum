@@ -14,13 +14,16 @@ sample_count_distributions_by_ntmut <- function(
   input_dt,
   output_file,
   width = 12,
-  height = 8){
+  height = 8,
+  title = ""){
   plot_df <- melt(as.data.frame(input_dt), id = c("Nmut_nt", "Nmut_aa"))
-  plot_df$value <- plot_df$value+1
-  d <- ggplot(plot_df, aes(value, color = factor(Nmut_nt), linetype = Nmut_aa == 0)) +
-    geom_density() + scale_x_log10() +
-    labs(x = "log10(variant count + 1)", y = "Density") +
-    facet_grid(Nmut_nt ~ variable, scales = "free")
+  plot_df[,'Synonymous_variant'] <- factor(plot_df[,'Nmut_aa']==0)
+  plot_df[,'Number_substitutions'] <- factor(plot_df[,'Nmut_nt'])
+  plot_df[,'value'] <- plot_df[,'value']+1
+  d <- ggplot(plot_df, aes(value, color = Number_substitutions, linetype = Synonymous_variant)) +
+    geom_density() + scale_x_log10() + theme_bw() +
+    labs(x = "log10(variant count + 1)", y = "Density", title = title) +
+    facet_grid(Number_substitutions ~ variable, scales = "free")
   ggsave(output_file, width = width, height = height)
 }
 

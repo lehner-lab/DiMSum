@@ -16,11 +16,12 @@ ggpairs_binhex <- function(
   output_file, 
   width = 12, 
   height = 12, 
-  bins = 50){
+  bins = 50,
+  title = ""){
   d <- ggpairs(input_dt,
     columns = 1:dim(input_dt)[2],
     upper=list(continuous = "cor"),
-    lower="blank", xlab = "log10(variant count + 1)", ylab = "log10(variant count + 1)")
+    lower="blank", xlab = "log10(variant count + 1)", ylab = "log10(variant count + 1)", title = title)
   for (x in 1:dim(input_dt)[2]){
     for (y in 1:dim(input_dt)[2]){
       if (y>x) {
@@ -28,5 +29,6 @@ ggpairs_binhex <- function(
       }
     }
   }
+  d <- d + theme_bw()
   suppressWarnings(suppressMessages(ggsave(output_file, d, width = width, height = height)))
 }

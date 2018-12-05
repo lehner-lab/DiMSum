@@ -6,6 +6,7 @@
 # dimsum_meta: an experiment metadata object (required)
 # cutadapt_outpath: cutadapt output path (required)
 # execute: whether or not to execute the system command (default: TRUE)
+# save_workspace: whether or not to save the current experiment metadata object (default: TRUE)
 #
 # Returns: an updated experiment metadata object.
 #
@@ -14,7 +15,8 @@ dimsum_stage_cutadapt <- function(
   cutadapt_outpath,
   execute = TRUE,
   report = TRUE,
-  report_outpath = NULL
+  report_outpath = NULL,
+  save_workspace = TRUE
   ){
   #Create/overwrite cutadapt directory (if executed)
   cutadapt_outpath <- gsub("/$", "", cutadapt_outpath)
@@ -24,6 +26,8 @@ dimsum_stage_cutadapt <- function(
   #Cutadapt parameters specified?
   if( is.null(dimsum_meta[["cutadapt5First"]]) | is.null(dimsum_meta[["cutadapt5Second"]]) ){
     message("Skipping this stage (all cutadapt arguments need to be specified)")
+    #Save workspace
+    if(save_workspace){save_metadata(dimsum_meta)}
     return(dimsum_meta)
   }else{
     #Options for removing constant regions from beginning or end of either read in pair
@@ -47,7 +51,7 @@ dimsum_stage_cutadapt <- function(
     for(pair_name in rownames(fastq_pair_list)){
       #TODO: cutadapt binary path specifiable on commandline?
       #TEMP: don't trim files
-      print(fastq_pair_list[pair_name,])
+      message(paste0("\t", fastq_pair_list[pair_name,]))
       #Check if this system command should be executed
       if(execute){
         #Not stranded library
@@ -107,7 +111,7 @@ dimsum_stage_cutadapt <- function(
             " -e ",
             as.character(dimsum_meta[["cutadaptErrorRate"]]),
             " -j ",
-            num_cores,
+            dimsum_meta[['num_cores']],
             " -o ",
             file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt")),
             " -p ",
@@ -131,7 +135,7 @@ dimsum_stage_cutadapt <- function(
             " -e ",
             as.character(dimsum_meta[["cutadaptErrorRate"]]),
             " -j ",
-            num_cores,
+            dimsum_meta[['num_cores']],
             " -o ",
             file.path(cutadapt_outpath, paste0(fastq_pair_list[pair_name,][1], ".cutadapt")),
             " -p ",
@@ -156,9 +160,13 @@ dimsum_stage_cutadapt <- function(
     dimsum_meta_new[['exp_design']]$pair_directory <- cutadapt_outpath
     #Generate cutadapt report
     if(report){
-      dimsum_meta_new_report <- dimsum_stage_cutadapt_report(dimsum_meta_new, report_outpath)
+      dimsum_meta_new_report <- dimsum_stage_cutadapt_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
+      #Save workspace
+      if(save_workspace){save_metadata(dimsum_meta_new_report)}
       return(dimsum_meta_new_report)
     }else{
+      #Save workspace
+      if(save_workspace){save_metadata(dimsum_meta_new)}
       return(dimsum_meta_new)
     }
   }

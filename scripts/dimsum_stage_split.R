@@ -6,13 +6,15 @@
 # dimsum_meta: an experiment metadata object (required)
 # split_outpath: split FASTQ output path (required)
 # execute: whether or not to execute the system command (default: TRUE)
+# save_workspace: whether or not to save the current experiment metadata object (default: TRUE)
 #
 # Returns: an updated experiment metadata object.
 #
 dimsum_stage_split <- function(
   dimsum_meta,
   split_outpath,
-  execute = TRUE
+  execute = TRUE,
+  save_workspace = TRUE
   ){
   #Create/overwrite split directory (if executed)
   split_outpath <- gsub("/$", "", split_outpath)
@@ -25,7 +27,7 @@ dimsum_stage_split <- function(
   print(all_fastq)
   message("Processing...")
   for(pair_name in rownames(fastq_pair_list)){
-    print(fastq_pair_list[pair_name,])
+    message(paste0("\t", fastq_pair_list[pair_name,]))
     #Check if this system command should be executed
     if(execute){
       temp_out = system(paste0(
@@ -69,6 +71,8 @@ dimsum_stage_split <- function(
   dimsum_meta_new[["exp_design"]]$pair2 = paste0(dimsum_meta_new[["exp_design"]]$pair2, temp_suffix, '.fastq')
   dimsum_meta_new[["exp_design"]]$split = as.integer(gsub(".split", "", temp_suffix))
   dimsum_meta_new[['exp_design']]$pair_directory <- split_outpath
+  #Save workspace
+  if(save_workspace){save_metadata(dimsum_meta_new)}
   return(dimsum_meta_new)
 }
 
