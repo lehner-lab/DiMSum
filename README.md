@@ -11,7 +11,7 @@ Welcome to the GitHub repository for DiMSum: A pipeline for pre-processing of pa
 To run the DiMSum pipeline you will need the following software and associated packages:
 
 * **[Python](https://www.python.org/downloads/) v3.6** (argparse, biopython)
-* **[R](https://www.r-project.org/) v3.3** (data.table, seqinr, optparse, parallel, reshape2, ggplot2, plyr, GGally)
+* **[R](https://www.r-project.org/) v3.3** (data.table, seqinr, optparse, parallel, reshape2, ggplot2, plyr, GGally, ShortRead)
 * **[FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) v0.11.3**
 * **[cutadapt](https://cutadapt.readthedocs.io/en/stable/) v1.16**
 * **[USEARCH 32-bit](https://drive5.com/usearch/download.html) v10.0**
@@ -53,9 +53,7 @@ Additionally, if your raw FASTQ sequencing files contain multiplexed samples you
 
 ## Stage 7: UNIQUE
 
-## Stage 8: FILTER
-
-## Stage 9: MERGE
+## Stage 8: MERGE
 
 
 
