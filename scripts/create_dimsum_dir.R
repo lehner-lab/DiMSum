@@ -10,18 +10,22 @@
 #
 # Returns: nothing.
 #
-create_dimsum_dir <- function(dimsum_dir, execute, message = NULL, overwrite_dir = TRUE){
-  if(execute){
-    if(!is.null(message)){
-      message(paste("\n\n\n*******", message, "*******\n\n\n"))
-    }
-    if(dir.exists(dimsum_dir) & overwrite_dir){
-      unlink(dimsum_dir, recursive = TRUE)
-    }
-    dir.create(dimsum_dir, showWarnings = FALSE)
-  }else{
+create_dimsum_dir <- function(
+  dimsum_dir, 
+  execute, 
+  message = NULL, 
+  overwrite_dir = TRUE){
+  if(!execute){
     if(!is.null(message)){
       message(paste("\n\n\n*******", message, "(not executed)", "*******\n\n\n"))
     }
+    return()
   }
+  if(!is.null(message)){
+    message(paste("\n\n\n*******", message, "*******\n\n\n"))
+  }
+  if(dir.exists(dimsum_dir) & overwrite_dir){
+    unlink(dimsum_dir, recursive = TRUE)
+  }
+  dir.create(dimsum_dir, showWarnings = FALSE)
 }

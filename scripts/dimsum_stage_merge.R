@@ -36,7 +36,7 @@ dimsum_stage_merge <- function(
   
   #Load variant count files
   message("Loading variant count files:")
-  all_count <- file.path(dimsum_meta[['exp_design']]$aligned_pair_unique_directory, dimsum_meta[['exp_design']]$aligned_pair_unique)
+  all_count <- file.path(dimsum_meta[['exp_design']][,"aligned_pair_unique_directory"], dimsum_meta[['exp_design']][,"aligned_pair_unique"])
   print(all_count)
   message("Processing...")
   for(count_file in all_count){
@@ -59,7 +59,7 @@ dimsum_stage_merge <- function(
         Nmut_nt = integer())
       #Load fasta file (if exists)
       if(!file.exists(count_file)){
-        message("\t\tWarning: File does not exist!")
+        warning("File does not exist.", call. = FALSE, immediate. = TRUE, noBreaks. = TRUE)
         #Save nucleotide mutation distribution (with/without indels)
         nuc_subst_dict[[count_file]] <- NA
         nuc_indel_dict[[count_file]] <- NA
@@ -85,11 +85,11 @@ dimsum_stage_merge <- function(
         count_dt[,Nsub_nt := mut_counts[,1,3]]
         count_dt[,Nmut_nt := Nins_nt+Ndel_nt+Nsub_nt]
         #Save nucleotide mutation distribution (with/without indels)
-        nuc_subst_dict[[count_file]] <- tapply(count_dt[Nsub_nt==Nmut_nt,]$count, count_dt[Nsub_nt==Nmut_nt,]$Nsub_nt, sum)
-        nuc_indel_dict[[count_file]] <- tapply(count_dt[Nsub_nt!=Nmut_nt,]$count, count_dt[Nsub_nt!=Nmut_nt, .(Nindels_nt = Nins_nt + Ndel_nt)]$Nindels_nt, sum)
+        nuc_subst_dict[[count_file]] <- tapply(count_dt[Nsub_nt==Nmut_nt,count], count_dt[Nsub_nt==Nmut_nt,Nsub_nt], sum)
+        nuc_indel_dict[[count_file]] <- tapply(count_dt[Nsub_nt!=Nmut_nt,count], count_dt[Nsub_nt!=Nmut_nt, .(Nindels_nt = Nins_nt + Ndel_nt)][,Nindels_nt], sum)
         #Save amino acid mutation distribution (with/without indels)
-        aa_subst_dict[[count_file]] <- tapply(count_dt[Nsub_aa==Nmut_aa,]$count, count_dt[Nsub_aa==Nmut_aa,]$Nsub_aa, sum)
-        aa_indel_dict[[count_file]] <- tapply(count_dt[Nsub_aa!=Nmut_aa,]$count, count_dt[Nsub_aa!=Nmut_aa, .(Nindels_aa = Nins_aa + Ndel_aa)]$Nindels_aa, sum)
+        aa_subst_dict[[count_file]] <- tapply(count_dt[Nsub_aa==Nmut_aa,count], count_dt[Nsub_aa==Nmut_aa,Nsub_aa], sum)
+        aa_indel_dict[[count_file]] <- tapply(count_dt[Nsub_aa!=Nmut_aa,count], count_dt[Nsub_aa!=Nmut_aa, .(Nindels_aa = Nins_aa + Ndel_aa)][,Nindels_aa], sum)
       }
       #First file loaded
       if(is.null(variant_data)){
@@ -146,9 +146,8 @@ dimsum_stage_merge <- function(
     #Save workspace
     if(save_workspace){save_metadata(dimsum_meta_new_report)}
     return(dimsum_meta_new_report)
-  }else{
-    #Save workspace
-    if(save_workspace){save_metadata(dimsum_meta_new)}
-    return(dimsum_meta_new)
   }
+  #Save workspace
+  if(save_workspace){save_metadata(dimsum_meta_new)}
+  return(dimsum_meta_new)
 }

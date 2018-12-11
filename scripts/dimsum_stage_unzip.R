@@ -22,7 +22,7 @@ dimsum_stage_unzip <- function(
   #All fastq files gzipped?
   if(dimsum_meta[["gzipped"]]){
     message("Unzipping FASTQ files:")
-    all_fastq <- file.path(dimsum_meta[["exp_design"]]$pair_directory, c(dimsum_meta[['exp_design']]$pair1, dimsum_meta[['exp_design']]$pair2))
+    all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"]))
     print(all_fastq)
     message("Processing...")
     for(f in all_fastq){
@@ -41,20 +41,19 @@ dimsum_stage_unzip <- function(
     #New experiment metadata
     dimsum_meta_new <- dimsum_meta
     #Update fastq metadata
-    dimsum_meta_new[['exp_design']]$pair1 <- gsub(".gz$", "", dimsum_meta_new[["exp_design"]][,"pair1"])
-    dimsum_meta_new[['exp_design']]$pair2 <- gsub(".gz$", "", dimsum_meta_new[["exp_design"]][,"pair2"])
-    dimsum_meta_new[['exp_design']]$pair_directory <- fastq_outpath
-    #Save workspace
-    if(save_workspace){save_metadata(dimsum_meta_new)}
-    return(dimsum_meta_new)
-  }else{
-    #Copy fastq files
-    message("Skipping this stage (FASTQ files already unzipped)")
-    #New experiment metadata
-    dimsum_meta_new <- dimsum_meta
+    dimsum_meta_new[['exp_design']][,"pair1"] <- gsub(".gz$", "", dimsum_meta_new[["exp_design"]][,"pair1"])
+    dimsum_meta_new[['exp_design']][,"pair2"] <- gsub(".gz$", "", dimsum_meta_new[["exp_design"]][,"pair2"])
+    dimsum_meta_new[['exp_design']][,"pair_directory"] <- fastq_outpath
     #Save workspace
     if(save_workspace){save_metadata(dimsum_meta_new)}
     return(dimsum_meta_new)
   }
+  #Copy fastq files
+  message("Skipping this stage (FASTQ files already unzipped)")
+  #New experiment metadata
+  dimsum_meta_new <- dimsum_meta
+  #Save workspace
+  if(save_workspace){save_metadata(dimsum_meta_new)}
+  return(dimsum_meta_new)
 }
 

@@ -19,14 +19,14 @@ option_list <- list(
   make_option(opt_str=c("--barcodeDesignPath", "-b"), help = "Path to barcode design file (tab-separated plain text file with barcode design)"),
   make_option(opt_str=c("--barcodeErrorRate"), type="double", default=0.25, help = "Maximum allowed error rate for the barcode (default:0.25)"),
   make_option(opt_str=c("--experimentDesignPath", "-e"), help = "Path to experimental design file (tab-separated plain text file with replicate structure)"),
-  make_option(opt_str=c("--cutadaptCut5First"), type="integer", help = "cutadapt: remove bases from start of first read (before adapter trimming)"),
-  make_option(opt_str=c("--cutadaptCut5Second"), type="integer", help = "cutadapt: remove bases from start of second read (before adapter trimming)"),
-  make_option(opt_str=c("--cutadaptCut3First"), type="integer", help = "cutadapt: remove bases from end of first read (before adapter trimming)"),
-  make_option(opt_str=c("--cutadaptCut3Second"), type="integer", help = "cutadapt: remove bases from end of second read (before adapter trimming)"),
-  make_option(opt_str=c("--cutadapt5First"), help = "cutadapt: sequence of an adapter ligated to the 5' end (of the first read)"),
-  make_option(opt_str=c("--cutadapt5Second"), help = "cutadapt: sequence of an adapter ligated to the 5' end (of the second read)"),
-  make_option(opt_str=c("--cutadapt3First"), help = "cutadapt: sequence of an adapter ligated to the 3' end (of the first read)"),
-  make_option(opt_str=c("--cutadapt3Second"), help = "cutadapt: sequence of an adapter ligated to the 3' end (of the second read)"),
+  make_option(opt_str=c("--cutadaptCut5First"), type="integer", help = "cutadapt: remove bases from start of first read (before constant region trimming)"),
+  make_option(opt_str=c("--cutadaptCut5Second"), type="integer", help = "cutadapt: remove bases from start of second read (before constant region trimming)"),
+  make_option(opt_str=c("--cutadaptCut3First"), type="integer", help = "cutadapt: remove bases from end of first read (before constant region trimming)"),
+  make_option(opt_str=c("--cutadaptCut3Second"), type="integer", help = "cutadapt: remove bases from end of second read (before constant region trimming)"),
+  make_option(opt_str=c("--cutadapt5First"), help = "cutadapt: sequence of 5' constant region (of the first read)"),
+  make_option(opt_str=c("--cutadapt5Second"), help = "cutadapt: sequence of 5' constant region (of the second read)"),
+  make_option(opt_str=c("--cutadapt3First"), help = "cutadapt: sequence of 3' constant region (of the first read)"),
+  make_option(opt_str=c("--cutadapt3Second"), help = "cutadapt: sequence of 3' constant region (of the second read)"),
   make_option(opt_str=c("--cutadaptMinLength", "-n"), type="integer", default=50, help = "cutadapt: Discard reads shorter than LENGTH (default:50)"),
   make_option(opt_str=c("--cutadaptErrorRate", "-a"), type="double", default=0.2, help = "cutadapt: Maximum allowed error rate (default:0.2)"),
   make_option(opt_str=c("--cutadaptDiscardUntrimmed"), type="logical", default=F, help = "cutadapt: Discard untrimmed read pairs (default:F)"),
@@ -85,39 +85,39 @@ exp_metadata <- list()
 
 ### Save metadata
 #Remove trailing "/" if present
-exp_metadata[["fastq_path_original"]] <- gsub("/$", "", arg_list$fastqFileDir)
-exp_metadata[["fastq_file_extension"]] <- arg_list$fastqFileExtension
-exp_metadata[["gzipped"]] <- arg_list$gzipped
-exp_metadata[["stranded"]] <- arg_list$stranded
-exp_metadata[["barcode_design_path"]] <- arg_list$barcodeDesignPath
-exp_metadata[["barcodeErrorRate"]] <- arg_list$barcodeErrorRate
-exp_metadata[["experiment_design_path"]] <- arg_list$experimentDesignPath
-exp_metadata[["cutadaptCut5First"]] <- arg_list$cutadaptCut5First
-exp_metadata[["cutadaptCut5Second"]] <- arg_list$cutadaptCut5Second
-exp_metadata[["cutadaptCut3First"]] <- arg_list$cutadaptCut3First
-exp_metadata[["cutadaptCut3Second"]] <- arg_list$cutadaptCut3Second
-exp_metadata[["cutadapt5First"]] <- arg_list$cutadapt5First
-exp_metadata[["cutadapt5Second"]] <- arg_list$cutadapt5Second
-exp_metadata[["cutadapt3First"]] <- arg_list$cutadapt3First
-exp_metadata[["cutadapt3Second"]] <- arg_list$cutadapt3Second
-exp_metadata[["cutadaptMinLength"]] <- arg_list$cutadaptMinLength
-exp_metadata[["cutadaptErrorRate"]] <- arg_list$cutadaptErrorRate
-exp_metadata[["cutadaptDiscardUntrimmed"]] <- arg_list$cutadaptDiscardUntrimmed
-exp_metadata[["usearchMinQual"]] <- arg_list$usearchMinQual
-exp_metadata[["usearchMaxee"]] <- arg_list$usearchMaxee
-exp_metadata[["usearchMinlen"]] <- arg_list$usearchMinlen
-exp_metadata[["usearchMinovlen"]] <- arg_list$usearchMinovlen
-exp_metadata[["usearchAttemptExactMinovlen"]] <- arg_list$usearchAttemptExactMinovlen
+exp_metadata[["fastq_path_original"]] <- gsub("/$", "", arg_list[["fastqFileDir"]])
+exp_metadata[["fastq_file_extension"]] <- arg_list[["fastqFileExtension"]]
+exp_metadata[["gzipped"]] <- arg_list[["gzipped"]]
+exp_metadata[["stranded"]] <- arg_list[["stranded"]]
+exp_metadata[["barcode_design_path"]] <- arg_list[["barcodeDesignPath"]]
+exp_metadata[["barcodeErrorRate"]] <- arg_list[["barcodeErrorRate"]]
+exp_metadata[["experiment_design_path"]] <- arg_list[["experimentDesignPath"]]
+exp_metadata[["cutadaptCut5First"]] <- arg_list[["cutadaptCut5First"]]
+exp_metadata[["cutadaptCut5Second"]] <- arg_list[["cutadaptCut5Second"]]
+exp_metadata[["cutadaptCut3First"]] <- arg_list[["cutadaptCut3First"]]
+exp_metadata[["cutadaptCut3Second"]] <- arg_list[["cutadaptCut3Second"]]
+exp_metadata[["cutadapt5First"]] <- arg_list[["cutadapt5First"]]
+exp_metadata[["cutadapt5Second"]] <- arg_list[["cutadapt5Second"]]
+exp_metadata[["cutadapt3First"]] <- arg_list[["cutadapt3First"]]
+exp_metadata[["cutadapt3Second"]] <- arg_list[["cutadapt3Second"]]
+exp_metadata[["cutadaptMinLength"]] <- arg_list[["cutadaptMinLength"]]
+exp_metadata[["cutadaptErrorRate"]] <- arg_list[["cutadaptErrorRate"]]
+exp_metadata[["cutadaptDiscardUntrimmed"]] <- arg_list[["cutadaptDiscardUntrimmed"]]
+exp_metadata[["usearchMinQual"]] <- arg_list[["usearchMinQual"]]
+exp_metadata[["usearchMaxee"]] <- arg_list[["usearchMaxee"]]
+exp_metadata[["usearchMinlen"]] <- arg_list[["usearchMinlen"]]
+exp_metadata[["usearchMinovlen"]] <- arg_list[["usearchMinovlen"]]
+exp_metadata[["usearchAttemptExactMinovlen"]] <- arg_list[["usearchAttemptExactMinovlen"]]
 #Remove trailing "/" if present
-exp_metadata[["output_path"]] <- gsub("/$", "", arg_list$outputPath)
-exp_metadata[["project_name"]] <- arg_list$projectName
-exp_metadata[["wildtypeSequence"]] <- arg_list$wildtypeSequence
-exp_metadata[["transLibrary"]] <- arg_list$transLibrary
-exp_metadata[["num_cores"]] <- arg_list$numCores
+exp_metadata[["output_path"]] <- gsub("/$", "", arg_list[["outputPath"]])
+exp_metadata[["project_name"]] <- arg_list[["projectName"]]
+exp_metadata[["wildtypeSequence"]] <- arg_list[["wildtypeSequence"]]
+exp_metadata[["transLibrary"]] <- arg_list[["transLibrary"]]
+exp_metadata[["num_cores"]] <- arg_list[["numCores"]]
 
 #First pipeline stage to run
-first_stage <- arg_list$startStage
-last_stage <- arg_list$stopStage
+first_stage <- arg_list[["startStage"]]
+last_stage <- arg_list[["stopStage"]]
 
 ###########################
 ### MAIN
@@ -138,11 +138,8 @@ suppressWarnings(dir.create(exp_metadata[["tmp_path"]]))
 ### Get experiment design
 ###########################
 
-#TODO: check if file exists
 #TODO: check if all fastq files exist
-exp_metadata[["exp_design"]] <- read.table(exp_metadata[["experiment_design_path"]], header = T, stringsAsFactors = F, sep="\t")
-#Add original FASTQ directory
-exp_metadata[["exp_design"]]$pair_directory <- exp_metadata[["fastq_path_original"]]
+exp_metadata[["exp_design"]] <- get_experiment_design(exp_metadata)
 
 ### Get barcode design (if provided)
 ###########################

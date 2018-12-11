@@ -23,7 +23,7 @@ dimsum_stage_fastqc <- function(
   create_dimsum_dir(fastqc_outpath, execute = execute, message = "DiMSum STAGE 2: FASTQC")  
   #Run FASTQC on all fastq files
   message("Running FASTQC on all files:")
-  all_fastq <- file.path(dimsum_meta[['exp_design']]$pair_directory, c(dimsum_meta[['exp_design']]$pair1, dimsum_meta[['exp_design']]$pair2))
+  all_fastq <- file.path(dimsum_meta[['exp_design']][,"pair_directory"], c(dimsum_meta[['exp_design']][,'pair1'], dimsum_meta[['exp_design']][,'pair2']))
   print(all_fastq)
   message("Processing...")
   message(paste0("\t", all_fastq, "\n"))
@@ -45,19 +45,18 @@ dimsum_stage_fastqc <- function(
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Update fastq metadata
-  dimsum_meta_new[['exp_design']]$pair1_fastqc <- gsub(dimsum_meta_new[["fastq_file_extension"]], '_fastqc/fastqc_data.txt', gsub('.gz', '', dimsum_meta_new[['exp_design']][,"pair1"]))
-  dimsum_meta_new[['exp_design']]$pair2_fastqc <- gsub(dimsum_meta_new[["fastq_file_extension"]], '_fastqc/fastqc_data.txt', gsub('.gz', '', dimsum_meta_new[['exp_design']][,"pair2"]))
-  dimsum_meta_new[['exp_design']]$fastqc_directory <- fastqc_outpath
+  dimsum_meta_new[['exp_design']][,"pair1_fastqc"] <- gsub(dimsum_meta_new[["fastq_file_extension"]], '_fastqc/fastqc_data.txt', gsub('.gz', '', dimsum_meta_new[['exp_design']][,"pair1"]))
+  dimsum_meta_new[['exp_design']][,"pair2_fastqc"] <- gsub(dimsum_meta_new[["fastq_file_extension"]], '_fastqc/fastqc_data.txt', gsub('.gz', '', dimsum_meta_new[['exp_design']][,"pair2"]))
+  dimsum_meta_new[['exp_design']][,"fastqc_directory"] <- fastqc_outpath
   #Generate FASTQC report
   if(report){
     dimsum_meta_new_report <- dimsum_stage_fastqc_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
     #Save workspace
     if(save_workspace){save_metadata(dimsum_meta_new_report)}
     return(dimsum_meta_new_report)
-  }else{
-    #Save workspace
-    if(save_workspace){save_metadata(dimsum_meta_new)}
-    return(dimsum_meta_new)
   }
+  #Save workspace
+  if(save_workspace){save_metadata(dimsum_meta_new)}
+  return(dimsum_meta_new)
 }
 

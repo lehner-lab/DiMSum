@@ -21,10 +21,10 @@ dimsum_stage_unique <- function(
   create_dimsum_dir(unique_outpath, execute = execute, message = "DiMSum STAGE 7: UNIQUE")  
   #Run fastx_collapser on all aligned read pair fastq files
   message("Getting unique aligned read counts with fastx_collapser:")
-  all_fasta <- file.path(dimsum_meta[["exp_design"]]$aligned_pair_directory, dimsum_meta[['exp_design']]$aligned_pair)
+  all_fasta <- file.path(dimsum_meta[["exp_design"]][,"aligned_pair_directory"], dimsum_meta[['exp_design']][,"aligned_pair"])
   print(all_fasta)
   message("Processing...")
-  for(read_pair in dimsum_meta[["exp_design"]]$aligned_pair){
+  for(read_pair in dimsum_meta[["exp_design"]][,"aligned_pair"]){
     #TODO: usearch binary path specifiable on commandline?
     #TODO: only run if usearch arguments specified
     message(paste0("\t", read_pair))
@@ -32,7 +32,7 @@ dimsum_stage_unique <- function(
     if(execute){
       temp_out = system(paste0(
         "fastx_collapser -Q33 -i ",
-        file.path(dimsum_meta[["exp_design"]]$aligned_pair_directory, read_pair),
+        file.path(dimsum_meta[["exp_design"]][,"aligned_pair_directory"][1], read_pair),
         " -o ",
         file.path(unique_outpath, paste0(read_pair, '.unique')),
         " > ",
@@ -44,8 +44,8 @@ dimsum_stage_unique <- function(
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Unique fasta filenames
-  dimsum_meta_new[["exp_design"]]$aligned_pair_unique <- paste0(dimsum_meta_new[["exp_design"]]$aligned_pair, ".unique")
-  dimsum_meta_new[['exp_design']]$aligned_pair_unique_directory <- unique_outpath
+  dimsum_meta_new[["exp_design"]][,"aligned_pair_unique"] <- paste0(dimsum_meta_new[["exp_design"]][,"aligned_pair"], ".unique")
+  dimsum_meta_new[['exp_design']][,"aligned_pair_unique_directory"] <- unique_outpath
   #Save workspace
   if(save_workspace){save_metadata(dimsum_meta_new)}
   return(dimsum_meta_new)
