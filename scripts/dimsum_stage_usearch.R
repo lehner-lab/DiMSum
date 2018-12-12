@@ -82,9 +82,9 @@ dimsum_stage_usearch <- function(
       else{
         temp_out = system(paste0(
           "usearch -fastq_mergepairs ",
-          file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,][i,"pair1"]),
+          file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair1"]),
           " -reverse ",
-          file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,][i,"pair2"]),
+          file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair2"]),
           " -fastqout ",
           file.path(usearch_outpath, paste0(sample_names[i], '.usearch')),
           " -report ",

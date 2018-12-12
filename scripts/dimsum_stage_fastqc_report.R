@@ -15,15 +15,19 @@ dimsum_stage_fastqc_report <- function(
   #Create report directory (if doesn't already exist)
   report_outpath <- gsub("/$", "", report_outpath)
   suppressWarnings(dir.create(report_outpath))
+  #Initialise read length
+  dimsum_meta[['exp_design']][,"pair1_length"] <- NA
+  dimsum_meta[['exp_design']][,"pair2_length"] <- NA
   #Get results for all fastq files
   for(col_name in c('pair1_fastqc', 'pair2_fastqc')){
     fastqc_files <- file.path(dimsum_meta[['exp_design']][,'fastqc_directory'], dimsum_meta[['exp_design']][,col_name])
     fastqc_list <- list()
     encoding <- ''
-    for(f in fastqc_files){
-      temp_out <- system(paste0("head -n ", 500, ' ', f), intern=TRUE)
+    for(i in 1:length(fastqc_files)){
+      temp_out <- system(paste0("head -n ", 500, ' ', fastqc_files[i]), intern=TRUE)
       filename <- gsub('Filename\\t', '', temp_out[4])
       encoding <- gsub('Encoding\\t', '', temp_out[6])
+      dimsum_meta[['exp_design']][i,gsub("_fastqc", "_length", col_name)] <- as.numeric(gsub('Sequence length\\t', '', temp_out[9]))
       temp_nlines <- grep('>>END_MODULE', temp_out)[2]
       temp_out <- temp_out[c(13:(temp_nlines-1))]
       temp_out_data <- strsplit(temp_out[2:length(temp_out)], '\\t')
@@ -51,18 +55,20 @@ dimsum_stage_fastqc_report <- function(
     # pos_5 <- NULL
     # pos_3 <- NULL
     # temp_adapt5 <- c("cutadapt5First", "cutadapt5Second")[as.numeric(gsub("pair|_fastqc", "", col_name))]
+    # temp_cut5 <- c("cutadaptCut5First", "cutadaptCut5Second")[as.numeric(gsub("pair|_fastqc", "", col_name))]
     # if(grepl("\\.\\.\\.", dimsum_meta[[temp_adapt5]])){
     #   #Linked adaptors
-    #   cr_5 <- nchar(unlist(strsplit(dimsum_meta[[temp_adapt5]], "\\.\\.\\."))[1])
-    #   cr_3 <- nchar(unlist(strsplit(dimsum_meta[[temp_adapt5]], "\\.\\.\\."))[2]) + nchar(dimsum_meta[["wildtypeSequence"]])
+    #   cr_5 <- nchar(unlist(sapply(strsplit(dimsum_meta[['exp_design']][,temp_adapt5], "\\.\\.\\."), '[', 1)))
+    #   cr_3 <- nchar(unlist(sapply(strsplit(dimsum_meta[['exp_design']][,temp_adapt5], "\\.\\.\\."), '[', 2))) + nchar(dimsum_meta[["wildtypeSequence"]])
     #   pos_start <- as.numeric(sapply(strsplit(rownames(fastqc_df1), "-"), '[', 1))
     #   pos_5 <- which(pos_start/cr_5>1)[1]
     #   pos_3 <- which(pos_start/cr_3>1)[1]
     # }else{
     #   #Unlinked adaptors
     #   temp_adapt3 <- c("cutadapt3First", "cutadapt3second")[as.numeric(gsub("pair|_fastqc", "", col_name))]
-    #   cr_5 <- nchar(dimsum_meta[[temp_adapt5]])
-    #   cr_3 <- nchar(dimsum_meta[[temp_adapt3]]) + nchar(dimsum_meta[["wildtypeSequence"]])
+    #   cr_5 <- nchar(dimsum_meta[['exp_design']][,temp_adapt5]) + dimsum_meta[['exp_design']][,temp_cut5]
+
+    #   cr_3 <- nchar(dimsum_meta[['exp_design']][,temp_adapt3]) + nchar(dimsum_meta[["wildtypeSequence"]])
     #   pos_start <- as.numeric(sapply(strsplit(rownames(fastqc_df1), "-"), '[', 1))
     #   pos_5 <- which(pos_start/cr_5>1)[1]
     #   pos_3 <- which(pos_start/cr_3>1)[1]
