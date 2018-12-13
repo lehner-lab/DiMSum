@@ -29,14 +29,16 @@ dimsum_stage_cutadapt <- function(
   for(i in 1:dim(dimsum_meta[['exp_design']])[1]){
     #TODO: cutadapt binary path specifiable on commandline?
     message(paste0("\t", dimsum_meta[['exp_design']][i,c('pair1', 'pair2')]))
-    #If not trans library: convert to linked adapters if 3' constant region expected to be sequenced - pair1
+    #If not trans library: convert to linked adapters if 3' constant region expected to be sequenced
     if(!dimsum_meta[["transLibrary"]]){
       num_cut5f <- ifelse(is.na(dimsum_meta[['exp_design']][i,"cutadaptCut5First"]), 0, dimsum_meta[['exp_design']][i,"cutadaptCut5First"])
       num_cut5s <- ifelse(is.na(dimsum_meta[['exp_design']][i,"cutadaptCut5Second"]), 0, dimsum_meta[['exp_design']][i,"cutadaptCut5Second"])
+      #Read 1
       if(dimsum_meta[['exp_design']][i,"pair1_length"] > (num_cut5f + nchar(dimsum_meta[['exp_design']][i,"cutadapt5First"]) + nchar(dimsum_meta[['wildtypeSequence']]))){
         dimsum_meta[['exp_design']][i,"cutadapt5First"] <- paste0(dimsum_meta[['exp_design']][i,"cutadapt5First"], "...", dimsum_meta[['exp_design']][i,"cutadapt3First"])
         dimsum_meta[['exp_design']][i,"cutadapt3First"] <- NA
       }
+      #Read2
       if(dimsum_meta[['exp_design']][i,"pair2_length"] > (num_cut5s + nchar(dimsum_meta[['exp_design']][i,"cutadapt5Second"]) + nchar(dimsum_meta[['wildtypeSequence']]))){
         dimsum_meta[['exp_design']][i,"cutadapt5Second"] <- paste0(dimsum_meta[['exp_design']][i,"cutadapt5Second"], "...", dimsum_meta[['exp_design']][i,"cutadapt3Second"])
         dimsum_meta[['exp_design']][i,"cutadapt3Second"] <- NA

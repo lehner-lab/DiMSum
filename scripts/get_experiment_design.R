@@ -48,7 +48,7 @@ get_experiment_design <- function(
   if(sum(!all_characters %in% c("A", "C", "G", "T", NA))!=0){
     stop("Invalid constant region sequences. Only valid nucleotide sequences allowed (A/C/T/G).", call. = FALSE)
   }
-  #If not trans library: reverse complement cutadapt 5' constant regions to get 3' constant regions (if not already supplied)
+  #If not trans library: reverse complement cutadapt 5' constant regions to obtain 3' constant regions (if not already supplied)
   if(!dimsum_meta[["transLibrary"]]){
     exp_design[is.na(exp_design[,"cutadapt3First"]),"cutadapt3First"] <- as.character(reverseComplement(DNAStringSet(exp_design[is.na(exp_design[,"cutadapt3First"]),"cutadapt5Second"])))
     exp_design[is.na(exp_design[,"cutadapt3Second"]),"cutadapt3Second"] <- as.character(reverseComplement(DNAStringSet(exp_design[is.na(exp_design[,"cutadapt3Second"]),"cutadapt5First"])))

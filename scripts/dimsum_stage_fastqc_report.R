@@ -22,12 +22,17 @@ dimsum_stage_fastqc_report <- function(
   for(col_name in c('pair1_fastqc', 'pair2_fastqc')){
     fastqc_files <- file.path(dimsum_meta[['exp_design']][,'fastqc_directory'], dimsum_meta[['exp_design']][,col_name])
     fastqc_list <- list()
-    encoding <- ''
+    encoding <- list()
     for(i in 1:length(fastqc_files)){
       temp_out <- system(paste0("head -n ", 500, ' ', fastqc_files[i]), intern=TRUE)
       filename <- gsub('Filename\\t', '', temp_out[4])
-      encoding <- gsub('Encoding\\t', '', temp_out[6])
-      dimsum_meta[['exp_design']][i,gsub("_fastqc", "_length", col_name)] <- as.numeric(gsub('Sequence length\\t', '', temp_out[9]))
+      encoding[[i]] <- gsub('Encoding\\t', '', temp_out[6])
+      read_length <- gsub('Sequence length\\t', '', temp_out[9])
+      if(grepl("-", read_length)){
+        dimsum_meta[['exp_design']][i,gsub("_fastqc", "_length", col_name)] <- as.numeric(unlist(strsplit(read_length, "-"))[2])
+      }else{
+        dimsum_meta[['exp_design']][i,gsub("_fastqc", "_length", col_name)] <- as.numeric(read_length)
+      }
       temp_nlines <- grep('>>END_MODULE', temp_out)[2]
       temp_out <- temp_out[c(13:(temp_nlines-1))]
       temp_out_data <- strsplit(temp_out[2:length(temp_out)], '\\t')
@@ -51,38 +56,38 @@ dimsum_stage_fastqc_report <- function(
     plot_df[,'Read_name'] <- factor(plot_df[,'variable'])
     #Remove NAs
     plot_df <- plot_df[!is.na(plot_df[,'value']),]
-    # #Constant regions
-    # pos_5 <- NULL
-    # pos_3 <- NULL
-    # temp_adapt5 <- c("cutadapt5First", "cutadapt5Second")[as.numeric(gsub("pair|_fastqc", "", col_name))]
-    # temp_cut5 <- c("cutadaptCut5First", "cutadaptCut5Second")[as.numeric(gsub("pair|_fastqc", "", col_name))]
-    # if(grepl("\\.\\.\\.", dimsum_meta[[temp_adapt5]])){
-    #   #Linked adaptors
-    #   cr_5 <- nchar(unlist(sapply(strsplit(dimsum_meta[['exp_design']][,temp_adapt5], "\\.\\.\\."), '[', 1)))
-    #   cr_3 <- nchar(unlist(sapply(strsplit(dimsum_meta[['exp_design']][,temp_adapt5], "\\.\\.\\."), '[', 2))) + nchar(dimsum_meta[["wildtypeSequence"]])
-    #   pos_start <- as.numeric(sapply(strsplit(rownames(fastqc_df1), "-"), '[', 1))
-    #   pos_5 <- which(pos_start/cr_5>1)[1]
-    #   pos_3 <- which(pos_start/cr_3>1)[1]
-    # }else{
-    #   #Unlinked adaptors
-    #   temp_adapt3 <- c("cutadapt3First", "cutadapt3second")[as.numeric(gsub("pair|_fastqc", "", col_name))]
-    #   cr_5 <- nchar(dimsum_meta[['exp_design']][,temp_adapt5]) + dimsum_meta[['exp_design']][,temp_cut5]
-
-    #   cr_3 <- nchar(dimsum_meta[['exp_design']][,temp_adapt3]) + nchar(dimsum_meta[["wildtypeSequence"]])
-    #   pos_start <- as.numeric(sapply(strsplit(rownames(fastqc_df1), "-"), '[', 1))
-    #   pos_5 <- which(pos_start/cr_5>1)[1]
-    #   pos_3 <- which(pos_start/cr_3>1)[1]
-    # }
+    #Variable region boundaries
+    temp_adapt5 <- c("cutadapt5First", "cutadapt5Second")[as.numeric(gsub("pair|_fastqc", "", col_name))]
+    temp_cut5 <- c("cutadaptCut5First", "cutadaptCut5Second")[as.numeric(gsub("pair|_fastqc", "", col_name))]
+    #Positions of 5' and 3' boundaries of constant regions
+    vr_5 <- apply(cbind(nchar(dimsum_meta[['exp_design']][,temp_adapt5]), dimsum_meta[['exp_design']][,temp_cut5]), 1, sum, na.rm = T)
+    vr_3 <- vr_5 + nchar(dimsum_meta[["wildtypeSequence"]])
+    #Only show sequenced boundaries
+    vr_5 <- vr_5[vr_5<=dimsum_meta[['exp_design']][,gsub("_fastqc", "_length", col_name)]]
+    vr_3 <- vr_3[vr_3<=dimsum_meta[['exp_design']][,gsub("_fastqc", "_length", col_name)]]
+    #Min and max boundary positions
+    vr_5 <- range(vr_5)
+    if(length(vr_3)!=0){vr_3 <- range(vr_3)}
+    vr_boundaries <- unique(c(vr_5, vr_3))
+    #Plot axis position
+    pos_start <- as.numeric(sapply(strsplit(rownames(fastqc_df1), "-"), '[', 1))
+    vr_boundaries_pos <- NULL
+    for(b in vr_boundaries){
+      vr_boundaries_pos <- c(vr_boundaries_pos, which(pos_start/b>=1)[1])
+    }
+    #Encoding
+    encoding_format <- paste(unique(unlist(encoding)), collapse = ", ")
+    #Plot
     d <- ggplot(plot_df, aes(base_position, value, color = Read_name)) +
       geom_line() +
       geom_hline(yintercept=c(20, 28), linetype = 2) +
       theme_bw() +
-      coord_cartesian(ylim = c(0, max(plot_df[,'value']))) + #geom_vline(xintercept = c(pos_5, pos_3), linetype = 2) +
-      # annotate("text", label = "variable region" , x = median(unique(plot_df[,"base_position"])), y = 0) + 
+      coord_cartesian(ylim = c(0, max(plot_df[,'value']))) + geom_vline(xintercept = vr_boundaries_pos, linetype = 2) +
+      annotate("text", label = "variable region" , x = median(unique(plot_df[,"base_position"])), y = 0) + 
       scale_x_continuous(
       breaks = (1:length(rownames(fastqc_df1)))[seq(1, length(rownames(fastqc_df1)), 5)],
       label = rownames(fastqc_df1)[seq(1, length(rownames(fastqc_df1)), 5)]) +
-      labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Read ", gsub("pair|_fastqc", "", col_name), " quality scores across all bases (", encoding, ")"))
+      labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Read ", gsub("pair|_fastqc", "", col_name), " quality scores across all bases (", encoding_format, ")"))
     d <- d + facet_wrap(~statistic, nrow=2, ncol=1)
     ggsave(file.path(report_outpath, paste0('dimsum_stage_fastqc_report_', col_name, '.png')), d, width=12, height=8)
   }
