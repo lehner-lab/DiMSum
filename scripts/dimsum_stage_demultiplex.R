@@ -66,7 +66,7 @@ dimsum_stage_demultiplex <- function(
   }
   #Demultiplex FASTQ files
   message("Demultiplexing FASTQ files with cutadapt:")
-  all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], c(dimsum_meta[['barcode_design']][,"pair1"], dimsum_meta[['barcode_design']][,"pair1"]))
+  all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], c(dimsum_meta[['barcode_design']][,"pair1"], dimsum_meta[['barcode_design']][,"pair2"]))
   print(unique(all_fastq))
   message("Processing...")
   for(pair_name in rownames(fastq_pair_list)){
