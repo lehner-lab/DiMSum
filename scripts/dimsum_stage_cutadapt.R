@@ -40,8 +40,8 @@ dimsum_stage_cutadapt <- function(
         dimsum_meta[['exp_design']][i,"cutadapt5First"] <- paste0(dimsum_meta[['exp_design']][i,"cutadapt5First"], "...", dimsum_meta[['exp_design']][i,"cutadapt3First"])
         dimsum_meta[['exp_design']][i,"cutadapt3First"] <- NA
       }
-      #Read2
-      if( (dimsum_meta[['exp_design']][i,"pair2_length"]-num_cut5s-num_cut3s) > (nchar(dimsum_meta[['exp_design']][i,"cutadapt5Second"]) + nchar(dimsum_meta[['wildtypeSequence']])) ){
+      #Read2 (use read1 length; read1 lengths can be variable due to inconsistent barcode trimming with cutadapt)
+      if( (dimsum_meta[['exp_design']][i,"pair1_length"]-num_cut5s-num_cut3s) > (nchar(dimsum_meta[['exp_design']][i,"cutadapt5Second"]) + nchar(dimsum_meta[['wildtypeSequence']])) ){
         dimsum_meta[['exp_design']][i,"cutadapt5Second"] <- paste0(dimsum_meta[['exp_design']][i,"cutadapt5Second"], "...", dimsum_meta[['exp_design']][i,"cutadapt3Second"])
         dimsum_meta[['exp_design']][i,"cutadapt3Second"] <- NA
       }
