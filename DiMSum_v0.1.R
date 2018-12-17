@@ -29,7 +29,6 @@ option_list <- list(
   make_option(opt_str=c("--cutadapt3Second"), help = "cutadapt: sequence of 3' constant region (of the second read; default: reverse complement of cutadapt5First)"),
   make_option(opt_str=c("--cutadaptMinLength", "-n"), type="integer", default=50, help = "cutadapt: Discard reads shorter than LENGTH (default:50)"),
   make_option(opt_str=c("--cutadaptErrorRate", "-a"), type="double", default=0.2, help = "cutadapt: Maximum allowed error rate (default:0.2)"),
-  make_option(opt_str=c("--cutadaptDiscardUntrimmed"), type="logical", default=F, help = "cutadapt: Discard untrimmed read pairs (default:F)"),
   make_option(opt_str=c("--usearchMinQual", "-q"), type="integer", help = "USEARCH: minimum observed base quality to retain read pair"),
   make_option(opt_str=c("--usearchMaxee", "-m"), type="double", help = "USEARCH: maximum number of expected errors to retain read pair"),
   make_option(opt_str=c("--usearchMinlen"), type="integer", default=64, help = "USEARCH: Discard pair if either read is shorter than this (default:64)"),
@@ -102,7 +101,6 @@ exp_metadata[["cutadapt3First"]] <- arg_list[["cutadapt3First"]]
 exp_metadata[["cutadapt3Second"]] <- arg_list[["cutadapt3Second"]]
 exp_metadata[["cutadaptMinLength"]] <- arg_list[["cutadaptMinLength"]]
 exp_metadata[["cutadaptErrorRate"]] <- arg_list[["cutadaptErrorRate"]]
-exp_metadata[["cutadaptDiscardUntrimmed"]] <- arg_list[["cutadaptDiscardUntrimmed"]]
 exp_metadata[["usearchMinQual"]] <- arg_list[["usearchMinQual"]]
 exp_metadata[["usearchMaxee"]] <- arg_list[["usearchMaxee"]]
 exp_metadata[["usearchMinlen"]] <- arg_list[["usearchMinlen"]]

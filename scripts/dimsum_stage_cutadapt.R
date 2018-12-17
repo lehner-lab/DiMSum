@@ -52,7 +52,6 @@ dimsum_stage_cutadapt <- function(
       temp_options = paste0(' -g ', dimsum_meta[['exp_design']][i,"cutadapt5First"], ' -G ', dimsum_meta[['exp_design']][i,"cutadapt5Second"])
       if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt3First"]) ){temp_options = paste0(temp_options, " -a ", dimsum_meta[['exp_design']][i,"cutadapt3First"])}
       if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt3Second"]) ){temp_options = paste0(temp_options, " -A ", dimsum_meta[['exp_design']][i,"cutadapt3Second"])}
-      if( dimsum_meta[['exp_design']][i,"cutadaptDiscardUntrimmed"] ){temp_options = paste0(temp_options, " --discard-untrimmed ")}
       #Options for swapping read1 and read2
       temp_options_swap = paste0(' -g forward=', dimsum_meta[['exp_design']][i,"cutadapt5First"], ' -g reverse=', dimsum_meta[['exp_design']][i,"cutadapt5Second"])
       #Options for removing a fixed number of bases from beginning or end of either read in pair
@@ -113,7 +112,7 @@ dimsum_stage_cutadapt <- function(
         temp_out = system(paste0(
           "cutadapt",
           temp_options,
-          " --minimum-length ",
+          " --discard-untrimmed --minimum-length ",
           as.character(dimsum_meta[['exp_design']][i,"cutadaptMinLength"]),
           " -e ",
           as.character(dimsum_meta[['exp_design']][i,"cutadaptErrorRate"]),
@@ -137,7 +136,7 @@ dimsum_stage_cutadapt <- function(
           "cutadapt",
           temp_options,
           temp_cut_options,
-          " --minimum-length ",
+          " --discard-untrimmed --minimum-length ",
           as.character(dimsum_meta[['exp_design']][i,"cutadaptMinLength"]),
           " -e ",
           as.character(dimsum_meta[['exp_design']][i,"cutadaptErrorRate"]),
