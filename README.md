@@ -38,21 +38,17 @@ To run this pipeline, you will first need to describe your experimental design (
 
 Additionally, if your raw FASTQ sequencing files contain multiplexed samples you will need to provide a tab-separated plain text file describing how barcodes map to samples. You can download [this](./example_barcodeDesign.txt) file to use as a template.
 
-## Stage 1: DEMULTIPLEX
+## Stage 1: DEMULTIPLEX READS
 
-## Stage 2: FASTQC
+## Stage 2: ASSESS READ QUALITY
 
-## Stage 3: UNZIP
+## Stage 3: TRIM CONSTANT REGIONS
 
-## Stage 4: SPLIT
+## Stage 4: ALIGN PAIRED-END READS
 
-## Stage 5: CUTADAPT
+## Stage 5: COUNT UNIQUE VARIANTS
 
-## Stage 6: USEARCH
-
-## Stage 7: UNIQUE
-
-## Stage 8: MERGE
+## Stage 6: MERGE SAMPLE STATISTICS
 
 
 
