@@ -1,13 +1,13 @@
 
-#dimsum_stage_merge_report
-#
-# Generate final summary plots for all samples.
-#
-# dimsum_meta: an experiment metadata object (required)
-# report_outpath: final report output path (required)
-#
-# Returns: an updated experiment metadata object
-#
+#' dimsum_stage_merge_report
+#'
+#' Generate final summary plots for all samples.
+#'
+#' @param dimsum_meta an experiment metadata object (required)
+#' @param report_outpath final report output path (required)
+#'
+#' @return a single data.frame where empty rows are filled with NAs
+#' @export
 dimsum_stage_merge_report <- function(
   dimsum_meta,
   report_outpath
@@ -27,7 +27,7 @@ dimsum_stage_merge_report <- function(
     'AA_indel_sum'=sapply(dimsum_meta[['aa_indel_counts']], sum))
   aa_subst_df[is.na(aa_subst_df)] <- 0
   aa_subst_df[,'pairname'] <- sapply(strsplit(merge_df[,'aligned_pair'], '.split'), '[', 1)
-  aa_subst_df_collapse <- ddply(aa_subst_df, "pairname", summarise, 
+  aa_subst_df_collapse <- plyr::ddply(aa_subst_df, "pairname", summarise, 
     AA_subst_0 = sum(AA_subst_0), 
     AA_subst_1 = sum(AA_subst_1), 
     AA_subst_2 = sum(AA_subst_2),
@@ -47,23 +47,23 @@ dimsum_stage_merge_report <- function(
   aa_subst_df_collapse <- aa_subst_df_collapse[,-which(colnames(aa_subst_df_collapse) == "AA_subst_sum")]
   colnames(aa_subst_df_collapse)[-1] <- temp_colnames
   #Plot
-  plot_df <- melt(aa_subst_df_collapse, id="pairname")
+  plot_df <- reshape2::melt(aa_subst_df_collapse, id="pairname")
   plot_df[,'Mutation_type'] <- factor(plot_df[,'variable'], levels=temp_colnames[order(temp_colnames)])
-  d <- ggplot(plot_df, aes(pairname, value)) +
-    geom_col(aes(fill = Mutation_type)) +
-    theme_bw() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    labs(x = "Sample names", y = "Total variants", title = paste0("Variant amino acid mutation statistics"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_aamutationcounts.png')), d, width=12, height=8)
+  d <- ggplot2::ggplot(plot_df, ggplot2::aes(pairname, value)) +
+    ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
+    ggplot2::labs(x = "Sample names", y = "Total variants", title = paste0("Variant amino acid mutation statistics"))
+  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_aamutationcounts.png')), d, width=12, height=8)
   #Plot 2: AA mutation percentages
-  plot_df <- melt(aa_subst_df_collapse_perc, id="pairname")
+  plot_df <- reshape2::melt(aa_subst_df_collapse_perc, id="pairname")
   plot_df[,'Mutation_type'] <- factor(plot_df[,'variable'], levels=temp_colnames[order(temp_colnames)])
-  d <- ggplot(plot_df, aes(pairname, value)) +
-    geom_col(aes(fill = Mutation_type)) +
-    theme_bw() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    labs(x = "Sample names", y = "Percentage of variants", title = paste0("Variant amino acid mutation statistics (percentage)"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_aamutationpercentages.png')), d, width=12, height=8)
+  d <- ggplot2::ggplot(plot_df, ggplot2::aes(pairname, value)) +
+    ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
+    ggplot2::labs(x = "Sample names", y = "Percentage of variants", title = paste0("Variant amino acid mutation statistics (percentage)"))
+  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_aamutationpercentages.png')), d, width=12, height=8)
   #Plot 5: Nucleotide mutation counts
   nuc_subst_df <- data.frame(
     'nuc_subst_0'=sapply(dimsum_meta[['nuc_subst_counts']], '[', '0'),
@@ -73,7 +73,7 @@ dimsum_stage_merge_report <- function(
     'nuc_indel_sum'=sapply(dimsum_meta[['nuc_indel_counts']], sum))
   nuc_subst_df[is.na(nuc_subst_df)] <- 0
   nuc_subst_df[,'pairname'] <- sapply(strsplit(merge_df[,'aligned_pair'], '.split'), '[', 1)
-  nuc_subst_df_collapse <- ddply(nuc_subst_df, "pairname", summarise, 
+  nuc_subst_df_collapse <- plyr::ddply(nuc_subst_df, "pairname", summarise, 
     nuc_subst_0 = sum(nuc_subst_0), 
     nuc_subst_1 = sum(nuc_subst_1), 
     nuc_subst_2 = sum(nuc_subst_2),
@@ -93,23 +93,23 @@ dimsum_stage_merge_report <- function(
   nuc_subst_df_collapse <- nuc_subst_df_collapse[,-which(colnames(nuc_subst_df_collapse) == "nuc_subst_sum")]
   colnames(nuc_subst_df_collapse)[-1] <- temp_colnames
   #Plot
-  plot_df <- melt(nuc_subst_df_collapse, id="pairname")
+  plot_df <- reshape2::melt(nuc_subst_df_collapse, id="pairname")
   plot_df[,'Mutation_type'] <- factor(plot_df[,'variable'], levels=temp_colnames[order(temp_colnames)])
-  d <- ggplot(plot_df, aes(pairname, value)) +
-    geom_col(aes(fill = Mutation_type)) +
-    theme_bw() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    labs(x = "Sample names", y = "Total variants", title = paste0("Variant nucleotide mutation statistics"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_nucmutationcounts.png')), d, width=12, height=8)
+  d <- ggplot2::ggplot(plot_df, ggplot2::aes(pairname, value)) +
+    ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
+    ggplot2::labs(x = "Sample names", y = "Total variants", title = paste0("Variant nucleotide mutation statistics"))
+  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_nucmutationcounts.png')), d, width=12, height=8)
   #Plot 6: Nucleotide mutation percentages
-  plot_df <- melt(nuc_subst_df_collapse_perc, id="pairname")
+  plot_df <- reshape2::melt(nuc_subst_df_collapse_perc, id="pairname")
   plot_df[,'Mutation_type'] <- factor(plot_df[,'variable'], levels=temp_colnames[order(temp_colnames)])
-  d <- ggplot(plot_df, aes(pairname, value)) +
-    geom_col(aes(fill = Mutation_type)) +
-    theme_bw() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    labs(x = "Sample names", y = "Percentage of variants", title = paste0("Variant nucleotide mutation statistics (percentage)"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_nucmutationpercentages.png')), d, width=12, height=8)
+  d <- ggplot2::ggplot(plot_df, ggplot2::aes(pairname, value)) +
+    ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
+    ggplot2::labs(x = "Sample names", y = "Percentage of variants", title = paste0("Variant nucleotide mutation statistics (percentage)"))
+  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_nucmutationpercentages.png')), d, width=12, height=8)
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   return(dimsum_meta_new)

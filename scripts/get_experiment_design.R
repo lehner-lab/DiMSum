@@ -1,12 +1,12 @@
 
-#get_experiment_metadata
-#
-# Get and format metadata from experiment design file.
-#
-# experiment_design_path: path to experiment design file (required)
-#
-# Returns: a data frame
-#
+#' get_experiment_design
+#'
+#' Get and format metadata from experiment design file.
+#'
+#' @param dimsum_meta path to experiment design file (required)
+#'
+#' @return a data.frame
+#' @export
 get_experiment_design <- function(
   dimsum_meta){
   #Read experimental design
@@ -50,8 +50,8 @@ get_experiment_design <- function(
   }
   #If not trans library: reverse complement cutadapt 5' constant regions to obtain 3' constant regions (if not already supplied)
   if(!dimsum_meta[["transLibrary"]]){
-    exp_design[is.na(exp_design[,"cutadapt3First"]),"cutadapt3First"] <- as.character(reverseComplement(DNAStringSet(exp_design[is.na(exp_design[,"cutadapt3First"]),"cutadapt5Second"])))
-    exp_design[is.na(exp_design[,"cutadapt3Second"]),"cutadapt3Second"] <- as.character(reverseComplement(DNAStringSet(exp_design[is.na(exp_design[,"cutadapt3Second"]),"cutadapt5First"])))
+    exp_design[is.na(exp_design[,"cutadapt3First"]),"cutadapt3First"] <- as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(exp_design[is.na(exp_design[,"cutadapt3First"]),"cutadapt5Second"])))
+    exp_design[is.na(exp_design[,"cutadapt3Second"]),"cutadapt3Second"] <- as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(exp_design[is.na(exp_design[,"cutadapt3Second"]),"cutadapt5First"])))
   }
   #Check WT sequence is valid (ACGT characters only)
   all_characters <- unique(unlist(strsplit(dimsum_meta[["wildtypeSequence"]], "")))

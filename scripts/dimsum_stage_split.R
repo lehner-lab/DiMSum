@@ -1,15 +1,15 @@
 
-#dimsum_stage_split
-#
-# Split all fastq files.
-#
-# dimsum_meta: an experiment metadata object (required)
-# split_outpath: split FASTQ output path (required)
-# execute: whether or not to execute the system command (default: TRUE)
-# save_workspace: whether or not to save the current experiment metadata object (default: TRUE)
-#
-# Returns: an updated experiment metadata object.
-#
+#' dimsum_stage_split
+#'
+#' Split all fastq files.
+#'
+#' @param dimsum_meta an experiment metadata object (required)
+#' @param split_outpath split FASTQ output path (required)
+#' @param execute whether or not to execute the system command (default: TRUE)
+#' @param save_workspace whether or not to save the current experiment metadata object (default: TRUE)
+#'
+#' @return an updated experiment metadata object
+#' @export
 dimsum_stage_split <- function(
   dimsum_meta,
   split_outpath,
@@ -18,7 +18,7 @@ dimsum_stage_split <- function(
   ){
   #Create/overwrite split directory (if executed)
   split_outpath <- gsub("/$", "", split_outpath)
-  create_dimsum_dir(split_outpath, execute = execute, message = "DiMSum STAGE 4: SPLIT")  
+  create_dimsum_dir(split_outpath, execute = execute, message = "SPLIT FASTQ FILES")  
   fastq_pair_list <- dimsum_meta[['exp_design']][,c('pair1', 'pair2')]
   rownames(fastq_pair_list) = 1:dim(fastq_pair_list)[1]
   #Split FASTQ files
@@ -26,33 +26,27 @@ dimsum_stage_split <- function(
   all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"]))
   print(all_fastq)
   message("Processing...")
-  for(pair_name in rownames(fastq_pair_list)){
-    message(paste0("\t", fastq_pair_list[pair_name,]))
-    #Check if this system command should be executed
-    if(execute){
-      temp_out = system(paste0(
-        "fastq_splitter.py -i ", 
-        file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[pair_name,][1]), 
-        " -o ", 
-        file.path(split_outpath, paste0(fastq_pair_list[pair_name,][1], ".split")), 
-        " -c 3758096384",
-        " > ",
-        file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', fastq_pair_list[pair_name,][1]), ".split.stdout")),
-        " 2> ",
-        file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', fastq_pair_list[pair_name,][1]), ".split.stderr"))))
-      num_records = as.integer(read.table(file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', fastq_pair_list[pair_name,][1]), ".split.stdout"))))
-      temp_out = system(paste0(
-        "fastq_splitter.py -i ", 
-        file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[pair_name,][2]), 
-        " -o ", 
-        file.path(split_outpath, paste0(fastq_pair_list[pair_name,][2], ".split")), 
-        " -n ", 
-        num_records,
-        " >> ",
-        file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', fastq_pair_list[pair_name,][2]), ".split.stdout")),
-        " 2>> ",
-        file.path(split_outpath, paste0(gsub(dimsum_meta[["fastq_file_extension"]], '', fastq_pair_list[pair_name,][2]), ".split.stderr"))))
+  message(paste0("\t", all_fastq, "\n"))
+  #Check if this system command should be executed
+  if(execute){
+    dimsum_stage_split_helper <- function(
+      i
+      ){
+      num_records <- fastq_splitter(
+        inputFile = file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[i,][1]),
+        outputFilePrefix = file.path(split_outpath, paste0(fastq_pair_list[i,][1], ".split")),
+        chunkSize = 3758096384)
+      num_records <- fastq_splitter(
+        inputFile = file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[i,][2]),
+        outputFilePrefix = file.path(split_outpath, paste0(fastq_pair_list[i,][2], ".split")),
+        numRecords = num_records)
     }
+    # Setup cluster
+    clust <- parallel::makeCluster(dimsum_meta[['num_cores']])
+    # make variables available to each core's workspace
+    parallel::clusterExport(clust, list("dimsum_meta","fastq_pair_list","split_outpath","fastq_splitter","fastq_splitter_writeFastq"), envir = environment())
+    parallel::parSapply(clust,X = 1:nrow(fastq_pair_list), dimsum_stage_split_helper)
+    parallel::stopCluster(clust)
   }
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta

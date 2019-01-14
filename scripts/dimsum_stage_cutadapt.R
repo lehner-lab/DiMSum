@@ -1,15 +1,17 @@
 
-#dimsum_stage_cutadapt
-#
-# Run cutadapt on all fastq files.
-#
-# dimsum_meta: an experiment metadata object (required)
-# cutadapt_outpath: cutadapt output path (required)
-# execute: whether or not to execute the system command (default: TRUE)
-# save_workspace: whether or not to save the current experiment metadata object (default: TRUE)
-#
-# Returns: an updated experiment metadata object.
-#
+#' dimsum_stage_cutadapt
+#'
+#' Run cutadapt on all fastq files.
+#'
+#' @param dimsum_meta an experiment metadata object (required)
+#' @param cutadapt_outpath cutadapt output path (required)
+#' @param execute whether or not to execute the system command (default: TRUE)
+#' @param report whether or not to generate cutadapt summary plots (default: TRUE)
+#' @param report_outpath cutadapt report output path
+#' @param save_workspace whether or not to save the current experiment metadata object (default: TRUE)
+#'
+#' @return an updated experiment metadata object
+#' @export
 dimsum_stage_cutadapt <- function(
   dimsum_meta,
   cutadapt_outpath,
@@ -20,7 +22,7 @@ dimsum_stage_cutadapt <- function(
   ){
   #Create/overwrite cutadapt directory (if executed)
   cutadapt_outpath <- gsub("/$", "", cutadapt_outpath)
-  create_dimsum_dir(cutadapt_outpath, execute = execute, message = "DiMSum STAGE 5: CUTADAPT")  
+  create_dimsum_dir(cutadapt_outpath, execute = execute, message = "DiMSum STAGE 3: TRIM CONSTANT REGIONS")  
   #Trim FASTQ file pairs
   message("Trimming FASTQ files with cutadapt:")
   all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"]))

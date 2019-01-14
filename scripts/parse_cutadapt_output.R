@@ -1,12 +1,12 @@
 
-#parse_cutadapt_output
-#
-# Parse cutadapt stdout.
-#
-# file_path: path to cutadapt output file (required)
-#
-# Returns: a list of read trimming count statistics
-#
+#' parse_cutadapt_output
+#'
+#' Parse cutadapt stdout.
+#'
+#' @param file_path path to cutadapt output file (required)
+#'
+#' @return a list of read trimming count statistics
+#' @export
 parse_cutadapt_output <- function(
   file_path
   ){

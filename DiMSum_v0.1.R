@@ -6,6 +6,43 @@ version_info <- "DiMSum_v0.1"
 message(version_info)
 
 ###########################
+### CHECK DEPENDENCIES
+###########################
+
+#Binaries
+required_binaries <- c(
+  "cutadapt", 
+  "cat", 
+  "cp", 
+  "fastqc", 
+  "head", 
+  "fastx_collapser", 
+  "gunzip", 
+  "usearch")
+which_binaries <- Sys.which(required_binaries)
+missing_binaries <- names(which_binaries)[which_binaries==""]
+if(length(missing_binaries)!=0){
+  stop(paste0("Required executables not installed. Please install the following software: ", paste(missing_binaries, sep = ", ")), call. = FALSE)
+}
+
+#R packages
+required_packages <- c(
+  "data.table", 
+  "seqinr", 
+  "ShortRead", 
+  "parallel", 
+  "reshape2", 
+  "ggplot2", 
+  "plyr", 
+  "GGally",
+  "hexbin",
+  "optparse")
+missing_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]
+if(length(missing_packages)!=0){
+  stop(paste0("Required R packages not installed. Please install the following packages: ", paste(missing_packages, sep = ", ")), call. = FALSE)
+}
+
+###########################
 ### COMMAND-LINE OPTIONS
 ###########################
 
@@ -49,7 +86,7 @@ message(paste("\n\n\n*******", "DiMSum command-line arguments", "*******\n\n\n")
 print(arg_list)
 
 ###########################
-### PACKAGES
+### LOAD PACKAGES
 ###########################
 
 suppressWarnings(suppressMessages(require(data.table)))
@@ -60,6 +97,7 @@ suppressWarnings(suppressMessages(library(reshape2)))
 suppressWarnings(suppressMessages(library(ggplot2)))
 suppressWarnings(suppressMessages(library(plyr)))
 suppressWarnings(suppressMessages(library(GGally)))
+suppressWarnings(suppressMessages(library(hexbin)))
 
 ###########################
 ### SCRIPTS
@@ -76,127 +114,36 @@ filelist = list.files(file.path(dimsum_base_dir, 'scripts/'))
 x <- sapply(paste0(file.path(dimsum_base_dir, 'scripts/'),filelist),source,.GlobalEnv)
 
 ###########################
-### GLOBALS
+### RUN
 ###########################
 
-#Metadata object
-exp_metadata <- list()
-
-### Save metadata
-#Remove trailing "/" if present
-exp_metadata[["fastq_path_original"]] <- gsub("/$", "", arg_list[["fastqFileDir"]])
-exp_metadata[["fastq_file_extension"]] <- arg_list[["fastqFileExtension"]]
-exp_metadata[["gzipped"]] <- arg_list[["gzipped"]]
-exp_metadata[["stranded"]] <- arg_list[["stranded"]]
-exp_metadata[["barcode_design_path"]] <- arg_list[["barcodeDesignPath"]]
-exp_metadata[["barcodeErrorRate"]] <- arg_list[["barcodeErrorRate"]]
-exp_metadata[["experiment_design_path"]] <- arg_list[["experimentDesignPath"]]
-exp_metadata[["cutadaptCut5First"]] <- arg_list[["cutadaptCut5First"]]
-exp_metadata[["cutadaptCut5Second"]] <- arg_list[["cutadaptCut5Second"]]
-exp_metadata[["cutadaptCut3First"]] <- arg_list[["cutadaptCut3First"]]
-exp_metadata[["cutadaptCut3Second"]] <- arg_list[["cutadaptCut3Second"]]
-exp_metadata[["cutadapt5First"]] <- arg_list[["cutadapt5First"]]
-exp_metadata[["cutadapt5Second"]] <- arg_list[["cutadapt5Second"]]
-exp_metadata[["cutadapt3First"]] <- arg_list[["cutadapt3First"]]
-exp_metadata[["cutadapt3Second"]] <- arg_list[["cutadapt3Second"]]
-exp_metadata[["cutadaptMinLength"]] <- arg_list[["cutadaptMinLength"]]
-exp_metadata[["cutadaptErrorRate"]] <- arg_list[["cutadaptErrorRate"]]
-exp_metadata[["usearchMinQual"]] <- arg_list[["usearchMinQual"]]
-exp_metadata[["usearchMaxee"]] <- arg_list[["usearchMaxee"]]
-exp_metadata[["usearchMinlen"]] <- arg_list[["usearchMinlen"]]
-exp_metadata[["usearchMinovlen"]] <- arg_list[["usearchMinovlen"]]
-exp_metadata[["usearchAttemptExactMinovlen"]] <- arg_list[["usearchAttemptExactMinovlen"]]
-#Remove trailing "/" if present
-exp_metadata[["output_path"]] <- gsub("/$", "", arg_list[["outputPath"]])
-exp_metadata[["project_name"]] <- arg_list[["projectName"]]
-exp_metadata[["wildtypeSequence"]] <- arg_list[["wildtypeSequence"]]
-exp_metadata[["transLibrary"]] <- arg_list[["transLibrary"]]
-exp_metadata[["num_cores"]] <- arg_list[["numCores"]]
-
-#First pipeline stage to run
-first_stage <- arg_list[["startStage"]]
-last_stage <- arg_list[["stopStage"]]
-
-###########################
-### MAIN
-###########################
-
-### Output file path, working and temp directories
-###########################
-
-#Create working directory (if doesn't already exist)
-exp_metadata[["project_path"]] <- file.path(exp_metadata[["output_path"]], exp_metadata[["project_name"]])
-suppressWarnings(dir.create(exp_metadata[["project_path"]]))
-#Set working directory
-setwd(exp_metadata[["project_path"]])
-#Create temp directory (if doesn't already exist)
-exp_metadata[["tmp_path"]] <- file.path(exp_metadata[["project_path"]], "tmp")
-suppressWarnings(dir.create(exp_metadata[["tmp_path"]]))
-
-### Get experiment design
-###########################
-
-#TODO: check if all fastq files exist
-exp_metadata[["exp_design"]] <- get_experiment_design(exp_metadata)
-
-### Get barcode design (if provided)
-###########################
-
-if(!is.null(exp_metadata[["barcode_design_path"]])){
-  exp_metadata[["barcode_design"]] <- read.table(exp_metadata[["barcode_design_path"]], header = T, stringsAsFactors = F, sep="\t")
-}
-
-### Pipeline stages
-###########################
-
-### Step 0: Start pipeline tracking
-pipeline <- list()
-pipeline[['0_original']] <- exp_metadata
-
-### Step 1: Run demultiplex on all fastq files
-pipeline[['1_demultiplex']] <- dimsum_stage_demultiplex(dimsum_meta = pipeline[['0_original']], demultiplex_outpath = file.path(pipeline[['0_original']][["tmp_path"]], "demultiplex"), 
-  execute = (first_stage <= 1 & (last_stage == 0 | last_stage >= 1)))
-
-### Step 2: Run FASTQC on all fastq files
-pipeline[['2_fastqc']] <- dimsum_stage_fastqc(dimsum_meta = pipeline[['1_demultiplex']], fastqc_outpath = file.path(pipeline[['1_demultiplex']][["tmp_path"]], "fastqc"), 
-  execute = (first_stage <= 2 & (last_stage == 0 | last_stage >= 2)), report_outpath = file.path(pipeline[['1_demultiplex']][["project_path"]], "reports"))
-
-### Step 3: Unzip FASTQ files if necessary
-pipeline[['3_fastq']] <- dimsum_stage_unzip(dimsum_meta = pipeline[['2_fastqc']], fastq_outpath = file.path(pipeline[['2_fastqc']][["tmp_path"]], "fastq"), 
-  execute = (first_stage <= 3 & (last_stage == 0 | last_stage >= 3)))
-
-### Step 4: Split FASTQ files
-pipeline[['4_split']] <- dimsum_stage_split(dimsum_meta = pipeline[['3_fastq']], split_outpath = file.path(pipeline[['3_fastq']][["tmp_path"]], "split"), 
-  execute = (first_stage <= 4 & (last_stage == 0 | last_stage >= 4)))
-
-### Step 5: Remove adapters from FASTQ files with cutadapt if necessary
-pipeline[['5_cutadapt']] <- dimsum_stage_cutadapt(dimsum_meta = pipeline[['4_split']], cutadapt_outpath = file.path(pipeline[['4_split']][["tmp_path"]], "cutadapt"), 
-  execute = (first_stage <= 5 & (last_stage == 0 | last_stage >= 5)), report_outpath = file.path(pipeline[['4_split']][["project_path"]], "reports"))
-
-### Step 6: Merge paired-end reads with USEARCH
-pipeline[['6_usearch']] <- dimsum_stage_usearch(dimsum_meta = pipeline[['5_cutadapt']], usearch_outpath = file.path(pipeline[['5_cutadapt']][["tmp_path"]], "usearch"), 
-  execute = (first_stage <= 6 & (last_stage == 0 | last_stage >= 6)), report_outpath = file.path(pipeline[['5_cutadapt']][["project_path"]], "reports"))
-
-### Step 7: Get unique aligned read counts with FASTX-Toolkit
-pipeline[['7_unique']] <- dimsum_stage_unique(dimsum_meta = pipeline[['6_usearch']], unique_outpath = file.path(pipeline[['6_usearch']][["tmp_path"]], "unique"), 
-  execute = (first_stage <= 7 & (last_stage == 0 | last_stage >= 7)))
-
-### Step 8: Merge variant count tables
-pipeline[['8_merge']] <- dimsum_stage_merge(dimsum_meta = pipeline[['7_unique']], merge_outpath = pipeline[['7_unique']][["project_path"]], 
-  execute = (first_stage <= 8 & (last_stage == 0 | last_stage >= 8)), report_outpath = file.path(pipeline[['7_unique']][["project_path"]], "reports"))
-
-### Save workspace
-###########################
-
-message("\n\n\nSaving workspace image...")
-save.image(file=file.path(pipeline[['8_merge']][["project_path"]], paste0(pipeline[['8_merge']][["project_name"]], '_workspace.RData')))
-message("Done")
-
-### Save report html
-###########################
-
-message("\n\n\nSaving summary report...")
-write(gsub("PROJECT_NAME", pipeline[['8_merge']][["project_name"]], reports_summary_template), file = file.path(pipeline[['8_merge']][["project_path"]], "reports_summary.html"))
-message("Done")
-
-
+dimsum(
+  fastqFileDir=arg_list[["fastqFileDir"]],
+  fastqFileExtension=arg_list[["fastqFileExtension"]],
+  gzipped=arg_list[["gzipped"]],
+  stranded=arg_list[["stranded"]],
+  barcodeDesignPath=arg_list[["barcodeDesignPath"]],
+  barcodeErrorRate=arg_list[["barcodeErrorRate"]],
+  experimentDesignPath=arg_list[["experimentDesignPath"]],
+  cutadaptCut5First=arg_list[["cutadaptCut5First"]],
+  cutadaptCut5Second=arg_list[["cutadaptCut5Second"]],
+  cutadaptCut3First=arg_list[["cutadaptCut3First"]],
+  cutadaptCut3Second=arg_list[["cutadaptCut3Second"]],
+  cutadapt5First=arg_list[["cutadapt5First"]],
+  cutadapt5Second=arg_list[["cutadapt5Second"]],
+  cutadapt3First=arg_list[["cutadapt3First"]],
+  cutadapt3Second=arg_list[["cutadapt3Second"]],
+  cutadaptMinLength=arg_list[["cutadaptMinLength"]],
+  cutadaptErrorRate=arg_list[["cutadaptErrorRate"]],
+  usearchMinQual=arg_list[["usearchMinQual"]],
+  usearchMaxee=arg_list[["usearchMaxee"]],
+  usearchMinlen=arg_list[["usearchMinlen"]],
+  usearchMinovlen=arg_list[["usearchMinovlen"]],
+  usearchAttemptExactMinovlen=arg_list[["usearchAttemptExactMinovlen"]],
+  outputPath=arg_list[["outputPath"]],
+  projectName=arg_list[["projectName"]],
+  wildtypeSequence=arg_list[["wildtypeSequence"]],
+  transLibrary=arg_list[["transLibrary"]],
+  startStage=arg_list[["startStage"]],
+  stopStage=arg_list[["stopStage"]],
+  numCores=arg_list[["numCores"]])

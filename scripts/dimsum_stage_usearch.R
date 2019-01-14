@@ -1,15 +1,17 @@
 
-#dimsum_stage_usearch
-#
-# Run USEARCH on all fastq files.
-#
-# dimsum_meta: an experiment metadata object (required)
-# usearch_outpath: USEARCH output path (required)
-# execute: whether or not to execute the system command (default: TRUE)
-# save_workspace: whether or not to save the current experiment metadata object (default: TRUE)
-#
-# Returns: an updated experiment metadata object.
-#
+#' dimsum_stage_usearch
+#'
+#' Run USEARCH on all fastq files.
+#'
+#' @param dimsum_meta an experiment metadata object (required)
+#' @param usearch_outpath USEARCH output path (required)
+#' @param execute whether or not to execute the system command (default: TRUE)
+#' @param report whether or not to generate USEARCH summary plots (default: TRUE)
+#' @param report_outpath USEARCH report output path
+#' @param save_workspace whether or not to save the current experiment metadata object (default: TRUE)
+#'
+#' @return an updated experiment metadata object
+#' @export
 dimsum_stage_usearch <- function(
   dimsum_meta,
   usearch_outpath,
@@ -20,7 +22,7 @@ dimsum_stage_usearch <- function(
   ){
   #Create/overwrite usearch directory (if executed)
   usearch_outpath <- gsub("/$", "", usearch_outpath)
-  create_dimsum_dir(usearch_outpath, execute = execute, message = "DiMSum STAGE 6: USEARCH")  
+  create_dimsum_dir(usearch_outpath, execute = execute, message = "DiMSum STAGE 4: ALIGN PAIRED-END READS")  
   #Sample names
   sample_names = paste0(
     dimsum_meta[["exp_design"]][,"sample_name"], '_e', 

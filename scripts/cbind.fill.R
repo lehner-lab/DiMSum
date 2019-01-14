@@ -1,12 +1,12 @@
 
-#cbind.fill
-#
-# cbind a list of data.frames of same row names but unequal number.
-#
-# df_list: a list of data.frames (required)
-#
-# Returns: a single data.frame where empty rows are filled with NAs.
-#
+#' cbind.fill
+#'
+#' cbind a list of data.frames of same row names but unequal number.
+#'
+#' @param df_list a list of data.frames (required)
+#'
+#' @return a single data.frame where empty rows are filled with NAs
+#' @export
 cbind.fill <- function(df_list){
     nm <- lapply(df_list, as.matrix)
     n <- max(sapply(nm, nrow)) 

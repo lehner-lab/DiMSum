@@ -1,15 +1,15 @@
 
-#dimsum_stage_unique
-#
-# Run fastx_collapser on all fastq files.
-#
-# dimsum_meta: an experiment metadata object (required)
-# unique_outpath: fastx_collapser output path (required)
-# execute: whether or not to execute the system command (default: TRUE)
-# save_workspace: whether or not to save the current experiment metadata object (default: TRUE)
-#
-# Returns: an updated experiment metadata object.
-#
+#' dimsum_stage_unique
+#'
+#' Run fastx_collapser on all fastq files.
+#'
+#' @param dimsum_meta an experiment metadata object (required)
+#' @param unique_outpath fastx_collapser output path (required)
+#' @param execute whether or not to execute the system command (default: TRUE)
+#' @param save_workspace whether or not to save the current experiment metadata object (default: TRUE)
+#'
+#' @return an updated experiment metadata object
+#' @export
 dimsum_stage_unique <- function(
   dimsum_meta,
   unique_outpath,
@@ -18,7 +18,7 @@ dimsum_stage_unique <- function(
   ){
   #Create unique directory (if doesn't already exist)
   unique_outpath <- gsub("/$", "", unique_outpath)
-  create_dimsum_dir(unique_outpath, execute = execute, message = "DiMSum STAGE 7: UNIQUE")  
+  create_dimsum_dir(unique_outpath, execute = execute, message = "DiMSum STAGE 5: COUNT UNIQUE VARIANTS")  
   #Run fastx_collapser on all aligned read pair fastq files
   message("Getting unique aligned read counts with fastx_collapser:")
   all_fasta <- file.path(dimsum_meta[["exp_design"]][,"aligned_pair_directory"], dimsum_meta[['exp_design']][,"aligned_pair"])

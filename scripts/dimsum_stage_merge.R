@@ -1,15 +1,17 @@
 
-#dimsum_stage_merge
-#
-# Merge all variant files.
-#
-# dimsum_meta: an experiment metadata object (required)
-# merge_outpath: merged variant data output path (required)
-# execute: whether or not to execute the system command (default: TRUE)
-# save_workspace: whether or not to save the current experiment metadata object (default: TRUE)
-#
-# Returns: an updated experiment metadata object.
-#
+#' dimsum_stage_merge
+#'
+#' Merge all variant files.
+#'
+#' @param dimsum_meta an experiment metadata object (required)
+#' @param merge_outpath merged variant data output path (required)
+#' @param execute whether or not to execute the system command (default: TRUE)
+#' @param report whether or not to generate final summary plots (default: TRUE)
+#' @param report_outpath final summary report output path
+#' @param save_workspace whether or not to save the current experiment metadata object (default: TRUE)
+#'
+#' @return an updated experiment metadata object
+#' @export
 dimsum_stage_merge <- function(
   dimsum_meta,
   merge_outpath,
@@ -20,7 +22,7 @@ dimsum_stage_merge <- function(
   ){
   #Create merge directory (if doesn't already exist)
   merge_outpath <- gsub("/$", "", merge_outpath)
-  create_dimsum_dir(merge_outpath, execute = execute, message = "DiMSum STAGE 8: MERGE", overwrite_dir = FALSE)  
+  create_dimsum_dir(merge_outpath, execute = execute, message = "DiMSum STAGE 6: MERGE SAMPLE STATISTICS", overwrite_dir = FALSE)  
   #WT nucleotide sequence
   wt_NTseq <- tolower(dimsum_meta[['wildtypeSequence']])
   #WT AA sequence
@@ -45,7 +47,7 @@ dimsum_stage_merge <- function(
     if(execute){
       file_id <- gsub('.usearch.unique', '', basename(count_file))
       #Initialise count table
-      count_dt <- data.table(
+      count_dt <- data.table::data.table(
         nt_seq = character(),
         count = numeric(),
         aa_seq = character(),
@@ -67,11 +69,11 @@ dimsum_stage_merge <- function(
         aa_subst_dict[[count_file]] <- NA
         aa_indel_dict[[count_file]] <- NA
       }else{
-        rfa <- readFasta(count_file)
+        rfa <- ShortRead::readFasta(count_file)
         #Create variant count table with nucleotide and amino acid sequence
-        count_dt <- data.table(nt_seq = tolower(as.character(sread(rfa))))
+        count_dt <- data.table::data.table(nt_seq = tolower(as.character(sread(rfa))))
         count_dt[, count := as.numeric(sapply(strsplit(as.character(ShortRead::id(rfa)), "-"), "[", 2))]
-        suppressWarnings(count_dt[, aa_seq := as.character(translate(sread(rfa)))])
+        suppressWarnings(count_dt[, aa_seq := as.character(Biostrings::translate(ShortRead::sread(rfa)))])
         #Calculate number of aa mutations (insertions, deletions, substitutions)
         mut_counts <- attr(adist(count_dt[,aa_seq], wt_AAseq, counts = T), "counts")
         count_dt[,Nins_aa := mut_counts[,1,2]]

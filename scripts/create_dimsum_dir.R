@@ -1,15 +1,15 @@
 
-#create_dimsum_dir
-#
-# Create results folder for dimsum pipeline stage.
-#
-# dimsum_dir: directory path string (required)
-# execute: whether or not the system command will be executed (required)
-# message: message string (optional, default: NULL i.e. no message displayed)
-# overwrite_dir: delete directory if already exists (optional, default: TRUE)
-#
-# Returns: nothing.
-#
+#' create_dimsum_dir
+#'
+#' Create results folder for dimsum pipeline stage.
+#'
+#' @param dimsum_dir directory path string (required)
+#' @param execute whether or not the system command will be executed (required)
+#' @param message message string (optional, default: NULL i.e. no message displayed)
+#' @param overwrite_dir delete directory if already exists (optional, default: TRUE)
+#'
+#' @return Nothing
+#' @export
 create_dimsum_dir <- function(
   dimsum_dir, 
   execute, 

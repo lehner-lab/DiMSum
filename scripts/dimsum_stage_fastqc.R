@@ -1,15 +1,17 @@
 
-#dimsum_stage_fastqc
-#
-# Run FASTQC on all fastq files.
-#
-# dimsum_meta: an experiment metadata object (required)
-# fastqc_outpath: FASTQC output path (required)
-# execute: whether or not to execute the system command (default: TRUE)
-# save_workspace: whether or not to save the current experiment metadata object (default: TRUE)
-#
-# Returns: an updated experiment metadata object.
-#
+#' dimsum_stage_fastqc
+#'
+#' Run FASTQC on all fastq files.
+#'
+#' @param dimsum_meta an experiment metadata object (required)
+#' @param fastqc_outpath FASTQC output path (required)
+#' @param execute whether or not to execute the system command (default: TRUE)
+#' @param report whether or not to generate FASTQC summary plots (default: TRUE)
+#' @param report_outpath FASTQC report output path
+#' @param save_workspace whether or not to save the current experiment metadata object (default: TRUE)
+#'
+#' @return an updated experiment metadata object
+#' @export
 dimsum_stage_fastqc <- function(
   dimsum_meta,
   fastqc_outpath,
@@ -20,7 +22,7 @@ dimsum_stage_fastqc <- function(
   ){
   #Create/overwrite FASTQC directory (if executed)
   fastqc_outpath <- gsub("/$", "", fastqc_outpath)
-  create_dimsum_dir(fastqc_outpath, execute = execute, message = "DiMSum STAGE 2: FASTQC")  
+  create_dimsum_dir(fastqc_outpath, execute = execute, message = "DiMSum STAGE 2: ASSESS READ QUALITY")  
   #Run FASTQC on all fastq files
   message("Running FASTQC on all files:")
   all_fastq <- file.path(dimsum_meta[['exp_design']][,"pair_directory"], c(dimsum_meta[['exp_design']][,'pair1'], dimsum_meta[['exp_design']][,'pair2']))

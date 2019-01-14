@@ -1,13 +1,15 @@
 
-#dimsum_stage_diagnostics_report
-#
-# Generate diagnostic plots for all samples.
-#
-# variant_data: path to variant data R Data file (required)
-# report_outpath: diagnostics report output path (required)
-#
-# Returns: nothing
-#
+#' dimsum_stage_diagnostics_report
+#'
+#' Generate diagnostic plots for all samples.
+#'
+#' @param variant_data path to variant data R Data file (required)
+#' @param report_outpath diagnostics report output path (required)
+#' @param input_samples_pattern input samples string pattern (default: "^input")
+#' @param output_samples_pattern diagnostics report output path (default: "^output")
+#'
+#' @return Nothing
+#' @export
 dimsum_stage_diagnostics_report <- function(
   variant_data,
   report_outpath,
@@ -27,13 +29,13 @@ dimsum_stage_diagnostics_report <- function(
   #Plot 1: bimodality of sequencing counts in input (per # nucleotide mutations)
   #Histogram of input counts split by number of nucleotide mutations (restricting to 1-4)
   if(length(input_samples)!=0){
-    sample_count_distributions_by_ntmut(input_dt = vdm_noindel[between(Nmut_nt,1,4),.SD,.SDcols=c(input_samples, "Nmut_nt", "Nmut_aa")],
+    sample_count_distributions_by_ntmut(input_dt = vdm_noindel[data.table::between(Nmut_nt,1,4),.SD,.SDcols=c(input_samples, "Nmut_nt", "Nmut_aa")],
       output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_count_hist_input.png"),
       title = paste0("Substitution variant count distributions (input samples)"))
   }
   #Histogram of output counts split by number of nucleotide mutations (restricting to 1-4)
   if(length(output_samples)!=0){
-    sample_count_distributions_by_ntmut(input_dt = vdm_noindel[between(Nmut_nt,1,4),.SD,.SDcols=c(output_samples, "Nmut_nt", "Nmut_aa")],
+    sample_count_distributions_by_ntmut(input_dt = vdm_noindel[data.table::between(Nmut_nt,1,4),.SD,.SDcols=c(output_samples, "Nmut_nt", "Nmut_aa")],
       output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_count_hist_output.png"),
       title = paste0("Substitution variant count distributions (output samples)"))
   }
@@ -41,15 +43,21 @@ dimsum_stage_diagnostics_report <- function(
   #Plot pairwise input sample count correlations (restricting to 1-2 nucleotide mutations)
   if(length(input_samples)!=0){
     temp_dt <- vdm_noindel[,.SD,.SDcols = c(input_samples, "Nmut_nt")]
-    ggpairs_binhex(log10(temp_dt[between(Nmut_nt,1,2),.SD,.SDcols = input_samples]+1), 
-      file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_input.png"),
+    ggpairs_binhex(
+      input_dt = log10(temp_dt[data.table::between(Nmut_nt,1,2),.SD,.SDcols = input_samples]+1), 
+      output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_input.png"),
+      xlab = "log10(variant count + 1)",
+      ylab = "log10(variant count + 1)",
       title = "Substitution variant inter-sample count correlations (input samples)")
   }
   #Plot pairwise output sample count correlations
   if(length(output_samples)!=0){
     temp_dt <- vdm_noindel[,.SD,.SDcols = c(output_samples, "Nmut_nt")]
-    ggpairs_binhex(log10(temp_dt[between(Nmut_nt,1,2),.SD,.SDcols = output_samples]+1), 
-      file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_output.png"),
+    ggpairs_binhex(
+      input_dt = log10(temp_dt[data.table::between(Nmut_nt,1,2),.SD,.SDcols = output_samples]+1), 
+      output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_output.png"),
+      xlab = "log10(variant count + 1)",
+      ylab = "log10(variant count + 1)",
       title = "Substitution variant inter-sample count correlations (output samples)")
   }
 }

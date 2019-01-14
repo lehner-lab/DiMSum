@@ -1,15 +1,15 @@
 
-#dimsum_stage_demultiplex
-#
-# Run demultiplexing on all fastq files using cutadapt.
-#
-# dimsum_meta: an experiment metadata object (required)
-# demultiplex_outpath: demultiplex output path (required)
-# execute: whether or not to execute the system command (default: TRUE)
-# save_workspace: whether or not to save the current experiment metadata object (default: TRUE)
-#
-# Returns: an updated experiment metadata object.
-#
+#' dimsum_stage_demultiplex
+#'
+#' Run demultiplexing on all fastq files using cutadapt.
+#'
+#' @param dimsum_meta an experiment metadata object (required)
+#' @param demultiplex_outpath demultiplex output path (required)
+#' @param execute whether or not to execute the system command (default: TRUE)
+#' @param save_workspace whether or not to save the current experiment metadata object (default: TRUE)
+#'
+#' @return an updated experiment metadata object
+#' @export
 dimsum_stage_demultiplex <- function(
   dimsum_meta,
   demultiplex_outpath,
@@ -18,7 +18,7 @@ dimsum_stage_demultiplex <- function(
   ){
   #Create/overwrite demultiplex directory (if executed)
   demultiplex_outpath <- gsub("/$", "", demultiplex_outpath)
-  create_dimsum_dir(demultiplex_outpath, execute = execute, message = "DiMSum STAGE 1: DEMULTIPLEX")  
+  create_dimsum_dir(demultiplex_outpath, execute = execute, message = "DiMSum STAGE 1: DEMULTIPLEX READS")  
   #Demultiplex parameters specified?
   if( !'barcode_design' %in% names(dimsum_meta) ){
     message("Skipping this stage (assuming all fastq files already demultiplexed)")

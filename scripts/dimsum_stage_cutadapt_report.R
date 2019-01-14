@@ -1,13 +1,13 @@
 
-#dimsum_stage_cutadapt_report
-#
-# Generate cutadapt summary plots for all fastq files.
-#
-# dimsum_meta: an experiment metadata object (required)
-# report_outpath: cutadapt report output path (required)
-#
-# Returns: an updated experiment metadata object
-#
+#' dimsum_stage_cutadapt_report
+#'
+#' Generate cutadapt summary plots for all fastq files.
+#'
+#' @param dimsum_meta an experiment metadata object (required)
+#' @param report_outpath cutadapt report output path (required)
+#'
+#' @return an updated experiment metadata object
+#' @export
 dimsum_stage_cutadapt_report <- function(
   dimsum_meta,
   report_outpath
@@ -38,7 +38,7 @@ dimsum_stage_cutadapt_report <- function(
   cutadapt_read1_df <- as.data.frame(do.call('rbind', cutadapt_read1_list))
   colnames(cutadapt_read1_df) <- c('five_prime', 'three_prime', 'both', 'total_reads')
   cutadapt_read1_df[,'fastq'] <- sapply(strsplit(rownames(cutadapt_read1_df), '.split'), '[', 1)
-  cutadapt_read1_df_collapse <- ddply(cutadapt_read1_df, "fastq", summarise, 
+  cutadapt_read1_df_collapse <- plyr::ddply(cutadapt_read1_df, "fastq", summarise, 
     five_prime = sum(five_prime), 
     three_prime = sum(three_prime), 
     both = sum(both), 
@@ -47,19 +47,19 @@ dimsum_stage_cutadapt_report <- function(
   cutadapt_read1_df_collapse_perc[,2:4] <- as.data.frame(t(scale(t(cutadapt_read1_df_collapse_perc[,2:4]), center = F, scale = cutadapt_read1_df_collapse_perc[,'total_reads'])))*100
   cutadapt_read1_df_collapse_perc <- cutadapt_read1_df_collapse_perc[,1:4]
   #Plot
-  plot_df <- melt(cutadapt_read1_df_collapse_perc, id="fastq")
+  plot_df <- reshape2::melt(cutadapt_read1_df_collapse_perc, id="fastq")
   plot_df[,'Region_trimmed'] <- factor(plot_df[,'variable'])
-  d <- ggplot(plot_df, aes(fastq, value)) +
-    geom_col(aes(fill = Region_trimmed)) +
-    theme_bw() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    labs(x = "FASTQ files", y = "Reads trimmed (percentage)", title = paste0("Read 1 percentage constant region identified and trimmed"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_cutadapt_report_pair1.png')), d, width=12, height=8)
+  d <- ggplot2::ggplot(plot_df, ggplot2::aes(fastq, value)) +
+    ggplot2::geom_col(aes(fill = Region_trimmed)) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
+    ggplot2::labs(x = "FASTQ files", y = "Reads trimmed (percentage)", title = paste0("Read 1 percentage constant region identified and trimmed"))
+  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_cutadapt_report_pair1.png')), d, width=12, height=8)
   #Second read
   cutadapt_read2_df <- as.data.frame(do.call('rbind', cutadapt_read2_list))
   colnames(cutadapt_read2_df) <- c('five_prime', 'three_prime', 'both', 'total_reads')
   cutadapt_read2_df[,'fastq'] <- sapply(strsplit(rownames(cutadapt_read2_df), '.split'), '[', 1)
-  cutadapt_read2_df_collapse <- ddply(cutadapt_read2_df, "fastq", summarise, 
+  cutadapt_read2_df_collapse <- plyr::ddply(cutadapt_read2_df, "fastq", summarise, 
     five_prime = sum(five_prime), 
     three_prime = sum(three_prime), 
     both = sum(both), 
@@ -68,14 +68,14 @@ dimsum_stage_cutadapt_report <- function(
   cutadapt_read2_df_collapse_perc[,2:4] <- as.data.frame(t(scale(t(cutadapt_read2_df_collapse_perc[,2:4]), center = F, scale = cutadapt_read2_df_collapse_perc[,'total_reads'])))*100
   cutadapt_read2_df_collapse_perc <- cutadapt_read2_df_collapse_perc[,1:4]
   #Plot
-  plot_df <- melt(cutadapt_read2_df_collapse_perc, id="fastq")
+  plot_df <- reshape2::melt(cutadapt_read2_df_collapse_perc, id="fastq")
   plot_df[,'Region_trimmed'] <- factor(plot_df[,'variable'])
-  d <- ggplot(plot_df, aes(fastq, value)) +
-    geom_col(aes(fill = Region_trimmed)) +
-    theme_bw() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    labs(x = "FASTQ files", y = "Reads trimmed (percentage)", title = paste0("Read 2 percentage constant region identified and trimmed"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_cutadapt_report_pair2.png')), d, width=12, height=8)
+  d <- ggplot2::ggplot(plot_df, ggplot2::aes(fastq, value)) +
+    ggplot2::geom_col(aes(fill = Region_trimmed)) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
+    ggplot2::labs(x = "FASTQ files", y = "Reads trimmed (percentage)", title = paste0("Read 2 percentage constant region identified and trimmed"))
+  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_cutadapt_report_pair2.png')), d, width=12, height=8)
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Update fastq metadata

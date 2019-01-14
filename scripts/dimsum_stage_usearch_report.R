@@ -1,13 +1,13 @@
 
-#dimsum_stage_usearch_report
-#
-# Generate USEARCH summary plots for all samples.
-#
-# dimsum_meta: an experiment metadata object (required)
-# report_outpath: USEARCH report output path (required)
-#
-# Returns: an updated experiment metadata object
-#
+#' dimsum_stage_usearch_report
+#'
+#' Generate USEARCH summary plots for all samples.
+#'
+#' @param dimsum_meta an experiment metadata object (required)
+#' @param report_outpath USEARCH report output path (required)
+#'
+#' @return an updated experiment metadata object
+#' @export
 dimsum_stage_usearch_report <- function(
   dimsum_meta,
   report_outpath
@@ -46,7 +46,7 @@ dimsum_stage_usearch_report <- function(
   usearch_df[,'cutadapt_pairs_too_short'] <- usearch_df[,'total_read_pairs'] - usearch_df[,'usearch_total_read_pairs']
   #Plot 1: read pair count statistics
   usearch_df[,'pairname'] <- sapply(strsplit(usearch_df[,'aligned_pair'], '.split'), '[', 1)
-  usearch_df_collapse <- ddply(usearch_df, "pairname", summarise, 
+  usearch_df_collapse <- plyr::ddply(usearch_df, "pairname", summarise, 
     total_read_pairs = sum(total_read_pairs), 
     usearch_aligned = sum(usearch_merged), 
     usearch_too_many_diffs = sum(usearch_too_many_diffs), 
@@ -62,24 +62,24 @@ dimsum_stage_usearch_report <- function(
   usearch_df_collapse_perc[,3:11] <- as.data.frame(t(scale(t(usearch_df_collapse_perc[,3:11]), center = F, scale = usearch_df_collapse_perc[,'total_read_pairs'])))*100
   usearch_df_collapse_perc <- usearch_df_collapse_perc[,c(1, 3:11)]
   #Plot
-  plot_df <- melt(usearch_df_collapse_perc, id="pairname")
+  plot_df <- reshape2::melt(usearch_df_collapse_perc, id="pairname")
   plot_df[,'Alignment_status'] <- factor(plot_df[,'variable'])
-  d <- ggplot(plot_df, aes(pairname, value)) +
-    geom_col(aes(fill = Alignment_status)) +
-    theme_bw() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    labs(x = "Sample names", y = "Read pairs (percentage)", title = paste0("Read pair alignment statistics"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_usearch_report_paircounts.png')), d, width=12, height=8)
+  d <- ggplot2::ggplot(plot_df, ggplot2::aes(pairname, value)) +
+    ggplot2::geom_col(ggplot2::aes(fill = Alignment_status)) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
+    ggplot2::labs(x = "Sample names", y = "Read pairs (percentage)", title = paste0("Read pair alignment statistics"))
+  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_usearch_report_paircounts.png')), d, width=12, height=8)
   #Plot2: read pair merge length statistics
-  plot_df <- melt(usearch_df[,grep('pairname|usearch_merge_', colnames(usearch_df))], id="pairname")
+  plot_df <- reshape2::melt(usearch_df[,grep('pairname|usearch_merge_', colnames(usearch_df))], id="pairname")
   plot_df[,'Length_quantile'] <- factor(plot_df[,'variable'])
-  d <- ggplot(plot_df, aes(pairname, value)) +
-    geom_boxplot(aes(color = Length_quantile)) +
-    theme_bw() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    coord_cartesian(ylim = c(0, max(plot_df[,'value'], na.rm = T))) +
-    labs(x = "Sample names", y = "Aligned length (bp)", title = paste0("Aligned length distributions (all splits)"))
-  ggsave(file.path(report_outpath, paste0('dimsum_stage_usearch_report_mergedlength.png')), d, width=12, height=8)
+  d <- ggplot2::ggplot(plot_df, ggplot2::aes(pairname, value)) +
+    ggplot2::geom_boxplot(ggplot2::aes(color = Length_quantile)) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
+    ggplot2::coord_cartesian(ylim = c(0, max(plot_df[,'value'], na.rm = T))) +
+    ggplot2::labs(x = "Sample names", y = "Aligned length (bp)", title = paste0("Aligned length distributions (all splits)"))
+  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_usearch_report_mergedlength.png')), d, width=12, height=8)
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Update fastq metadata

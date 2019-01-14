@@ -1,15 +1,15 @@
 
-#dimsum_stage_unzip
-#
-# Unzip all fastq files.
-#
-# dimsum_meta: an experiment metadata object (required)
-# fastq_outpath: FASTQ output path (required)
-# execute: whether or not to execute the system command (default: TRUE)
-# save_workspace: whether or not to save the current experiment metadata object (default: TRUE)
-#
-# Returns: an updated experiment metadata object.
-#
+#' dimsum_stage_unzip
+#'
+#' Unzip all fastq files.
+#'
+#' @param dimsum_meta an experiment metadata object (required)
+#' @param fastq_outpath FASTQ output path (required)
+#' @param execute whether or not to execute the system command (default: TRUE)
+#' @param save_workspace whether or not to save the current experiment metadata object (default: TRUE)
+#'
+#' @return an updated experiment metadata object
+#' @export
 dimsum_stage_unzip <- function(
   dimsum_meta,
   fastq_outpath,
@@ -18,7 +18,7 @@ dimsum_stage_unzip <- function(
   ){
   #Create/overwrite unzip directory (if executed)
   fastq_outpath <- gsub("/$", "", fastq_outpath)
-  create_dimsum_dir(fastq_outpath, execute = execute, message = "DiMSum STAGE 3: UNZIP")  
+  create_dimsum_dir(fastq_outpath, execute = execute, message = "UNZIP FASTQ FILES")  
   #All fastq files gzipped?
   if(dimsum_meta[["gzipped"]]){
     message("Unzipping FASTQ files:")
