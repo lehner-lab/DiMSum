@@ -29,8 +29,8 @@
 #' @param projectName Project name
 #' @param wildtypeSequence Wild-type nucleotide sequence
 #' @param transLibrary Trans library design i.e. read pairs correspond to distinct peptides (no overlap)
-#' @param startStage Start at a specified pipeline stage
-#' @param stopStage "Stop at specified pipeline stage (default:0, no stop condition)
+#' @param startStage Start at a specified pipeline stage (default:1)
+#' @param stopStage Stop at a specified pipeline stage (default:0 i.e. no stop condition)
 #' @param numCores Number of available CPU cores
 #'
 #' @return Nothing

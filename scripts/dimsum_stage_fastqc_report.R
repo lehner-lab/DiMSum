@@ -87,7 +87,7 @@ dimsum_stage_fastqc_report <- function(
       ggplot2::scale_x_continuous(
       breaks = (1:length(rownames(fastqc_df1)))[seq(1, length(rownames(fastqc_df1)), 5)],
       label = rownames(fastqc_df1)[seq(1, length(rownames(fastqc_df1)), 5)]) +
-      labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Read ", gsub("pair|_fastqc", "", col_name), " quality scores across all bases (", encoding_format, ")"))
+      ggplot2::labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Read ", gsub("pair|_fastqc", "", col_name), " quality scores across all bases (", encoding_format, ")"))
     d <- d + ggplot2::facet_wrap(~statistic, nrow=2, ncol=1)
     ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_fastqc_report_', col_name, '.png')), d, width=12, height=8)
   }

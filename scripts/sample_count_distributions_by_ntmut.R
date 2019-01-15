@@ -21,7 +21,7 @@ sample_count_distributions_by_ntmut <- function(
   plot_df[,'Synonymous_variant'] <- factor(plot_df[,'Nmut_aa']==0)
   plot_df[,'Number_substitutions'] <- factor(plot_df[,'Nmut_nt'])
   plot_df[,'value'] <- plot_df[,'value']+1
-  d <- ggplot2::ggplot(plot_df, aes(value, color = Number_substitutions, linetype = Synonymous_variant)) +
+  d <- ggplot2::ggplot(plot_df, ggplot2::aes(value, color = Number_substitutions, linetype = Synonymous_variant)) +
     ggplot2::geom_density() + ggplot2::scale_x_log10() + ggplot2::theme_bw() +
     ggplot2::labs(x = "variant count (log scale)", y = "Density", title = title) +
     ggplot2::facet_grid(Number_substitutions ~ variable, scales = "free")

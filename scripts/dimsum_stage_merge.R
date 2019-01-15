@@ -12,6 +12,7 @@
 #'
 #' @return an updated experiment metadata object
 #' @export
+#' @import data.table
 dimsum_stage_merge <- function(
   dimsum_meta,
   merge_outpath,
@@ -47,7 +48,7 @@ dimsum_stage_merge <- function(
     if(execute){
       file_id <- gsub('.usearch.unique', '', basename(count_file))
       #Initialise count table
-      count_dt <- data.table::data.table(
+      count_dt <- data.table(
         nt_seq = character(),
         count = numeric(),
         aa_seq = character(),
@@ -71,17 +72,17 @@ dimsum_stage_merge <- function(
       }else{
         rfa <- ShortRead::readFasta(count_file)
         #Create variant count table with nucleotide and amino acid sequence
-        count_dt <- data.table::data.table(nt_seq = tolower(as.character(sread(rfa))))
+        count_dt <- data.table(nt_seq = tolower(as.character(ShortRead::sread(rfa))))
         count_dt[, count := as.numeric(sapply(strsplit(as.character(ShortRead::id(rfa)), "-"), "[", 2))]
         suppressWarnings(count_dt[, aa_seq := as.character(Biostrings::translate(ShortRead::sread(rfa)))])
         #Calculate number of aa mutations (insertions, deletions, substitutions)
-        mut_counts <- attr(adist(count_dt[,aa_seq], wt_AAseq, counts = T), "counts")
+        mut_counts <- attr(utils::adist(count_dt[,aa_seq], wt_AAseq, counts = T), "counts")
         count_dt[,Nins_aa := mut_counts[,1,2]]
         count_dt[,Ndel_aa := mut_counts[,1,1]]
         count_dt[,Nsub_aa := mut_counts[,1,3]]
         count_dt[,Nmut_aa := Nins_aa+Ndel_aa+Nsub_aa]
         #Calculate number of nucleotide mutations (insertions, deletions, substitutions)
-        mut_counts <- attr(adist(count_dt[,nt_seq], wt_NTseq, counts = T), "counts")
+        mut_counts <- attr(utils::adist(count_dt[,nt_seq], wt_NTseq, counts = T), "counts")
         count_dt[,Nins_nt := mut_counts[,1,2]]
         count_dt[,Ndel_nt := mut_counts[,1,1]]
         count_dt[,Nsub_nt := mut_counts[,1,3]]
