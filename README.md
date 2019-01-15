@@ -23,7 +23,7 @@ Open R and enter:
 ```
 # Install
 if(!require(devtools)) install.packages("devtools")
-devtools::install_github("CRG-CNAG/DiMSum")
+devtools::install_github("lehner-lab/DiMSum")
 
 # Load
 library(DiMSum)
@@ -37,7 +37,7 @@ library(DiMSum)
 Clone the DiMSum repository and install the R package locally. The * must be replaced by what is actually downloaded and built.
 
 ```
-git clone https://github.com/CRG-CNAG/DiMSum.git
+git clone https://github.com/lehner-lab/DiMSum.git
 R CMD build DiMSum
 R CMD INSTALL DiMSum_*.tar.gz
 ```
