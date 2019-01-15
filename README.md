@@ -28,7 +28,7 @@ devtools::install_github("CRG-CNAG/DiMSum")
 # Load
 library(DiMSum)
 
-# Run
+# Help
 ?dimsum
 ```
 
