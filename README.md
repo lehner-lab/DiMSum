@@ -10,16 +10,36 @@ Welcome to the GitHub repository for DiMSum: A pipeline for pre-processing of pa
 
 To run the DiMSum pipeline you will need the following software and associated packages:
 
-* **[R](https://www.r-project.org/) v3.3** (data.table, ggplot2, GGally,hexbin,optparse,parallel, plyr, reshape2, seqinr, ShortRead)
+* **[R](https://www.r-project.org/) >=v3.5.2** (data.table, ggplot2, GGally, hexbin, optparse, parallel, plyr, reshape2, seqinr, ShortRead)
 * **[FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) v0.11.3**
 * **[cutadapt](https://cutadapt.readthedocs.io/en/stable/) v1.16**
 * **[USEARCH 32-bit](https://drive5.com/usearch/download.html) v10.0**
 * **fastx_collapser** from the [FASTX Toolkit](http://hannonlab.cshl.edu/fastx_toolkit/download.html) v0.0.13
 
-# Installation
+# Installation and loading
+
+Open R and enter:
+
+```
+# Install
+if(!require(devtools)) install.packages("devtools")
+devtools::install_github("CRG-CNAG/DiMSum")
+
+# Load
+library(DiMSum)
+
+# Run
+?dimsum
+```
+
+# DiMSum command-line tool
+
+Clone the DiMSum repository and install the R package locally. The * must be replaced by what is actually downloaded and built.
 
 ```
 git clone https://github.com/CRG-CNAG/DiMSum.git
+R CMD build DiMSum
+R CMD INSTALL DiMSum_*.tar.gz
 ```
 Add the cloned DiMSum repository base directory to your path. You can do this by adding the following line at the bottom of your ~/.bashrc file:
 ```
