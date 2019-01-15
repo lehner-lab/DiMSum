@@ -43,7 +43,7 @@ R CMD INSTALL DiMSum_*.tar.gz
 ```
 Add the cloned DiMSum repository base directory to your path. You can do this by adding the following line at the bottom of your ~/.bashrc file:
 ```
-export PATH=YOUR_DIMSUM_DIR:$PATH
+export PATH=CLONED_DIMSUM_REPOSITORY:$PATH
 ```
 Get a description of DiMSum command-line arguments with the following:
 ```
