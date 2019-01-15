@@ -8,7 +8,7 @@
 #' @param execute whether or not to execute the system command (default: TRUE)
 #' @param report whether or not to generate USEARCH summary plots (default: TRUE)
 #' @param report_outpath USEARCH report output path
-#' @param save_workspace whether or not to save the current experiment metadata object (default: TRUE)
+#' @param save_workspace whether or not to save the current workspace (default: TRUE)
 #'
 #' @return an updated experiment metadata object
 #' @export
@@ -20,6 +20,8 @@ dimsum_stage_usearch <- function(
   report_outpath = NULL,
   save_workspace = TRUE
   ){
+  #Save current workspace for debugging purposes
+  if(save_workspace){save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite usearch directory (if executed)
   usearch_outpath <- gsub("/$", "", usearch_outpath)
   create_dimsum_dir(usearch_outpath, execute = execute, message = "DiMSum STAGE 4: ALIGN PAIRED-END READS")  
@@ -115,11 +117,7 @@ dimsum_stage_usearch <- function(
   #Generate usearch report
   if(report){
     dimsum_meta_new_report <- dimsum_stage_usearch_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
-    #Save workspace
-    if(save_workspace){save_metadata(dimsum_meta_new_report)}
     return(dimsum_meta_new_report)
   }
-  #Save workspace
-  if(save_workspace){save_metadata(dimsum_meta_new)}
   return(dimsum_meta_new)
 }

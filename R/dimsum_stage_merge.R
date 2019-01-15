@@ -8,7 +8,7 @@
 #' @param execute whether or not to execute the system command (default: TRUE)
 #' @param report whether or not to generate final summary plots (default: TRUE)
 #' @param report_outpath final summary report output path
-#' @param save_workspace whether or not to save the current experiment metadata object (default: TRUE)
+#' @param save_workspace whether or not to save the current workspace (default: TRUE)
 #'
 #' @return an updated experiment metadata object
 #' @export
@@ -21,6 +21,8 @@ dimsum_stage_merge <- function(
   report_outpath = NULL,
   save_workspace = TRUE
   ){
+  #Save current workspace for debugging purposes
+  if(save_workspace){save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create merge directory (if doesn't already exist)
   merge_outpath <- gsub("/$", "", merge_outpath)
   create_dimsum_dir(merge_outpath, execute = execute, message = "DiMSum STAGE 6: MERGE SAMPLE STATISTICS", overwrite_dir = FALSE)  
@@ -146,11 +148,7 @@ dimsum_stage_merge <- function(
   if(report){
     dimsum_meta_new_report <- dimsum_stage_merge_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
     dimsum_stage_diagnostics_report(variant_data = file.path(merge_outpath, paste0(dimsum_meta[["project_name"]], '_variant_data_merge.RData')), report_outpath = report_outpath)
-    #Save workspace
-    if(save_workspace){save_metadata(dimsum_meta_new_report)}
     return(dimsum_meta_new_report)
   }
-  #Save workspace
-  if(save_workspace){save_metadata(dimsum_meta_new)}
   return(dimsum_meta_new)
 }

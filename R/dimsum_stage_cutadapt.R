@@ -8,7 +8,7 @@
 #' @param execute whether or not to execute the system command (default: TRUE)
 #' @param report whether or not to generate cutadapt summary plots (default: TRUE)
 #' @param report_outpath cutadapt report output path
-#' @param save_workspace whether or not to save the current experiment metadata object (default: TRUE)
+#' @param save_workspace whether or not to save the current workspace (default: TRUE)
 #'
 #' @return an updated experiment metadata object
 #' @export
@@ -20,6 +20,8 @@ dimsum_stage_cutadapt <- function(
   report_outpath = NULL,
   save_workspace = TRUE
   ){
+  #Save current workspace for debugging purposes
+  if(save_workspace){save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite cutadapt directory (if executed)
   cutadapt_outpath <- gsub("/$", "", cutadapt_outpath)
   create_dimsum_dir(cutadapt_outpath, execute = execute, message = "DiMSum STAGE 3: TRIM CONSTANT REGIONS")  
@@ -169,12 +171,8 @@ dimsum_stage_cutadapt <- function(
   #Generate cutadapt report
   if(report){
     dimsum_meta_new_report <- dimsum_stage_cutadapt_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
-    #Save workspace
-    if(save_workspace){save_metadata(dimsum_meta_new_report)}
     return(dimsum_meta_new_report)
   }else{
-    #Save workspace
-    if(save_workspace){save_metadata(dimsum_meta_new)}
     return(dimsum_meta_new)
   }
 }

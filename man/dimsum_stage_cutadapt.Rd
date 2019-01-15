@@ -18,7 +18,7 @@ dimsum_stage_cutadapt(dimsum_meta, cutadapt_outpath, execute = TRUE,
 
 \item{report_outpath}{cutadapt report output path}
 
-\item{save_workspace}{whether or not to save the current experiment metadata object (default: TRUE)}
+\item{save_workspace}{whether or not to save the current workspace (default: TRUE)}
 }
 \value{
 an updated experiment metadata object

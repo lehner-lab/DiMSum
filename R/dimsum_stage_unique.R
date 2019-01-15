@@ -16,6 +16,8 @@ dimsum_stage_unique <- function(
   execute = TRUE,
   save_workspace = TRUE
   ){
+  #Save current workspace for debugging purposes
+  if(save_workspace){save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create unique directory (if doesn't already exist)
   unique_outpath <- gsub("/$", "", unique_outpath)
   create_dimsum_dir(unique_outpath, execute = execute, message = "DiMSum STAGE 5: COUNT UNIQUE VARIANTS")  
@@ -46,8 +48,6 @@ dimsum_stage_unique <- function(
   #Unique fasta filenames
   dimsum_meta_new[["exp_design"]][,"aligned_pair_unique"] <- paste0(dimsum_meta_new[["exp_design"]][,"aligned_pair"], ".unique")
   dimsum_meta_new[['exp_design']][,"aligned_pair_unique_directory"] <- unique_outpath
-  #Save workspace
-  if(save_workspace){save_metadata(dimsum_meta_new)}
   return(dimsum_meta_new)
 }
 

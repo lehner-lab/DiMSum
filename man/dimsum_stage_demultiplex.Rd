@@ -14,7 +14,7 @@ dimsum_stage_demultiplex(dimsum_meta, demultiplex_outpath,
 
 \item{execute}{whether or not to execute the system command (default: TRUE)}
 
-\item{save_workspace}{whether or not to save the current experiment metadata object (default: TRUE)}
+\item{save_workspace}{whether or not to save the current workspace (default: TRUE)}
 }
 \value{
 an updated experiment metadata object

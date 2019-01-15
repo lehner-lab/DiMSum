@@ -6,7 +6,7 @@
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param fastq_outpath FASTQ output path (required)
 #' @param execute whether or not to execute the system command (default: TRUE)
-#' @param save_workspace whether or not to save the current experiment metadata object (default: TRUE)
+#' @param save_workspace whether or not to save the current workspace (default: TRUE)
 #'
 #' @return an updated experiment metadata object
 #' @export
@@ -16,6 +16,8 @@ dimsum_stage_unzip <- function(
   execute = TRUE,
   save_workspace = TRUE
   ){
+  #Save current workspace for debugging purposes
+  if(save_workspace){save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite unzip directory (if executed)
   fastq_outpath <- gsub("/$", "", fastq_outpath)
   create_dimsum_dir(fastq_outpath, execute = execute, message = "UNZIP FASTQ FILES")  
@@ -25,18 +27,26 @@ dimsum_stage_unzip <- function(
     all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"]))
     print(all_fastq)
     message("Processing...")
-    for(f in all_fastq){
-      message(paste0("\t", f))
-      #Check if this system command should be executed
-      if(execute){
+    message(paste0("\t", all_fastq, "\n"))
+    #Check if this system command should be executed
+    if(execute){
+      dimsum_stage_unzip_helper <- function(
+        i
+        ){
         temp_out = system(paste0(
           "gunzip -c ", 
-          f, 
+          all_fastq[i], 
           " > ", 
-          file.path(fastq_outpath, gsub(".gz$", "", basename(f))),
+          file.path(fastq_outpath, gsub(".gz$", "", basename(all_fastq[i]))),
           " 2> ",
-          file.path(fastq_outpath, paste0(gsub(".gz$", "", basename(f)), '.stderr'))))
+          file.path(fastq_outpath, paste0(gsub(".gz$", "", basename(all_fastq[i])), '.stderr'))))
       }
+      # Setup cluster
+      clust <- parallel::makeCluster(dimsum_meta[['num_cores']])
+      # make variables available to each core's workspace
+      parallel::clusterExport(clust, list("all_fastq","fastq_outpath"), envir = environment())
+      parallel::parSapply(clust,X = 1:length(all_fastq), dimsum_stage_unzip_helper)
+      parallel::stopCluster(clust)
     }
     #New experiment metadata
     dimsum_meta_new <- dimsum_meta
@@ -44,16 +54,12 @@ dimsum_stage_unzip <- function(
     dimsum_meta_new[['exp_design']][,"pair1"] <- gsub(".gz$", "", dimsum_meta_new[["exp_design"]][,"pair1"])
     dimsum_meta_new[['exp_design']][,"pair2"] <- gsub(".gz$", "", dimsum_meta_new[["exp_design"]][,"pair2"])
     dimsum_meta_new[['exp_design']][,"pair_directory"] <- fastq_outpath
-    #Save workspace
-    if(save_workspace){save_metadata(dimsum_meta_new)}
     return(dimsum_meta_new)
   }
   #Copy fastq files
   message("Skipping this stage (FASTQ files already unzipped)")
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
-  #Save workspace
-  if(save_workspace){save_metadata(dimsum_meta_new)}
   return(dimsum_meta_new)
 }
 

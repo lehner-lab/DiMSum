@@ -67,6 +67,38 @@ dimsum <- function(
   numCores=1
   ){
 
+  #Display welcome
+  message(paste("\n\n\n*******", "Running DiMSum pipeline", "*******\n\n\n"))
+  message(paste(formatDL(unlist(list("Package version" = as.character(packageVersion("DiMSum"))))), collapse = "\n"))
+  message(paste(formatDL(unlist(list("R version" = version$version.string))), collapse = "\n"))
+
+  #Required binaries
+  required_binaries <- c(
+    "cat", 
+    "cp", 
+    "cutadapt", 
+    "fastqc", 
+    "fastx_collapser", 
+    "gunzip", 
+    "head", 
+    "usearch")
+  which_binaries <- Sys.which(required_binaries)
+  missing_binaries <- names(which_binaries)[which_binaries==""]
+  if(length(missing_binaries)!=0){
+    stop(paste0("Required executables not installed. Please install the following software: ", paste(missing_binaries, sep = ", ")), call. = FALSE)
+  }
+
+  #Binary versions
+  suppressMessages(suppressWarnings(binary_versions <- list(
+    cutadapt = rev(system("cutadapt --version", intern = TRUE))[1],
+    FastQC = rev(system("fastqc --version", intern = TRUE))[1],
+    fastx_collapser = system("fastx_collapser -h", intern = TRUE)[2],
+    USEARCH = rev(system("usearch --version", intern = TRUE))[1])))
+
+  #Display binary versions
+  message(paste("\n\n\n*******", "Binary dependency versions", "*******\n\n\n"))
+  message(paste(formatDL(unlist(binary_versions)), collapse = "\n"))
+
   #Metadata object
   exp_metadata <- list()
 
@@ -177,7 +209,7 @@ dimsum <- function(
   ###########################
 
   message("\n\n\nSaving workspace image...")
-  save(list = ls(environment()), file=file.path(pipeline[['6_merge']][["project_path"]], paste0(pipeline[['6_merge']][["project_name"]], '_workspace.RData')))
+  save_metadata(dimsum_meta = pipeline[['6_merge']], n = 1)
   message("Done")
 
   ### Save report html

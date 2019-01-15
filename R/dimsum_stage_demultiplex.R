@@ -6,7 +6,7 @@
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param demultiplex_outpath demultiplex output path (required)
 #' @param execute whether or not to execute the system command (default: TRUE)
-#' @param save_workspace whether or not to save the current experiment metadata object (default: TRUE)
+#' @param save_workspace whether or not to save the current workspace (default: TRUE)
 #'
 #' @return an updated experiment metadata object
 #' @export
@@ -16,14 +16,14 @@ dimsum_stage_demultiplex <- function(
   execute = TRUE,
   save_workspace = TRUE
   ){
+  #Save current workspace for debugging purposes
+  if(save_workspace){save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite demultiplex directory (if executed)
   demultiplex_outpath <- gsub("/$", "", demultiplex_outpath)
   create_dimsum_dir(demultiplex_outpath, execute = execute, message = "DiMSum STAGE 1: DEMULTIPLEX READS")  
   #Demultiplex parameters specified?
   if( !'barcode_design' %in% names(dimsum_meta) ){
     message("Skipping this stage (assuming all fastq files already demultiplexed)")
-    #Save workspace
-    if(save_workspace){save_metadata(dimsum_meta)}
     return(dimsum_meta)
   }
   fastq_pair_list <- unique(dimsum_meta[['barcode_design']][,c('pair1', 'pair2')])
@@ -108,8 +108,6 @@ dimsum_stage_demultiplex <- function(
   dimsum_meta_new[['exp_design']][,"pair_directory"] <- demultiplex_outpath
   dimsum_meta_new[["fastq_file_extension"]] <- ".fastq"
   dimsum_meta_new[["gzipped"]] <- FALSE
-  #Save workspace
-  if(save_workspace){save_metadata(dimsum_meta_new)}
   return(dimsum_meta_new)
 }
 

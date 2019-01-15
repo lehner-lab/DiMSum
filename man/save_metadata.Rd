@@ -4,14 +4,16 @@
 \alias{save_metadata}
 \title{save_metadata}
 \usage{
-save_metadata(dimsum_meta)
+save_metadata(dimsum_meta, n)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
+
+\item{n}{the number of generations to go back (required)}
 }
 \value{
 Nothing
 }
 \description{
-Save experiment metadata.
+Save experiment workspace including metadata and session information.
 }

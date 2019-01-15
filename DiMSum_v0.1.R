@@ -1,29 +1,8 @@
 #!/usr/bin/env Rscript
 
-#Software version
-version_info <- "DiMSum_v0.1"
-#Display software version
-message(version_info)
-
 ###########################
 ### CHECK DEPENDENCIES
 ###########################
-
-#Binaries
-required_binaries <- c(
-  "cat", 
-  "cp", 
-  "cutadapt", 
-  "fastqc", 
-  "fastx_collapser", 
-  "gunzip", 
-  "head", 
-  "usearch")
-which_binaries <- Sys.which(required_binaries)
-missing_binaries <- names(which_binaries)[which_binaries==""]
-if(length(missing_binaries)!=0){
-  stop(paste0("Required executables not installed. Please install the following software: ", paste(missing_binaries, sep = ", ")), call. = FALSE)
-}
 
 #R packages
 required_packages <- c(
@@ -71,8 +50,8 @@ option_list <- list(
 
 arg_list <- optparse::parse_args(optparse::OptionParser(option_list=option_list))
 #Display arguments
-message(paste("\n\n\n*******", "DiMSum command-line arguments", "*******\n\n\n"))
-print(arg_list)
+message(paste("\n\n\n*******", "DiMSum wrapper command-line arguments", "*******\n\n\n"))
+message(paste(formatDL(unlist(arg_list)), collapse = "\n"))
 
 ###########################
 ### LOAD DIMSUM PACKAGE

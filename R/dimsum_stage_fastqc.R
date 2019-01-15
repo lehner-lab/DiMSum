@@ -8,7 +8,7 @@
 #' @param execute whether or not to execute the system command (default: TRUE)
 #' @param report whether or not to generate FASTQC summary plots (default: TRUE)
 #' @param report_outpath FASTQC report output path
-#' @param save_workspace whether or not to save the current experiment metadata object (default: TRUE)
+#' @param save_workspace whether or not to save the current workspace (default: TRUE)
 #'
 #' @return an updated experiment metadata object
 #' @export
@@ -20,6 +20,8 @@ dimsum_stage_fastqc <- function(
   report_outpath = NULL,
   save_workspace = TRUE
   ){
+  #Save current workspace for debugging purposes
+  if(save_workspace){save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite FASTQC directory (if executed)
   fastqc_outpath <- gsub("/$", "", fastqc_outpath)
   create_dimsum_dir(fastqc_outpath, execute = execute, message = "DiMSum STAGE 2: ASSESS READ QUALITY")  
@@ -53,12 +55,8 @@ dimsum_stage_fastqc <- function(
   #Generate FASTQC report
   if(report){
     dimsum_meta_new_report <- dimsum_stage_fastqc_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
-    #Save workspace
-    if(save_workspace){save_metadata(dimsum_meta_new_report)}
     return(dimsum_meta_new_report)
   }
-  #Save workspace
-  if(save_workspace){save_metadata(dimsum_meta_new)}
   return(dimsum_meta_new)
 }
 
