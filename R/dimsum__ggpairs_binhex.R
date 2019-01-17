@@ -1,5 +1,5 @@
 
-#' ggpairs_binhex
+#' dimsum__ggpairs_binhex
 #'
 #' GGpairs plot for all variables in input data table with correlation in upper triangle and 2d binned hexagons in lower triangle.
 #'
@@ -14,7 +14,7 @@
 #'
 #' @return Nothing
 #' @export
-ggpairs_binhex <- function(
+dimsum__ggpairs_binhex <- function(
   input_dt, 
   output_file, 
   width = 12, 

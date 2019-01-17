@@ -1,5 +1,5 @@
 
-#' sum_datatable_columns
+#' dimsum__sum_datatable_columns
 #'
 #' Replace a subset of columns with a single column containing the row sums.
 #'
@@ -9,7 +9,7 @@
 #'
 #' @return a data.table where a subset of columns is replaced with a single column containing the row sums
 #' @export
-sum_datatable_columns <- function(
+dimsum__sum_datatable_columns <- function(
   dt, 
   column_patterns, 
   suffix=""){

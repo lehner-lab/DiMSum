@@ -21,10 +21,10 @@ dimsum_stage_cutadapt <- function(
   save_workspace = TRUE
   ){
   #Save current workspace for debugging purposes
-  if(save_workspace){save_metadata(dimsum_meta = dimsum_meta, n = 2)}
+  if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite cutadapt directory (if executed)
   cutadapt_outpath <- gsub("/$", "", cutadapt_outpath)
-  create_dimsum_dir(cutadapt_outpath, execute = execute, message = "DiMSum STAGE 3: TRIM CONSTANT REGIONS")  
+  dimsum__create_dir(cutadapt_outpath, execute = execute, message = "DiMSum STAGE 3: TRIM CONSTANT REGIONS")  
   #Trim FASTQ file pairs
   message("Trimming FASTQ files with cutadapt:")
   all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"]))
@@ -121,7 +121,7 @@ dimsum_stage_cutadapt <- function(
           " -e ",
           as.character(dimsum_meta[['exp_design']][i,"cutadaptErrorRate"]),
           " -j ",
-          dimsum_meta[['num_cores']],
+          dimsum_meta[['numCores']],
           " -o ",
           file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt")),
           " -p ",
@@ -145,7 +145,7 @@ dimsum_stage_cutadapt <- function(
           " -e ",
           as.character(dimsum_meta[['exp_design']][i,"cutadaptErrorRate"]),
           " -j ",
-          dimsum_meta[['num_cores']],
+          dimsum_meta[['numCores']],
           " -o ",
           file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt")),
           " -p ",

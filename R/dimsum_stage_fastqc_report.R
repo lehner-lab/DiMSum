@@ -41,10 +41,10 @@ dimsum_stage_fastqc_report <- function(
       colnames(temp_df) <- unlist(strsplit(temp_out[1], '\\t'))[-1]
       fastqc_list[[filename]] <- temp_df
     }
-    fastqc_df1 <- cbind.fill(lapply(fastqc_list, '[', 'Mean'))
+    fastqc_df1 <- dimsum__cbind_fill(lapply(fastqc_list, '[', 'Mean'))
     colnames(fastqc_df1) <- names(fastqc_list)
     fastqc_df1[,'base_position'] <- 1:length(rownames(fastqc_df1))
-    fastqc_df2 <- cbind.fill(lapply(fastqc_list, '[', '10th Percentile'))
+    fastqc_df2 <- dimsum__cbind_fill(lapply(fastqc_list, '[', '10th Percentile'))
     colnames(fastqc_df2) <- names(fastqc_list)
     fastqc_df2[,'base_position'] <- 1:length(rownames(fastqc_df1))
     #Plot

@@ -1,5 +1,5 @@
 
-#' cbind.fill
+#' dimsum__cbind_fill
 #'
 #' cbind a list of data.frames of same row names but unequal number.
 #'
@@ -7,7 +7,7 @@
 #'
 #' @return a single data.frame where empty rows are filled with NAs
 #' @export
-cbind.fill <- function(df_list){
+dimsum__cbind_fill <- function(df_list){
     nm <- lapply(df_list, as.matrix)
     n <- max(sapply(nm, nrow)) 
     temp_rownames <- unique(as.character(unlist(sapply(nm, rownames))))

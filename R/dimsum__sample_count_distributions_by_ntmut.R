@@ -1,5 +1,5 @@
 
-#' sample_count_distributions_by_ntmut
+#' dimsum__sample_count_distributions_by_ntmut
 #'
 #' Plot sample sample count distributions split by number of nucleotide mutations (Nmut_nt) and synonymous/nonsynonymous mutations (Nmut_aa).
 #'
@@ -11,7 +11,7 @@
 #'
 #' @return Nothing
 #' @export
-sample_count_distributions_by_ntmut <- function(
+dimsum__sample_count_distributions_by_ntmut <- function(
   input_dt,
   output_file,
   width = 12,

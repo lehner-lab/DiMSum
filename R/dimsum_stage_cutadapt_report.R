@@ -21,7 +21,7 @@ dimsum_stage_cutadapt_report <- function(
   cutadapt_read2_list <- list()
   total_reads_list <- list()
   for(i in 1:length(cutadapt_files)){
-    trim_list <- parse_cutadapt_output(cutadapt_files[i])
+    trim_list <- dimsum__parse_cutadapt_output(cutadapt_files[i])
     total_reads_list[[i]] <- trim_list[['total_reads']]
     cutadapt_read1_list[[trim_list[['name_read1']]]] <- c(
       trim_list[['total_read1_a5']]-trim_list[['total_read1_both']], 

@@ -10,8 +10,7 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   cutadaptCut3First, cutadaptCut3Second, cutadapt5First, cutadapt5Second,
   cutadapt3First, cutadapt3Second, cutadaptMinLength = 50,
   cutadaptErrorRate = 0.2, usearchMinQual, usearchMaxee,
-  usearchMinlen = 64, usearchMinovlen = 16,
-  usearchAttemptExactMinovlen = F, outputPath, projectName,
+  usearchMinlen = 64, usearchMinovlen = 16, outputPath, projectName,
   wildtypeSequence, transLibrary = F, startStage = 1, stopStage = 0,
   numCores = 1)
 }
@@ -20,9 +19,9 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{fastqFileExtension}{FASTQ file extension}
 
-\item{gzipped}{Are FASTQ files are gzipped?}
+\item{gzipped}{Are FASTQ files are gzipped? (default:T)}
 
-\item{stranded}{Is the library design stranded?}
+\item{stranded}{Is the library design stranded? (default:T)}
 
 \item{barcodeDesignPath}{Path to barcode design file (tab-separated plain text file with barcode design)}
 
@@ -58,8 +57,6 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{usearchMinovlen}{USEARCH: discard pair if alignment is shorter than given value (default:16)}
 
-\item{usearchAttemptExactMinovlen}{USEARCH: Attempt exact alignment of --usearchMinovlen (default:F)}
-
 \item{outputPath}{Path to directory to use for output files}
 
 \item{projectName}{Project name}
@@ -72,7 +69,7 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{stopStage}{Stop at a specified pipeline stage (default:0 i.e. no stop condition)}
 
-\item{numCores}{Number of available CPU cores}
+\item{numCores}{Number of available CPU cores (default:1)}
 }
 \value{
 Nothing

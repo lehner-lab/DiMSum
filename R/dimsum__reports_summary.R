@@ -1,5 +1,5 @@
 
-#' reports_summary
+#' dimsum__reports_summary
 #'
 #' Generate a summary report in html format.
 #'
@@ -7,7 +7,7 @@
 #'
 #' @return a summary report character string (html format)
 #' @export
-reports_summary <- function(dimsum_meta){
+dimsum__reports_summary <- function(dimsum_meta){
   #HTML results summary
   reports_summary_template <- "<html>\
    <head>\
@@ -70,5 +70,5 @@ reports_summary <- function(dimsum_meta){
   \
    </body>\
   </html>"
-  return(gsub("PROJECT_NAME", dimsum_meta[["project_name"]], reports_summary_template))
+  return(gsub("PROJECT_NAME", dimsum_meta[["projectName"]], reports_summary_template))
 }

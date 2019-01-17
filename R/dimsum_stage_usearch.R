@@ -21,10 +21,10 @@ dimsum_stage_usearch <- function(
   save_workspace = TRUE
   ){
   #Save current workspace for debugging purposes
-  if(save_workspace){save_metadata(dimsum_meta = dimsum_meta, n = 2)}
+  if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite usearch directory (if executed)
   usearch_outpath <- gsub("/$", "", usearch_outpath)
-  create_dimsum_dir(usearch_outpath, execute = execute, message = "DiMSum STAGE 4: ALIGN PAIRED-END READS")  
+  dimsum__create_dir(usearch_outpath, execute = execute, message = "DiMSum STAGE 4: ALIGN PAIRED-END READS")  
   #Sample names
   sample_names = paste0(
     dimsum_meta[["exp_design"]][,"sample_name"], '_e', 
@@ -51,37 +51,14 @@ dimsum_stage_usearch <- function(
     #Check if this system command should be executed
     if(execute){
       if(dimsum_meta[["transLibrary"]]){
-        temp_out = fastq_manualalign(
+        temp_out = dimsum__concatenate_reads(
           input_FASTQ1 = file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair1"]),
           input_FASTQ2 = file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair2"]),
           output_FASTQ = file.path(usearch_outpath, paste0(sample_names[i], '.usearch')),
           output_REPORT = file.path(usearch_outpath, paste0(sample_names[i], '.report')),
-          num_nuc = 0,
           min_qual = dimsum_meta[["usearchMinQual"]],
           max_ee = dimsum_meta[["usearchMaxee"]],
-          min_len = dimsum_meta[["usearchMinlen"]],
-          concatentate_reads = TRUE)              
-      }
-      else if(dimsum_meta[["usearchAttemptExactMinovlen"]]){
-        temp_out = system(paste0(
-          "fastq_manualalign.py -i1 ",
-          file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair1"]),
-          " -i2 ",
-          file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair2"]),
-          " -o ",
-          file.path(usearch_outpath, paste0(sample_names[i], '.usearch')),
-          " -r ",
-          file.path(usearch_outpath, paste0(sample_names[i], '.report')),
-          " --minqual ",
-          as.character(dimsum_meta[["usearchMinQual"]]),
-          " --maxee ",
-          as.character(dimsum_meta[["usearchMaxee"]]),
-          " --numNuc ",
-          as.character(dimsum_meta[["usearchMinovlen"]]),
-          " > ",
-          file.path(usearch_outpath, paste0(sample_names[i], '.usearch.stdout')),
-          " 2> ",
-          file.path(usearch_outpath, paste0(sample_names[i], '.usearch.stderr'))))        
+          min_len = dimsum_meta[["usearchMinlen"]])              
       }
       else{
         temp_out = system(paste0(
@@ -101,7 +78,7 @@ dimsum_stage_usearch <- function(
           as.character(dimsum_meta[["usearchMinlen"]]),
           temp_options,
           " -threads ",
-          dimsum_meta[['num_cores']],
+          dimsum_meta[['numCores']],
           " > ",
           file.path(usearch_outpath, paste0(sample_names[i], '.usearch.stdout')),
           " 2> ",

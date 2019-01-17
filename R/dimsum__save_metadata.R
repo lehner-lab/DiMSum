@@ -1,5 +1,5 @@
 
-#' save_metadata
+#' dimsum__save_metadata
 #'
 #' Save experiment workspace including metadata and session information.
 #'
@@ -8,14 +8,14 @@
 #'
 #' @return Nothing
 #' @export
-save_metadata <- function(
+dimsum__save_metadata <- function(
   dimsum_meta,
   n
   ){
   save(
     list = c(ls(parent.frame(n = n))), 
-    file = file.path(dimsum_meta[["project_path"]], paste0(dimsum_meta[["project_name"]], '_workspace.RData')),
+    file = file.path(dimsum_meta[["project_path"]], paste0(dimsum_meta[["projectName"]], '_workspace.RData')),
     envir = parent.frame(n = n))
   session_info = sessionInfo()
-  save(session_info, file = file.path(dimsum_meta[["project_path"]], paste0(dimsum_meta[["project_name"]], '_sessionInfo.RData')))
+  save(session_info, file = file.path(dimsum_meta[["project_path"]], paste0(dimsum_meta[["projectName"]], '_sessionInfo.RData')))
 }

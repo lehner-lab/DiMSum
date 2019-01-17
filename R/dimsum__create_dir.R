@@ -1,5 +1,5 @@
 
-#' create_dimsum_dir
+#' dimsum__create_dir
 #'
 #' Create results folder for dimsum pipeline stage.
 #'
@@ -10,7 +10,7 @@
 #'
 #' @return Nothing
 #' @export
-create_dimsum_dir <- function(
+dimsum__create_dir <- function(
   dimsum_dir, 
   execute, 
   message = NULL, 

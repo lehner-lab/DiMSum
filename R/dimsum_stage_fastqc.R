@@ -21,10 +21,10 @@ dimsum_stage_fastqc <- function(
   save_workspace = TRUE
   ){
   #Save current workspace for debugging purposes
-  if(save_workspace){save_metadata(dimsum_meta = dimsum_meta, n = 2)}
+  if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite FASTQC directory (if executed)
   fastqc_outpath <- gsub("/$", "", fastqc_outpath)
-  create_dimsum_dir(fastqc_outpath, execute = execute, message = "DiMSum STAGE 2: ASSESS READ QUALITY")  
+  dimsum__create_dir(fastqc_outpath, execute = execute, message = "DiMSum STAGE 2: ASSESS READ QUALITY")  
   #Run FASTQC on all fastq files
   message("Running FASTQC on all files:")
   all_fastq <- file.path(dimsum_meta[['exp_design']][,"pair_directory"], c(dimsum_meta[['exp_design']][,'pair1'], dimsum_meta[['exp_design']][,'pair2']))
@@ -38,7 +38,7 @@ dimsum_stage_fastqc <- function(
       fastqc_outpath,
       " --extract ",
       " -t ",
-      dimsum_meta[['num_cores']],
+      dimsum_meta[['numCores']],
       " ",
       paste(all_fastq, collapse = " "),
       " > ", 
@@ -49,8 +49,8 @@ dimsum_stage_fastqc <- function(
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Update fastq metadata
-  dimsum_meta_new[['exp_design']][,"pair1_fastqc"] <- gsub(dimsum_meta_new[["fastq_file_extension"]], '_fastqc/fastqc_data.txt', gsub('.gz', '', dimsum_meta_new[['exp_design']][,"pair1"]))
-  dimsum_meta_new[['exp_design']][,"pair2_fastqc"] <- gsub(dimsum_meta_new[["fastq_file_extension"]], '_fastqc/fastqc_data.txt', gsub('.gz', '', dimsum_meta_new[['exp_design']][,"pair2"]))
+  dimsum_meta_new[['exp_design']][,"pair1_fastqc"] <- gsub(dimsum_meta_new[["fastqFileExtension"]], '_fastqc/fastqc_data.txt', gsub('.gz', '', dimsum_meta_new[['exp_design']][,"pair1"]))
+  dimsum_meta_new[['exp_design']][,"pair2_fastqc"] <- gsub(dimsum_meta_new[["fastqFileExtension"]], '_fastqc/fastqc_data.txt', gsub('.gz', '', dimsum_meta_new[['exp_design']][,"pair2"]))
   dimsum_meta_new[['exp_design']][,"fastqc_directory"] <- fastqc_outpath
   #Generate FASTQC report
   if(report){

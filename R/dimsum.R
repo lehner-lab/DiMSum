@@ -5,8 +5,8 @@
 #'
 #' @param fastqFileDir Path to directory with input FASTQ files
 #' @param fastqFileExtension FASTQ file extension
-#' @param gzipped Are FASTQ files are gzipped?
-#' @param stranded Is the library design stranded?
+#' @param gzipped Are FASTQ files are gzipped? (default:T)
+#' @param stranded Is the library design stranded? (default:T)
 #' @param barcodeDesignPath Path to barcode design file (tab-separated plain text file with barcode design)
 #' @param barcodeErrorRate Maximum allowed error rate for the barcode (default:0.25)
 #' @param experimentDesignPath Path to experimental design file (tab-separated plain text file with replicate structure)
@@ -24,14 +24,13 @@
 #' @param usearchMaxee USEARCH: maximum number of expected errors to retain read pair
 #' @param usearchMinlen USEARCH: Discard pair if either read is shorter than this (default:64)
 #' @param usearchMinovlen USEARCH: discard pair if alignment is shorter than given value (default:16)
-#' @param usearchAttemptExactMinovlen USEARCH: Attempt exact alignment of --usearchMinovlen (default:F)
 #' @param outputPath Path to directory to use for output files
 #' @param projectName Project name
 #' @param wildtypeSequence Wild-type nucleotide sequence
 #' @param transLibrary Trans library design i.e. read pairs correspond to distinct peptides (no overlap)
 #' @param startStage Start at a specified pipeline stage (default:1)
 #' @param stopStage Stop at a specified pipeline stage (default:0 i.e. no stop condition)
-#' @param numCores Number of available CPU cores
+#' @param numCores Number of available CPU cores (default:1)
 #'
 #' @return Nothing
 #' @export
@@ -57,7 +56,6 @@ dimsum <- function(
   usearchMaxee,
   usearchMinlen=64,
   usearchMinovlen=16,
-  usearchAttemptExactMinovlen=F,
   outputPath,
   projectName,
   wildtypeSequence,
@@ -71,6 +69,9 @@ dimsum <- function(
   message(paste("\n\n\n*******", "Running DiMSum pipeline", "*******\n\n\n"))
   message(paste(formatDL(unlist(list("Package version" = as.character(packageVersion("DiMSum"))))), collapse = "\n"))
   message(paste(formatDL(unlist(list("R version" = version$version.string))), collapse = "\n"))
+
+  ### Basic checks
+  ###########################
 
   #Required binaries
   required_binaries <- c(
@@ -99,72 +100,59 @@ dimsum <- function(
   message(paste("\n\n\n*******", "Binary dependency versions", "*******\n\n\n"))
   message(paste(formatDL(unlist(binary_versions)), collapse = "\n"))
 
-  #Metadata object
-  exp_metadata <- list()
-
-  ### Save metadata
-  #Remove trailing "/" if present
-  exp_metadata[["fastq_path_original"]] <- gsub("/$", "", fastqFileDir)
-  exp_metadata[["fastq_file_extension"]] <- fastqFileExtension
-  exp_metadata[["gzipped"]] <- gzipped
-  exp_metadata[["stranded"]] <- stranded
-  exp_metadata[["barcode_design_path"]] <- barcodeDesignPath
-  exp_metadata[["barcodeErrorRate"]] <- barcodeErrorRate
-  exp_metadata[["experiment_design_path"]] <- experimentDesignPath
-  exp_metadata[["cutadaptCut5First"]] <- cutadaptCut5First
-  exp_metadata[["cutadaptCut5Second"]] <- cutadaptCut5Second
-  exp_metadata[["cutadaptCut3First"]] <- cutadaptCut3First
-  exp_metadata[["cutadaptCut3Second"]] <- cutadaptCut3Second
-  exp_metadata[["cutadapt5First"]] <- cutadapt5First
-  exp_metadata[["cutadapt5Second"]] <- cutadapt5Second
-  exp_metadata[["cutadapt3First"]] <- cutadapt3First
-  exp_metadata[["cutadapt3Second"]] <- cutadapt3Second
-  exp_metadata[["cutadaptMinLength"]] <- cutadaptMinLength
-  exp_metadata[["cutadaptErrorRate"]] <- cutadaptErrorRate
-  exp_metadata[["usearchMinQual"]] <- usearchMinQual
-  exp_metadata[["usearchMaxee"]] <- usearchMaxee
-  exp_metadata[["usearchMinlen"]] <- usearchMinlen
-  exp_metadata[["usearchMinovlen"]] <- usearchMinovlen
-  exp_metadata[["usearchAttemptExactMinovlen"]] <- usearchAttemptExactMinovlen
-  #Remove trailing "/" if present
-  exp_metadata[["output_path"]] <- gsub("/$", "", outputPath)
-  exp_metadata[["project_name"]] <- projectName
-  exp_metadata[["wildtypeSequence"]] <- wildtypeSequence
-  exp_metadata[["transLibrary"]] <- transLibrary
-  exp_metadata[["num_cores"]] <- numCores
-
-  #First pipeline stage to run
-  first_stage <- startStage
-  last_stage <- stopStage
-
-  ###########################
-  ### MAIN
+  ### Setup
   ###########################
 
-  ### Output file path, working and temp directories
-  ###########################
+  dimsum_arg_list <- list(
+    "fastqFileDir" = list(fastqFileDir, c("character")), #directory exists -- checked in dimsum__validate_input
+    "fastqFileExtension" = list(fastqFileExtension, c("character")), #alphanumeric character string starting with '.' -- checked in dimsum__validate_input
+    "gzipped" = list(gzipped, c("logical")), #logical -- checked in dimsum__validate_input
+    "stranded" = list(stranded, c("logical")), #logical -- checked in dimsum__validate_input
+    "barcodeDesignPath" = list(barcodeDesignPath, c("character", "NULL")), #file exists (if not NULL)
+    "barcodeErrorRate" = list(barcodeErrorRate, c("double")), #strictly positive double (zero inclusive)
+    "experimentDesignPath" = list(experimentDesignPath, c("character")), #file exists -- checked in dimsum__get_experiment_design
+    "cutadaptCut5First" = list(cutadaptCut5First, c("integer", "NULL")), #strictly positive integer (if not NULL) -- checked in dimsum__get_experiment_design
+    "cutadaptCut5Second" = list(cutadaptCut5Second, c("integer", "NULL")), #strictly positive integer (if not NULL) -- checked in dimsum__get_experiment_design
+    "cutadaptCut3First" = list(cutadaptCut3First, c("integer", "NULL")), #strictly positive integer (if not NULL) -- checked in dimsum__get_experiment_design
+    "cutadaptCut3Second" = list(cutadaptCut3Second, c("integer", "NULL")), #strictly positive integer (if not NULL) -- checked in dimsum__get_experiment_design
+    "cutadapt5First" = list(cutadapt5First, c("character", "NULL")), #AGCT character string (if not NULL) -- checked in dimsum__get_experiment_design
+    "cutadapt5Second" = list(cutadapt5Second, c("character", "NULL")), #AGCT character string (if not NULL) -- checked in dimsum__get_experiment_design
+    "cutadapt3First" = list(cutadapt3First, c("character", "NULL")), #AGCT character string (if not NULL) -- checked in dimsum__get_experiment_design
+    "cutadapt3Second" = list(cutadapt3Second, c("character", "NULL")), #AGCT character string (if not NULL) -- checked in dimsum__get_experiment_design
+    "cutadaptMinLength" = list(cutadaptMinLength, c("integer")), #strictly positive integer -- checked in dimsum__get_experiment_design
+    "cutadaptErrorRate" = list(cutadaptErrorRate, c("double")), #strictly positive double (zero inclusive) -- checked in dimsum__get_experiment_design
+    "usearchMinQual" = list(usearchMinQual, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
+    "usearchMaxee" = list(usearchMaxee, c("double")), #strictly positive double -- checked in dimsum__validate_input
+    "usearchMinlen" = list(usearchMinlen, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
+    "usearchMinovlen" = list(usearchMinovlen, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
+    "outputPath" = list(outputPath, c("character")), #directory exists -- checked in dimsum__validate_input
+    "projectName" = list(projectName, c("character")), #character string -- checked in dimsum__validate_input
+    "wildtypeSequence" = list(wildtypeSequence, c("character")), #AGCT character string -- checked in dimsum__validate_input
+    "transLibrary" = list(transLibrary, c("logical")), #logical -- checked in dimsum__validate_input
+    "startStage" = list(startStage, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
+    "stopStage" = list(stopStage, c("integer")), #strictly positive integer (zero inclusive) -- checked in dimsum__validate_input
+    "numCores" = list(numCores, c("integer")) #strictly positive integer -- checked in dimsum__validate_input
+    )
 
-  #Create working directory (if doesn't already exist)
-  exp_metadata[["project_path"]] <- file.path(exp_metadata[["output_path"]], exp_metadata[["project_name"]])
+  #Validate input
+  exp_metadata <- dimsum__validate_input(dimsum_arg_list)
+
+  #Get and check barcode design (if provided)
+  exp_metadata[["barcode_design"]] <- dimsum__get_barcode_design(exp_metadata)
+
+  #Get and check experiment design
+  exp_metadata[["exp_design"]] <- dimsum__get_experiment_design(exp_metadata)
+
+  #Create project directory (if doesn't already exist)
+  exp_metadata[["project_path"]] <- file.path(exp_metadata[["outputPath"]], exp_metadata[["projectName"]])
   suppressWarnings(dir.create(exp_metadata[["project_path"]]))
-  #Set working directory
-  setwd(exp_metadata[["project_path"]])
   #Create temp directory (if doesn't already exist)
   exp_metadata[["tmp_path"]] <- file.path(exp_metadata[["project_path"]], "tmp")
   suppressWarnings(dir.create(exp_metadata[["tmp_path"]]))
 
-  ### Get experiment design
-  ###########################
-
-  #TODO: check if all fastq files exist
-  exp_metadata[["exp_design"]] <- get_experiment_design(exp_metadata)
-
-  ### Get barcode design (if provided)
-  ###########################
-
-  if(!is.null(exp_metadata[["barcode_design_path"]])){
-    exp_metadata[["barcode_design"]] <- read.table(exp_metadata[["barcode_design_path"]], header = T, stringsAsFactors = F, sep="\t")
-  }
+  #First and last pipeline stages
+  first_stage <- exp_metadata[["startStage"]]
+  last_stage <- exp_metadata[["stopStage"]]
 
   ### Pipeline stages
   ###########################
@@ -209,14 +197,14 @@ dimsum <- function(
   ###########################
 
   message("\n\n\nSaving workspace image...")
-  save_metadata(dimsum_meta = pipeline[['6_merge']], n = 1)
+  dimsum__save_metadata(dimsum_meta = pipeline[['6_merge']], n = 1)
   message("Done")
 
   ### Save report html
   ###########################
 
   message("\n\n\nSaving summary report...")
-  write(reports_summary(dimsum_meta = pipeline[['6_merge']]), file = file.path(pipeline[['6_merge']][["project_path"]], "reports_summary.html"))
+  write(dimsum__reports_summary(dimsum_meta = pipeline[['6_merge']]), file = file.path(pipeline[['6_merge']][["project_path"]], "reports_summary.html"))
   message("Done")
 }
 

@@ -17,21 +17,22 @@ dimsum_stage_unique <- function(
   save_workspace = TRUE
   ){
   #Save current workspace for debugging purposes
-  if(save_workspace){save_metadata(dimsum_meta = dimsum_meta, n = 2)}
+  if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create unique directory (if doesn't already exist)
   unique_outpath <- gsub("/$", "", unique_outpath)
-  create_dimsum_dir(unique_outpath, execute = execute, message = "DiMSum STAGE 5: COUNT UNIQUE VARIANTS")  
+  dimsum__create_dir(unique_outpath, execute = execute, message = "DiMSum STAGE 5: COUNT UNIQUE VARIANTS")  
   #Run fastx_collapser on all aligned read pair fastq files
   message("Getting unique aligned read counts with fastx_collapser:")
   all_fasta <- file.path(dimsum_meta[["exp_design"]][,"aligned_pair_directory"], dimsum_meta[['exp_design']][,"aligned_pair"])
   print(all_fasta)
   message("Processing...")
-  for(read_pair in dimsum_meta[["exp_design"]][,"aligned_pair"]){
-    #TODO: usearch binary path specifiable on commandline?
-    #TODO: only run if usearch arguments specified
-    message(paste0("\t", read_pair))
-    #Check if this system command should be executed
-    if(execute){
+  for(i in 1:dim(dimsum_meta[["exp_design"]])[1]){message(paste0("\t", dimsum_meta[["exp_design"]][i,"aligned_pair"]))}
+  #Check if this system command should be executed
+  if(execute){
+    dimsum_stage_unique_helper <- function(
+      i
+      ){
+      read_pair <- dimsum_meta[["exp_design"]][i,"aligned_pair"]
       temp_out = system(paste0(
         "fastx_collapser -Q33 -i ",
         file.path(dimsum_meta[["exp_design"]][,"aligned_pair_directory"][1], read_pair),
@@ -42,6 +43,12 @@ dimsum_stage_unique <- function(
         " 2> ",
         file.path(unique_outpath, paste0(read_pair, '.unique.stderr'))))
     }
+    # Setup cluster
+    clust <- parallel::makeCluster(dimsum_meta[['numCores']])
+    # make variables available to each core's workspace
+    parallel::clusterExport(clust, list("dimsum_meta","unique_outpath"), envir = environment())
+    parallel::parSapply(clust,X = 1:nrow(dimsum_meta[["exp_design"]]), dimsum_stage_unique_helper)
+    parallel::stopCluster(clust)
   }
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta

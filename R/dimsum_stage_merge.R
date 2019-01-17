@@ -22,10 +22,10 @@ dimsum_stage_merge <- function(
   save_workspace = TRUE
   ){
   #Save current workspace for debugging purposes
-  if(save_workspace){save_metadata(dimsum_meta = dimsum_meta, n = 2)}
+  if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create merge directory (if doesn't already exist)
   merge_outpath <- gsub("/$", "", merge_outpath)
-  create_dimsum_dir(merge_outpath, execute = execute, message = "DiMSum STAGE 6: MERGE SAMPLE STATISTICS", overwrite_dir = FALSE)  
+  dimsum__create_dir(merge_outpath, execute = execute, message = "DiMSum STAGE 6: MERGE SAMPLE STATISTICS", overwrite_dir = FALSE)  
   #WT nucleotide sequence
   wt_NTseq <- tolower(dimsum_meta[['wildtypeSequence']])
   #WT AA sequence
@@ -123,19 +123,19 @@ dimsum_stage_merge <- function(
     variant_data[,STOP := ifelse(length(grep(aa_seq,pattern="\\*"))==1,TRUE,FALSE),aa_seq]
     #Merge split counts
     split_base <- unique(sapply(strsplit(colnames(variant_data)[grep('_count', colnames(variant_data))], "_split"), '[', 1))
-    variant_data_merge <- sum_datatable_columns(dt=variant_data, column_patterns=split_base, suffix="_count")
+    variant_data_merge <- dimsum__sum_datatable_columns(dt=variant_data, column_patterns=split_base, suffix="_count")
     #Merge technical counts
     split_base <- unique(sapply(strsplit(colnames(variant_data_merge)[grep('_count', colnames(variant_data_merge))], "_t"), '[', 1))
-    variant_data_merge <- sum_datatable_columns(dt=variant_data_merge, column_patterns=split_base, suffix="_count")
+    variant_data_merge <- dimsum__sum_datatable_columns(dt=variant_data_merge, column_patterns=split_base, suffix="_count")
     #Save merged variant data
     message("Saving merged variant data...")
-    save(variant_data_merge, file=file.path(merge_outpath, paste0(dimsum_meta[["project_name"]], '_variant_data_merge.RData')))
+    save(variant_data_merge, file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.RData')))
     message("Done")
   }
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Merged variant data path
-  dimsum_meta_new[["variant_data_merge_path"]] <- file.path(merge_outpath, paste0(dimsum_meta[["project_name"]], '_variant_data_merge.RData')) 
+  dimsum_meta_new[["variant_data_merge_path"]] <- file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.RData')) 
   #Load mutation statistics
   load(file.path(dimsum_meta[["tmp_path"]], "mutation_stats_dicts.RData"))
   #AA mutation results
@@ -147,7 +147,7 @@ dimsum_stage_merge <- function(
   #Generate merge report
   if(report){
     dimsum_meta_new_report <- dimsum_stage_merge_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
-    dimsum_stage_diagnostics_report(variant_data = file.path(merge_outpath, paste0(dimsum_meta[["project_name"]], '_variant_data_merge.RData')), report_outpath = report_outpath)
+    dimsum_stage_diagnostics_report(variant_data = file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.RData')), report_outpath = report_outpath)
     return(dimsum_meta_new_report)
   }
   return(dimsum_meta_new)

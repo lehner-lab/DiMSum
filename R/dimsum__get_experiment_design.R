@@ -1,27 +1,27 @@
 
-#' get_experiment_design
+#' dimsum__get_experiment_design
 #'
-#' Get and format metadata from experiment design file.
+#' Get, format and validate metadata from experiment design file.
 #'
-#' @param dimsum_meta path to experiment design file (required)
+#' @param dimsum_meta an experiment metadata object (required)
 #'
-#' @return a data.frame
+#' @return a data.frame with the validated experiment design 
 #' @export
-get_experiment_design <- function(
-  dimsum_meta){
-  #Read experimental design
-  if(!file.exists(dimsum_meta[["experiment_design_path"]])){
-    stop("Experiment design file not found. Please check that the --experimentDesignPath (-e) command-line option is correctly set.", call. = FALSE)
+dimsum__get_experiment_design <- function(
+  dimsum_meta
+  ){
+  #Load experimental design
+  if(!file.exists(dimsum_meta[["experimentDesignPath"]])){
+    stop(paste0("Invalid '", "experimentDesignPath", "' argument (file not found)"), call. = FALSE)
   }
-  exp_design <- read.table(dimsum_meta[["experiment_design_path"]], header = T, stringsAsFactors = F, sep="\t")
+  exp_design <- read.table(dimsum_meta[["experimentDesignPath"]], header = T, stringsAsFactors = F, sep="\t")
+
   #Add original FASTQ directory
-  if(!file.exists(dimsum_meta[["fastq_path_original"]])){
-    stop("Input FASTQ directory not found. Please check that the --fastqFileDir (-l) command-line option is correctly set.", call. = FALSE)
-  }
-  exp_design[,"pair_directory"] <- dimsum_meta[["fastq_path_original"]]
-  #Add sample specific cutadapt options
+  exp_design[,"pair_directory"] <- dimsum_meta[["fastqFileDir"]]
+
+  #Add sample-specific cutadapt options
   if((!"cutadapt5First" %in% colnames(exp_design) & is.null(dimsum_meta[["cutadapt5First"]])) | (!"cutadapt5Second" %in% colnames(exp_design) & is.null(dimsum_meta[["cutadapt5Second"]]))){
-    stop("Sequence of 5' constant region not found. Please check that the --cutadapt5First and --cutadapt5Second command-line options are correctly set.", call. = FALSE)
+    stop("Sequence of 5' constant region not found. Please check that the 'cutadapt5First' and 'cutadapt5Second' arguments are correctly set.", call. = FALSE)
   }
   if(!"cutadaptCut5First" %in% colnames(exp_design)){exp_design[,"cutadaptCut5First"] <- ifelse(is.null(dimsum_meta[["cutadaptCut5First"]]), NA, dimsum_meta[["cutadaptCut5First"]])}
   if(!"cutadaptCut5Second" %in% colnames(exp_design)){exp_design[,"cutadaptCut5Second"] <- ifelse(is.null(dimsum_meta[["cutadaptCut5Second"]]), NA, dimsum_meta[["cutadaptCut5Second"]])}
@@ -33,31 +33,45 @@ get_experiment_design <- function(
   if(!"cutadapt3Second" %in% colnames(exp_design)){exp_design[,"cutadapt3Second"] <- ifelse(is.null(dimsum_meta[["cutadapt3Second"]]), NA, dimsum_meta[["cutadapt3Second"]])}
   if(!"cutadaptMinLength" %in% colnames(exp_design)){exp_design[,"cutadaptMinLength"] <- ifelse(is.null(dimsum_meta[["cutadaptMinLength"]]), NA, dimsum_meta[["cutadaptMinLength"]])}
   if(!"cutadaptErrorRate" %in% colnames(exp_design)){exp_design[,"cutadaptErrorRate"] <- ifelse(is.null(dimsum_meta[["cutadaptErrorRate"]]), NA, dimsum_meta[["cutadaptErrorRate"]])}
-  if(!"cutadaptDiscardUntrimmed" %in% colnames(exp_design)){exp_design[,"cutadaptDiscardUntrimmed"] <- ifelse(is.null(dimsum_meta[["cutadaptDiscardUntrimmed"]]), NA, dimsum_meta[["cutadaptDiscardUntrimmed"]])}
   #Convert empty string constant region sequences to NA
   exp_design[which(exp_design[,"cutadapt5First"]==""),"cutadapt5First"] <- NA
   exp_design[which(exp_design[,"cutadapt5Second"]==""),"cutadapt5Second"] <- NA
   exp_design[which(exp_design[,"cutadapt3First"]==""),"cutadapt3First"] <- NA
   exp_design[which(exp_design[,"cutadapt3Second"]==""),"cutadapt3Second"] <- NA
-  #Check that each sample has a 5' adapter (constant region) specified
-  if(sum(is.na(exp_design[,"cutadapt5First"]))!=0 | sum(is.na(exp_design[,"cutadapt5Second"]))!=0){
-    stop("Sequence of 5' constant region not found for some samples. Please check that the corresponding experiment design file columns are correct.", call. = FALSE)
+
+  #Check whether experiment design is valid
+  dimsum__check_experiment_design(exp_design)
+
+  #Check FASTQ files exist (if demultiplexed FASTQ files supplied i.e. no barcodeDesignPath supplied)
+  if(is.null(dimsum_meta[["barcodeDesignPath"]])){
+    #Pair1 files
+    for(i in unlist(exp_design[,c("pair1")])){
+      if(!file.exists(file.path(dimsum_meta[["fastqFileDir"]], i))){
+        stop(paste0("Invalid FASTQ file name '", i, "' in experimentDesign file (file not found)"), call. = FALSE)
+      }
+    }
+    #Pair2 files
+    for(i in unlist(exp_design[,c("pair2")])){
+      if(!file.exists(file.path(dimsum_meta[["fastqFileDir"]], i))){
+        stop(paste0("Invalid FASTQ file name '", i, "' in experimentDesign file (file not found)"), call. = FALSE)
+      }
+    }
   }
-  #Check constant region sequences are valid (ACGT characters only)
-  all_characters <- unique(unlist(strsplit(unlist(exp_design[,c("cutadapt5First", "cutadapt5Second", "cutadapt3First", "cutadapt3Second")]), "")))
-  if(sum(!all_characters %in% c("A", "C", "G", "T", NA))!=0){
-    stop("Invalid constant region sequences. Only valid nucleotide sequences allowed (A/C/T/G).", call. = FALSE)
+
+  #Check that all FASTQ file prefices exist in barcodeDesign file (if barcodeDesignPath supplied)
+  if(!is.null(dimsum_meta[["barcodeDesignPath"]])){
+    all_prefices <- unique(gsub("1.fastq|2.fastq", "", unlist(exp_design[,c("pair1", "pair2")])))
+    if(sum(!all_prefices %in% dimsum_meta[["barcode_design"]][,"new_pair_prefix"])!=0){
+      stop(paste0("One or more FASTQ file names in experimentDesign file didn't match a 'new_pair_prefix' value in barcodeDesign file"), call. = FALSE)
+    }
   }
+
   #If not trans library: reverse complement cutadapt 5' constant regions to obtain 3' constant regions (if not already supplied)
   if(!dimsum_meta[["transLibrary"]]){
     exp_design[is.na(exp_design[,"cutadapt3First"]),"cutadapt3First"] <- as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(exp_design[is.na(exp_design[,"cutadapt3First"]),"cutadapt5Second"])))
     exp_design[is.na(exp_design[,"cutadapt3Second"]),"cutadapt3Second"] <- as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(exp_design[is.na(exp_design[,"cutadapt3Second"]),"cutadapt5First"])))
   }
-  #Check WT sequence is valid (ACGT characters only)
-  all_characters <- unique(unlist(strsplit(dimsum_meta[["wildtypeSequence"]], "")))
-  if(sum(!all_characters %in% c("A", "C", "G", "T"))!=0){
-    stop("Invalid wild-type nucleotide sequence. Only valid nucleotide sequences allowed (A/C/T/G).", call. = FALSE)
-  }
+
   return(exp_design)
 }
 

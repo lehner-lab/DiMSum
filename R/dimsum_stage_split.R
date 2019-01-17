@@ -17,10 +17,10 @@ dimsum_stage_split <- function(
   save_workspace = TRUE
   ){
   #Save current workspace for debugging purposes
-  if(save_workspace){save_metadata(dimsum_meta = dimsum_meta, n = 2)}
+  if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite split directory (if executed)
   split_outpath <- gsub("/$", "", split_outpath)
-  create_dimsum_dir(split_outpath, execute = execute, message = "SPLIT FASTQ FILES")  
+  dimsum__create_dir(split_outpath, execute = execute, message = "SPLIT FASTQ FILES")  
   fastq_pair_list <- dimsum_meta[['exp_design']][,c('pair1', 'pair2')]
   rownames(fastq_pair_list) = 1:dim(fastq_pair_list)[1]
   #Split FASTQ files
@@ -34,19 +34,19 @@ dimsum_stage_split <- function(
     dimsum_stage_split_helper <- function(
       i
       ){
-      num_records <- fastq_splitter(
+      num_records <- dimsum__fastq_splitter(
         inputFile = file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[i,][1]),
         outputFilePrefix = file.path(split_outpath, paste0(fastq_pair_list[i,][1], ".split")),
         chunkSize = 3758096384)
-      num_records <- fastq_splitter(
+      num_records <- dimsum__fastq_splitter(
         inputFile = file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[i,][2]),
         outputFilePrefix = file.path(split_outpath, paste0(fastq_pair_list[i,][2], ".split")),
         numRecords = num_records)
     }
     # Setup cluster
-    clust <- parallel::makeCluster(dimsum_meta[['num_cores']])
+    clust <- parallel::makeCluster(dimsum_meta[['numCores']])
     # make variables available to each core's workspace
-    parallel::clusterExport(clust, list("dimsum_meta","fastq_pair_list","split_outpath","fastq_splitter","fastq_splitter_writeFastq"), envir = environment())
+    parallel::clusterExport(clust, list("dimsum_meta","fastq_pair_list","split_outpath","dimsum__fastq_splitter","dimsum__fastq_splitter_writeFastq"), envir = environment())
     parallel::parSapply(clust,X = 1:nrow(fastq_pair_list), dimsum_stage_split_helper)
     parallel::stopCluster(clust)
   }

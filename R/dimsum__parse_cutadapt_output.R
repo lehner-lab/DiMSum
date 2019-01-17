@@ -1,5 +1,5 @@
 
-#' parse_cutadapt_output
+#' dimsum__parse_cutadapt_output
 #'
 #' Parse cutadapt stdout.
 #'
@@ -7,7 +7,7 @@
 #'
 #' @return a list of read trimming count statistics
 #' @export
-parse_cutadapt_output <- function(
+dimsum__parse_cutadapt_output <- function(
   file_path
   ){
   temp_out <- system(paste0("cat ", file_path), intern=TRUE)

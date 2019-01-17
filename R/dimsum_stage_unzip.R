@@ -17,10 +17,10 @@ dimsum_stage_unzip <- function(
   save_workspace = TRUE
   ){
   #Save current workspace for debugging purposes
-  if(save_workspace){save_metadata(dimsum_meta = dimsum_meta, n = 2)}
+  if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite unzip directory (if executed)
   fastq_outpath <- gsub("/$", "", fastq_outpath)
-  create_dimsum_dir(fastq_outpath, execute = execute, message = "UNZIP FASTQ FILES")  
+  dimsum__create_dir(fastq_outpath, execute = execute, message = "UNZIP FASTQ FILES")  
   #All fastq files gzipped?
   if(dimsum_meta[["gzipped"]]){
     message("Unzipping FASTQ files:")
@@ -42,7 +42,7 @@ dimsum_stage_unzip <- function(
           file.path(fastq_outpath, paste0(gsub(".gz$", "", basename(all_fastq[i])), '.stderr'))))
       }
       # Setup cluster
-      clust <- parallel::makeCluster(dimsum_meta[['num_cores']])
+      clust <- parallel::makeCluster(dimsum_meta[['numCores']])
       # make variables available to each core's workspace
       parallel::clusterExport(clust, list("all_fastq","fastq_outpath"), envir = environment())
       parallel::parSapply(clust,X = 1:length(all_fastq), dimsum_stage_unzip_helper)
