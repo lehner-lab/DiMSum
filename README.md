@@ -54,10 +54,6 @@ DiMSum -h
 
 The DiMSum pipeline processes paired-end reads (in FASTQ format) from deep mutational scanning (DMS) experiments to produce variant counts for each sample. These counts are suitable for use in downstream analyses of epistasis and [protein structure determination](https://github.com/lehner-lab/DMS2structure).
 
-To run this pipeline, you will first need to describe your experimental design (e.g. in MSExcel) and save this as a tab-separated plain text file. You can download [this](./example_experimentDesign.txt) file to use as a template.
-
-Additionally, if your raw FASTQ sequencing files contain multiplexed samples you will need to provide a tab-separated plain text file describing how barcodes map to samples. You can download [this](./example_barcodeDesign.txt) file to use as a template.
-
 ## Stage 1: DEMULTIPLEX READS
 
 Demultiplex samples and trim read barcodes using cutadapt (optional). This stage is run if a barcode design file is supplied (see 'barcodeDesignPath' argument). Stage-specific arguments: 'barcodeDesignPath' and 'barcodeErrorRate'.
@@ -81,6 +77,24 @@ Tally counts of unique variant sequences using FASTX-Toolkit.
 ## Stage 6: MERGE SAMPLE STATISTICS
 
 Combine sample-wise variant counts and statistics to produce a unified results data.table. Variant counts are aggregated across technical replicates.
+
+# Experimental design file
+
+To run this pipeline, you will first need to describe your experimental design (e.g. in MSExcel) and save this as a tab-separated plain text file. You can download [this](./example_experimentDesign.txt) file to use as a template.
+
+Your file must have the following columns:
+* **sample_name** A sensible sample name e.g. 'input1' (only alphanumeric characters allowed)
+* **experiment** An integer identifier for each unique experiment i.e. a set of input and output replicates relating to the same original plasmid library transformation or input biological replicate (a strictly positive integer)
+* **selection_id** An integer inidicating whether samples were sequenced before (0) or after (1) selection. Subsequent (serial) rounds of selection are indicated by higher numbers i.e. 2, 3, etc. (a positive integer, zero included)
+* **biological_replicate** An integer indicating the output biological replicate (a strictly positive integer). This field must be blank (empty string) for input samples (each input sample corresponds to a separate biological replicate i.e. experiment).
+* **technical_replicate** An integer indicating the technical replicate (a strictly positive integer). Leave this column blank (empty string) when no technical replicates are present.
+* **pair1** File name of the first read in a given pair.
+* **pair2** File name of the second read in a given pair.
+
+
+# Barcode design file
+
+If your raw FASTQ sequencing files contain multiplexed samples you will need to provide a tab-separated plain text file describing how barcodes map to samples. You can download [this](./example_barcodeDesign.txt) file to use as a template.
 
 
 
