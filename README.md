@@ -80,7 +80,7 @@ Tally counts of unique variant sequences using FASTX-Toolkit.
 
 ## Stage 6: MERGE SAMPLE STATISTICS
 
-Combine sample-wise variant counts and statistics. Variant counts are aggregated across technical replicates.
+Combine sample-wise variant counts and statistics to produce a unified results data.table. Variant counts are aggregated across technical replicates.
 
 
 
