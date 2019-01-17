@@ -60,6 +60,8 @@ Additionally, if your raw FASTQ sequencing files contain multiplexed samples you
 
 ## Stage 1: DEMULTIPLEX READS
 
+Demultiplex samples and trim read barcodes using cutadapt (optional). This stage is run if a barcode design file is supplied (see 'barcodeDesignPath' option).
+
 ## Stage 2: ASSESS READ QUALITY
 
 ## Stage 3: TRIM CONSTANT REGIONS
