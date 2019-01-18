@@ -91,6 +91,11 @@ Your file must have the following columns:
 * **pair1** FASTQ file name of the first read in a given pair.
 * **pair2** FASTQ file name of the second read in a given pair.
 
+Below is a schematic of a generic deep mutational scanning experiment together with the 
+<p align="left">
+  <img src="./DMS_pipeline.png">
+</p>
+
 In addition to these mandatory columns, additional columns may be included to specify stage 3-specific options i.e. those prefixed by 'cutadapt...', which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments.
 
 # Barcode design file
