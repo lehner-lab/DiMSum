@@ -91,7 +91,7 @@ Your file must have the following columns:
 * **pair1** FASTQ file name of the first read in a given pair.
 * **pair2** FASTQ file name of the second read in a given pair.
 
-Below is a schematic of a generic deep mutational scanning experiment indicating the corresponding entries which should be made in the experimental design file. 
+Below is a schematic of a generic deep mutational scanning experiment indicating the corresponding entries which should be made in the experimental design file (red text). 
 <p align="left">
   <img src="./DMS_experiment.png" width="600">
 </p>
