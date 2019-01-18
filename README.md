@@ -83,19 +83,27 @@ Combine sample-wise variant counts and statistics to produce a unified results d
 To run this pipeline, you will first need to describe your experimental design (e.g. in MSExcel) and save this as a tab-separated plain text file. You can download [this](./example_experimentDesign.txt) file to use as a template.
 
 Your file must have the following columns:
-* **sample_name** A sensible sample name e.g. 'input1' (only alphanumeric characters allowed)
-* **experiment** An integer identifier for each unique experiment i.e. a set of input and output replicates relating to the same original plasmid library transformation or input biological replicate (a strictly positive integer)
-* **selection_id** An integer inidicating whether samples were sequenced before (0) or after (1) selection. Subsequent (serial) rounds of selection are indicated by higher numbers i.e. 2, 3, etc. (a positive integer, zero included)
-* **biological_replicate** An integer indicating the output biological replicate (a strictly positive integer). This field must be blank (empty string) for input samples (each input sample corresponds to a separate biological replicate i.e. experiment).
+* **sample_name** A sensible sample name e.g. 'input1' (alphanumeric characters only)
+* **experiment** An integer identifier for each unique experiment i.e. a set of input and output replicates relating to the same original plasmid library transformation or input biological replicate (strictly positive integer)
+* **selection_id** An integer inidicating whether samples were sequenced before (0) or after (1) selection. Subsequent (serial) rounds of selection are indicated by higher numbers i.e. 2, 3, etc. (positive integer, zero included)
+* **biological_replicate** An integer indicating the output biological replicate (strictly positive integer). Entries should be blank (empty string) for all input samples (each input sample corresponds to a separate biological replicate i.e. experiment).
 * **technical_replicate** An integer indicating the technical replicate (a strictly positive integer). Leave this column blank (empty string) when no technical replicates are present.
-* **pair1** File name of the first read in a given pair.
-* **pair2** File name of the second read in a given pair.
+* **pair1** FASTQ file name of the first read in a given pair.
+* **pair2** FASTQ file name of the second read in a given pair.
 
+In addition to these mandatory columns, additional columns may be included to specify stage 3-specific options i.e. those prefixed by 'cutadapt...', which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments.
 
 # Barcode design file
 
 If your raw FASTQ sequencing files contain multiplexed samples you will need to provide a tab-separated plain text file describing how barcodes map to samples. You can download [this](./example_barcodeDesign.txt) file to use as a template.
 
+Your file must have the following columns:
+* **pair1** FASTQ file name of the first read in a given pair.
+* **pair2** FASTQ file name of the second read in a given pair.
+* **barcode** Sample DNA barcode (A/C/G/T characters only).
+* **new_pair_prefix** FASTQ file prefix of demultiplexed sample reads i.e. excluding file extension (alphanumeric and underscore characters only).
+
+When including a barcode design file, ensure that all 'new_pair_prefix' column entries correspond to 'pair1' and 'pair2' column entries in the experiment design file by appending '1.fastq' and '2.fastq' to the prefix for the first and second read respectively.
 
 
 (Vector illustration credit: <a href="https://www.vecteezy.com">Vecteezy!</a>)
