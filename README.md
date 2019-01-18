@@ -112,8 +112,8 @@ When including a barcode design file, ensure that all 'new_pair_prefix' column e
 
 # Output
 
-* **PROJECT_NAME_variant_data_merge.RData** R data object with variant counts and statistics ('variant_data_merge' data.table).
-* **reports_summary.html** DiMSum pipeline summary report and diagnostic plots in html format.
+* **PROJECT_DIR/PROJECT_NAME_variant_data_merge.RData** R data object with variant counts and statistics ('variant_data_merge' data.table).
+* **PROJECT_DIR/reports_summary.html** DiMSum pipeline summary report and diagnostic plots in html format.
 
 
 
