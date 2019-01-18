@@ -1,5 +1,5 @@
 <p align="left">
-  <img src="./Dumpling.png">
+  <img src="./Dumpling.png" width="100">
 </p>
 
 # Overview
@@ -90,6 +90,11 @@ Your file must have the following columns:
 * **technical_replicate** An integer indicating the technical replicate (a strictly positive integer). Leave this column blank (empty string) when no technical replicates are present.
 * **pair1** FASTQ file name of the first read in a given pair.
 * **pair2** FASTQ file name of the second read in a given pair.
+
+Below is a schematic of a generic deep mutational scanning experiment indicating the corresponding entries which should be made in the experimental design file (red text). 
+<p align="left">
+  <img src="./DMS_experiment.png" width="600">
+</p>
 
 In addition to these mandatory columns, additional columns may be included to specify stage 3-specific options i.e. those prefixed by 'cutadapt...', which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments.
 
