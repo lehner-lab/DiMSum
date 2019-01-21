@@ -4,7 +4,7 @@
 
 # Overview
 
-Welcome to the GitHub repository for DiMSum: A pipeline for pre-processing of paired-end reads from deep mutational scannning (DMS) data.
+Welcome to the GitHub repository for DiMSum: A pipeline for pre-processing deep mutational scannning (DMS) data.
 
 # Required Software
 
@@ -52,7 +52,7 @@ DiMSum -h
 
 # Pipeline
 
-The DiMSum pipeline processes paired-end reads (in FASTQ format) from deep mutational scanning (DMS) experiments to produce variant counts for each sample. These counts are suitable for use in downstream analyses of epistasis and [protein structure determination](https://github.com/lehner-lab/DMS2structure).
+The DiMSum pipeline processes raw sequencing reads (in FASTQ format) from deep mutational scanning (DMS) experiments to produce variant counts for each sample. These counts are suitable for use in downstream analyses of epistasis and [protein structure determination](https://github.com/lehner-lab/DMS2structure).
 
 ## Stage 1: DEMULTIPLEX READS
 
@@ -68,7 +68,7 @@ Remove constant region sequences from read 5’ and 3’ ends using cutadapt. 5'
 
 ## Stage 4: ALIGN PAIRED-END READS
 
-Align overlapping paired-end reads using USEARCH (cis libraries only i.e. 'transLibrary'=F). Stage-specific arguments: 'usearchMinQual', 'usearchMaxee', 'usearchMinlen', 'usearchMinovlen'.
+Align overlapping read pairs using USEARCH (paired-end cis libraries only i.e. 'transLibrary'=F). Stage-specific arguments: 'usearchMinQual', 'usearchMaxee', 'usearchMinlen', 'usearchMinovlen'.
 
 ## Stage 5: COUNT UNIQUE VARIANTS
 
