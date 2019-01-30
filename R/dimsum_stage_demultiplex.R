@@ -45,19 +45,19 @@ dimsum_stage_demultiplex <- function(
         #Copy FASTQ files to temp directory and format extension
         new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], fastq_pair_list[pair_name,][1])
         new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], fastq_pair_list[pair_name,][2])
-        temp_out = system(paste0(
+        temp_out <- system(paste0(
           "cp ",
           file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[pair_name,][1]),
           " ",
           file.path(demultiplex_outpath, new_fastq_name1)))
-        temp_out = system(paste0(
-          "cp ",
-          file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[pair_name,][2]),
-          " ",
-          file.path(demultiplex_outpath, new_fastq_name2)))
-        #Update names in list
-        fastq_pair_list[pair_name,][1] <- new_fastq_name1
-        fastq_pair_list[pair_name,][2] <- new_fastq_name2
+        #If second read in pair exists
+        if(dimsum_meta[["paired"]]){
+          temp_out <- system(paste0(
+            "cp ",
+            file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[pair_name,][2]),
+            " ",
+            file.path(demultiplex_outpath, new_fastq_name2)))
+        }
       }
     }
     # Setup cluster
@@ -89,10 +89,10 @@ dimsum_stage_demultiplex <- function(
   }
   #Demultiplex FASTQ files
   message("Demultiplexing FASTQ files with cutadapt:")
-  all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], c(dimsum_meta[['barcode_design']][,"pair1"], dimsum_meta[['barcode_design']][,"pair2"]))
+  all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], unique(c(dimsum_meta[['barcode_design']][,"pair1"], dimsum_meta[['barcode_design']][,"pair2"])))
   print(unique(all_fastq))
   message("Processing...")
-  for(i in 1:dim(fastq_pair_list)[1]){message(paste0("\t", fastq_pair_list[i,]))}
+  for(i in 1:dim(fastq_pair_list)[1]){message(paste0("\t", unique(fastq_pair_list[i,])))}
   #Check if this system command should be executed
   if(execute){
     dimsum_stage_demultiplex_helper <- function(
@@ -100,31 +100,51 @@ dimsum_stage_demultiplex <- function(
       ){
       pair_name <- rownames(fastq_pair_list)[i]
       #Demultiplex using cutadapt
-      temp_out = system(paste0(
-        "cutadapt",
-        " -g file:",
-        file.path(demultiplex_outpath, paste0('demultiplex_barcode-file_', pair_name, '.fasta')),
-        " -G file:",
-        file.path(demultiplex_outpath, paste0('demultiplex_barcode-file_', pair_name, '.fasta')),
-        " -e ",
-        as.character(dimsum_meta[["barcodeErrorRate"]]),
-        " --no-indels ",
-        " --untrimmed-output ",
-        file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.unknown.fastq")),
-        " --untrimmed-paired-output ",
-        file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][2], ".demultiplex.unknown.fastq")),
-        " -o ",
-        file.path(demultiplex_outpath, "{name}1.fastq"),
-        " -p ",
-        file.path(demultiplex_outpath, "{name}2.fastq"),
-        " ",
-        file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[pair_name,][1]),
-        " ",
-        file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[pair_name,][2]),
-        " > ",
-        file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.stdout")),
-        " 2> ",
-        file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.stderr"))))
+      if(dimsum_meta[["paired"]]){
+        temp_out <- system(paste0(
+          "cutadapt",
+          " -g file:",
+          file.path(demultiplex_outpath, paste0('demultiplex_barcode-file_', pair_name, '.fasta')),
+          " -G file:",
+          file.path(demultiplex_outpath, paste0('demultiplex_barcode-file_', pair_name, '.fasta')),
+          " -e ",
+          as.character(dimsum_meta[["barcodeErrorRate"]]),
+          " --no-indels ",
+          " --untrimmed-output ",
+          file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.unknown.fastq")),
+          " --untrimmed-paired-output ",
+          file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][2], ".demultiplex.unknown.fastq")),
+          " -o ",
+          file.path(demultiplex_outpath, "{name}1.fastq"),
+          " -p ",
+          file.path(demultiplex_outpath, "{name}2.fastq"),
+          " ",
+          file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[pair_name,][1]),
+          " ",
+          file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[pair_name,][2]),
+          " > ",
+          file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.stdout")),
+          " 2> ",
+          file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.stderr"))))
+      }else{
+        temp_out <- system(paste0(
+          "cutadapt",
+          " -g file:",
+          file.path(demultiplex_outpath, paste0('demultiplex_barcode-file_', pair_name, '.fasta')),
+          " -e ",
+          as.character(dimsum_meta[["barcodeErrorRate"]]),
+          " --no-indels ",
+          " --untrimmed-output ",
+          file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.unknown.fastq")),
+          " -o ",
+          file.path(demultiplex_outpath, "{name}1.fastq"),
+          " ",
+          file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[pair_name,][1]),
+          " > ",
+          file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.stdout")),
+          " 2> ",
+          file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.stderr"))))        
+      }
     }
     # Setup cluster
     clust <- parallel::makeCluster(dimsum_meta[['numCores']])

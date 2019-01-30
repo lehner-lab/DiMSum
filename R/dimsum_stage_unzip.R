@@ -24,16 +24,16 @@ dimsum_stage_unzip <- function(
   #All fastq files gzipped?
   if(dimsum_meta[["gzipped"]]){
     message("Unzipping FASTQ files:")
-    all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"]))
+    all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
     print(all_fastq)
     message("Processing...")
-    message(paste0("\t", all_fastq, "\n"))
+    message(paste0("\t", basename(all_fastq), "\n"))
     #Check if this system command should be executed
     if(execute){
       dimsum_stage_unzip_helper <- function(
         i
         ){
-        temp_out = system(paste0(
+        temp_out <- system(paste0(
           "gunzip -c ", 
           all_fastq[i], 
           " > ", 

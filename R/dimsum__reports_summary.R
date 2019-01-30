@@ -9,12 +9,14 @@
 #' @export
 dimsum__reports_summary <- function(dimsum_meta){
   #HTML results summary
-  reports_summary_template <- "<html>\
+  #Piece1
+  reports_piece1 <- "
+   <html>\
    <head>\
     <title>PROJECT_NAME</title>\
    </head>\
    <body>\
-   \t<h1>DiMSum v0.1 Pipeline Report (PROJECT_NAME)</h1>\
+   \t<h1>DiMSum DIMSUM_VERSION Pipeline Report (PROJECT_NAME)</h1>\
    \t\
    \t<div>\
    \t\t<a href=\"#FASTQC\"> 1. Raw FASTQ file quality control (FASTQC) </a><br>\
@@ -29,13 +31,25 @@ dimsum__reports_summary <- function(dimsum_meta){
    \t<div id=\"FASTQC\">\
    \t\t<h2>1. Raw FASTQ file quality control (FASTQC)</h2>\
    \t\t<p><img src=\"reports/dimsum_stage_fastqc_report_pair1_fastqc.png\" width=\"1200\"></p>\
+  "
+  #Paired-end read piece1
+  reports_PE_piece1 <- "
    \t\t<p><img src=\"reports/dimsum_stage_fastqc_report_pair2_fastqc.png\" width=\"1200\"></p>\
+  "
+  #Piece2
+  reports_piece2 <- "
    \t</div>\
   \
     \t<div id=\"CUTADAPT\">\
     \t\t<h2>2. Trimming of constant regions (cutadapt)</h2>\
   \t \t<p><img src=\"reports/dimsum_stage_cutadapt_report_pair1.png\" width=\"1200\"></p>\
+  "
+  #Paired-end read piece2
+  reports_PE_piece2 <- "
   \t \t<p><img src=\"reports/dimsum_stage_cutadapt_report_pair2.png\" width=\"1200\"></p>\
+  "
+  #Piece3
+  reports_piece3 <- "
    \t</div>\
    \t\
     \t<div id=\"USEARCH1\">\
@@ -70,5 +84,14 @@ dimsum__reports_summary <- function(dimsum_meta){
   \
    </body>\
   </html>"
-  return(gsub("PROJECT_NAME", dimsum_meta[["projectName"]], reports_summary_template))
+  #Assemble HTML
+  reports_summary_template <- ""
+  if(dimsum_meta[["paired"]]){
+    reports_summary_template <- paste0(reports_piece1, reports_PE_piece1, reports_piece2, reports_PE_piece2, reports_piece3)
+  }else{
+    reports_summary_template <- paste0(reports_piece1, reports_piece2, reports_piece3)
+  }
+  reports_summary_template <- gsub("PROJECT_NAME", dimsum_meta[["projectName"]], reports_summary_template)
+  reports_summary_template <- gsub("DIMSUM_VERSION", as.character(packageVersion("DiMSum")), reports_summary_template)
+  return(reports_summary_template)
 }

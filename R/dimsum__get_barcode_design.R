@@ -21,6 +21,15 @@ dimsum__get_barcode_design <- function(
   }
   barcode_design <- read.table(dimsum_meta[["barcodeDesignPath"]], header = T, stringsAsFactors = F, sep="\t")
 
+  #Set pair2 column equal to pair1 column if single-end library (contents of existing pair2 column will be ignored)
+  if(!dimsum_meta[["paired"]]){
+    if(!"pair1" %in% colnames(barcode_design)){
+      stop(paste0("Mandatory column missing from barcodeDesign file ('pair1')"), call. = FALSE)
+    }else{
+      barcode_design[,"pair2"] <- barcode_design[,"pair1"]
+    }
+  }
+
   #Check whether experiment design is valid
   dimsum__check_barcode_design(barcode_design)
 

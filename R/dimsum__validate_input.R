@@ -88,6 +88,11 @@ dimsum__validate_input <- function(
     stop("Invalid 'numCores' argument. Only positive integers allowed (zero exclusive).", call. = FALSE)
   }
 
+  #Check library design paired if trans library specified
+  if(dimsum_meta[["transLibrary"]] & !dimsum_meta[["paired"]]){
+    stop("Invalid 'paired' argument. Only paired-end trans libraries allowed.", call. = FALSE)
+  }
+
   #Return
   return(dimsum_meta)
 }

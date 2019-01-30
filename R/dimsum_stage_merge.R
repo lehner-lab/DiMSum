@@ -45,7 +45,7 @@ dimsum_stage_merge <- function(
   print(all_count)
   message("Processing...")
   for(count_file in all_count){
-    message(paste0("\t", count_file))
+    message(paste0("\t", basename(count_file)))
     #Check if this code should be executed
     if(execute){
       file_id <- gsub('.usearch.unique', '', basename(count_file))
@@ -101,7 +101,7 @@ dimsum_stage_merge <- function(
         variant_data <- count_dt
       #Not first file loaded (merge with previous data)
       }else{
-        variant_data = merge(variant_data,count_dt,by=names(variant_data)[-grep("count", names(variant_data))],all = T)
+        variant_data <- merge(variant_data,count_dt,by=names(variant_data)[-grep("count", names(variant_data))],all = T)
       }
       names(variant_data)[names(variant_data)=="count"] = paste0(file_id, "_count")
     }

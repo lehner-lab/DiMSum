@@ -33,15 +33,16 @@ dimsum_stage_unique <- function(
       i
       ){
       read_pair <- dimsum_meta[["exp_design"]][i,"aligned_pair"]
-      temp_out = system(paste0(
+      output_file_prefix <- read_pair
+      temp_out <- system(paste0(
         "fastx_collapser -Q33 -i ",
         file.path(dimsum_meta[["exp_design"]][,"aligned_pair_directory"][1], read_pair),
         " -o ",
-        file.path(unique_outpath, paste0(read_pair, '.unique')),
+        file.path(unique_outpath, paste0(output_file_prefix, '.unique')),
         " > ",
-        file.path(unique_outpath, paste0(read_pair, '.unique.stdout')),
+        file.path(unique_outpath, paste0(output_file_prefix, '.unique.stdout')),
         " 2> ",
-        file.path(unique_outpath, paste0(read_pair, '.unique.stderr'))))
+        file.path(unique_outpath, paste0(output_file_prefix, '.unique.stderr'))))
     }
     # Setup cluster
     clust <- parallel::makeCluster(dimsum_meta[['numCores']])
@@ -52,7 +53,6 @@ dimsum_stage_unique <- function(
   }
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
-  #Unique fasta filenames
   dimsum_meta_new[["exp_design"]][,"aligned_pair_unique"] <- paste0(dimsum_meta_new[["exp_design"]][,"aligned_pair"], ".unique")
   dimsum_meta_new[['exp_design']][,"aligned_pair_unique_directory"] <- unique_outpath
   return(dimsum_meta_new)

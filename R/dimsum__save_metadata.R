@@ -16,6 +16,6 @@ dimsum__save_metadata <- function(
     list = c(ls(parent.frame(n = n))), 
     file = file.path(dimsum_meta[["project_path"]], paste0(dimsum_meta[["projectName"]], '_workspace.RData')),
     envir = parent.frame(n = n))
-  session_info = sessionInfo()
+  session_info <- sessionInfo()
   save(session_info, file = file.path(dimsum_meta[["project_path"]], paste0(dimsum_meta[["projectName"]], '_sessionInfo.RData')))
 }

@@ -7,6 +7,7 @@
 #' @param fastqFileExtension FASTQ file extension
 #' @param gzipped Are FASTQ files are gzipped? (default:T)
 #' @param stranded Is the library design stranded? (default:T)
+#' @param paired Is the library design paired-end? (default:T)
 #' @param barcodeDesignPath Path to barcode design file (tab-separated plain text file with barcode design)
 #' @param barcodeErrorRate Maximum allowed error rate for the barcode (default:0.25)
 #' @param experimentDesignPath Path to experimental design file (tab-separated plain text file with replicate structure)
@@ -39,6 +40,7 @@ dimsum <- function(
   fastqFileExtension=".fastq",
   gzipped=T,
   stranded=T,
+  paired=T,
   barcodeDesignPath,
   barcodeErrorRate=0.25,
   experimentDesignPath,
@@ -108,6 +110,7 @@ dimsum <- function(
     "fastqFileExtension" = list(fastqFileExtension, c("character")), #alphanumeric character string starting with '.' -- checked in dimsum__validate_input
     "gzipped" = list(gzipped, c("logical")), #logical -- checked in dimsum__validate_input
     "stranded" = list(stranded, c("logical")), #logical -- checked in dimsum__validate_input
+    "paired" = list(paired, c("logical")), #logical -- checked in dimsum__validate_input
     "barcodeDesignPath" = list(barcodeDesignPath, c("character", "NULL")), #file exists (if not NULL)
     "barcodeErrorRate" = list(barcodeErrorRate, c("double")), #strictly positive double (zero inclusive)
     "experimentDesignPath" = list(experimentDesignPath, c("character")), #file exists -- checked in dimsum__get_experiment_design

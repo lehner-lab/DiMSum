@@ -16,6 +16,15 @@ dimsum__get_experiment_design <- function(
   }
   exp_design <- read.table(dimsum_meta[["experimentDesignPath"]], header = T, stringsAsFactors = F, sep="\t")
 
+  #Set pair2 column equal to pair1 column if single-end library (contents of existing pair2 column will be ignored)
+  if(!dimsum_meta[["paired"]]){
+    if(!"pair1" %in% colnames(exp_design)){
+      stop(paste0("Mandatory column missing from experimentDesign file ('pair1')"), call. = FALSE)
+    }else{
+      exp_design[,"pair2"] <- exp_design[,"pair1"]
+    }
+  }
+
   #Add original FASTQ directory
   exp_design[,"pair_directory"] <- dimsum_meta[["fastqFileDir"]]
 

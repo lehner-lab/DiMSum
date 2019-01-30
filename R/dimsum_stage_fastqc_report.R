@@ -77,19 +77,21 @@ dimsum_stage_fastqc_report <- function(
     }
     #Encoding
     encoding_format <- paste(unique(unlist(encoding)), collapse = ", ")
-    #Plot
-    d <- ggplot2::ggplot(plot_df, ggplot2::aes(base_position, value, color = Read_name)) +
-      ggplot2::geom_line() +
-      ggplot2::geom_hline(yintercept=c(20, 28), linetype = 2) +
-      ggplot2::theme_bw() +
-      ggplot2::coord_cartesian(ylim = c(0, max(plot_df[,'value']))) + ggplot2::geom_vline(xintercept = vr_boundaries_pos, linetype = 2) +
-      ggplot2::annotate("text", label = "variable region" , x = median(unique(plot_df[,"base_position"])), y = 0) + 
-      ggplot2::scale_x_continuous(
-      breaks = (1:length(rownames(fastqc_df1)))[seq(1, length(rownames(fastqc_df1)), 5)],
-      label = rownames(fastqc_df1)[seq(1, length(rownames(fastqc_df1)), 5)]) +
-      ggplot2::labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Read ", gsub("pair|_fastqc", "", col_name), " quality scores across all bases (", encoding_format, ")"))
-    d <- d + ggplot2::facet_wrap(~statistic, nrow=2, ncol=1)
-    ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_fastqc_report_', col_name, '.png')), d, width=12, height=8)
+    #Plot (if not pair2 or paired design)
+    if(col_name != "pair2_fastqc" | dimsum_meta[["paired"]]){
+      d <- ggplot2::ggplot(plot_df, ggplot2::aes(base_position, value, color = Read_name)) +
+        ggplot2::geom_line() +
+        ggplot2::geom_hline(yintercept=c(20, 28), linetype = 2) +
+        ggplot2::theme_bw() +
+        ggplot2::coord_cartesian(ylim = c(0, max(plot_df[,'value']))) + ggplot2::geom_vline(xintercept = vr_boundaries_pos, linetype = 2) +
+        ggplot2::annotate("text", label = "variable region" , x = median(unique(plot_df[,"base_position"])), y = 0) + 
+        ggplot2::scale_x_continuous(
+        breaks = (1:length(rownames(fastqc_df1)))[seq(1, length(rownames(fastqc_df1)), 5)],
+        label = rownames(fastqc_df1)[seq(1, length(rownames(fastqc_df1)), 5)]) +
+        ggplot2::labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Read ", gsub("pair|_fastqc", "", col_name), " quality scores across all bases (", encoding_format, ")"))
+      d <- d + ggplot2::facet_wrap(~statistic, nrow=2, ncol=1)
+      ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_fastqc_report_', col_name, '.png')), d, width=12, height=8)
+    }
   }
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta

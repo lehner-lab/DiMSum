@@ -15,7 +15,7 @@ dimsum__check_barcode_design <- function(
   #Check if mandatory columns present
   mandatory_cols <- c("pair1", "pair2", "barcode", "new_pair_prefix")
   if(sum(unlist(lapply(mandatory_cols, "%in%", colnames(barcode_design)))==FALSE)!=0){
-    stop(paste0("One or more mandatory columns missing from barcodeDesign file ('sample_name', 'experiment', 'selection_id', 'biological_replicate', 'technical_replicate', 'pair1', 'pair2')"), call. = FALSE)
+    stop(paste0("One or more mandatory columns missing from barcodeDesign file ('pair1', 'pair2', 'barcode', 'new_pair_prefix')"), call. = FALSE)
   }
 
   ### FASTQ file checks (pair1/pair2 columns)

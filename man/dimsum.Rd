@@ -5,14 +5,14 @@
 \title{Run DiMSum pipeline}
 \usage{
 dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
-  stranded = T, barcodeDesignPath, barcodeErrorRate = 0.25,
-  experimentDesignPath, cutadaptCut5First, cutadaptCut5Second,
-  cutadaptCut3First, cutadaptCut3Second, cutadapt5First, cutadapt5Second,
-  cutadapt3First, cutadapt3Second, cutadaptMinLength = 50,
-  cutadaptErrorRate = 0.2, usearchMinQual, usearchMaxee,
-  usearchMinlen = 64, usearchMinovlen = 16, outputPath, projectName,
-  wildtypeSequence, transLibrary = F, startStage = 1, stopStage = 0,
-  numCores = 1)
+  stranded = T, paired = T, barcodeDesignPath,
+  barcodeErrorRate = 0.25, experimentDesignPath, cutadaptCut5First,
+  cutadaptCut5Second, cutadaptCut3First, cutadaptCut3Second,
+  cutadapt5First, cutadapt5Second, cutadapt3First, cutadapt3Second,
+  cutadaptMinLength = 50, cutadaptErrorRate = 0.2, usearchMinQual,
+  usearchMaxee, usearchMinlen = 64, usearchMinovlen = 16, outputPath,
+  projectName, wildtypeSequence, transLibrary = F, startStage = 1,
+  stopStage = 0, numCores = 1)
 }
 \arguments{
 \item{fastqFileDir}{Path to directory with input FASTQ files}
@@ -22,6 +22,8 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 \item{gzipped}{Are FASTQ files are gzipped? (default:T)}
 
 \item{stranded}{Is the library design stranded? (default:T)}
+
+\item{paired}{Is the library design paired-end? (default:T)}
 
 \item{barcodeDesignPath}{Path to barcode design file (tab-separated plain text file with barcode design)}
 

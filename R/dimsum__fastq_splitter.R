@@ -1,31 +1,4 @@
 
-#' dimsum__fastq_splitter_writeFastq
-#'
-#' writeFastq wrapper for fastq_splitter.
-#'
-#' @param shortreads ShortReadQ object (required)
-#' @param outputFile Path to output FASTQ file (required)
-#' @param initial_write Is this the first write? (required)
-#'
-#' @return Nothing
-#' @export
-dimsum__fastq_splitter_writeFastq <- function(
-  shortreads,
-  outputFile,
-  initial_write
-  ){
-  if(initial_write){
-    if(file.exists(outputFile)){
-      stop("file output path exists", call. = FALSE)
-    }else{
-      ShortRead::writeFastq(shortreads, outputFile, mode="w", compress=FALSE, full = FALSE)
-    }
-  }else{
-    ShortRead::writeFastq(shortreads, outputFile, mode="a", compress=FALSE, full = FALSE)
-  }
-}
-
-
 #' dimsum__fastq_splitter
 #'
 #' Split FASTQ file into roughly equally sized chunks (bytes).
@@ -56,7 +29,7 @@ dimsum__fastq_splitter <- function(
     #Number of bytes in first FASTQ record
     bytesperrecord <- IRanges::width(ShortRead::id(fq)) + 1 + IRanges::width(ShortRead::sread(fq))*2 + 1 + 4
     #Estimated lines per file
-    num_fastqrecords = as.integer(chunkSize/bytesperrecord)
+    num_fastqrecords <- as.integer(chunkSize/bytesperrecord)
     close(f)
   }else{
     stop("Either --chunkSize or --numRecords arguments need to be specified", call. = FALSE)
@@ -71,27 +44,25 @@ dimsum__fastq_splitter <- function(
   f <- ShortRead::FastqStreamer(inputFile, n=yield_size)
   while(length(fq <- ShortRead::yield(f))){
     #Write all yielded records
-    while(length(fq)){
-      if((records + length(fq)) >= num_fastqrecords){
-        #File will be full after this write
-        num_to_write <- num_fastqrecords-records
-        #Write a subset of yielded records
-        dimsum__fastq_splitter_writeFastq(shortreads = fq[1:num_to_write], outputFile = output_FASTQ, initial_write = (records==0))
-        #Remove written records
-        fq <- fq[-(1:num_to_write)]
-        #Increment file counter and update output file
-        count <- count + 1
-        output_FASTQ <- paste0(outputFilePrefix, count, '.fastq')
-        #Reset record counter
-        records <- 0
-      }else{
-        #File will not be full after this write (write all yielded records)
-        dimsum__fastq_splitter_writeFastq(shortreads = fq, outputFile = output_FASTQ, initial_write = (records==0))
-        #Increment record counter
-        records <- records + length(fq)
-        #Remove written records
-        fq <- fq[-(1:length(fq))]
-      }
+    if((records + length(fq)) >= num_fastqrecords){
+      #File will be full after this write
+      num_to_write <- num_fastqrecords-records
+      #Write a subset of yielded records
+      dimsum__writeFastq(shortreads = fq[1:num_to_write], outputFile = output_FASTQ, initial_write = (records==0))
+      #Remove written records
+      fq <- fq[-(1:num_to_write)]
+      #Increment file counter and update output file
+      count <- count + 1
+      output_FASTQ <- paste0(outputFilePrefix, count, '.fastq')
+      #Reset record counter
+      records <- 0
+    }else{
+      #File will not be full after this write (write all yielded records)
+      dimsum__writeFastq(shortreads = fq, outputFile = output_FASTQ, initial_write = (records==0))
+      #Increment record counter
+      records <- records + length(fq)
+      #Remove written records
+      fq <- fq[-(1:length(fq))]
     }
   }
   close(f)

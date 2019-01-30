@@ -1,10 +1,9 @@
 
-#' dimsum__concatenate_reads
+#' dimsum__filter_single_end_reads
 #'
 #' Concatentate reads (without reverse complementing second read in pair).
 #'
-#' @param input_FASTQ1 Path to first read FASTQ file (required)
-#' @param input_FASTQ2 Path to second read FASTQ file (required)
+#' @param input_FASTQ Path to first read FASTQ file (required)
 #' @param output_FASTQ Path to output FASTQ file (required)
 #' @param output_REPORT Path to report file (required)
 #' @param min_qual Minimum observed base quality to retain read pair (required)
@@ -13,9 +12,8 @@
 #'
 #' @return Nothing
 #' @export
-dimsum__concatenate_reads <- function(
-  input_FASTQ1,
-  input_FASTQ2,
+dimsum__filter_single_end_reads <- function(
+  input_FASTQ,
   output_FASTQ,
   output_REPORT,
   min_qual,
@@ -37,55 +35,41 @@ dimsum__concatenate_reads <- function(
   #Process FASTQ files
   initial_write <- TRUE #records written to output file already?
   yield_size <- 1e6
-  f1 <- ShortRead::FastqStreamer(input_FASTQ1, n=yield_size)
-  f2 <- ShortRead::FastqStreamer(input_FASTQ2, n=yield_size)
+  f <- ShortRead::FastqStreamer(input_FASTQ, n=yield_size)
   #Read input FASTQ files in chunks
-  while(length(fq1 <- ShortRead::yield(f1))){
-    fq2 <- ShortRead::yield(f2)
+  while(length(fq <- ShortRead::yield(f))){
     #Update statistics
-    a_stats[['Pairs']] <- a_stats[['Pairs']] + length(fq1)
+    a_stats[['Pairs']] <- a_stats[['Pairs']] + length(fq)
     #Read lengths
-    fq1_lengths <- IRanges::width(ShortRead::sread(fq1))
-    fq2_lengths <- IRanges::width(ShortRead::sread(fq2))
+    fq_lengths <- IRanges::width(ShortRead::sread(fq))
     #Update statistics
-    a_stats[['Fwd_too_short']] <- a_stats[['Fwd_too_short']] + sum(fq1_lengths<min_len)
-    a_stats[['Rev_too_short']] <- a_stats[['Rev_too_short']] + sum(fq2_lengths<min_len)
+    a_stats[['Fwd_too_short']] <- a_stats[['Fwd_too_short']] + sum(fq_lengths<min_len)
     #Subset to sequences at least 64 bp long
-    fq1 <- fq1[fq1_lengths>=min_len & fq2_lengths>=min_len]
-    fq2 <- fq2[fq1_lengths>=min_len & fq2_lengths>=min_len]
+    fq <- fq[fq_lengths>=min_len]
     #Update statistics
-    a_stats[['Alignments_zero_diffs']] <- a_stats[['Alignments_zero_diffs']] + sum(fq1_lengths>=min_len & fq2_lengths>=min_len)
+    a_stats[['Alignments_zero_diffs']] <- a_stats[['Alignments_zero_diffs']] + sum(fq_lengths>=min_len)
     #Read quality matrices
-    qmat1 <- as(Biostrings::quality(fq1), "matrix")
-    qmat2 <- as(Biostrings::quality(fq2), "matrix")
+    qmat <- as(Biostrings::quality(fq), "matrix")
     #Number of bases with qualities less than minimum specified?
-    non_merge_num_bases_too_low_qual <- apply(qmat1<min_qual, 1, sum, na.rm = T) + apply(qmat2<min_qual, 1, sum, na.rm = T)
+    non_merge_num_bases_too_low_qual <- apply(qmat<min_qual, 1, sum, na.rm = T)
     #Update statistics
     a_stats[['Min_Q_too_low']] <- a_stats[['Min_Q_too_low']] + sum(non_merge_num_bases_too_low_qual!=0)
     #Subset to sequences with all base qualities not less than specified
-    fq1 <- fq1[non_merge_num_bases_too_low_qual==0]
-    fq2 <- fq2[non_merge_num_bases_too_low_qual==0]
+    fq <- fq[non_merge_num_bases_too_low_qual==0]
     #Read error probability matrices
-    emat1 <- 10^(qmat1[non_merge_num_bases_too_low_qual==0,]/(-10))
-    emat2 <- 10^(qmat2[non_merge_num_bases_too_low_qual==0,]/(-10))
+    emat <- 10^(qmat[non_merge_num_bases_too_low_qual==0,]/(-10))
     #Expected number of read errors
-    exp_num_read_errors <- apply(emat1, 1, sum, na.rm = T) + apply(emat2, 1, sum, na.rm = T)
+    exp_num_read_errors <- apply(emat, 1, sum, na.rm = T)
     #Update statistics
     a_stats[['Exp.errs._too_high']] <- a_stats[['Exp.errs._too_high']] + sum(exp_num_read_errors>max_ee)
     #Subset to sequences with less than specified expected number of read errors
-    fq1 <- fq1[exp_num_read_errors<=max_ee]
-    fq2 <- fq2[exp_num_read_errors<=max_ee]
-    #Concatenate sequence
-    fqc <- ShortRead::ShortReadQ(
-      sread = Biostrings::DNAStringSet(paste0(as.character(ShortRead::sread(fq1)), as.character(ShortRead::sread(fq2)))), 
-      quality = Biostrings::BStringSet(paste0(as.character(Biostrings::quality(Biostrings::quality(fq1))), as.character(Biostrings::quality(Biostrings::quality(fq2))))), 
-      id = ShortRead::id(fq1))
+    fq <- fq[exp_num_read_errors<=max_ee]
     #Write to file
-    dimsum__writeFastq(shortreads = fqc, outputFile = output_FASTQ, initial_write = initial_write)
+    dimsum__writeFastq(shortreads = fq, outputFile = output_FASTQ, initial_write = initial_write)
     initial_write <- FALSE
     #Update statistics
-    a_stats[['Merged']] <- a_stats[['Merged']] + length(fqc)
-    a_stats[['merged_lengths']] <- c(a_stats[['merged_lengths']], IRanges::width(ShortRead::sread(fqc)))
+    a_stats[['Merged']] <- a_stats[['Merged']] + length(fq)
+    a_stats[['merged_lengths']] <- c(a_stats[['merged_lengths']], IRanges::width(ShortRead::sread(fq)))
   }
   #Update length statistics
   if(a_stats[['Merged']]!=0){
@@ -106,9 +90,9 @@ dimsum__concatenate_reads <- function(
   report_list <- list()
   report_list <- append(report_list, paste0(
     '\nMerge\n\tFwd ', 
-    input_FASTQ1, 
+    input_FASTQ, 
     '\n\tRev ', 
-    input_FASTQ2, 
+    input_FASTQ, 
     '\n\tKeep read labels\n\t', 
     as.character(a_stats['Merged']), 
     ' / ', 

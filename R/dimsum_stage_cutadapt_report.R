@@ -21,18 +21,28 @@ dimsum_stage_cutadapt_report <- function(
   cutadapt_read2_list <- list()
   total_reads_list <- list()
   for(i in 1:length(cutadapt_files)){
-    trim_list <- dimsum__parse_cutadapt_output(cutadapt_files[i])
-    total_reads_list[[i]] <- trim_list[['total_reads']]
-    cutadapt_read1_list[[trim_list[['name_read1']]]] <- c(
-      trim_list[['total_read1_a5']]-trim_list[['total_read1_both']], 
-      trim_list[['total_read1_a3']]-trim_list[['total_read1_both']], 
-      trim_list[['total_read1_both']], 
-      trim_list[['total_reads']])
-    cutadapt_read2_list[[trim_list[['name_read2']]]] <- c(
-      trim_list[['total_read2_a5']]-trim_list[['total_read2_both']], 
-      trim_list[['total_read2_a3']]-trim_list[['total_read2_both']], 
-      trim_list[['total_read2_both']], 
-      trim_list[['total_reads']])
+    if(dimsum_meta[["paired"]]){
+      trim_list <- dimsum__parse_cutadapt_output(cutadapt_files[i])
+      total_reads_list[[i]] <- trim_list[['total_reads']]
+      cutadapt_read1_list[[trim_list[['name_read1']]]] <- c(
+        trim_list[['total_read1_a5']]-trim_list[['total_read1_both']], 
+        trim_list[['total_read1_a3']]-trim_list[['total_read1_both']], 
+        trim_list[['total_read1_both']], 
+        trim_list[['total_reads']])
+      cutadapt_read2_list[[trim_list[['name_read2']]]] <- c(
+        trim_list[['total_read2_a5']]-trim_list[['total_read2_both']], 
+        trim_list[['total_read2_a3']]-trim_list[['total_read2_both']], 
+        trim_list[['total_read2_both']], 
+        trim_list[['total_reads']])
+    }else{
+      trim_list <- dimsum__parse_cutadapt_output_single_end(cutadapt_files[i])
+      total_reads_list[[i]] <- trim_list[['total_reads']]
+      cutadapt_read1_list[[trim_list[['name_read1']]]] <- c(
+        trim_list[['total_read1_a5']]-trim_list[['total_read1_both']], 
+        trim_list[['total_read1_a3']]-trim_list[['total_read1_both']], 
+        trim_list[['total_read1_both']], 
+        trim_list[['total_reads']])
+    }
   }
   #First read
   cutadapt_read1_df <- as.data.frame(do.call('rbind', cutadapt_read1_list))
@@ -55,27 +65,29 @@ dimsum_stage_cutadapt_report <- function(
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
     ggplot2::labs(x = "FASTQ files", y = "Reads trimmed (percentage)", title = paste0("Read 1 percentage constant region identified and trimmed"))
   ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_cutadapt_report_pair1.png')), d, width=12, height=8)
-  #Second read
-  cutadapt_read2_df <- as.data.frame(do.call('rbind', cutadapt_read2_list))
-  colnames(cutadapt_read2_df) <- c('five_prime', 'three_prime', 'both', 'total_reads')
-  cutadapt_read2_df[,'fastq'] <- sapply(strsplit(rownames(cutadapt_read2_df), '.split'), '[', 1)
-  cutadapt_read2_df_collapse <- plyr::ddply(cutadapt_read2_df, "fastq", plyr::summarise, 
-    five_prime = sum(five_prime), 
-    three_prime = sum(three_prime), 
-    both = sum(both), 
-    total_reads = sum(total_reads))
-  cutadapt_read2_df_collapse_perc <- cutadapt_read2_df_collapse
-  cutadapt_read2_df_collapse_perc[,2:4] <- as.data.frame(t(scale(t(cutadapt_read2_df_collapse_perc[,2:4]), center = F, scale = cutadapt_read2_df_collapse_perc[,'total_reads'])))*100
-  cutadapt_read2_df_collapse_perc <- cutadapt_read2_df_collapse_perc[,1:4]
-  #Plot
-  plot_df <- reshape2::melt(cutadapt_read2_df_collapse_perc, id="fastq")
-  plot_df[,'Region_trimmed'] <- factor(plot_df[,'variable'])
-  d <- ggplot2::ggplot(plot_df, ggplot2::aes(fastq, value)) +
-    ggplot2::geom_col(ggplot2::aes(fill = Region_trimmed)) +
-    ggplot2::theme_bw() +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
-    ggplot2::labs(x = "FASTQ files", y = "Reads trimmed (percentage)", title = paste0("Read 2 percentage constant region identified and trimmed"))
-  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_cutadapt_report_pair2.png')), d, width=12, height=8)
+  #Second read (if paired design)
+  if(dimsum_meta[["paired"]]){
+    cutadapt_read2_df <- as.data.frame(do.call('rbind', cutadapt_read2_list))
+    colnames(cutadapt_read2_df) <- c('five_prime', 'three_prime', 'both', 'total_reads')
+    cutadapt_read2_df[,'fastq'] <- sapply(strsplit(rownames(cutadapt_read2_df), '.split'), '[', 1)
+    cutadapt_read2_df_collapse <- plyr::ddply(cutadapt_read2_df, "fastq", plyr::summarise, 
+      five_prime = sum(five_prime), 
+      three_prime = sum(three_prime), 
+      both = sum(both), 
+      total_reads = sum(total_reads))
+    cutadapt_read2_df_collapse_perc <- cutadapt_read2_df_collapse
+    cutadapt_read2_df_collapse_perc[,2:4] <- as.data.frame(t(scale(t(cutadapt_read2_df_collapse_perc[,2:4]), center = F, scale = cutadapt_read2_df_collapse_perc[,'total_reads'])))*100
+    cutadapt_read2_df_collapse_perc <- cutadapt_read2_df_collapse_perc[,1:4]
+    #Plot
+    plot_df <- reshape2::melt(cutadapt_read2_df_collapse_perc, id="fastq")
+    plot_df[,'Region_trimmed'] <- factor(plot_df[,'variable'])
+    d <- ggplot2::ggplot(plot_df, ggplot2::aes(fastq, value)) +
+      ggplot2::geom_col(ggplot2::aes(fill = Region_trimmed)) +
+      ggplot2::theme_bw() +
+      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
+      ggplot2::labs(x = "FASTQ files", y = "Reads trimmed (percentage)", title = paste0("Read 2 percentage constant region identified and trimmed"))
+    ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_cutadapt_report_pair2.png')), d, width=12, height=8)
+  }
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Update fastq metadata

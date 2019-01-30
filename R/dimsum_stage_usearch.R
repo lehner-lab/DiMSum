@@ -24,9 +24,9 @@ dimsum_stage_usearch <- function(
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite usearch directory (if executed)
   usearch_outpath <- gsub("/$", "", usearch_outpath)
-  dimsum__create_dir(usearch_outpath, execute = execute, message = "DiMSum STAGE 4: ALIGN PAIRED-END READS")  
+  dimsum__create_dir(usearch_outpath, execute = execute, message = "DiMSum STAGE 4: ALIGN PAIRED-END READS") 
   #Sample names
-  sample_names = paste0(
+  sample_names <- paste0(
     dimsum_meta[["exp_design"]][,"sample_name"], '_e', 
     dimsum_meta[["exp_design"]][,"experiment"], '_s', 
     dimsum_meta[["exp_design"]][,"selection_id"], '_b', 
@@ -34,34 +34,68 @@ dimsum_stage_usearch <- function(
     dimsum_meta[["exp_design"]][,"technical_replicate"], '_split', 
     dimsum_meta[["exp_design"]][,"split"], sep = "")
   #Additional usearch options related to alignment length
-  temp_options = paste0(' -fastq_minovlen ', dimsum_meta[["usearchMinovlen"]])
-  if( dimsum_meta[["usearchMinovlen"]] < 16 ){temp_options = paste0(temp_options, " -xdrop_nw ", dimsum_meta[["usearchMinovlen"]])}
-  if( dimsum_meta[["usearchMinovlen"]] < 16 ){temp_options = paste0(temp_options, " -minhsp ", dimsum_meta[["usearchMinovlen"]])}
-  if( dimsum_meta[["usearchMinovlen"]] < 16 ){temp_options = paste0(temp_options, " -band ", dimsum_meta[["usearchMinovlen"]])}
-  if( dimsum_meta[["usearchMinovlen"]] < 5 ){temp_options = paste0(temp_options, " -hspw ", dimsum_meta[["usearchMinovlen"]])}
+  temp_options <- paste0(' -fastq_minovlen ', dimsum_meta[["usearchMinovlen"]])
+  if( dimsum_meta[["usearchMinovlen"]] < 16 ){temp_options <- paste0(temp_options, " -xdrop_nw ", dimsum_meta[["usearchMinovlen"]])}
+  if( dimsum_meta[["usearchMinovlen"]] < 16 ){temp_options <- paste0(temp_options, " -minhsp ", dimsum_meta[["usearchMinovlen"]])}
+  if( dimsum_meta[["usearchMinovlen"]] < 16 ){temp_options <- paste0(temp_options, " -band ", dimsum_meta[["usearchMinovlen"]])}
+  if( dimsum_meta[["usearchMinovlen"]] < 5 ){temp_options <- paste0(temp_options, " -hspw ", dimsum_meta[["usearchMinovlen"]])}
   #Run USEARCH on all fastq file pairs
   message("Aligning paired-end FASTQ files with USEARCH:")
-  all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"]))
+  all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
   print(all_fastq)
   message("Processing...")
-  for(i in 1:length(sample_names)){
-    #TODO: usearch binary path specifiable on commandline?
-    #TODO: only run if usearch arguments specified
-    message(paste0("\t", dimsum_meta[["exp_design"]][i,c('pair1', 'pair2')]))
-    #Check if this system command should be executed
+  #Trans library mode?
+  if(dimsum_meta[["transLibrary"]]){
+    for(i in 1:length(sample_names)){message(paste0("\t", dimsum_meta[["exp_design"]][i,c('pair1', 'pair2')]))}
     if(execute){
-      if(dimsum_meta[["transLibrary"]]){
-        temp_out = dimsum__concatenate_reads(
+      dimsum_stage_usearch_trans_library_helper <- function(
+        i
+        ){
+        temp_out <- dimsum__concatenate_reads(
           input_FASTQ1 = file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair1"]),
           input_FASTQ2 = file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair2"]),
           output_FASTQ = file.path(usearch_outpath, paste0(sample_names[i], '.usearch')),
           output_REPORT = file.path(usearch_outpath, paste0(sample_names[i], '.report')),
           min_qual = dimsum_meta[["usearchMinQual"]],
           max_ee = dimsum_meta[["usearchMaxee"]],
-          min_len = dimsum_meta[["usearchMinlen"]])              
+          min_len = dimsum_meta[["usearchMinlen"]])
       }
-      else{
-        temp_out = system(paste0(
+      # Setup cluster
+      clust <- parallel::makeCluster(dimsum_meta[['numCores']])
+      # make variables available to each core's workspace
+      parallel::clusterExport(clust, list("dimsum_meta","usearch_outpath","sample_names","dimsum__concatenate_reads"), envir = environment())
+      parallel::parSapply(clust,X = 1:length(sample_names), dimsum_stage_usearch_trans_library_helper)
+      parallel::stopCluster(clust)
+    }
+  #Single-end mode?
+  }else if(!dimsum_meta[["paired"]]){
+    for(i in 1:length(sample_names)){message(paste0("\t", unique(unlist(dimsum_meta[["exp_design"]][i,c('pair1', 'pair2')]))))}
+    if(execute){
+      dimsum_stage_usearch_single_end_library_helper <- function(
+        i
+        ){
+        temp_out <- dimsum__filter_single_end_reads(
+          input_FASTQ = file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair1"]),
+          output_FASTQ = file.path(usearch_outpath, paste0(sample_names[i], '.usearch')),
+          output_REPORT = file.path(usearch_outpath, paste0(sample_names[i], '.report')),
+          min_qual = dimsum_meta[["usearchMinQual"]],
+          max_ee = dimsum_meta[["usearchMaxee"]],
+          min_len = dimsum_meta[["usearchMinlen"]])
+      }
+      # Setup cluster
+      clust <- parallel::makeCluster(dimsum_meta[['numCores']])
+      # make variables available to each core's workspace
+      parallel::clusterExport(clust, list("dimsum_meta","usearch_outpath","sample_names","dimsum__filter_single_end_reads"), envir = environment())
+      parallel::parSapply(clust,X = 1:length(sample_names), dimsum_stage_usearch_single_end_library_helper)
+      parallel::stopCluster(clust)
+    }
+  #Classic paired-end mode
+  }else{
+    for(i in 1:length(sample_names)){
+      message(paste0("\t", dimsum_meta[["exp_design"]][i,c('pair1', 'pair2')]))
+      #Check if this system command should be executed
+      if(execute){
+        temp_out <- system(paste0(
           "usearch -fastq_mergepairs ",
           file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair1"]),
           " -reverse ",
