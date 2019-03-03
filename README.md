@@ -4,7 +4,7 @@
 
 # Overview
 
-Welcome to the GitHub repository for DiMSum: A pipeline for pre-processing deep mutational scannning (DMS) data.
+Welcome to the GitHub repository for DiMSum: A pipeline for pre-processing deep mutational scanning (DMS) data.
 
 # Required Software
 
