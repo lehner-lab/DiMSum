@@ -116,7 +116,7 @@ dimsum__check_experiment_design <- function(
 
   ### Misc cutadapt argument checks
   #Check cutadaptCut... columns are of type integer (or logical i.e. all empty/NA)
-  if(sum(!unlist(lapply(exp_design[,c("cutadaptCut5First", "cutadaptCut5Second", "cutadaptCut3First", "cutadaptCut3Second")], typeof)) %in% c("character", "logical"))!=0){
+  if(sum(!unlist(lapply(exp_design[,c("cutadaptCut5First", "cutadaptCut5Second", "cutadaptCut3First", "cutadaptCut3Second")], typeof)) %in% c("integer", "logical"))!=0){
     stop(paste0("One or more invalid 'cutadaptCut...' arguments. Only positive integers allowed (zero exclusive)."), call. = FALSE)
   }
   #Check strictly positive integer cutadaptCut... arguments (if not NA)

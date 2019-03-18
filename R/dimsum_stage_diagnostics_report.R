@@ -22,7 +22,7 @@ dimsum_stage_diagnostics_report <- function(
   #load variant data from RData file
   load(variant_data)
   #Exclude indel variants
-  vdm_noindel <- variant_data_merge[Nins_nt==0 & Ndel_nt ==0,]
+  vdm_noindel <- variant_data_merge[Nins_nt==0 & Ndel_nt==0,]
   #Sample names
   input_samples <- colnames(vdm_noindel)[grep(input_samples_pattern, colnames(vdm_noindel))]
   output_samples <- colnames(vdm_noindel)[grep(output_samples_pattern, colnames(vdm_noindel))]
@@ -46,6 +46,12 @@ dimsum_stage_diagnostics_report <- function(
     dimsum__ggpairs_binhex(
       input_dt = log10(temp_dt[data.table::between(Nmut_nt,1,2),.SD,.SDcols = input_samples]+1), 
       output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_input.png"),
+      xlab = "log10(variant count + 1)",
+      ylab = "log10(variant count + 1)",
+      title = "Substitution variant inter-sample count correlations (input samples)")
+    dimsum__ggpairs_binhex(
+      input_dt = log10(temp_dt[data.table::between(Nmut_nt,1,2),.SD,.SDcols = input_samples]+1), 
+      output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_input.pdf"),
       xlab = "log10(variant count + 1)",
       ylab = "log10(variant count + 1)",
       title = "Substitution variant inter-sample count correlations (input samples)")

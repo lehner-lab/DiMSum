@@ -64,7 +64,7 @@ dimsum_stage_merge <- function(
         Nmut_nt = integer())
       #Load fasta file (if exists)
       if(!file.exists(count_file)){
-        warning("File does not exist.", call. = FALSE, immediate. = TRUE, noBreaks. = TRUE)
+        warning("dimsum_stage_merge.R: File does not exist.", call. = FALSE, immediate. = TRUE, noBreaks. = TRUE)
         #Save nucleotide mutation distribution (with/without indels)
         nuc_subst_dict[[count_file]] <- NA
         nuc_indel_dict[[count_file]] <- NA

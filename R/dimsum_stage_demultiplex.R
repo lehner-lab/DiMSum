@@ -92,7 +92,7 @@ dimsum_stage_demultiplex <- function(
   all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], unique(c(dimsum_meta[['barcode_design']][,"pair1"], dimsum_meta[['barcode_design']][,"pair2"])))
   print(unique(all_fastq))
   message("Processing...")
-  for(i in 1:dim(fastq_pair_list)[1]){message(paste0("\t", unique(fastq_pair_list[i,])))}
+  for(i in 1:dim(fastq_pair_list)[1]){message(paste0("\t", unique(unlist(fastq_pair_list[i,]))))}
   #Check if this system command should be executed
   if(execute){
     dimsum_stage_demultiplex_helper <- function(

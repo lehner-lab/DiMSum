@@ -23,6 +23,11 @@ dimsum__ggpairs_binhex <- function(
   xlab = "x",
   ylab = "y",
   title = ""){
+  #Check if something to plot
+  if(dim(input_dt)[1]==0){
+    warning("dimsum__ggpairs_binhex.R: No data to plot (empty data.table 'input_dt').", call. = FALSE, immediate. = TRUE, noBreaks. = TRUE)
+    return(NULL)
+  }
   d <- GGally::ggpairs(input_dt,
     columns = 1:dim(input_dt)[2],
     upper=list(continuous = "cor"),

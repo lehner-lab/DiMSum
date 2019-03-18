@@ -17,6 +17,11 @@ dimsum__sample_count_distributions_by_ntmut <- function(
   width = 12,
   height = 8,
   title = ""){
+  #Check if something to plot
+  if(dim(input_dt)[1]==0){
+    warning("dimsum__sample_count_distributions_by_ntmut.R: No data to plot (empty data.table 'input_dt').", call. = FALSE, immediate. = TRUE, noBreaks. = TRUE)
+    return(NULL)
+  }
   plot_df <- reshape2::melt(as.data.frame(input_dt), id = c("Nmut_nt", "Nmut_aa"))
   plot_df[,'Synonymous_variant'] <- factor(plot_df[,'Nmut_aa']==0)
   plot_df[,'Number_substitutions'] <- factor(plot_df[,'Nmut_nt'])
