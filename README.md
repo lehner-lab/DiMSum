@@ -4,7 +4,7 @@
 
 # Overview
 
-Welcome to the GitHub repository for DiMSum: A pipeline for pre-processing deep mutational scannning (DMS) data.
+Welcome to the GitHub repository for DiMSum: A pipeline for pre-processing deep mutational scanning (DMS) data.
 
 # Required Software
 
@@ -68,7 +68,7 @@ Remove constant region sequences from read 5’ and 3’ ends using cutadapt. 5'
 
 ## Stage 4: ALIGN PAIRED-END READS
 
-Align overlapping read pairs using USEARCH (paired-end cis libraries only i.e. 'transLibrary'=F). Stage-specific arguments: 'usearchMinQual', 'usearchMaxee', 'usearchMinlen', 'usearchMinovlen'.
+Align overlapping read pairs using USEARCH (paired-end cis libraries only i.e. 'paired'=T, 'transLibrary'=F) or alternatively concatenate read pairs (paired-end trans libraries only i.e. 'transLibrary'=T), and filter resulting variants according to base quality, expected number of errors and constituent read length (including those from single-end libraries i.e. 'paired'=F). Stage-specific arguments: 'usearchMinQual', 'usearchMaxee', 'usearchMinlen', 'usearchMinovlen'.
 
 ## Stage 5: COUNT UNIQUE VARIANTS
 
@@ -89,7 +89,7 @@ Your file must have the following columns:
 * **biological_replicate** An integer indicating the output biological replicate (strictly positive integer). Entries should be blank (empty string) for all input samples (each input sample corresponds to a separate biological replicate i.e. experiment).
 * **technical_replicate** An integer indicating the technical replicate (a strictly positive integer). Leave this column blank (empty string) when no technical replicates are present.
 * **pair1** FASTQ file name of the first read in a given pair.
-* **pair2** FASTQ file name of the second read in a given pair.
+* **pair2** FASTQ file name of the second read in a given pair (omit for single-end library designs i.e. 'paired'=F).
 
 Below is a schematic of a generic deep mutational scanning experiment indicating the corresponding entries which should be made in the experimental design file (red text). 
 <p align="left">
@@ -104,7 +104,7 @@ If your raw FASTQ sequencing files contain multiplexed samples you will need to 
 
 Your file must have the following columns:
 * **pair1** FASTQ file name of the first read in a given pair.
-* **pair2** FASTQ file name of the second read in a given pair.
+* **pair2** FASTQ file name of the second read in a given pair (omit for single-end library designs i.e. 'paired'=F).
 * **barcode** Sample DNA barcode (A/C/G/T characters only).
 * **new_pair_prefix** FASTQ file prefix of demultiplexed sample reads i.e. excluding file extension (alphanumeric and underscore characters only).
 
