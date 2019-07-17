@@ -12,7 +12,7 @@ To run the DiMSum pipeline you will need the following software and associated p
 
 * **[R](https://www.r-project.org/) >=v3.5.2** (data.table, ggplot2, GGally, hexbin, optparse, parallel, plyr, reshape2, seqinr, ShortRead)
 * **[FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) v0.11.3**
-* **[cutadapt](https://cutadapt.readthedocs.io/en/stable/) v1.16**
+* **[cutadapt](https://cutadapt.readthedocs.io/en/stable/) v2.4**
 * **[USEARCH 32-bit](https://drive5.com/usearch/download.html) v10.0**
 * **fastx_collapser** from the [FASTX Toolkit](http://hannonlab.cshl.edu/fastx_toolkit/download.html) v0.0.13
 
