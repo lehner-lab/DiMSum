@@ -13,7 +13,8 @@ dimsum__parse_cutadapt_output <- function(
   temp_out <- system(paste0("cat ", file_path), intern=TRUE)
   name_read1 <- basename(rev(unlist(strsplit(temp_out[2], ' ')))[2])
   name_read2 <- basename(rev(unlist(strsplit(temp_out[2], ' ')))[1])
-  temp_out <- temp_out[c(9:13, grep("=== First|=== Second|Sequence: ", temp_out))]
+  summary_index <- grep("=== Summary", temp_out)
+  temp_out <- temp_out[c((summary_index+2):(summary_index+6), grep("=== First|=== Second|Sequence: ", temp_out))]
   #Total reads processed
   total_reads <- as.integer(gsub(',', '', rev(unlist(strsplit(temp_out[1], ' ')))[1]))
   #Total reads trimmed
@@ -34,10 +35,13 @@ dimsum__parse_cutadapt_output <- function(
   total_read2_a3 <- ifelse(sum(read_number=="read2" & adapter_position=="a3"),trim_counts[read_number=="read2" & adapter_position=="a3"],0)
   total_read2_a5 <- ifelse(sum(read_number=="read2" & adapter_position=="a5"),trim_counts[read_number=="read2" & adapter_position=="a5"],0)
   total_read2_both <- total_read2_a3+total_read2_a5-total_read2_trimmed
-  #If all adapters linked (mixture of linked and unlinked adapters not supported)
-  if(sum(adapter_type!="linked")==0){
+  #Read1 adapters linked
+  if(unique(adapter_type[read_number=="read1"])=="linked"){
     total_read1_a5 <- total_read1_a3
     total_read1_both <- total_read1_a3
+  }
+  #Read2 adapters linked
+  if(unique(adapter_type[read_number=="read2"])=="linked"){
     total_read2_a5 <- total_read2_a3
     total_read2_both <- total_read2_a3
   }

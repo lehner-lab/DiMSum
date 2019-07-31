@@ -29,9 +29,9 @@ dimsum__get_experiment_design <- function(
   exp_design[,"pair_directory"] <- dimsum_meta[["fastqFileDir"]]
 
   #Add sample-specific cutadapt options
-  if((!"cutadapt5First" %in% colnames(exp_design) & is.null(dimsum_meta[["cutadapt5First"]])) | (!"cutadapt5Second" %in% colnames(exp_design) & is.null(dimsum_meta[["cutadapt5Second"]]))){
-    stop("Sequence of 5' constant region not found. Please check that the 'cutadapt5First' and 'cutadapt5Second' arguments are correctly set.", call. = FALSE)
-  }
+  # if((!"cutadapt5First" %in% colnames(exp_design) & is.null(dimsum_meta[["cutadapt5First"]])) | (!"cutadapt5Second" %in% colnames(exp_design) & is.null(dimsum_meta[["cutadapt5Second"]]))){
+  #   stop("Sequence of 5' constant region not found. Please check that the 'cutadapt5First' and 'cutadapt5Second' arguments are correctly set.", call. = FALSE)
+  # }
   if(!"cutadaptCut5First" %in% colnames(exp_design)){exp_design[,"cutadaptCut5First"] <- ifelse(is.null(dimsum_meta[["cutadaptCut5First"]]), NA, dimsum_meta[["cutadaptCut5First"]])}
   if(!"cutadaptCut5Second" %in% colnames(exp_design)){exp_design[,"cutadaptCut5Second"] <- ifelse(is.null(dimsum_meta[["cutadaptCut5Second"]]), NA, dimsum_meta[["cutadaptCut5Second"]])}
   if(!"cutadaptCut3First" %in% colnames(exp_design)){exp_design[,"cutadaptCut3First"] <- ifelse(is.null(dimsum_meta[["cutadaptCut3First"]]), NA, dimsum_meta[["cutadaptCut3First"]])}
@@ -42,6 +42,7 @@ dimsum__get_experiment_design <- function(
   if(!"cutadapt3Second" %in% colnames(exp_design)){exp_design[,"cutadapt3Second"] <- ifelse(is.null(dimsum_meta[["cutadapt3Second"]]), NA, dimsum_meta[["cutadapt3Second"]])}
   if(!"cutadaptMinLength" %in% colnames(exp_design)){exp_design[,"cutadaptMinLength"] <- ifelse(is.null(dimsum_meta[["cutadaptMinLength"]]), NA, dimsum_meta[["cutadaptMinLength"]])}
   if(!"cutadaptErrorRate" %in% colnames(exp_design)){exp_design[,"cutadaptErrorRate"] <- ifelse(is.null(dimsum_meta[["cutadaptErrorRate"]]), NA, dimsum_meta[["cutadaptErrorRate"]])}
+  if(!"generations" %in% colnames(exp_design)){exp_design[,"generations"] <- NA}
   #Convert empty string constant region sequences to NA
   exp_design[which(exp_design[,"cutadapt5First"]==""),"cutadapt5First"] <- NA
   exp_design[which(exp_design[,"cutadapt5Second"]==""),"cutadapt5Second"] <- NA
@@ -50,6 +51,13 @@ dimsum__get_experiment_design <- function(
 
   #Check whether experiment design is valid
   dimsum__check_experiment_design(exp_design)
+
+  #Check that each sample has 5' adapters (constant regions) specified (if unstranded library)
+  if(!dimsum_meta[["stranded"]]){
+    if(sum(is.na(exp_design[,"cutadapt5First"]))!=0 | sum(is.na(exp_design[,"cutadapt5Second"]))!=0){
+      stop("Unstranded library but sequence of 5' constant regions not found for some samples. Please check that the corresponding experiment design file columns are correct.", call. = FALSE)
+    }
+  }
 
   #Check FASTQ files exist (if demultiplexed FASTQ files supplied i.e. no barcodeDesignPath supplied)
   if(is.null(dimsum_meta[["barcodeDesignPath"]])){
@@ -77,11 +85,14 @@ dimsum__get_experiment_design <- function(
 
   #If not trans library: reverse complement cutadapt 5' constant regions to obtain 3' constant regions (if not already supplied)
   if(!dimsum_meta[["transLibrary"]]){
-    exp_design[is.na(exp_design[,"cutadapt3First"]),"cutadapt3First"] <- as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(exp_design[is.na(exp_design[,"cutadapt3First"]),"cutadapt5Second"])))
-    exp_design[is.na(exp_design[,"cutadapt3Second"]),"cutadapt3Second"] <- as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(exp_design[is.na(exp_design[,"cutadapt3Second"]),"cutadapt5First"])))
+    if(sum(is.na(exp_design[,"cutadapt3First"]) & !is.na(exp_design[,"cutadapt5Second"]))!=0){
+      exp_design[is.na(exp_design[,"cutadapt3First"]) & !is.na(exp_design[,"cutadapt5Second"]),"cutadapt3First"] <- as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(exp_design[is.na(exp_design[,"cutadapt3First"]) & !is.na(exp_design[,"cutadapt5Second"]),"cutadapt5Second"])))
+    }
+    if(sum(is.na(exp_design[,"cutadapt3Second"]) & !is.na(exp_design[,"cutadapt5First"]))!=0){
+      exp_design[is.na(exp_design[,"cutadapt3Second"]) & !is.na(exp_design[,"cutadapt5First"]),"cutadapt3Second"] <- as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(exp_design[is.na(exp_design[,"cutadapt3Second"]) & !is.na(exp_design[,"cutadapt5First"]),"cutadapt5First"])))
+    }
   }
 
   return(exp_design)
 }
-
 

@@ -110,6 +110,7 @@ dimsum_stage_demultiplex <- function(
           " -e ",
           as.character(dimsum_meta[["barcodeErrorRate"]]),
           " --no-indels ",
+          " --pair-adapters ",
           " --untrimmed-output ",
           file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.unknown.fastq")),
           " --untrimmed-paired-output ",

@@ -4,11 +4,13 @@
 \alias{dimsum__sample_count_distributions_by_ntmut}
 \title{dimsum__sample_count_distributions_by_ntmut}
 \usage{
-dimsum__sample_count_distributions_by_ntmut(input_dt, output_file,
-  width = 12, height = 8, title = "")
+dimsum__sample_count_distributions_by_ntmut(input_dt, sequence_type,
+  output_file, width = 12, height = 8, title = "")
 }
 \arguments{
 \item{input_dt}{input data table (required)}
+
+\item{sequence_type}{coding potential of sequence: noncoding/coding (required)}
 
 \item{output_file}{plot output path (required)}
 

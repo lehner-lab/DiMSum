@@ -1,0 +1,258 @@
+
+#' dimsum_stage_counts_to_fitness
+#'
+#' Estimate fitness of singles, doubles and silent AA substitution variants from DiMSum formatted output counts.
+#'
+#' @param dimsum_meta an experiment metadata object (required)
+#' @param fitness_outpath output path for saved objects (required)
+#' @param all_reps list of replicates to retain or "all" (default:"all")
+#' @param min_mean_input_read_count minimum mean input read count for high confidence variants (default:10)
+#' @param min_input_read_count_doubles minimum input read count for doubles used to derive prior for Bayesian doubles correction (default:50)
+#' @param lam_d Poisson distribution for score likelihood (default:0.025)
+#' @param execute whether or not to execute the analysis (default: TRUE)
+#' @param report whether or not to generate fitness summary plots (default: TRUE)
+#' @param report_outpath fitness report output path
+#' @param save_workspace whether or not to save the current workspace (default: TRUE)
+#'
+#' @return Nothing
+#' @export
+#' @import data.table
+dimsum_stage_counts_to_fitness <- function(
+  dimsum_meta,
+  fitness_outpath,
+  all_reps="all", #move to metadata
+  min_mean_input_read_count = 10, #move to metadata
+  min_input_read_count_doubles = 50, #move to metadata
+  lam_d = 0.025, #move to metadata
+  execute = TRUE,
+  report = TRUE,
+  report_outpath = NULL,
+  save_workspace = TRUE
+  ){
+  #Save current workspace for debugging purposes
+  if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
+
+  #Fitness path
+  dimsum_meta[["fitness_path"]] <- file.path(fitness_outpath)
+
+  #Do nothing if analysis not executed
+  if(!execute){
+    return(dimsum_meta)
+  }
+
+  #Create/overwrite fitness directory (if executed)
+  fitness_outpath <- gsub("/$", "", fitness_outpath)
+  dimsum__create_dir(fitness_outpath, execute = execute, message = "DiMSum STAGE 7: CALCULATE FITNESS", overwrite_dir = FALSE) 
+
+  ### Load variant data
+  ###########################
+
+  #load variant data from RData file
+  e1 <- new.env() 
+  load(file.path(dimsum_meta[["project_path"]], paste0(dimsum_meta[["projectName"]], '_variant_data_merge.RData')))
+  all_data <- get('variant_data_merge', e1)
+  rm(e1)
+
+  #WT nucleotide sequences
+  wt_ntseq <- all_data[WT==T,nt_seq]
+
+  #WT AA sequences
+  wt_AAseq <- all_data[WT==T,aa_seq]
+
+  #Sample names
+  input_samples <- names(all_data)[grep("_e.*_s0_b.*_count$", names(all_data))]
+  output_samples <- names(all_data)[grep("_e.*_s1_b.*_count$", names(all_data))]
+
+  #Determine replicates to retain
+  if(is.character(all_reps)){
+    if(all_reps=="all"){
+      all_reps <- unique(dimsum_meta[["exp_design"]][,"experiment"])
+    }
+  }
+
+  #Bayesian double mutant fitness estimates
+  bayesian_double_fitness <- dimsum_meta[["bayesianDoubleFitness"]]
+
+  ### Check fitness, count-based error and replicate error at nucleotide level (before filtering and aggregating at the AA level)
+  ###########################
+
+  #Retain nucleotide variants with same length as WT and max 2 nucleotide substitutions only
+  dimsum__check_nt_fitness(
+    input_dt = data.table::copy(all_data)[nchar(nt_seq)==nchar(all_data[WT==T,nt_seq]) & Nmut_nt<=2 & Nmut_nt==Nsub_nt,],
+    all_reps = all_reps,
+    report_outpath = report_outpath)
+
+  ### Filter nucleotide variants
+  ###########################
+
+  if(dimsum_meta[["sequenceType"]]=="coding"){
+    nf_data <- dimsum__filter_nuc_variants_coding(
+      dimsum_meta = dimsum_meta,
+      input_dt = all_data,
+      wt_ntseq = wt_ntseq,
+      report_outpath = report_outpath)
+  }else{
+    nf_data <- dimsum__filter_nuc_variants_noncoding(
+      dimsum_meta = dimsum_meta,
+      input_dt = all_data,
+      wt_ntseq = wt_ntseq,
+      report_outpath = report_outpath)
+  }
+
+  ### Aggregate counts from variants that are identical at the AA level and without synonymous mutations (if coding sequence)
+  ###########################
+
+  if(dimsum_meta[["sequenceType"]]=="coding"){
+    nf_data_syn <- dimsum__aggregate_AA_variants(
+      input_dt = nf_data)
+  }else{
+    nf_data[,merge_seq := nt_seq,nt_seq]
+    nf_data_syn <- nf_data[,.SD,merge_seq,.SDcols = c("aa_seq","Nmut_nt","Nmut_aa","Nmut_codons","WT","STOP",names(nf_data)[grep(names(nf_data),pattern="_count$")])]
+  }
+
+  ### Aggregate counts for biological output replicates
+  ###########################
+
+  message("Aggregating counts for biological output replicates...")
+
+  #Add up counts for biological output reps
+  for (E in all_reps) {
+    idx <- names(nf_data_syn)[grep(names(nf_data_syn),pattern = paste0("e",E,"_s1_b"))]
+    nf_data_syn[,paste0("count_e",E,"_s1") := rowSums(.SD),,.SDcols = idx]
+    names(nf_data_syn)[grep(names(nf_data_syn),pattern = paste0("e",E,"_s0_b"))] <- paste0("count_e",E,"_s0")
+  }
+  nf_data_syn <- unique(nf_data_syn[,.SD,merge_seq,.SDcols = c("aa_seq","Nmut_nt","Nmut_aa","Nmut_codons","WT","STOP",names(nf_data_syn)[grep(names(nf_data_syn),pattern="^count")])])
+
+  message("Done")
+
+  ### Calculate fitness and count-based error
+  ###########################
+
+  nf_data_syn <- dimsum__calculate_fitness(
+    input_dt = nf_data_syn,
+    all_reps = all_reps,
+    sequence_type = dimsum_meta[["sequenceType"]],
+    report_outpath = report_outpath)
+
+  ### Wild type
+  ###########################
+
+  wildtype <- nf_data_syn[WT==TRUE,]
+
+  ### Identify position and identity of single AA/NT mutations (and all silent mutants in the case of AA mutations)
+  ###########################
+
+  if(dimsum_meta[["sequenceType"]]=="coding"){
+    singles_silent <- dimsum__identify_single_aa_mutations(
+      input_dt = nf_data_syn[!is.na(apply(nf_data_syn[,.SD,,.SDcols=paste0("fitness", all_reps, "_uncorr")], 1, sum)),],
+      wt_AAseq = wt_AAseq,
+      report_outpath = report_outpath)
+  }else{
+    singles_silent <- dimsum__identify_single_nt_mutations(
+      input_dt = nf_data_syn[!is.na(apply(nf_data_syn[,.SD,,.SDcols=paste0("fitness", all_reps, "_uncorr")], 1, sum)),],
+      wt_ntseq = wt_ntseq,
+      report_outpath = report_outpath)    
+  }
+
+  #Identify high confidence singles
+  singles_silent[mean_count >= min_mean_input_read_count,is.reads0 := TRUE]
+
+  ### Identify position and identity of double AA/NT mutations
+  ###########################
+
+  if(dimsum_meta[["sequenceType"]]=="coding"){
+    doubles <- dimsum__identify_double_aa_mutations(
+      input_dt = nf_data_syn,
+      singles_dt = singles_silent,
+      wt_AAseq = wt_AAseq,
+      report_outpath = report_outpath)
+  }else{
+    doubles <- dimsum__identify_double_nt_mutations(
+      input_dt = nf_data_syn,
+      singles_dt = singles_silent,
+      wt_ntseq = wt_ntseq,
+      report_outpath = report_outpath)
+  }
+
+  ### Bayesian framework for fitness estimation for double mutants
+  ###########################
+
+  #Bin mean counts for replicate 1
+  doubles[,counts_for_bins := .SD[[1]],,.SDcols = paste0("count_e",all_reps[1],"_s0")]
+  doubles[,bin_count := findInterval(log10(counts_for_bins),seq(0.5,4,0.25))]
+  # doubles[,.(.N,mean(counts_for_bins)),bin_count][order(bin_count)]
+
+  if(!bayesian_double_fitness){
+    message("Skipping Bayesian double mutant fitness estimation")
+  }else{
+    doubles <- dimsum__bayesian_double_fitness(
+      dimsum_meta = dimsum_meta,
+      doubles_dt = doubles,
+      singles_dt = singles_silent,
+      wt_dt = wildtype,
+      all_reps = all_reps,
+      min_input_read_count_doubles = min_input_read_count_doubles,
+      lam_d = lam_d,
+      report_outpath = report_outpath)
+  }
+
+  ### Normalise fitness and sigma for differences in number of generations (between biological replicates)
+  ###########################
+
+  #Check that number of generations supplied for all output samples
+  if(sum(is.na(dimsum_meta[["exp_design"]][dimsum_meta[["exp_design"]][,"selection_id"]==1,"generations"]))!=0){
+
+    message("Skipping normalisation by number of generations")
+
+  }else{
+
+    message("Normalising fitness and error for differences in number of generations...")
+
+    nf_data_syn <- dimsum__normalise_fitness(
+      dimsum_meta = dimsum_meta,
+      input_dt = nf_data_syn,
+      all_reps = all_reps,
+      fitness_suffix="_uncorr"
+      )
+    singles_silent <- dimsum__normalise_fitness(
+      dimsum_meta = dimsum_meta,
+      input_dt = singles_silent,
+      all_reps = all_reps
+      )
+    doubles <- dimsum__normalise_fitness(
+      dimsum_meta = dimsum_meta,
+      input_dt = doubles,
+      all_reps = all_reps,
+      fitness_suffix="_uncorr"
+      )
+    if(bayesian_double_fitness){
+      doubles <- dimsum__normalise_fitness(
+        dimsum_meta = dimsum_meta,
+        input_dt = doubles,
+        all_reps = all_reps,
+        fitness_suffix="_cond"
+        )
+    }
+
+    message("Done")
+
+  }
+
+  ### Merge fitness values and save fitness data
+  ###########################
+
+  dimsum__merge_fitness(
+    dimsum_meta = dimsum_meta,
+    input_dt = nf_data_syn,
+    doubles_dt = doubles,
+    singles_dt = singles_silent,
+    wt_dt = wildtype,
+    all_reps = all_reps,
+    min_mean_input_read_count = min_mean_input_read_count,
+    bayesian_double_fitness = bayesian_double_fitness,
+    fitness_outpath = fitness_outpath,
+    report = TRUE,
+    report_outpath = report_outpath)
+
+  return(dimsum_meta)
+}

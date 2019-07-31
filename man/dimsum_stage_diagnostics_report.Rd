@@ -4,10 +4,12 @@
 \alias{dimsum_stage_diagnostics_report}
 \title{dimsum_stage_diagnostics_report}
 \usage{
-dimsum_stage_diagnostics_report(variant_data, report_outpath,
+dimsum_stage_diagnostics_report(dimsum_meta, variant_data, report_outpath,
   input_samples_pattern = "^input", output_samples_pattern = "^output")
 }
 \arguments{
+\item{dimsum_meta}{an experiment metadata object (required)}
+
 \item{variant_data}{path to variant data R Data file (required)}
 
 \item{report_outpath}{diagnostics report output path (required)}

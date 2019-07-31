@@ -93,6 +93,18 @@ dimsum__validate_input <- function(
     stop("Invalid 'paired' argument. Only paired-end trans libraries allowed.", call. = FALSE)
   }
 
+  #Check library design paired if unstranded library specified
+  if(!dimsum_meta[["stranded"]] & !dimsum_meta[["paired"]]){
+    stop("Invalid 'stranded' argument. Only unstranded paired-end libraries allowed.", call. = FALSE)
+  }
+
+  #Check sequenceType one of noncoding/coding/auto
+  if(!dimsum_meta[["sequenceType"]] %in% c("nonconding", "coding", "auto")){
+    stop("Invalid 'sequenceType' argument. Only noncoding/coding/auto allowed.", call. = FALSE)
+  }else if(dimsum_meta[["sequenceType"]]=="auto"){
+    dimsum_meta[["sequenceType"]] <- dimsum__detect_sequence_type(dimsum_meta[["wildtypeSequence"]])
+  }
+
   #Return
   return(dimsum_meta)
 }

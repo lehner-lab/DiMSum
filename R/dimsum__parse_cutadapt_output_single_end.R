@@ -12,7 +12,8 @@ dimsum__parse_cutadapt_output_single_end <- function(
   ){
   temp_out <- system(paste0("cat ", file_path), intern=TRUE)
   name_read1 <- basename(rev(unlist(strsplit(temp_out[2], ' ')))[1])
-  temp_out <- temp_out[c(9:12, grep("=== Adapter|Sequence: ", temp_out))]
+  summary_index <- grep("=== Summary", temp_out)
+  temp_out <- temp_out[c((summary_index+2):(summary_index+5), grep("=== Adapter|Sequence: ", temp_out))]
   #Total reads processed
   total_reads <- as.integer(gsub(',', '', rev(unlist(strsplit(temp_out[1], ' ')))[1]))
   #Total reads trimmed

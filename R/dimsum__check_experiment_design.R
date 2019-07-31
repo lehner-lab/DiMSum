@@ -97,10 +97,12 @@ dimsum__check_experiment_design <- function(
     stop(paste0("One or more duplicated rows in experimentDesign file matrix (sample rows should be unique)"), call. = FALSE)
   }
 
-  ### 5' adapter existence checks
-  #Check that each sample has a 5' adapter (constant region) specified
-  if(sum(is.na(exp_design[,"cutadapt5First"]))!=0 | sum(is.na(exp_design[,"cutadapt5Second"]))!=0){
-    stop("Sequence of 5' constant region not found for some samples. Please check that the corresponding experiment design file columns are correct.", call. = FALSE)
+  ### 5'/3' adapter/cut existence checks
+  #Check that at least one cutadapt argument specified for all samples
+  if(sum(is.na(exp_design[,"cutadapt5First"]))!=0 & sum(is.na(exp_design[,"cutadapt5Second"]))!=0 & sum(is.na(exp_design[,"cutadapt3First"]))!=0 & sum(is.na(exp_design[,"cutadapt3Second"]))!=0){
+    if(sum(is.na(exp_design[,"cutadaptCut5First"]))!=0 & sum(is.na(exp_design[,"cutadaptCut5Second"]))!=0 & sum(is.na(exp_design[,"cutadaptCut3First"]))!=0 & sum(is.na(exp_design[,"cutadaptCut3Second"]))!=0){
+      stop("At least one of cutadapt5First, cutadapt5Second, cutadapt3First, cutadapt3Second, cutadaptCut5First, cutadaptCut5Second, cutadaptCut3First, cutadaptCut3Second must be specified for all samples. Please check that the corresponding experiment design file columns are correct.", call. = FALSE)
+    }
   }
 
   ### Constant region checks
@@ -131,13 +133,32 @@ dimsum__check_experiment_design <- function(
   if(sum(exp_design[,c("cutadaptMinLength")]<1)!=0){
     stop("Invalid 'cutadaptMinLength' argument. Only positive integers allowed (zero exclusive).", call. = FALSE)
   }
-  #Check cutadaptErrorRate strictly positive integer
+  #Check cutadaptErrorRate positive integer
   if(typeof(exp_design[,"cutadaptErrorRate"])!="double"){
-    stop("Invalid 'cutadaptErrorRate' argument. Only positive doubles allowed (zero exclusive).", call. = FALSE)
+    stop("Invalid 'cutadaptErrorRate' argument. Only positive doubles allowed (zero inclusive).", call. = FALSE)
   }
   #Check cutadaptErrorRate argument
   if(sum(exp_design[,c("cutadaptErrorRate")]<0)!=0){
     stop("Invalid 'cutadaptErrorRate' argument. Only positive doubles allowed (zero inclusive).", call. = FALSE)
+  }
+
+  ### Generations checks
+  #Check generations column is of type double (or logical i.e. all empty/NA)
+  if(!typeof(exp_design[,"generations"]) %in% c("double", "logical")){
+    stop(paste0("One or more invalid generations values. Only positive doubles allowed (zero exclusive)."), call. = FALSE)
+  }
+  #Check generations column is strictly positive
+  if(sum(exp_design[,"generations"]<=0, na.rm=T)!=0){
+    stop(paste0("One or more invalid generations values. Only positive doubles allowed (zero exclusive)."), call. = FALSE)
+  }
+  #Check that all output samples have a generations value (if one or more specified)
+  if(typeof(exp_design[,"generations"])=="double" & sum(is.na(exp_design[exp_design[,"selection_id"]==1,"generations"]))!=0){
+    stop(paste0("One or more missing generations values. Generations values must be specified for all output samples (or none)."), call. = FALSE)
+  }
+  #Check that generations values are identical for technical output replicates (if one or more specified)
+  temp_n_output_replicates <- length(unique(exp_design[exp_design[,"selection_id"]!=0,c("sample_name")]))
+  if(typeof(exp_design[,"generations"])=="double" & dim(unique(exp_design[exp_design[,"selection_id"]!=0,c("sample_name", "generations")]))[1]!=temp_n_output_replicates){
+    stop(paste0("Generations values not identical for technical output replicates. Generations values must be specified for all output samples (or none)."), call. = FALSE)
   }
 
 }

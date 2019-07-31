@@ -28,7 +28,9 @@
 #' @param outputPath Path to directory to use for output files
 #' @param projectName Project name
 #' @param wildtypeSequence Wild-type nucleotide sequence
+#' @param sequenceType Coding potential of sequence; either noncoding/coding/auto (default:auto)
 #' @param transLibrary Trans library design i.e. read pairs correspond to distinct peptides (no overlap)
+#' @param bayesianDoubleFitness Improve double mutant fitness estimates using Bayesian framework (default:F)
 #' @param startStage Start at a specified pipeline stage (default:1)
 #' @param stopStage Stop at a specified pipeline stage (default:0 i.e. no stop condition)
 #' @param numCores Number of available CPU cores (default:1)
@@ -61,7 +63,9 @@ dimsum <- function(
   outputPath,
   projectName,
   wildtypeSequence,
+  sequenceType="auto",
   transLibrary=F,
+  bayesianDoubleFitness=F,
   startStage=1,
   stopStage=0,
   numCores=1
@@ -131,7 +135,9 @@ dimsum <- function(
     "outputPath" = list(outputPath, c("character")), #directory exists -- checked in dimsum__validate_input
     "projectName" = list(projectName, c("character")), #character string -- checked in dimsum__validate_input
     "wildtypeSequence" = list(wildtypeSequence, c("character")), #AGCT character string -- checked in dimsum__validate_input
+    "sequenceType" = list(sequenceType, c("character")), #character string; either noncoding/coding/auto -- checked in dimsum__validate_input
     "transLibrary" = list(transLibrary, c("logical")), #logical -- checked in dimsum__validate_input
+    "bayesianDoubleFitness" = list(bayesianDoubleFitness, c("logical")), #logical -- checked in dimsum__validate_input
     "startStage" = list(startStage, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
     "stopStage" = list(stopStage, c("integer")), #strictly positive integer (zero inclusive) -- checked in dimsum__validate_input
     "numCores" = list(numCores, c("integer")) #strictly positive integer -- checked in dimsum__validate_input
@@ -196,18 +202,22 @@ dimsum <- function(
   pipeline[['6_merge']] <- dimsum_stage_merge(dimsum_meta = pipeline[['5_unique']], merge_outpath = pipeline[['5_unique']][["project_path"]], 
     execute = (first_stage <= 6 & (last_stage == 0 | last_stage >= 6)), report_outpath = file.path(pipeline[['5_unique']][["project_path"]], "reports"))
 
+  ### Step 7: Calculate fitness
+  pipeline[['7_fitness']] <- dimsum_stage_counts_to_fitness(dimsum_meta = pipeline[['6_merge']], fitness_outpath = pipeline[['6_merge']][["project_path"]], 
+    execute = (first_stage <= 7 & (last_stage == 0 | last_stage >= 7)), report_outpath = file.path(pipeline[['6_merge']][["project_path"]], "reports"))
+
   ### Save workspace
   ###########################
 
   message("\n\n\nSaving workspace image...")
-  dimsum__save_metadata(dimsum_meta = pipeline[['6_merge']], n = 1)
+  dimsum__save_metadata(dimsum_meta = pipeline[['7_fitness']], n = 1)
   message("Done")
 
   ### Save report html
   ###########################
 
   message("\n\n\nSaving summary report...")
-  write(dimsum__reports_summary(dimsum_meta = pipeline[['6_merge']]), file = file.path(pipeline[['6_merge']][["project_path"]], "reports_summary.html"))
+  write(dimsum__reports_summary(dimsum_meta = pipeline[['7_fitness']]), file = file.path(pipeline[['7_fitness']][["project_path"]], "reports_summary.html"))
   message("Done")
 }
 

@@ -147,7 +147,10 @@ dimsum_stage_merge <- function(
   #Generate merge report
   if(report){
     dimsum_meta_new_report <- dimsum_stage_merge_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
-    dimsum_stage_diagnostics_report(variant_data = file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.RData')), report_outpath = report_outpath)
+    dimsum_stage_diagnostics_report(
+      dimsum_meta = dimsum_meta,
+      variant_data = file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.RData')), 
+      report_outpath = report_outpath)
     return(dimsum_meta_new_report)
   }
   return(dimsum_meta_new)

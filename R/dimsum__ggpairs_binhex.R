@@ -11,6 +11,8 @@
 #' @param xlab the title of the x-axis
 #' @param ylab the title of the y-axis
 #' @param title the plot title
+#' @param cut a factor variable to colour the hexagon outlines (optional)
+#' @param size line width of hex bins when 'cut' specified (default: 0.5)
 #'
 #' @return Nothing
 #' @export
@@ -22,7 +24,9 @@ dimsum__ggpairs_binhex <- function(
   bins = 50,
   xlab = "x",
   ylab = "y",
-  title = ""){
+  title = "",
+  cut = NULL,
+  size = 0.5){
   #Check if something to plot
   if(dim(input_dt)[1]==0){
     warning("dimsum__ggpairs_binhex.R: No data to plot (empty data.table 'input_dt').", call. = FALSE, immediate. = TRUE, noBreaks. = TRUE)
@@ -32,13 +36,29 @@ dimsum__ggpairs_binhex <- function(
     columns = 1:dim(input_dt)[2],
     upper=list(continuous = "cor"),
     lower="blank", xlab = xlab, ylab = ylab, title = title)
+  if(is.null(cut)){
+    plot_dt <- input_dt
+  }else{
+    plot_dt <- input_dt[, cut := cut]
+  }
   for (x in 1:dim(input_dt)[2]){
     for (y in 1:dim(input_dt)[2]){
       if (y>x) {
-        d <- GGally::putPlot(d, ggplot2::ggplot(input_dt, ggplot2::aes_string(x=colnames(input_dt)[x],y=colnames(input_dt)[y])) + ggplot2::stat_binhex(bins=bins), y,x)
+        if(is.null(cut)){
+          d <- GGally::putPlot(d, 
+            ggplot2::ggplot(plot_dt, ggplot2::aes_string(x=colnames(input_dt)[x],y=colnames(input_dt)[y])) + 
+            ggplot2::stat_binhex(bins=bins)
+            , y,x)
+        }else{
+          d <- GGally::putPlot(d, 
+            ggplot2::ggplot(plot_dt, ggplot2::aes_string(x=colnames(input_dt)[x],y=colnames(input_dt)[y])) + 
+            ggplot2::stat_binhex(ggplot2::aes(color = cut), bins=bins, size=size) +
+            ggplot2::scale_fill_gradientn(colours=c("white", "black"))
+            , y,x)
+        }
       }
     }
   }
-  d <- d + ggplot2::theme_bw()
+  d <- d + ggplot2::theme_bw() + ggplot2::theme(panel.grid.minor=ggplot2::element_blank())
   suppressWarnings(suppressMessages(ggplot2::ggsave(output_file, d, width = width, height = height)))
 }

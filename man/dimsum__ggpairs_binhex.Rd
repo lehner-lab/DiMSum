@@ -5,7 +5,8 @@
 \title{dimsum__ggpairs_binhex}
 \usage{
 dimsum__ggpairs_binhex(input_dt, output_file, width = 12, height = 12,
-  bins = 50, xlab = "x", ylab = "y", title = "")
+  bins = 50, xlab = "x", ylab = "y", title = "", cut = NULL,
+  size = 0.5)
 }
 \arguments{
 \item{input_dt}{input data table (required)}
@@ -23,6 +24,10 @@ dimsum__ggpairs_binhex(input_dt, output_file, width = 12, height = 12,
 \item{ylab}{the title of the y-axis}
 
 \item{title}{the plot title}
+
+\item{cut}{a factor variable to colour the hexagon outlines (optional)}
+
+\item{size}{line width of hex bins when 'cut' specified (default: 0.5)}
 }
 \value{
 Nothing

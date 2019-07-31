@@ -11,7 +11,8 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   cutadapt5First, cutadapt5Second, cutadapt3First, cutadapt3Second,
   cutadaptMinLength = 50, cutadaptErrorRate = 0.2, usearchMinQual,
   usearchMaxee, usearchMinlen = 64, usearchMinovlen = 16, outputPath,
-  projectName, wildtypeSequence, transLibrary = F, startStage = 1,
+  projectName, wildtypeSequence, sequenceType = "auto",
+  transLibrary = F, bayesianDoubleFitness = F, startStage = 1,
   stopStage = 0, numCores = 1)
 }
 \arguments{
@@ -65,7 +66,11 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{wildtypeSequence}{Wild-type nucleotide sequence}
 
+\item{sequenceType}{Coding potential of sequence; either noncoding/coding/auto (default:auto)}
+
 \item{transLibrary}{Trans library design i.e. read pairs correspond to distinct peptides (no overlap)}
+
+\item{bayesianDoubleFitness}{Improve double mutant fitness estimates using Bayesian framework (default:F)}
 
 \item{startStage}{Start at a specified pipeline stage (default:1)}
 

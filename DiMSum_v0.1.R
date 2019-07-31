@@ -42,7 +42,9 @@ option_list <- list(
   optparse::make_option(opt_str=c("--outputPath", "-o"), help = "Path to directory to use for output files"),
   optparse::make_option(opt_str=c("--projectName", "-p"), help = "Project name"),
   optparse::make_option(opt_str=c("--wildtypeSequence", "-w"), help = "Wild-type nucleotide sequence"),
+  optparse::make_option(opt_str=c("--sequenceType", "-u"), default="auto", help = "Coding potential of sequence; either noncoding/coding/auto (default:auto)"),
   optparse::make_option(opt_str=c("--transLibrary", "-r"), type="logical", default=F, help = "Trans library design i.e. read pairs correspond to distinct peptides (no overlap)"),
+  optparse::make_option(opt_str=c("--bayesianDoubleFitness", "-y"), type="logical", default=F, help = "Improve double mutant fitness estimates using Bayesian framework (default:F)"),
   optparse::make_option(opt_str=c("--startStage", "-s"), type="integer", default=1, help = "Start at a specified pipeline stage"),
   optparse::make_option(opt_str=c("--stopStage", "-t"), type="integer", default=0, help = "Stop at a specified pipeline stage (default: 0 i.e. no stop condition)"),
   optparse::make_option(opt_str=c("--numCores", "-c"), type="integer", default=1, help = "Number of available CPU cores")  
@@ -89,7 +91,9 @@ dimsum(
   outputPath=arg_list[["outputPath"]],
   projectName=arg_list[["projectName"]],
   wildtypeSequence=arg_list[["wildtypeSequence"]],
+  sequenceType=arg_list[["sequenceType"]],
   transLibrary=arg_list[["transLibrary"]],
+  bayesianDoubleFitness=arg_list[["bayesianDoubleFitness"]],
   startStage=arg_list[["startStage"]],
   stopStage=arg_list[["stopStage"]],
   numCores=arg_list[["numCores"]])
