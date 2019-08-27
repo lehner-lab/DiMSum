@@ -15,13 +15,13 @@ dimsum__detect_sequence_type <- function(
   #Sequence length a multiple of 3?
   if(nchar(input_sequence) %% 3 == 0){
     aa_seq_split <- seqinr::translate(strsplit(input_sequence,split="")[[1]])
-    #Translated sequence contains STOP?
-    if(!"*" %in% aa_seq_split){
+    #Translated sequence contains internal STOP?
+    if(!"*" %in% aa_seq_split[-length(aa_seq_split)]){
       return("coding")
     }
   }
   
-  #Sequence length not a multiple of 3 or contains STOP
+  #Sequence length not a multiple of 3 or contains internal STOP
   return("noncoding")
 
 }

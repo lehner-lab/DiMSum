@@ -4,15 +4,13 @@
 \alias{dimsum_stage_merge}
 \title{dimsum_stage_merge}
 \usage{
-dimsum_stage_merge(dimsum_meta, merge_outpath, execute = TRUE,
-  report = TRUE, report_outpath = NULL, save_workspace = TRUE)
+dimsum_stage_merge(dimsum_meta, merge_outpath, report = TRUE,
+  report_outpath = NULL, save_workspace = TRUE)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
 
 \item{merge_outpath}{merged variant data output path (required)}
-
-\item{execute}{whether or not to execute the system command (default: TRUE)}
 
 \item{report}{whether or not to generate final summary plots (default: TRUE)}
 

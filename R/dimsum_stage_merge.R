@@ -5,7 +5,6 @@
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param merge_outpath merged variant data output path (required)
-#' @param execute whether or not to execute the system command (default: TRUE)
 #' @param report whether or not to generate final summary plots (default: TRUE)
 #' @param report_outpath final summary report output path
 #' @param save_workspace whether or not to save the current workspace (default: TRUE)
@@ -16,11 +15,13 @@
 dimsum_stage_merge <- function(
   dimsum_meta,
   merge_outpath,
-  execute = TRUE,
   report = TRUE,
   report_outpath = NULL,
   save_workspace = TRUE
   ){
+  #Whether or not to execute the system command
+  this_stage <- 6
+  execute <- (dimsum_meta[["startStage"]] <= this_stage & (dimsum_meta[["stopStage"]] == 0 | dimsum_meta[["stopStage"]] >= this_stage))
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create merge directory (if doesn't already exist)
@@ -130,6 +131,7 @@ dimsum_stage_merge <- function(
     #Save merged variant data
     message("Saving merged variant data...")
     save(variant_data_merge, file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.RData')))
+    write.table(variant_data_merge, file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.tsv')), sep = "\t", quote = F, row.names = F)
     message("Done")
   }
   #New experiment metadata
@@ -144,6 +146,12 @@ dimsum_stage_merge <- function(
   #Nucleotide mutation results
   dimsum_meta_new[["nuc_subst_counts"]] <- mutation_stats_dicts[["nuc_subst_dict"]]
   dimsum_meta_new[["nuc_indel_counts"]] <- mutation_stats_dicts[["nuc_indel_dict"]]
+  #Delete files when last stage complete
+  if(!dimsum_meta_new[["retainIntermediateFiles"]]){
+    if(dimsum_meta_new[["stopStage"]]==this_stage){
+      temp_out <- mapply(system, dimsum_meta_new[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+    }
+  }
   #Generate merge report
   if(report){
     dimsum_meta_new_report <- dimsum_stage_merge_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)

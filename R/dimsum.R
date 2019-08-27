@@ -31,6 +31,13 @@
 #' @param sequenceType Coding potential of sequence; either noncoding/coding/auto (default:auto)
 #' @param transLibrary Trans library design i.e. read pairs correspond to distinct peptides (no overlap)
 #' @param bayesianDoubleFitness Improve double mutant fitness estimates using Bayesian framework (default:F)
+#' @param bayesianDoubleFitnessLamD Poisson distribution for score likelihood (default:0.025)
+#' @param fitnessMinInputCountAll minimum input read count (in all replicate) to be retained during fitness calculations (default:0)
+#' @param fitnessMinInputCountAny minimum input read count (in any replicate) to be retained during fitness calculations (default:5)
+#' @param fitnessHighConfidenceCount minimum mean input read count for high confidence variants (default:10)
+#' @param fitnessDoubleHighConfidenceCount minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)
+#' @param fitnessMaxSubstitutions maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)
+#' @param retainIntermediateFiles Should intermediate files be retained? (default:F)
 #' @param startStage Start at a specified pipeline stage (default:1)
 #' @param stopStage Stop at a specified pipeline stage (default:0 i.e. no stop condition)
 #' @param numCores Number of available CPU cores (default:1)
@@ -66,6 +73,13 @@ dimsum <- function(
   sequenceType="auto",
   transLibrary=F,
   bayesianDoubleFitness=F,
+  bayesianDoubleFitnessLamD=0.025,
+  fitnessMinInputCountAll=0,
+  fitnessMinInputCountAny=5,
+  fitnessHighConfidenceCount=10,
+  fitnessDoubleHighConfidenceCount=50,
+  fitnessMaxSubstitutions=2,
+  retainIntermediateFiles=F,
   startStage=1,
   stopStage=0,
   numCores=1
@@ -116,7 +130,7 @@ dimsum <- function(
     "stranded" = list(stranded, c("logical")), #logical -- checked in dimsum__validate_input
     "paired" = list(paired, c("logical")), #logical -- checked in dimsum__validate_input
     "barcodeDesignPath" = list(barcodeDesignPath, c("character", "NULL")), #file exists (if not NULL)
-    "barcodeErrorRate" = list(barcodeErrorRate, c("double")), #strictly positive double (zero inclusive)
+    "barcodeErrorRate" = list(barcodeErrorRate, c("double")), #positive double (zero inclusive)
     "experimentDesignPath" = list(experimentDesignPath, c("character")), #file exists -- checked in dimsum__get_experiment_design
     "cutadaptCut5First" = list(cutadaptCut5First, c("integer", "NULL")), #strictly positive integer (if not NULL) -- checked in dimsum__get_experiment_design
     "cutadaptCut5Second" = list(cutadaptCut5Second, c("integer", "NULL")), #strictly positive integer (if not NULL) -- checked in dimsum__get_experiment_design
@@ -127,7 +141,7 @@ dimsum <- function(
     "cutadapt3First" = list(cutadapt3First, c("character", "NULL")), #AGCT character string (if not NULL) -- checked in dimsum__get_experiment_design
     "cutadapt3Second" = list(cutadapt3Second, c("character", "NULL")), #AGCT character string (if not NULL) -- checked in dimsum__get_experiment_design
     "cutadaptMinLength" = list(cutadaptMinLength, c("integer")), #strictly positive integer -- checked in dimsum__get_experiment_design
-    "cutadaptErrorRate" = list(cutadaptErrorRate, c("double")), #strictly positive double (zero inclusive) -- checked in dimsum__get_experiment_design
+    "cutadaptErrorRate" = list(cutadaptErrorRate, c("double")), #positive double (zero inclusive) -- checked in dimsum__get_experiment_design
     "usearchMinQual" = list(usearchMinQual, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
     "usearchMaxee" = list(usearchMaxee, c("double")), #strictly positive double -- checked in dimsum__validate_input
     "usearchMinlen" = list(usearchMinlen, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
@@ -138,8 +152,15 @@ dimsum <- function(
     "sequenceType" = list(sequenceType, c("character")), #character string; either noncoding/coding/auto -- checked in dimsum__validate_input
     "transLibrary" = list(transLibrary, c("logical")), #logical -- checked in dimsum__validate_input
     "bayesianDoubleFitness" = list(bayesianDoubleFitness, c("logical")), #logical -- checked in dimsum__validate_input
+    "bayesianDoubleFitnessLamD" = list(bayesianDoubleFitnessLamD, c("double")), #strictly positive double -- checked in dimsum__validate_input
+    "fitnessMinInputCountAll" = list(fitnessMinInputCountAll, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
+    "fitnessMinInputCountAny" = list(fitnessMinInputCountAny, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
+    "fitnessHighConfidenceCount" = list(fitnessHighConfidenceCount, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
+    "fitnessDoubleHighConfidenceCount" = list(fitnessDoubleHighConfidenceCount, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
+    "fitnessMaxSubstitutions" = list(fitnessMaxSubstitutions, c("integer")), #positive integer (greater than 1) -- checked in dimsum__validate_input
+    "retainIntermediateFiles" = list(retainIntermediateFiles, c("logical")), #logical -- checked in dimsum__validate_input
     "startStage" = list(startStage, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
-    "stopStage" = list(stopStage, c("integer")), #strictly positive integer (zero inclusive) -- checked in dimsum__validate_input
+    "stopStage" = list(stopStage, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "numCores" = list(numCores, c("integer")) #strictly positive integer -- checked in dimsum__validate_input
     )
 
@@ -159,9 +180,8 @@ dimsum <- function(
   exp_metadata[["tmp_path"]] <- file.path(exp_metadata[["project_path"]], "tmp")
   suppressWarnings(dir.create(exp_metadata[["tmp_path"]]))
 
-  #First and last pipeline stages
-  first_stage <- exp_metadata[["startStage"]]
-  last_stage <- exp_metadata[["stopStage"]]
+  #inisiDelete intermediate files string
+  exp_metadata[["deleteIntermediateFiles"]] <- NULL
 
   ### Pipeline stages
   ###########################
@@ -171,40 +191,36 @@ dimsum <- function(
   pipeline[['0_original']] <- exp_metadata
 
   ### Step 1: Run demultiplex on all fastq files
-  pipeline[['1_demultiplex']] <- dimsum_stage_demultiplex(dimsum_meta = pipeline[['0_original']], demultiplex_outpath = file.path(pipeline[['0_original']][["tmp_path"]], "demultiplex"), 
-    execute = (first_stage <= 1 & (last_stage == 0 | last_stage >= 1)))
+  pipeline[['1_demultiplex']] <- dimsum_stage_demultiplex(dimsum_meta = pipeline[['0_original']], demultiplex_outpath = file.path(pipeline[['0_original']][["tmp_path"]], "demultiplex"))
 
   ### Step 2.1: Run FASTQC on all fastq files
   pipeline[['2_fastqc']] <- dimsum_stage_fastqc(dimsum_meta = pipeline[['1_demultiplex']], fastqc_outpath = file.path(pipeline[['1_demultiplex']][["tmp_path"]], "fastqc"), 
-    execute = (first_stage <= 2 & (last_stage == 0 | last_stage >= 2)), report_outpath = file.path(pipeline[['1_demultiplex']][["project_path"]], "reports"))
+    report_outpath = file.path(pipeline[['1_demultiplex']][["project_path"]], "reports"))
 
   ### Step 2.2: Unzip FASTQ files if necessary
-  pipeline[['2_fastq']] <- dimsum_stage_unzip(dimsum_meta = pipeline[['2_fastqc']], fastq_outpath = file.path(pipeline[['2_fastqc']][["tmp_path"]], "fastq"), 
-    execute = (first_stage <= 2 & (last_stage == 0 | last_stage >= 2)))
+  pipeline[['2_fastq']] <- dimsum_stage_unzip(dimsum_meta = pipeline[['2_fastqc']], fastq_outpath = file.path(pipeline[['2_fastqc']][["tmp_path"]], "fastq"))
 
   ### Step 2.3: Split FASTQ files
-  pipeline[['2_split']] <- dimsum_stage_split(dimsum_meta = pipeline[['2_fastq']], split_outpath = file.path(pipeline[['2_fastq']][["tmp_path"]], "split"), 
-    execute = (first_stage <= 2 & (last_stage == 0 | last_stage >= 2)))
+  pipeline[['2_split']] <- dimsum_stage_split(dimsum_meta = pipeline[['2_fastq']], split_outpath = file.path(pipeline[['2_fastq']][["tmp_path"]], "split"))
 
   ### Step 3: Remove adapters from FASTQ files with cutadapt if necessary
   pipeline[['3_cutadapt']] <- dimsum_stage_cutadapt(dimsum_meta = pipeline[['2_split']], cutadapt_outpath = file.path(pipeline[['2_split']][["tmp_path"]], "cutadapt"), 
-    execute = (first_stage <= 3 & (last_stage == 0 | last_stage >= 3)), report_outpath = file.path(pipeline[['2_split']][["project_path"]], "reports"))
+    report_outpath = file.path(pipeline[['2_split']][["project_path"]], "reports"))
 
   ### Step 4: Merge paired-end reads with USEARCH
   pipeline[['4_usearch']] <- dimsum_stage_usearch(dimsum_meta = pipeline[['3_cutadapt']], usearch_outpath = file.path(pipeline[['3_cutadapt']][["tmp_path"]], "usearch"), 
-    execute = (first_stage <= 4 & (last_stage == 0 | last_stage >= 4)), report_outpath = file.path(pipeline[['3_cutadapt']][["project_path"]], "reports"))
+    report_outpath = file.path(pipeline[['3_cutadapt']][["project_path"]], "reports"))
 
   ### Step 5: Get unique aligned read counts with FASTX-Toolkit
-  pipeline[['5_unique']] <- dimsum_stage_unique(dimsum_meta = pipeline[['4_usearch']], unique_outpath = file.path(pipeline[['4_usearch']][["tmp_path"]], "unique"), 
-    execute = (first_stage <= 5 & (last_stage == 0 | last_stage >= 5)))
+  pipeline[['5_unique']] <- dimsum_stage_unique(dimsum_meta = pipeline[['4_usearch']], unique_outpath = file.path(pipeline[['4_usearch']][["tmp_path"]], "unique"))
 
   ### Step 6: Merge variant count tables
   pipeline[['6_merge']] <- dimsum_stage_merge(dimsum_meta = pipeline[['5_unique']], merge_outpath = pipeline[['5_unique']][["project_path"]], 
-    execute = (first_stage <= 6 & (last_stage == 0 | last_stage >= 6)), report_outpath = file.path(pipeline[['5_unique']][["project_path"]], "reports"))
+    report_outpath = file.path(pipeline[['5_unique']][["project_path"]], "reports"))
 
   ### Step 7: Calculate fitness
   pipeline[['7_fitness']] <- dimsum_stage_counts_to_fitness(dimsum_meta = pipeline[['6_merge']], fitness_outpath = pipeline[['6_merge']][["project_path"]], 
-    execute = (first_stage <= 7 & (last_stage == 0 | last_stage >= 7)), report_outpath = file.path(pipeline[['6_merge']][["project_path"]], "reports"))
+    report_outpath = file.path(pipeline[['6_merge']][["project_path"]], "reports"))
 
   ### Save workspace
   ###########################

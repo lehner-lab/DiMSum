@@ -5,7 +5,6 @@
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param split_outpath split FASTQ output path (required)
-#' @param execute whether or not to execute the system command (default: TRUE)
 #' @param save_workspace whether or not to save the current workspace (default: TRUE)
 #'
 #' @return an updated experiment metadata object
@@ -13,9 +12,11 @@
 dimsum_stage_split <- function(
   dimsum_meta,
   split_outpath,
-  execute = TRUE,
   save_workspace = TRUE
   ){
+  #Whether or not to execute the system command
+  this_stage <- 2
+  execute <- (dimsum_meta[["startStage"]] <= this_stage & (dimsum_meta[["stopStage"]] == 0 | dimsum_meta[["stopStage"]] >= this_stage))
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite split directory (if executed)
@@ -69,6 +70,15 @@ dimsum_stage_split <- function(
   dimsum_meta_new[["exp_design"]][,"pair2"] <- paste0(dimsum_meta_new[["exp_design"]][,"pair2"], temp_suffix, '.fastq')
   dimsum_meta_new[["exp_design"]][,"split"] <- as.integer(gsub(".split", "", temp_suffix))
   dimsum_meta_new[['exp_design']][,"pair_directory"] <- split_outpath
+  #Delete file contents when last stage complete
+  if(!dimsum_meta_new[["retainIntermediateFiles"]]){
+    if(dimsum_meta_new[["stopStage"]]==this_stage){
+      temp_out <- mapply(system, dimsum_meta_new[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+    }else{
+      dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], 
+        paste0("> ", file.path(dimsum_meta_new[['exp_design']][,"pair_directory"], c(dimsum_meta_new[['exp_design']][,"pair1"], dimsum_meta_new[['exp_design']][,"pair2"]))))
+    }
+  }
   return(dimsum_meta_new)
 }
 

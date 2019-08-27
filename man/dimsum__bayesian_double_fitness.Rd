@@ -5,8 +5,7 @@
 \title{dimsum__bayesian_double_fitness}
 \usage{
 dimsum__bayesian_double_fitness(dimsum_meta, doubles_dt, singles_dt, wt_dt,
-  all_reps, min_input_read_count_doubles, lam_d, report = TRUE,
-  report_outpath = NULL)
+  all_reps, report = TRUE, report_outpath = NULL)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
@@ -18,10 +17,6 @@ dimsum__bayesian_double_fitness(dimsum_meta, doubles_dt, singles_dt, wt_dt,
 \item{wt_dt}{WT data.table (required)}
 
 \item{all_reps}{list of replicates to retain (required)}
-
-\item{min_input_read_count_doubles}{minimum input read count for doubles used to derive prior for Bayesian doubles correction (required)}
-
-\item{lam_d}{Poisson distribution for score likelihood (required)}
 
 \item{report}{whether or not to generate fitness summary plots (default: TRUE)}
 

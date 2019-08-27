@@ -5,7 +5,6 @@
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param cutadapt_outpath cutadapt output path (required)
-#' @param execute whether or not to execute the system command (default: TRUE)
 #' @param report whether or not to generate cutadapt summary plots (default: TRUE)
 #' @param report_outpath cutadapt report output path
 #' @param save_workspace whether or not to save the current workspace (default: TRUE)
@@ -15,11 +14,13 @@
 dimsum_stage_cutadapt <- function(
   dimsum_meta,
   cutadapt_outpath,
-  execute = TRUE,
   report = TRUE,
   report_outpath = NULL,
   save_workspace = TRUE
   ){
+  #Whether or not to execute the system command
+  this_stage <- 3
+  execute <- (dimsum_meta[["startStage"]] <= this_stage & (dimsum_meta[["stopStage"]] == 0 | dimsum_meta[["stopStage"]] >= this_stage))
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite cutadapt directory (if executed)
@@ -199,6 +200,17 @@ dimsum_stage_cutadapt <- function(
   dimsum_meta_new[["exp_design"]][,"pair1"] <- paste0(dimsum_meta_new[["exp_design"]][,"pair1"], temp_suffix)
   dimsum_meta_new[["exp_design"]][,"pair2"] <- paste0(dimsum_meta_new[["exp_design"]][,"pair2"], temp_suffix)
   dimsum_meta_new[['exp_design']][,"pair_directory"] <- cutadapt_outpath
+  #Delete files when last stage complete
+  if(!dimsum_meta_new[["retainIntermediateFiles"]]){
+    if(dimsum_meta_new[["stopStage"]]==this_stage){
+      temp_out <- mapply(system, dimsum_meta_new[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+    }else{
+      dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], 
+        paste0("rm ", file.path(cutadapt_outpath, "*.fastq")),
+        paste0("rm ", file.path(cutadapt_outpath, "*.cutadapt")),
+        paste0("rm ", file.path(cutadapt_outpath, "*.cutadapt2")))
+    }
+  }
   #Generate cutadapt report
   if(report){
     dimsum_meta_new_report <- dimsum_stage_cutadapt_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)

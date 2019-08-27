@@ -6,10 +6,6 @@
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param fitness_outpath output path for saved objects (required)
 #' @param all_reps list of replicates to retain or "all" (default:"all")
-#' @param min_mean_input_read_count minimum mean input read count for high confidence variants (default:10)
-#' @param min_input_read_count_doubles minimum input read count for doubles used to derive prior for Bayesian doubles correction (default:50)
-#' @param lam_d Poisson distribution for score likelihood (default:0.025)
-#' @param execute whether or not to execute the analysis (default: TRUE)
 #' @param report whether or not to generate fitness summary plots (default: TRUE)
 #' @param report_outpath fitness report output path
 #' @param save_workspace whether or not to save the current workspace (default: TRUE)
@@ -21,14 +17,13 @@ dimsum_stage_counts_to_fitness <- function(
   dimsum_meta,
   fitness_outpath,
   all_reps="all", #move to metadata
-  min_mean_input_read_count = 10, #move to metadata
-  min_input_read_count_doubles = 50, #move to metadata
-  lam_d = 0.025, #move to metadata
-  execute = TRUE,
   report = TRUE,
   report_outpath = NULL,
   save_workspace = TRUE
   ){
+  #Whether or not to execute the system command
+  this_stage <- 7
+  execute <- (dimsum_meta[["startStage"]] <= this_stage & (dimsum_meta[["stopStage"]] == 0 | dimsum_meta[["stopStage"]] >= this_stage))
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
 
@@ -73,14 +68,39 @@ dimsum_stage_counts_to_fitness <- function(
   #Bayesian double mutant fitness estimates
   bayesian_double_fitness <- dimsum_meta[["bayesianDoubleFitness"]]
 
+  ### Subset to variants with same length as WT
+  ###########################
+
+  all_data <- all_data[nchar(nt_seq)==nchar(all_data[WT==T,nt_seq]),]
+
+  ### Remove perfectly matching internal constant region(s) if specified
+  ###########################
+
+  if(sum(!strsplit(dimsum_meta[["wildtypeSequenceCoded"]], "")[[1]] %in% c("A", "C", "G", "T"))!=0){
+    all_data <- dimsum__remove_internal_constant_region(
+      input_dt = all_data,
+      wt_ccntseq = dimsum_meta[["wildtypeSequenceCoded"]])
+    #WT nucleotide sequences
+    wt_ntseq <- all_data[WT==T,nt_seq]
+    #WT AA sequences
+    wt_AAseq <- all_data[WT==T,aa_seq]
+  }
+
   ### Check fitness, count-based error and replicate error at nucleotide level (before filtering and aggregating at the AA level)
   ###########################
 
-  #Retain nucleotide variants with same length as WT and max 2 nucleotide substitutions only
-  dimsum__check_nt_fitness(
-    input_dt = data.table::copy(all_data)[nchar(nt_seq)==nchar(all_data[WT==T,nt_seq]) & Nmut_nt<=2 & Nmut_nt==Nsub_nt,],
-    all_reps = all_reps,
-    report_outpath = report_outpath)
+  #Retain variants with max fitnessMaxSubstitutions nucleotide or amino acid substitutions only
+  if(dimsum_meta[["sequenceType"]]=="coding"){
+    dimsum__check_nt_fitness(
+      input_dt = data.table::copy(all_data)[Nmut_aa<=dimsum_meta[["fitnessMaxSubstitutions"]],],
+      all_reps = all_reps,
+      report_outpath = report_outpath)
+  }else{
+    dimsum__check_nt_fitness(
+      input_dt = data.table::copy(all_data)[Nmut_nt<=dimsum_meta[["fitnessMaxSubstitutions"]],],
+      all_reps = all_reps,
+      report_outpath = report_outpath)
+  }
 
   ### Filter nucleotide variants
   ###########################
@@ -96,7 +116,7 @@ dimsum_stage_counts_to_fitness <- function(
       dimsum_meta = dimsum_meta,
       input_dt = all_data,
       wt_ntseq = wt_ntseq,
-      report_outpath = report_outpath)
+       report_outpath = report_outpath)
   }
 
   ### Aggregate counts from variants that are identical at the AA level and without synonymous mutations (if coding sequence)
@@ -107,7 +127,7 @@ dimsum_stage_counts_to_fitness <- function(
       input_dt = nf_data)
   }else{
     nf_data[,merge_seq := nt_seq,nt_seq]
-    nf_data_syn <- nf_data[,.SD,merge_seq,.SDcols = c("aa_seq","Nmut_nt","Nmut_aa","Nmut_codons","WT","STOP",names(nf_data)[grep(names(nf_data),pattern="_count$")])]
+    nf_data_syn <- nf_data[,.SD,merge_seq,.SDcols = c("aa_seq","Nins_nt","Ndel_nt","Nsub_nt","Nmut_nt","Nins_aa","Ndel_aa","Nsub_aa","Nmut_aa","Nmut_codons","WT","STOP",names(nf_data)[grep(names(nf_data),pattern="_count$")])]
   }
 
   ### Aggregate counts for biological output replicates
@@ -121,7 +141,7 @@ dimsum_stage_counts_to_fitness <- function(
     nf_data_syn[,paste0("count_e",E,"_s1") := rowSums(.SD),,.SDcols = idx]
     names(nf_data_syn)[grep(names(nf_data_syn),pattern = paste0("e",E,"_s0_b"))] <- paste0("count_e",E,"_s0")
   }
-  nf_data_syn <- unique(nf_data_syn[,.SD,merge_seq,.SDcols = c("aa_seq","Nmut_nt","Nmut_aa","Nmut_codons","WT","STOP",names(nf_data_syn)[grep(names(nf_data_syn),pattern="^count")])])
+  nf_data_syn <- unique(nf_data_syn[,.SD,merge_seq,.SDcols = c("aa_seq","Nins_nt","Ndel_nt","Nsub_nt","Nmut_nt","Nins_aa","Ndel_aa","Nsub_aa","Nmut_aa","Nmut_codons","WT","STOP",names(nf_data_syn)[grep(names(nf_data_syn),pattern="^count")])])
 
   message("Done")
 
@@ -155,7 +175,7 @@ dimsum_stage_counts_to_fitness <- function(
   }
 
   #Identify high confidence singles
-  singles_silent[mean_count >= min_mean_input_read_count,is.reads0 := TRUE]
+  singles_silent[mean_count >= dimsum_meta[["fitnessHighConfidenceCount"]],is.reads0 := TRUE]
 
   ### Identify position and identity of double AA/NT mutations
   ###########################
@@ -191,8 +211,6 @@ dimsum_stage_counts_to_fitness <- function(
       singles_dt = singles_silent,
       wt_dt = wildtype,
       all_reps = all_reps,
-      min_input_read_count_doubles = min_input_read_count_doubles,
-      lam_d = lam_d,
       report_outpath = report_outpath)
   }
 
@@ -248,11 +266,16 @@ dimsum_stage_counts_to_fitness <- function(
     singles_dt = singles_silent,
     wt_dt = wildtype,
     all_reps = all_reps,
-    min_mean_input_read_count = min_mean_input_read_count,
-    bayesian_double_fitness = bayesian_double_fitness,
     fitness_outpath = fitness_outpath,
     report = TRUE,
     report_outpath = report_outpath)
+
+  #Delete files when last stage complete
+  if(!dimsum_meta[["retainIntermediateFiles"]]){
+    if(dimsum_meta[["stopStage"]]==this_stage | dimsum_meta[["stopStage"]]==0){
+      temp_out <- mapply(system, dimsum_meta[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+    }
+  }
 
   return(dimsum_meta)
 }

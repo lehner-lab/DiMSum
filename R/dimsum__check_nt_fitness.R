@@ -27,7 +27,7 @@ dimsum__check_nt_fitness <- function(
   input_dt[,merge_seq := nt_seq,nt_seq]
   #Dummy column (for compatibility)
   input_dt[,Nmut_codons := 0]
-  input_dt <- input_dt[,.SD,merge_seq,.SDcols = c("aa_seq","Nmut_nt","Nmut_aa","Nmut_codons","WT","STOP",names(input_dt)[grep(names(input_dt),pattern="_count$")])]
+  input_dt <- input_dt[,.SD,merge_seq,.SDcols = c("aa_seq","Nins_nt","Ndel_nt","Nsub_nt","Nmut_nt","Nins_aa","Ndel_aa","Nsub_aa","Nmut_aa","Nmut_codons","WT","STOP",names(input_dt)[grep(names(input_dt),pattern="_count$")])]
 
   #Add up counts for biological output reps
   for (E in all_reps) {
@@ -36,7 +36,8 @@ dimsum__check_nt_fitness <- function(
     input_dt[,paste0("count_e",E,"_s1") := rowSums(.SD),,.SDcols = idx]
     names(input_dt)[grep(names(input_dt),pattern = paste0("e",E,"_s0_b"))] <- paste0("count_e",E,"_s0")
   }
-  input_dt <- unique(input_dt[,.SD,merge_seq,.SDcols = c("aa_seq","Nmut_nt","Nmut_aa","Nmut_codons","WT","STOP",names(input_dt)[grep(names(input_dt),pattern="^count")])])
+  input_dt <- unique(input_dt[,.SD,merge_seq,.SDcols = c("aa_seq","Nins_nt","Ndel_nt","Nsub_nt","Nmut_nt","Nins_aa","Ndel_aa","Nsub_aa","Nmut_aa","Nmut_codons","WT","STOP",names(input_dt)[grep(names(input_dt),pattern="^count")])])
+
   #Calculate fitness
   input_dt <- dimsum__calculate_fitness(
     input_dt = input_dt,

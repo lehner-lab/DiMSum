@@ -4,15 +4,13 @@
 \alias{dimsum_stage_fastqc}
 \title{dimsum_stage_fastqc}
 \usage{
-dimsum_stage_fastqc(dimsum_meta, fastqc_outpath, execute = TRUE,
-  report = TRUE, report_outpath = NULL, save_workspace = TRUE)
+dimsum_stage_fastqc(dimsum_meta, fastqc_outpath, report = TRUE,
+  report_outpath = NULL, save_workspace = TRUE)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
 
 \item{fastqc_outpath}{FASTQC output path (required)}
-
-\item{execute}{whether or not to execute the system command (default: TRUE)}
 
 \item{report}{whether or not to generate FASTQC summary plots (default: TRUE)}
 

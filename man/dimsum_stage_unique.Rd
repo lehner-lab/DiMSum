@@ -4,15 +4,12 @@
 \alias{dimsum_stage_unique}
 \title{dimsum_stage_unique}
 \usage{
-dimsum_stage_unique(dimsum_meta, unique_outpath, execute = TRUE,
-  save_workspace = TRUE)
+dimsum_stage_unique(dimsum_meta, unique_outpath, save_workspace = TRUE)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
 
 \item{unique_outpath}{fastx_collapser output path (required)}
-
-\item{execute}{whether or not to execute the system command (default: TRUE)}
 
 \item{save_workspace}{whether or not to save the current experiment metadata object (default: TRUE)}
 }

@@ -4,15 +4,13 @@
 \alias{dimsum_stage_usearch}
 \title{dimsum_stage_usearch}
 \usage{
-dimsum_stage_usearch(dimsum_meta, usearch_outpath, execute = TRUE,
-  report = TRUE, report_outpath = NULL, save_workspace = TRUE)
+dimsum_stage_usearch(dimsum_meta, usearch_outpath, report = TRUE,
+  report_outpath = NULL, save_workspace = TRUE)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
 
 \item{usearch_outpath}{USEARCH output path (required)}
-
-\item{execute}{whether or not to execute the system command (default: TRUE)}
 
 \item{report}{whether or not to generate USEARCH summary plots (default: TRUE)}
 

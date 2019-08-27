@@ -5,9 +5,8 @@
 \title{dimsum_stage_counts_to_fitness}
 \usage{
 dimsum_stage_counts_to_fitness(dimsum_meta, fitness_outpath,
-  all_reps = "all", min_mean_input_read_count = 10,
-  min_input_read_count_doubles = 50, lam_d = 0.025, execute = TRUE,
-  report = TRUE, report_outpath = NULL, save_workspace = TRUE)
+  all_reps = "all", report = TRUE, report_outpath = NULL,
+  save_workspace = TRUE)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
@@ -15,14 +14,6 @@ dimsum_stage_counts_to_fitness(dimsum_meta, fitness_outpath,
 \item{fitness_outpath}{output path for saved objects (required)}
 
 \item{all_reps}{list of replicates to retain or "all" (default:"all")}
-
-\item{min_mean_input_read_count}{minimum mean input read count for high confidence variants (default:10)}
-
-\item{min_input_read_count_doubles}{minimum input read count for doubles used to derive prior for Bayesian doubles correction (default:50)}
-
-\item{lam_d}{Poisson distribution for score likelihood (default:0.025)}
-
-\item{execute}{whether or not to execute the analysis (default: TRUE)}
 
 \item{report}{whether or not to generate fitness summary plots (default: TRUE)}
 

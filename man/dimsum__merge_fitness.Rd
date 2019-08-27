@@ -5,8 +5,7 @@
 \title{dimsum__merge_fitness}
 \usage{
 dimsum__merge_fitness(dimsum_meta, input_dt, doubles_dt, singles_dt, wt_dt,
-  all_reps, min_mean_input_read_count, bayesian_double_fitness,
-  fitness_outpath, report = TRUE, report_outpath = NULL)
+  all_reps, fitness_outpath, report = TRUE, report_outpath = NULL)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
@@ -20,10 +19,6 @@ dimsum__merge_fitness(dimsum_meta, input_dt, doubles_dt, singles_dt, wt_dt,
 \item{wt_dt}{WT data.table (required)}
 
 \item{all_reps}{list of replicates to retain (required)}
-
-\item{min_mean_input_read_count}{minimum mean input read count for high confidence variants (required)}
-
-\item{bayesian_double_fitness}{whether Bayesian double mutant fitness estimates exist (required)}
 
 \item{fitness_outpath}{output path for saved objects (required)}
 

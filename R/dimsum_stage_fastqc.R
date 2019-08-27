@@ -5,7 +5,6 @@
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param fastqc_outpath FASTQC output path (required)
-#' @param execute whether or not to execute the system command (default: TRUE)
 #' @param report whether or not to generate FASTQC summary plots (default: TRUE)
 #' @param report_outpath FASTQC report output path
 #' @param save_workspace whether or not to save the current workspace (default: TRUE)
@@ -15,11 +14,13 @@
 dimsum_stage_fastqc <- function(
   dimsum_meta,
   fastqc_outpath,
-  execute = TRUE,
   report = TRUE,
   report_outpath = NULL,
   save_workspace = TRUE
   ){
+  #Whether or not to execute the system command
+  this_stage <- 2
+  execute <- (dimsum_meta[["startStage"]] <= this_stage & (dimsum_meta[["stopStage"]] == 0 | dimsum_meta[["stopStage"]] >= this_stage))
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite FASTQC directory (if executed)

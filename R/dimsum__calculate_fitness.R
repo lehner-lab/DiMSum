@@ -38,7 +38,7 @@ dimsum__calculate_fitness <- function(
             ,.SDcols = c(paste0("count_e",E,"_s1"),paste0("count_e",E,"_s0"))]
   }
   #Remove unnecessary columns
-  output_dt <- input_dt[,.SD,merge_seq,.SDcols = c("aa_seq","Nmut_nt","Nmut_aa","Nmut_codons","WT","STOP",names(input_dt)[grep(names(input_dt),pattern="^count|^fitness|^sigma")])]
+  output_dt <- input_dt[,.SD,merge_seq,.SDcols = c("aa_seq","Nins_nt","Ndel_nt","Nsub_nt","Nmut_nt","Nins_aa","Ndel_aa","Nsub_aa","Nmut_aa","Nmut_codons","WT","STOP",names(input_dt)[grep(names(input_dt),pattern="^count|^fitness|^sigma")])]
 
   if(report){
 

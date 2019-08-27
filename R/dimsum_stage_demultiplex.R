@@ -5,7 +5,6 @@
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param demultiplex_outpath demultiplex output path (required)
-#' @param execute whether or not to execute the system command (default: TRUE)
 #' @param save_workspace whether or not to save the current workspace (default: TRUE)
 #'
 #' @return an updated experiment metadata object
@@ -13,9 +12,11 @@
 dimsum_stage_demultiplex <- function(
   dimsum_meta,
   demultiplex_outpath,
-  execute = TRUE,
   save_workspace = TRUE
   ){
+  #Whether or not to execute the system command
+  this_stage <- 1
+  execute <- (dimsum_meta[["startStage"]] <= this_stage & (dimsum_meta[["stopStage"]] == 0 | dimsum_meta[["stopStage"]] >= this_stage))
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite demultiplex directory (if executed)
@@ -160,6 +161,10 @@ dimsum_stage_demultiplex <- function(
   dimsum_meta_new[['exp_design']][,"pair_directory"] <- demultiplex_outpath
   dimsum_meta_new[["fastqFileExtension"]] <- ".fastq"
   dimsum_meta_new[["gzipped"]] <- FALSE
+  #Delete files when last stage complete
+  if(!dimsum_meta_new[["retainIntermediateFiles"]]){
+    dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], paste0("rm ", file.path(demultiplex_outpath, "*.fastq")))
+  }
   return(dimsum_meta_new)
 }
 

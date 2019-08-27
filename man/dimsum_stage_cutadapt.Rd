@@ -4,15 +4,13 @@
 \alias{dimsum_stage_cutadapt}
 \title{dimsum_stage_cutadapt}
 \usage{
-dimsum_stage_cutadapt(dimsum_meta, cutadapt_outpath, execute = TRUE,
-  report = TRUE, report_outpath = NULL, save_workspace = TRUE)
+dimsum_stage_cutadapt(dimsum_meta, cutadapt_outpath, report = TRUE,
+  report_outpath = NULL, save_workspace = TRUE)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
 
 \item{cutadapt_outpath}{cutadapt output path (required)}
-
-\item{execute}{whether or not to execute the system command (default: TRUE)}
 
 \item{report}{whether or not to generate cutadapt summary plots (default: TRUE)}
 

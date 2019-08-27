@@ -8,8 +8,6 @@
 #' @param singles_dt singles data.table (required)
 #' @param wt_dt WT data.table (required)
 #' @param all_reps list of replicates to retain (required)
-#' @param min_input_read_count_doubles minimum input read count for doubles used to derive prior for Bayesian doubles correction (required)
-#' @param lam_d Poisson distribution for score likelihood (required)
 #' @param report whether or not to generate fitness summary plots (default: TRUE)
 #' @param report_outpath fitness report output path
 #'
@@ -22,13 +20,14 @@ dimsum__bayesian_double_fitness <- function(
   singles_dt,
   wt_dt,
   all_reps,
-  min_input_read_count_doubles,
-  lam_d,
   report = TRUE,
   report_outpath = NULL
   ){
 
   message("Calculating Bayesian double mutant fitness estimates...")
+
+  #Poisson distribution for score likelihood
+  lam_d <- dimsum_meta[["bayesianDoubleFitnessLamD"]]
 
   #Number of input and output replicates
   all_reps_str <- paste0(all_reps, collapse="")
@@ -43,12 +42,12 @@ dimsum__bayesian_double_fitness <- function(
 
   #Plot fitness densities for mean counts greater/less than 50 (replicate 1)
   if(report){
-    d <- ggplot2::ggplot(doubles_dt[!is.infinite(fitness_for_bins) & !is.na(fitness_for_bins)],ggplot2::aes(fitness_for_bins,..density..,color=counts_for_bins >= min_input_read_count_doubles)) +
+    d <- ggplot2::ggplot(doubles_dt[!is.infinite(fitness_for_bins) & !is.na(fitness_for_bins)],ggplot2::aes(fitness_for_bins,..density..,color=counts_for_bins >= dimsum_meta[["fitnessDoubleHighConfidenceCount"]])) +
       ggplot2::geom_density(adjust=1)
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_4_doubles_bayesian_framework2.png"), d, width = 7, height = 5)
   }
   #>> try to estimate what fitness scores are for variants with low sequence coverage
-  # use double mutants with variants >= min_input_read_count_doubles counts 
+  # use double mutants with variants >= dimsum_meta[["fitnessDoubleHighConfidenceCount"]] counts 
 
   ## calculate posterior double mutant fitness based on prior from single mutants
   postpois_conditioned_singleF <- function(i){  
@@ -92,7 +91,7 @@ dimsum__bayesian_double_fitness <- function(
     double_data <- merge(double_data,singles_dt[!is.na(singles_dt[,paste0("fitness",E)]) & is.reads0==T,.(Pos,Mut,F2 = .SD),,.SDcols = paste0("fitness",E)],by.x = c("Pos2","Mut2"),by.y = c("Pos","Mut"))
     
     Nneighbours <- 500
-    score_prior_cond <- double_data[count_in >= min_input_read_count_doubles & F > -Inf & F1 > -Inf & F2 > -Inf]
+    score_prior_cond <- double_data[count_in >= dimsum_meta[["fitnessDoubleHighConfidenceCount"]] & F > -Inf & F1 > -Inf & F2 > -Inf]
 
     # make variables available to each core's workspace
     parallel::clusterExport(clust, list("double_data","lam_d","wt_corr","score_prior_cond","Nneighbours"), envir = environment())

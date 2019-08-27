@@ -5,7 +5,6 @@
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param unique_outpath fastx_collapser output path (required)
-#' @param execute whether or not to execute the system command (default: TRUE)
 #' @param save_workspace whether or not to save the current experiment metadata object (default: TRUE)
 #'
 #' @return an updated experiment metadata object
@@ -13,9 +12,11 @@
 dimsum_stage_unique <- function(
   dimsum_meta,
   unique_outpath,
-  execute = TRUE,
   save_workspace = TRUE
   ){
+  #Whether or not to execute the system command
+  this_stage <- 5
+  execute <- (dimsum_meta[["startStage"]] <= this_stage & (dimsum_meta[["stopStage"]] == 0 | dimsum_meta[["stopStage"]] >= this_stage))
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create unique directory (if doesn't already exist)
@@ -55,6 +56,15 @@ dimsum_stage_unique <- function(
   dimsum_meta_new <- dimsum_meta
   dimsum_meta_new[["exp_design"]][,"aligned_pair_unique"] <- paste0(dimsum_meta_new[["exp_design"]][,"aligned_pair"], ".unique")
   dimsum_meta_new[['exp_design']][,"aligned_pair_unique_directory"] <- unique_outpath
+  #Delete files when last stage complete
+  if(!dimsum_meta_new[["retainIntermediateFiles"]]){
+    if(dimsum_meta_new[["stopStage"]]==this_stage){
+      temp_out <- mapply(system, dimsum_meta_new[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+    }else{
+      dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], 
+        paste0("rm ", file.path(unique_outpath, "*.unique")))
+    }
+  }
   return(dimsum_meta_new)
 }
 

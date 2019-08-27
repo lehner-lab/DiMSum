@@ -57,10 +57,14 @@ dimsum__validate_input <- function(
     stop(paste0("Invalid '", "fastqFileExtension", "' argument (only alphanumeric characters allowed)"), call. = FALSE)
   }
 
-  #Check WT sequence is valid (ACGT characters only)
+  #Check WT sequence is valid (ACGT characters only) and save case-coded sequence
   all_characters <- unique(unlist(strsplit(dimsum_meta[["wildtypeSequence"]], "")))
-  if(sum(!all_characters %in% c("A", "C", "G", "T"))!=0){
-    stop("Invalid wild-type nucleotide sequence. Only valid nucleotide sequences allowed (A/C/T/G).", call. = FALSE)
+  if(sum(!all_characters %in% c("A", "a", "C", "c", "G", "g", "T", "t"))!=0){
+    stop("Invalid wild-type nucleotide sequence. Only valid nucleotide sequences allowed (A/C/G/T). Use lower-case letters (a/c/g/t) to indicate internal constant regions (removed before fitness calculations).", call. = FALSE)
+  }else{
+    #case-coded WT nucleotide sequence
+    dimsum_meta[["wildtypeSequenceCoded"]] <- dimsum_meta[["wildtypeSequence"]]
+    dimsum_meta[["wildtypeSequence"]] <- toupper(dimsum_meta[["wildtypeSequence"]])
   }
 
   #Check strictly positive integer usearch... arguments
@@ -68,9 +72,24 @@ dimsum__validate_input <- function(
     stop("Invalid 'usearch...' arguments. Only positive integers allowed (zero exclusive).", call. = FALSE)
   }
 
+  #Check strictly positive integer fitness... arguments
+  if(sum(unlist(dimsum_meta[c("fitnessMinInputCountAll", "fitnessMinInputCountAny", "fitnessHighConfidenceCount", "fitnessDoubleHighConfidenceCount")])<0)!=0){
+    stop("Invalid 'fitness...Count...' arguments. Only positive integers allowed (zero inclusive).", call. = FALSE)
+  }
+
+  #Check fitnessMaxSubstitutions argument greater than 1
+  if(dimsum_meta[["fitnessMaxSubstitutions"]]<2){
+    stop("Invalid 'fitnessMaxSubstitutions' argument. Only integers greater than 1 allowed.", call. = FALSE)
+  }
+
   #Check usearchMaxee argument
   if(dimsum_meta[["usearchMaxee"]]<=0){
     stop("Invalid 'usearchMaxee' argument. Only positive doubles allowed (zero exclusive).", call. = FALSE)
+  }
+
+  #Check bayesianDoubleFitnessLamD argument
+  if(dimsum_meta[["bayesianDoubleFitnessLamD"]]<=0){
+    stop("Invalid 'bayesianDoubleFitnessLamD' argument. Only positive doubles allowed (zero exclusive).", call. = FALSE)
   }
 
   #Check startStage argument

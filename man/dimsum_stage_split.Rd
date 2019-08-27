@@ -4,15 +4,12 @@
 \alias{dimsum_stage_split}
 \title{dimsum_stage_split}
 \usage{
-dimsum_stage_split(dimsum_meta, split_outpath, execute = TRUE,
-  save_workspace = TRUE)
+dimsum_stage_split(dimsum_meta, split_outpath, save_workspace = TRUE)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
 
 \item{split_outpath}{split FASTQ output path (required)}
-
-\item{execute}{whether or not to execute the system command (default: TRUE)}
 
 \item{save_workspace}{whether or not to save the current workspace (default: TRUE)}
 }

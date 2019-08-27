@@ -5,7 +5,6 @@
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param fastq_outpath FASTQ output path (required)
-#' @param execute whether or not to execute the system command (default: TRUE)
 #' @param save_workspace whether or not to save the current workspace (default: TRUE)
 #'
 #' @return an updated experiment metadata object
@@ -13,9 +12,11 @@
 dimsum_stage_unzip <- function(
   dimsum_meta,
   fastq_outpath,
-  execute = TRUE,
   save_workspace = TRUE
   ){
+  #Whether or not to execute the system command
+  this_stage <- 2
+  execute <- (dimsum_meta[["startStage"]] <= this_stage & (dimsum_meta[["stopStage"]] == 0 | dimsum_meta[["stopStage"]] >= this_stage))
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite unzip directory (if executed)
@@ -54,10 +55,16 @@ dimsum_stage_unzip <- function(
     dimsum_meta_new[['exp_design']][,"pair1"] <- gsub(".gz$", "", dimsum_meta_new[["exp_design"]][,"pair1"])
     dimsum_meta_new[['exp_design']][,"pair2"] <- gsub(".gz$", "", dimsum_meta_new[["exp_design"]][,"pair2"])
     dimsum_meta_new[['exp_design']][,"pair_directory"] <- fastq_outpath
+    #Delete files when last stage complete
+    if(!dimsum_meta_new[["retainIntermediateFiles"]]){
+      dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], 
+        paste0("rm ", file.path(dimsum_meta_new[['exp_design']][,"pair_directory"], c(dimsum_meta_new[['exp_design']][,"pair1"], dimsum_meta_new[['exp_design']][,"pair2"]))))
+    }
     return(dimsum_meta_new)
   }
   #Copy fastq files
   message("Skipping this stage (FASTQ files already unzipped)")
+  if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   return(dimsum_meta_new)

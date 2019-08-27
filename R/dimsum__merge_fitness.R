@@ -9,8 +9,6 @@
 #' @param singles_dt singles data.table (required)
 #' @param wt_dt WT data.table (required)
 #' @param all_reps list of replicates to retain (required)
-#' @param min_mean_input_read_count minimum mean input read count for high confidence variants (required)
-#' @param bayesian_double_fitness whether Bayesian double mutant fitness estimates exist (required)
 #' @param fitness_outpath output path for saved objects (required)
 #' @param report whether or not to generate fitness summary plots (default: TRUE)
 #' @param report_outpath fitness report output path
@@ -25,8 +23,6 @@ dimsum__merge_fitness <- function(
   singles_dt,
   wt_dt,
   all_reps,
-  min_mean_input_read_count,
-  bayesian_double_fitness,
   fitness_outpath,
   report = TRUE,
   report_outpath = NULL
@@ -66,6 +62,16 @@ dimsum__merge_fitness <- function(
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_5_fitness_replicateerror_vs_avgsigma.png"), d, width = 6, height = 5)
   }
 
+  #### all variants
+  fitness_rx <- input_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]"),colnames(input_dt))]
+  sigma_rx <- sqrt(input_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]"),colnames(input_dt))]^2 + 
+                    matrix(replicate_error^2,nrow = dim(fitness_rx)[1],ncol = dim(fitness_rx)[2]))
+  # sigma_s2 <- random_effect_model(fitness_rx,sigma_rx)
+  # input_dt[,fitness := rowSums(fitness_rx/(sigma_rx^2 + sigma_s2),na.rm=T)/rowSums(1/(sigma_rx^2 + sigma_s2),na.rm=T)]
+  input_dt[,fitness := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
+  # input_dt[,sigma := sqrt(1/rowSums(1/(sigma_rx^2+sigma_s2),na.rm=T))]
+  input_dt[,sigma := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
+
   #### singles
   fitness_rx <- singles_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]"),colnames(singles_dt))]
   sigma_rx <- sqrt(singles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]"),colnames(singles_dt))]^2 + 
@@ -102,7 +108,7 @@ dimsum__merge_fitness <- function(
   }
 
   #conditioned fitness
-  if(bayesian_double_fitness){
+  if(dimsum_meta[["bayesianDoubleFitness"]]){
     fitness_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]_cond"),colnames(doubles_dt))]
     sigma_rx <- sqrt(doubles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]_cond"),colnames(doubles_dt))]^2 + 
                       matrix(replicate_error^2,nrow = dim(fitness_rx)[1],ncol = dim(fitness_rx)[2]))
@@ -132,7 +138,7 @@ dimsum__merge_fitness <- function(
       ggplot2::geom_hex() + 
       ggplot2::scale_y_log10() +
       ggplot2::coord_cartesian(ylim = c(0.05,1.5))
-    if(bayesian_double_fitness){
+    if(dimsum_meta[["bayesianDoubleFitness"]]){
       p2<-ggplot2::ggplot(doubles_dt,ggplot2::aes(mean_count,fitness_cond)) + 
         ggplot2::geom_hex()+ 
         ggplot2::scale_x_log10() +
@@ -146,7 +152,7 @@ dimsum__merge_fitness <- function(
     }
     ggplot2::theme_set(ggplot2::theme_minimal())
     #Plot
-    if(bayesian_double_fitness){
+    if(dimsum_meta[["bayesianDoubleFitness"]]){
       d <- cowplot::plot_grid(plotlist = list(p1,p2,p3,p4,p5,p6),nrow=3)
       rm(p1,p2,p3,p4,p5,p6)
       ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_5_doubles_fitness_estimates.png"), d, width = 10, height = 10)
@@ -158,14 +164,14 @@ dimsum__merge_fitness <- function(
   }
 
   #Plot fitness values against each other
-  if(report & bayesian_double_fitness){
+  if(report & dimsum_meta[["bayesianDoubleFitness"]]){
     set.seed(1)
     d <- GGally::ggpairs(doubles_dt[sample(.N,1000),.(fitness_uncorr,fitness_cond)])
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_5_doubles_fitness_estimates_scattermatrix.png"), d, width = 10, height = 10)
   }
 
   #Plot sigma values against each other
-  if(report & bayesian_double_fitness){
+  if(report & dimsum_meta[["bayesianDoubleFitness"]]){
     d <- GGally::ggpairs(doubles_dt[,.(sigma_uncorr,sigma_cond)])
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_5_doubles_sigma_estimates_scattermatrix.png"), d, width = 10, height = 10)
   }
@@ -179,8 +185,8 @@ dimsum__merge_fitness <- function(
 
   # define which variants have enough reads
   wt_dt[,is.reads0 := TRUE]
-  singles_dt[mean_count >= min_mean_input_read_count,is.reads0 := TRUE]
-  doubles_dt[mean_count >= min_mean_input_read_count,is.reads0 := TRUE]
+  singles_dt[mean_count >= dimsum_meta[["fitnessHighConfidenceCount"]],is.reads0 := TRUE]
+  doubles_dt[mean_count >= dimsum_meta[["fitnessHighConfidenceCount"]],is.reads0 := TRUE]
 
   #Reformat columns
   if(dimsum_meta[["sequenceType"]]=="coding"){
@@ -205,6 +211,9 @@ dimsum__merge_fitness <- function(
     #Remove unnecessary columns
     unnecessary_cols <- c(
       "aa_seq",
+      "Nins_aa",
+      "Ndel_aa",
+      "Nsub_aa",
       "Nmut_aa",
       "Nmut_codons",
       "STOP",

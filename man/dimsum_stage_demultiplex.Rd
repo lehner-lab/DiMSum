@@ -5,14 +5,12 @@
 \title{dimsum_stage_demultiplex}
 \usage{
 dimsum_stage_demultiplex(dimsum_meta, demultiplex_outpath,
-  execute = TRUE, save_workspace = TRUE)
+  save_workspace = TRUE)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
 
 \item{demultiplex_outpath}{demultiplex output path (required)}
-
-\item{execute}{whether or not to execute the system command (default: TRUE)}
 
 \item{save_workspace}{whether or not to save the current workspace (default: TRUE)}
 }

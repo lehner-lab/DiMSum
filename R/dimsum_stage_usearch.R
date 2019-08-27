@@ -5,7 +5,6 @@
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param usearch_outpath USEARCH output path (required)
-#' @param execute whether or not to execute the system command (default: TRUE)
 #' @param report whether or not to generate USEARCH summary plots (default: TRUE)
 #' @param report_outpath USEARCH report output path
 #' @param save_workspace whether or not to save the current workspace (default: TRUE)
@@ -15,11 +14,13 @@
 dimsum_stage_usearch <- function(
   dimsum_meta,
   usearch_outpath,
-  execute = TRUE,
   report = TRUE,
   report_outpath = NULL,
   save_workspace = TRUE
   ){
+  #Whether or not to execute the system command
+  this_stage <- 4
+  execute <- (dimsum_meta[["startStage"]] <= this_stage & (dimsum_meta[["stopStage"]] == 0 | dimsum_meta[["stopStage"]] >= this_stage))
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
   #Create/overwrite usearch directory (if executed)
@@ -125,6 +126,15 @@ dimsum_stage_usearch <- function(
   #Merged fastq filenames
   dimsum_meta_new[["exp_design"]][,"aligned_pair"] <- paste0(sample_names, ".usearch")
   dimsum_meta_new[['exp_design']][,"aligned_pair_directory"] <- usearch_outpath
+  #Delete files when last stage complete
+  if(!dimsum_meta_new[["retainIntermediateFiles"]]){
+    if(dimsum_meta_new[["stopStage"]]==this_stage){
+      temp_out <- mapply(system, dimsum_meta_new[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+    }else{
+      dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], 
+        paste0("rm ", file.path(usearch_outpath, "*.usearch")))
+    }
+  }
   #Generate usearch report
   if(report){
     dimsum_meta_new_report <- dimsum_stage_usearch_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
