@@ -17,12 +17,13 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   fitnessMinInputCountAny = 5, fitnessHighConfidenceCount = 10,
   fitnessDoubleHighConfidenceCount = 50, fitnessMaxSubstitutions = 2,
   retainIntermediateFiles = F, splitChunkSize = 3758096384,
-  startStage = 1, stopStage = 0, numCores = 1)
+  retainedReplicates = "all", startStage = 1, stopStage = 0,
+  numCores = 1)
 }
 \arguments{
 \item{fastqFileDir}{Path to directory with input FASTQ files}
 
-\item{fastqFileExtension}{FASTQ file extension}
+\item{fastqFileExtension}{FASTQ file extension (default:".fastq")}
 
 \item{gzipped}{Are FASTQ files are gzipped? (default:T)}
 
@@ -91,6 +92,8 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 \item{retainIntermediateFiles}{Should intermediate files be retained? (default:F)}
 
 \item{splitChunkSize}{FASTQ file split chunk size in bytes (default:3758096384)}
+
+\item{retainedReplicates}{Comma-separated list of Input replicates (or experiment ids) to retain or 'all' (default:'all')}
 
 \item{startStage}{Start at a specified pipeline stage (default:1)}
 

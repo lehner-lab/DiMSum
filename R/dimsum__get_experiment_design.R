@@ -93,6 +93,14 @@ dimsum__get_experiment_design <- function(
     }
   }
 
+  #Check retainedReplicates exist in experiment design file
+  if(dimsum_meta[["retainedReplicates"]]!="all"){
+    all_reps <- as.integer(strsplit(dimsum_meta[["retainedReplicates"]], ",")[[1]])
+    if(sum(!all_reps %in% exp_design[,"experiment"])!=0){
+      stop("Invalid 'retainedReplicates' argument. One or more replicates not present in experiment design file.", call. = FALSE)
+    }
+  }
+
   return(exp_design)
 }
 

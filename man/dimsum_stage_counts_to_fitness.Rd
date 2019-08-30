@@ -5,15 +5,12 @@
 \title{dimsum_stage_counts_to_fitness}
 \usage{
 dimsum_stage_counts_to_fitness(dimsum_meta, fitness_outpath,
-  all_reps = "all", report = TRUE, report_outpath = NULL,
-  save_workspace = TRUE)
+  report = TRUE, report_outpath = NULL, save_workspace = TRUE)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
 
 \item{fitness_outpath}{output path for saved objects (required)}
-
-\item{all_reps}{list of replicates to retain or "all" (default:"all")}
 
 \item{report}{whether or not to generate fitness summary plots (default: TRUE)}
 

@@ -5,7 +5,6 @@
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param fitness_outpath output path for saved objects (required)
-#' @param all_reps list of replicates to retain or "all" (default:"all")
 #' @param report whether or not to generate fitness summary plots (default: TRUE)
 #' @param report_outpath fitness report output path
 #' @param save_workspace whether or not to save the current workspace (default: TRUE)
@@ -16,7 +15,6 @@
 dimsum_stage_counts_to_fitness <- function(
   dimsum_meta,
   fitness_outpath,
-  all_reps="all", #move to metadata
   report = TRUE,
   report_outpath = NULL,
   save_workspace = TRUE
@@ -59,10 +57,9 @@ dimsum_stage_counts_to_fitness <- function(
   output_samples <- names(all_data)[grep("_e.*_s1_b.*_count$", names(all_data))]
 
   #Determine replicates to retain
-  if(is.character(all_reps)){
-    if(all_reps=="all"){
-      all_reps <- unique(dimsum_meta[["exp_design"]][,"experiment"])
-    }
+  all_reps <- unique(dimsum_meta[["exp_design"]][,"experiment"])
+  if(dimsum_meta[["retainedReplicates"]]!="all"){
+    all_reps <- unique(as.integer(strsplit(dimsum_meta[["retainedReplicates"]], ",")[[1]]))
   }
 
   #Bayesian double mutant fitness estimates

@@ -4,7 +4,7 @@
 #' This function runs the DiMSum pipeline.
 #'
 #' @param fastqFileDir Path to directory with input FASTQ files
-#' @param fastqFileExtension FASTQ file extension
+#' @param fastqFileExtension FASTQ file extension (default:".fastq")
 #' @param gzipped Are FASTQ files are gzipped? (default:T)
 #' @param stranded Is the library design stranded? (default:T)
 #' @param paired Is the library design paired-end? (default:T)
@@ -39,6 +39,7 @@
 #' @param fitnessMaxSubstitutions Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)
 #' @param retainIntermediateFiles Should intermediate files be retained? (default:F)
 #' @param splitChunkSize FASTQ file split chunk size in bytes (default:3758096384)
+#' @param retainedReplicates Comma-separated list of Input replicates (or experiment ids) to retain or 'all' (default:'all')
 #' @param startStage Start at a specified pipeline stage (default:1)
 #' @param stopStage Stop at a specified pipeline stage (default:0 i.e. no stop condition)
 #' @param numCores Number of available CPU cores (default:1)
@@ -82,6 +83,7 @@ dimsum <- function(
   fitnessMaxSubstitutions=2,
   retainIntermediateFiles=F,
   splitChunkSize=3758096384,
+  retainedReplicates="all",
   startStage=1,
   stopStage=0,
   numCores=1
@@ -162,6 +164,7 @@ dimsum <- function(
     "fitnessMaxSubstitutions" = list(fitnessMaxSubstitutions, c("integer")), #positive integer (greater than 1) -- checked in dimsum__validate_input
     "retainIntermediateFiles" = list(retainIntermediateFiles, c("logical")), #logical -- checked in dimsum__validate_input
     "splitChunkSize" = list(splitChunkSize, c("double")), #strictly positive double -- checked in dimsum__validate_input
+    "retainedReplicates" = list(retainedReplicates, c("character")), #comma-separated list of integers or "all" -- checked in dimsum__validate_input
     "startStage" = list(startStage, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
     "stopStage" = list(stopStage, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "numCores" = list(numCores, c("integer")) #strictly positive integer -- checked in dimsum__validate_input

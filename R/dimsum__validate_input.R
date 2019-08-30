@@ -129,6 +129,13 @@ dimsum__validate_input <- function(
     dimsum_meta[["sequenceType"]] <- dimsum__detect_sequence_type(dimsum_meta[["wildtypeSequence"]])
   }
 
+  #Check retainedReplicates comma-separated list of integers or "all"
+  if(dimsum_meta[["retainedReplicates"]] != "all"){
+    if(sum(!strsplit(dimsum_meta[["retainedReplicates"]], ",")[[1]] %in% strsplit("0123456789", "")[[1]])!=0){
+      stop("Invalid 'retainedReplicates' argument. Only comma-separated list of integers or 'all' allowed.", call. = FALSE)
+    }
+  }
+
   #Return
   return(dimsum_meta)
 }
