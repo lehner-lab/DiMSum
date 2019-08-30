@@ -14,7 +14,7 @@ To run the DiMSum pipeline you will need the following software and associated p
 * **[FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) v0.11.3**
 * **[cutadapt](https://cutadapt.readthedocs.io/en/stable/) v2.4**
 * **[USEARCH 32-bit](https://drive5.com/usearch/download.html) v10.0**
-* **fastx_collapser** from the [FASTX Toolkit](http://hannonlab.cshl.edu/fastx_toolkit/download.html) v0.0.13
+* **[starcode](https://github.com/gui11aume/starcode) v1.3**
 
 # Installation and loading
 
@@ -72,7 +72,7 @@ Align overlapping read pairs using USEARCH (paired-end cis libraries only i.e. '
 
 ## Stage 5: COUNT UNIQUE VARIANTS
 
-Tally counts of unique variant sequences using FASTX-Toolkit.
+Tally counts of unique variant sequences using [starcode](https://github.com/gui11aume/starcode).
 
 ## Stage 6: MERGE SAMPLE STATISTICS
 
