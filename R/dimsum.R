@@ -27,7 +27,7 @@
 #' @param usearchMinovlen USEARCH: discard pair if alignment is shorter than given value (default:16)
 #' @param outputPath Path to directory to use for output files
 #' @param projectName Project name
-#' @param wildtypeSequence Wild-type nucleotide sequence
+#' @param wildtypeSequence Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed before fitness calculations.
 #' @param sequenceType Coding potential of sequence; either noncoding/coding/auto (default:auto)
 #' @param transLibrary Trans library design i.e. read pairs correspond to distinct peptides (no overlap)
 #' @param bayesianDoubleFitness Improve double mutant fitness estimates using Bayesian framework (default:F)
@@ -36,7 +36,7 @@
 #' @param fitnessMinInputCountAny Minimum input read count (in any replicate) to be retained during fitness calculations (default:5)
 #' @param fitnessHighConfidenceCount Minimum mean input read count for high confidence variants (default:10)
 #' @param fitnessDoubleHighConfidenceCount Minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)
-#' @param fitnessMaxSubstitutions maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)
+#' @param fitnessMaxSubstitutions Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)
 #' @param retainIntermediateFiles Should intermediate files be retained? (default:F)
 #' @param splitChunkSize FASTQ file split chunk size in bytes (default:3758096384)
 #' @param startStage Start at a specified pipeline stage (default:1)
@@ -161,7 +161,7 @@ dimsum <- function(
     "fitnessDoubleHighConfidenceCount" = list(fitnessDoubleHighConfidenceCount, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "fitnessMaxSubstitutions" = list(fitnessMaxSubstitutions, c("integer")), #positive integer (greater than 1) -- checked in dimsum__validate_input
     "retainIntermediateFiles" = list(retainIntermediateFiles, c("logical")), #logical -- checked in dimsum__validate_input
-    "splitChunkSize" = list(splitChunkSize, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
+    "splitChunkSize" = list(splitChunkSize, c("double")), #strictly positive double -- checked in dimsum__validate_input
     "startStage" = list(startStage, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
     "stopStage" = list(stopStage, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "numCores" = list(numCores, c("integer")) #strictly positive integer -- checked in dimsum__validate_input

@@ -68,7 +68,7 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{projectName}{Project name}
 
-\item{wildtypeSequence}{Wild-type nucleotide sequence}
+\item{wildtypeSequence}{Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed before fitness calculations.}
 
 \item{sequenceType}{Coding potential of sequence; either noncoding/coding/auto (default:auto)}
 
@@ -86,7 +86,7 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{fitnessDoubleHighConfidenceCount}{Minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)}
 
-\item{fitnessMaxSubstitutions}{maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)}
+\item{fitnessMaxSubstitutions}{Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)}
 
 \item{retainIntermediateFiles}{Should intermediate files be retained? (default:F)}
 

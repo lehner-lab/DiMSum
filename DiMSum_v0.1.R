@@ -52,7 +52,7 @@ option_list <- list(
   optparse::make_option(opt_str=c("--fitnessDoubleHighConfidenceCount"), type="integer", default=50, help = "Fitness: minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)"),
   optparse::make_option(opt_str=c("--fitnessMaxSubstitutions"), type="integer", default=2, help = "Fitness: maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)"),
   optparse::make_option(opt_str=c("--retainIntermediateFiles", "-f"), type="logical", default=F, help = "Should intermediate files be retained? (default:F)"),
-  optparse::make_option(opt_str=c("--splitChunkSize", "-k"), type="integer", default=3758096384, help = "FASTQ file split chunk size in bytes (default:3758096384)"),
+  optparse::make_option(opt_str=c("--splitChunkSize", "-k"), type="double", default=3758096384, help = "FASTQ file split chunk size in bytes (default:3758096384)"),
   optparse::make_option(opt_str=c("--startStage", "-s"), type="integer", default=1, help = "Start at a specified pipeline stage"),
   optparse::make_option(opt_str=c("--stopStage", "-t"), type="integer", default=0, help = "Stop at a specified pipeline stage (default: 0 i.e. no stop condition)"),
   optparse::make_option(opt_str=c("--numCores", "-c"), type="integer", default=1, help = "Number of available CPU cores")  
