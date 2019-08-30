@@ -78,6 +78,12 @@ Tally counts of unique variant sequences using [starcode](https://github.com/gui
 
 Combine sample-wise variant counts and statistics to produce a unified results data.table. Variant counts are aggregated across technical replicates.
 
+## Stage 7: CALCULATE FITNESS
+
+Calculate fitness and error estimates for all variants. Firstly, indel variants not matching the WT sequence length are discarded. Secondly, if internal constant region(s) are specified, these are  removed from all variants if a perfect match is found. Thirdly, nucleotide variants with low input read counts likely representing sequencing errors ('fitnessMinInputCountAll', 'fitnessMinInputCountAny') are filtered out. Additionally, variants exceeding the maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively ('fitnessMaxSubstitutions') are filtered out. For amino acid substitutions, nonsynonymous variants with synonymous variants in other codons are discarded. Variants are then aggregated at the amino acid level if the target molecule is a protein ('sequenceType'=coding). 
+
+Fitness and estimates of the associated error are then calculated with respect to the corresponding wild-type sequence score. An optional step exists to improve double mutant fitness estimates for low frequency variants using a Bayesian approach incorporating priors based on observed single mutant counts ('bayesianDoubleFitness', 'bayesianDoubleFitnessLamD', 'fitnessHighConfidenceCount', 'fitnessDoubleHighConfidenceCount'). In the case of a growth-rate based assay, a 'generations' column can be supplied in the experimental design file in order to normalize fitness and error estimates accordingly (see below). Finally, fitness scores are merged between replicates and error estimates incorporate both sampling and replicate variation.
+
 # Experimental design file
 
 To run this pipeline, you will first need to describe your experimental design (e.g. in MSExcel) and save this as a tab-separated plain text file. You can download [this](./example_experimentDesign.txt) file to use as a template.
@@ -96,7 +102,7 @@ Below is a schematic of a generic deep mutational scanning experiment indicating
   <img src="./DMS_experiment.png" width="600">
 </p>
 
-In addition to these mandatory columns, additional columns may be included to specify stage 3-specific options i.e. those prefixed by 'cutadapt...', which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments.
+In addition to these mandatory columns, additional columns may be included to specify stage 3-specific options i.e. those prefixed by 'cutadapt...', which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments. In the case of a growth-rate based assay, a 'generations' column can be supplied (for all output samples) in order to normalize fitness and error estimates accordingly.
 
 # Barcode design file
 
