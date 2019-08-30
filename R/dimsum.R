@@ -32,12 +32,13 @@
 #' @param transLibrary Trans library design i.e. read pairs correspond to distinct peptides (no overlap)
 #' @param bayesianDoubleFitness Improve double mutant fitness estimates using Bayesian framework (default:F)
 #' @param bayesianDoubleFitnessLamD Poisson distribution for score likelihood (default:0.025)
-#' @param fitnessMinInputCountAll minimum input read count (in all replicate) to be retained during fitness calculations (default:0)
-#' @param fitnessMinInputCountAny minimum input read count (in any replicate) to be retained during fitness calculations (default:5)
-#' @param fitnessHighConfidenceCount minimum mean input read count for high confidence variants (default:10)
-#' @param fitnessDoubleHighConfidenceCount minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)
+#' @param fitnessMinInputCountAll Minimum input read count (in all replicate) to be retained during fitness calculations (default:0)
+#' @param fitnessMinInputCountAny Minimum input read count (in any replicate) to be retained during fitness calculations (default:5)
+#' @param fitnessHighConfidenceCount Minimum mean input read count for high confidence variants (default:10)
+#' @param fitnessDoubleHighConfidenceCount Minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)
 #' @param fitnessMaxSubstitutions maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)
 #' @param retainIntermediateFiles Should intermediate files be retained? (default:F)
+#' @param splitChunkSize FASTQ file split chunk size in bytes (default:3758096384)
 #' @param startStage Start at a specified pipeline stage (default:1)
 #' @param stopStage Stop at a specified pipeline stage (default:0 i.e. no stop condition)
 #' @param numCores Number of available CPU cores (default:1)
@@ -80,6 +81,7 @@ dimsum <- function(
   fitnessDoubleHighConfidenceCount=50,
   fitnessMaxSubstitutions=2,
   retainIntermediateFiles=F,
+  splitChunkSize=3758096384,
   startStage=1,
   stopStage=0,
   numCores=1
@@ -99,10 +101,10 @@ dimsum <- function(
     "cp", 
     "cutadapt", 
     "fastqc", 
-    "fastx_collapser", 
     "gunzip", 
     "head", 
-    "usearch")
+    "usearch",
+    "starcode")
   which_binaries <- Sys.which(required_binaries)
   missing_binaries <- names(which_binaries)[which_binaries==""]
   if(length(missing_binaries)!=0){
@@ -113,8 +115,8 @@ dimsum <- function(
   suppressMessages(suppressWarnings(binary_versions <- list(
     cutadapt = rev(system("cutadapt --version", intern = TRUE))[1],
     FastQC = rev(system("fastqc --version", intern = TRUE))[1],
-    fastx_collapser = system("fastx_collapser -h", intern = TRUE)[2],
-    USEARCH = rev(system("usearch --version", intern = TRUE))[1])))
+    USEARCH = rev(system("usearch --version", intern = TRUE))[1],
+    starcode = system("starcode --version 2>&1", intern = TRUE))))
 
   #Display binary versions
   message(paste("\n\n\n*******", "Binary dependency versions", "*******\n\n\n"))
@@ -159,6 +161,7 @@ dimsum <- function(
     "fitnessDoubleHighConfidenceCount" = list(fitnessDoubleHighConfidenceCount, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "fitnessMaxSubstitutions" = list(fitnessMaxSubstitutions, c("integer")), #positive integer (greater than 1) -- checked in dimsum__validate_input
     "retainIntermediateFiles" = list(retainIntermediateFiles, c("logical")), #logical -- checked in dimsum__validate_input
+    "splitChunkSize" = list(splitChunkSize, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
     "startStage" = list(startStage, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
     "stopStage" = list(stopStage, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "numCores" = list(numCores, c("integer")) #strictly positive integer -- checked in dimsum__validate_input

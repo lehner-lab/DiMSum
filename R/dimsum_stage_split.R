@@ -38,7 +38,7 @@ dimsum_stage_split <- function(
       num_records <- dimsum__fastq_splitter(
         inputFile = file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[i,][1]),
         outputFilePrefix = file.path(split_outpath, paste0(fastq_pair_list[i,][1], ".split")),
-        chunkSize = 3758096384)
+        chunkSize = dimsum_meta[["splitChunkSize"]])
       if(dimsum_meta[["paired"]]){
         num_records <- dimsum__fastq_splitter(
           inputFile = file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[i,][2]),

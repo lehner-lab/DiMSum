@@ -42,7 +42,7 @@ dimsum_stage_merge <- function(
   
   #Load variant count files
   message("Loading variant count files:")
-  all_count <- file.path(dimsum_meta[['exp_design']][,"aligned_pair_unique_directory"], dimsum_meta[['exp_design']][,"aligned_pair_unique"])
+  all_count <- unique(file.path(dimsum_meta[['exp_design']][,"aligned_pair_unique_directory"], dimsum_meta[['exp_design']][,"aligned_pair_unique"]))
   print(all_count)
   message("Processing...")
   for(count_file in all_count){
@@ -73,11 +73,11 @@ dimsum_stage_merge <- function(
         aa_subst_dict[[count_file]] <- NA
         aa_indel_dict[[count_file]] <- NA
       }else{
-        rfa <- ShortRead::readFasta(count_file)
         #Create variant count table with nucleotide and amino acid sequence
-        count_dt <- data.table(nt_seq = tolower(as.character(ShortRead::sread(rfa))))
-        count_dt[, count := as.numeric(sapply(strsplit(as.character(ShortRead::id(rfa)), "-"), "[", 2))]
-        suppressWarnings(count_dt[, aa_seq := as.character(Biostrings::translate(ShortRead::sread(rfa)))])
+        count_dt <- fread(count_file)
+        names(count_dt) <- c("nt_seq", "count")
+        count_dt[, nt_seq := tolower(nt_seq)]
+        suppressWarnings(count_dt[, aa_seq := as.character(Biostrings::translate(Biostrings::DNAStringSet(nt_seq)))])
         #Calculate number of aa mutations (insertions, deletions, substitutions)
         mut_counts <- attr(utils::adist(count_dt[,aa_seq], wt_AAseq, counts = T), "counts")
         count_dt[,Nins_aa := mut_counts[,1,2]]
@@ -122,12 +122,9 @@ dimsum_stage_merge <- function(
     variant_data[nt_seq == wt_NTseq,WT := TRUE]
     #Indicate STOPs
     variant_data[,STOP := ifelse(length(grep(aa_seq,pattern="\\*"))==1,TRUE,FALSE),aa_seq]
-    #Merge split counts
-    split_base <- unique(sapply(strsplit(colnames(variant_data)[grep('_count', colnames(variant_data))], "_split"), '[', 1))
-    variant_data_merge <- dimsum__sum_datatable_columns(dt=variant_data, column_patterns=split_base, suffix="_count")
     #Merge technical counts
-    split_base <- unique(sapply(strsplit(colnames(variant_data_merge)[grep('_count', colnames(variant_data_merge))], "_t"), '[', 1))
-    variant_data_merge <- dimsum__sum_datatable_columns(dt=variant_data_merge, column_patterns=split_base, suffix="_count")
+    split_base <- unique(sapply(strsplit(colnames(variant_data)[grep('_count', colnames(variant_data))], "_t"), '[', 1))
+    variant_data_merge <- dimsum__sum_datatable_columns(dt=variant_data, column_patterns=split_base, suffix="_count")
     #Save merged variant data
     message("Saving merged variant data...")
     save(variant_data_merge, file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.RData')))
@@ -156,8 +153,8 @@ dimsum_stage_merge <- function(
   if(report){
     dimsum_meta_new_report <- dimsum_stage_merge_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
     dimsum_stage_diagnostics_report(
-      dimsum_meta = dimsum_meta,
-      variant_data = file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.RData')), 
+      dimsum_meta = dimsum_meta_new_report,
+      variant_data = file.path(merge_outpath, paste0(dimsum_meta_new_report[["projectName"]], '_variant_data_merge.RData')), 
       report_outpath = report_outpath)
     return(dimsum_meta_new_report)
   }

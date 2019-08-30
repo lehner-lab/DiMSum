@@ -72,9 +72,14 @@ dimsum__validate_input <- function(
     stop("Invalid 'usearch...' arguments. Only positive integers allowed (zero exclusive).", call. = FALSE)
   }
 
-  #Check strictly positive integer fitness... arguments
+  #Check positive integer fitness... arguments
   if(sum(unlist(dimsum_meta[c("fitnessMinInputCountAll", "fitnessMinInputCountAny", "fitnessHighConfidenceCount", "fitnessDoubleHighConfidenceCount")])<0)!=0){
     stop("Invalid 'fitness...Count...' arguments. Only positive integers allowed (zero inclusive).", call. = FALSE)
+  }
+
+  #Check strictly positive integer splitChunkSize argument
+  if(dimsum_meta[["splitChunkSize"]]<=0){
+    stop("Invalid 'splitChunkSize' argument. Only positive integers allowed (zero exclusive).", call. = FALSE)
   }
 
   #Check fitnessMaxSubstitutions argument greater than 1

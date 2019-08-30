@@ -26,7 +26,7 @@ dimsum_stage_merge_report <- function(
     'AA_subst_sum'=sapply(dimsum_meta[['aa_subst_counts']], sum),
     'AA_indel_sum'=sapply(dimsum_meta[['aa_indel_counts']], sum))
   aa_subst_df[is.na(aa_subst_df)] <- 0
-  aa_subst_df[,'pairname'] <- sapply(strsplit(merge_df[,'aligned_pair'], '.split'), '[', 1)
+  aa_subst_df[,'pairname'] <- unique(sapply(strsplit(merge_df[,'aligned_pair'], '.split'), '[', 1))
   aa_subst_df_collapse <- plyr::ddply(aa_subst_df, "pairname", plyr::summarise, 
     AA_subst_0 = sum(AA_subst_0), 
     AA_subst_1 = sum(AA_subst_1), 
@@ -72,7 +72,7 @@ dimsum_stage_merge_report <- function(
     'nuc_subst_sum'=sapply(dimsum_meta[['nuc_subst_counts']], sum),
     'nuc_indel_sum'=sapply(dimsum_meta[['nuc_indel_counts']], sum))
   nuc_subst_df[is.na(nuc_subst_df)] <- 0
-  nuc_subst_df[,'pairname'] <- sapply(strsplit(merge_df[,'aligned_pair'], '.split'), '[', 1)
+  nuc_subst_df[,'pairname'] <- unique(sapply(strsplit(merge_df[,'aligned_pair'], '.split'), '[', 1))
   nuc_subst_df_collapse <- plyr::ddply(nuc_subst_df, "pairname", plyr::summarise, 
     nuc_subst_0 = sum(nuc_subst_0), 
     nuc_subst_1 = sum(nuc_subst_1), 

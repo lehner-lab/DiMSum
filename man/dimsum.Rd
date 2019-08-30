@@ -16,8 +16,8 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   bayesianDoubleFitnessLamD = 0.025, fitnessMinInputCountAll = 0,
   fitnessMinInputCountAny = 5, fitnessHighConfidenceCount = 10,
   fitnessDoubleHighConfidenceCount = 50, fitnessMaxSubstitutions = 2,
-  retainIntermediateFiles = F, startStage = 1, stopStage = 0,
-  numCores = 1)
+  retainIntermediateFiles = F, splitChunkSize = 3758096384,
+  startStage = 1, stopStage = 0, numCores = 1)
 }
 \arguments{
 \item{fastqFileDir}{Path to directory with input FASTQ files}
@@ -78,17 +78,19 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{bayesianDoubleFitnessLamD}{Poisson distribution for score likelihood (default:0.025)}
 
-\item{fitnessMinInputCountAll}{minimum input read count (in all replicate) to be retained during fitness calculations (default:0)}
+\item{fitnessMinInputCountAll}{Minimum input read count (in all replicate) to be retained during fitness calculations (default:0)}
 
-\item{fitnessMinInputCountAny}{minimum input read count (in any replicate) to be retained during fitness calculations (default:5)}
+\item{fitnessMinInputCountAny}{Minimum input read count (in any replicate) to be retained during fitness calculations (default:5)}
 
-\item{fitnessHighConfidenceCount}{minimum mean input read count for high confidence variants (default:10)}
+\item{fitnessHighConfidenceCount}{Minimum mean input read count for high confidence variants (default:10)}
 
-\item{fitnessDoubleHighConfidenceCount}{minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)}
+\item{fitnessDoubleHighConfidenceCount}{Minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)}
 
 \item{fitnessMaxSubstitutions}{maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)}
 
 \item{retainIntermediateFiles}{Should intermediate files be retained? (default:F)}
+
+\item{splitChunkSize}{FASTQ file split chunk size in bytes (default:3758096384)}
 
 \item{startStage}{Start at a specified pipeline stage (default:1)}
 

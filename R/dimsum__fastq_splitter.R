@@ -42,27 +42,31 @@ dimsum__fastq_splitter <- function(
   #Open FASTQ file
   yield_size <- 1e6
   f <- ShortRead::FastqStreamer(inputFile, n=yield_size)
+  #While data still to yield
   while(length(fq <- ShortRead::yield(f))){
-    #Write all yielded records
-    if((records + length(fq)) >= num_fastqrecords){
-      #File will be full after this write
-      num_to_write <- num_fastqrecords-records
-      #Write a subset of yielded records
-      dimsum__writeFastq(shortreads = fq[1:num_to_write], outputFile = output_FASTQ, initial_write = (records==0))
-      #Remove written records
-      fq <- fq[-(1:num_to_write)]
-      #Increment file counter and update output file
-      count <- count + 1
-      output_FASTQ <- paste0(outputFilePrefix, count, '.fastq')
-      #Reset record counter
-      records <- 0
-    }else{
-      #File will not be full after this write (write all yielded records)
-      dimsum__writeFastq(shortreads = fq, outputFile = output_FASTQ, initial_write = (records==0))
-      #Increment record counter
-      records <- records + length(fq)
-      #Remove written records
-      fq <- fq[-(1:length(fq))]
+    #While data still to write from this yield 
+    while(length(fq)>0){
+      #Write all yielded records
+      if((records + length(fq)) >= num_fastqrecords){
+        #File will be full after this write
+        num_to_write <- num_fastqrecords-records
+        #Write a subset of yielded records
+        dimsum__writeFastq(shortreads = fq[1:num_to_write], outputFile = output_FASTQ, initial_write = (records==0))
+        #Remove written records
+        fq <- fq[-(1:num_to_write)]
+        #Increment file counter and update output file
+        count <- count + 1
+        output_FASTQ <- paste0(outputFilePrefix, count, '.fastq')
+        #Reset record counter
+        records <- 0
+      }else{
+        #File will not be full after this write (write all yielded records)
+        dimsum__writeFastq(shortreads = fq, outputFile = output_FASTQ, initial_write = (records==0))
+        #Increment record counter
+        records <- records + length(fq)
+        #Remove written records
+        fq <- fq[-(1:length(fq))]
+      }
     }
   }
   close(f)
