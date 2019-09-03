@@ -93,7 +93,7 @@ Your file must have the following columns:
 * **transformation_replicate** An integer identifier denoting distinct variant library transformations i.e. a set of input and output replicates originating from the same plasmid library transformation or input biological replicate (strictly positive integer).
 * **selection_id** An integer inidicating whether samples were sequenced before (0) or after (1) selection. Subsequent (serial) rounds of selection are indicated by higher numbers i.e. 2, 3, etc. (positive integer, zero included).
 * **selection_replicate** An integer denoting distinct replicate selections (or biological output replicates) each derived from the same input sample (strictly positive integer). Entries should be blank (empty string) for all input samples (each input sample corresponds to a unique transformation).
-* **technical_replicate** An integer denoting technical replicates (a strictly positive integer) corresponding to sample re-sequencing i.e. extracted DNA originating from the same sample split between separate sequencing lanes. Leave this column blank (empty string) when no technical replicates are present.
+* **technical_replicate** An integer denoting technical replicates (a strictly positive integer) corresponding to sample re-sequencing i.e. extracted DNA originating from the same sample split between separate sequencing lanes or files. Leave this column blank (empty string) when no technical replicates are present.
 * **pair1** FASTQ file name of the first read in a given pair.
 * **pair2** FASTQ file name of the second read in a given pair (omit for single-end library designs i.e. 'paired'=F).
 
