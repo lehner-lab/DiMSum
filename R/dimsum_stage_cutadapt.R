@@ -26,6 +26,18 @@ dimsum_stage_cutadapt <- function(
   #Create/overwrite cutadapt directory (if executed)
   cutadapt_outpath <- gsub("/$", "", cutadapt_outpath)
   dimsum__create_dir(cutadapt_outpath, execute = execute, message = "DiMSum STAGE 3: TRIM CONSTANT REGIONS")  
+  #If not trans library: convert to linked adapters if 3' constant region expected to be sequenced
+  if(!dimsum_meta[["transLibrary"]]){
+    dimsum_meta <- dimsum__convert_linked_adapters(dimsum_meta = dimsum_meta)
+  }
+  #Not stranded library (and paired-end)
+  if( !dimsum_meta[["stranded"]] & dimsum_meta[["paired"]]){
+    #Swap reads in fastq files according to adapter presence
+    message("Swapping reads in FASTQ files according to adapter presence")
+    if(execute){
+      dimsum__swap_reads(dimsum_meta = dimsum_meta, cutadapt_outpath = cutadapt_outpath)
+    }
+  }
   #Trim FASTQ file pairs
   message("Trimming FASTQ files with cutadapt:")
   all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
@@ -33,96 +45,14 @@ dimsum_stage_cutadapt <- function(
   message("Processing...")
   for(i in 1:dim(dimsum_meta[['exp_design']])[1]){
     message(paste0("\t", unique(unlist(dimsum_meta[['exp_design']][i,c('pair1', 'pair2')]))))
-    #If not trans library: convert to linked adapters if 3' constant region expected to be sequenced
-    if(!dimsum_meta[["transLibrary"]]){
-      num_cut5f <- ifelse(is.na(dimsum_meta[['exp_design']][i,"cutadaptCut5First"]), 0, dimsum_meta[['exp_design']][i,"cutadaptCut5First"])
-      num_cut5s <- ifelse(is.na(dimsum_meta[['exp_design']][i,"cutadaptCut5Second"]), 0, dimsum_meta[['exp_design']][i,"cutadaptCut5Second"])
-      num_cut3f <- ifelse(is.na(dimsum_meta[['exp_design']][i,"cutadaptCut3First"]), 0, dimsum_meta[['exp_design']][i,"cutadaptCut3First"])
-      num_cut3s <- ifelse(is.na(dimsum_meta[['exp_design']][i,"cutadaptCut3Second"]), 0, dimsum_meta[['exp_design']][i,"cutadaptCut3Second"])
-      #Read 1
-      #Check if 5' constant region specified
-      if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt5First"]) ){
-        if( (dimsum_meta[['exp_design']][i,"pair1_length"]-num_cut5f-num_cut3f) > (nchar(dimsum_meta[['exp_design']][i,"cutadapt5First"]) + nchar(dimsum_meta[['wildtypeSequence']])) ){
-          dimsum_meta[['exp_design']][i,"cutadapt5First"] <- paste0(dimsum_meta[['exp_design']][i,"cutadapt5First"], "...", dimsum_meta[['exp_design']][i,"cutadapt3First"])
-          dimsum_meta[['exp_design']][i,"cutadapt3First"] <- NA
-        }
-      }
-      #Read2 (read1 lengths can be variable due to inconsistent barcode trimming with cutadapt version <2.3)
-      #Check if 5' constant region specified
-      if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt5Second"]) ){
-        if( (dimsum_meta[['exp_design']][i,"pair2_length"]-num_cut5s-num_cut3s) > (nchar(dimsum_meta[['exp_design']][i,"cutadapt5Second"]) + nchar(dimsum_meta[['wildtypeSequence']])) ){
-          dimsum_meta[['exp_design']][i,"cutadapt5Second"] <- paste0(dimsum_meta[['exp_design']][i,"cutadapt5Second"], "...", dimsum_meta[['exp_design']][i,"cutadapt3Second"])
-          dimsum_meta[['exp_design']][i,"cutadapt3Second"] <- NA
-        }
-      }
-    }
     #Check if this system command should be executed
     if(execute){
       #Options for removing constant regions from beginning or end of either read in pair
-      temp_options <- ''
-      if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt5First"]) ){temp_options <- paste0(' -g ', dimsum_meta[['exp_design']][i,"cutadapt5First"])}
-      if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt5Second"]) ){temp_options <- ifelse(dimsum_meta[['paired']], paste0(temp_options, ' -G ', dimsum_meta[['exp_design']][i,"cutadapt5Second"]), temp_options)}
-      if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt3First"]) ){temp_options <- paste0(temp_options, " -a ", dimsum_meta[['exp_design']][i,"cutadapt3First"])}
-      if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt3Second"]) & dimsum_meta[['paired']] ){temp_options <- paste0(temp_options, " -A ", dimsum_meta[['exp_design']][i,"cutadapt3Second"])}
-      #Options for swapping read1 and read2
-      temp_options_swap <- ''
-      if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt5First"]) & !is.na(dimsum_meta[['exp_design']][i,"cutadapt5Second"]) ){
-        temp_options_swap <- paste0(' -g forward=', dimsum_meta[['exp_design']][i,"cutadapt5First"], ' -g reverse=', dimsum_meta[['exp_design']][i,"cutadapt5Second"])
-      }
+      temp_options <- dimsum__get_cutadapt_options(dimsum_meta = dimsum_meta, exp_design_row = i)
       #Options for removing a fixed number of bases from beginning or end of either read in pair
-      temp_cut_options <- ''
-      if( !is.na(dimsum_meta[['exp_design']][i,"cutadaptCut5First"]) ){temp_cut_options <- paste0(temp_cut_options, " -u ", dimsum_meta[['exp_design']][i,"cutadaptCut5First"])}
-      if( !is.na(dimsum_meta[['exp_design']][i,"cutadaptCut3First"]) ){temp_cut_options <- paste0(temp_cut_options, " -u ", -dimsum_meta[['exp_design']][i,"cutadaptCut3First"])}
-      if( !is.na(dimsum_meta[['exp_design']][i,"cutadaptCut5Second"]) & dimsum_meta[['paired']] ){temp_cut_options <- paste0(temp_cut_options, " -U ", dimsum_meta[['exp_design']][i,"cutadaptCut5Second"])}
-      if( !is.na(dimsum_meta[['exp_design']][i,"cutadaptCut3Second"]) & dimsum_meta[['paired']] ){temp_cut_options <- paste0(temp_cut_options, " -U ", -dimsum_meta[['exp_design']][i,"cutadaptCut3Second"])}
+      temp_cut_options <- dimsum__get_cutadapt_options(dimsum_meta = dimsum_meta, exp_design_row = i, option_type = "cut")
       #Not stranded library (and paired-end)
       if( !dimsum_meta[["stranded"]] & dimsum_meta[["paired"]]){
-        #Swap reads in fastq files according to adapter presence
-        temp_out <- system(paste0(
-          "cutadapt",
-          temp_options_swap,
-          temp_cut_options,
-          " --no-trim ",
-          " --minimum-length ",
-          as.character(dimsum_meta[['exp_design']][i,"cutadaptMinLength"]),
-          " -e ",
-          as.character(dimsum_meta[['exp_design']][i,"cutadaptErrorRate"]),
-          " --untrimmed-output ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.untrimmed.fastq")),
-          " --untrimmed-paired-output ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt.untrimmed.fastq")),
-          " -o ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt1-{name}.fastq")),
-          " -p ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt1-{name}.fastq")),
-          " ",
-          file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
-          " ",
-          file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
-          " > ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt1.stdout")),
-          " 2> ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt1.stderr"))))
-        #New read1 file
-        temp_out <- system(paste0(
-          "cat ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt1-reverse.fastq")),
-          " ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt1-forward.fastq")),
-          " ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.untrimmed.fastq")),
-          " > ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt2"))))
-        #New read2 file
-        temp_out <- system(paste0(
-          "cat ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt1-reverse.fastq")),
-          " ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt1-forward.fastq")),
-          " ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt.untrimmed.fastq")),
-          " > ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt2"))))
         #Run cutadapt on the swapped  
         temp_out <- system(paste0(
           "cutadapt",

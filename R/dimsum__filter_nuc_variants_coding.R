@@ -58,7 +58,7 @@ dimsum__filter_nuc_variants_coding <- function(
   #Plot pairwise input sample count correlations for all single mutants (non-synonymous only)
   if(report){
     set.seed(1)
-    d <- GGally::ggpairs(log10(output_dt[Nmut_nt==1][sample(x = .N,min(c(.N,10000))),grep(names(output_dt),pattern="input"),with=F]+1),
+    d <- GGally::ggpairs(log10(output_dt[Nmut_nt==1][sample(x = .N,min(c(.N,10000))),grep(names(output_dt),pattern="_s0_"),with=F]+1),
             upper=list(continuous = "cor"))
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_2_scatterplotmatrix_singlemutants.png"), d, width = 10, height = 10)
   }
@@ -66,8 +66,8 @@ dimsum__filter_nuc_variants_coding <- function(
   #Plot pairwise input sample count correlations for random sample of 10k variants (non-synonymous only)
   if(report){
     temp <- output_dt[is.na(WT) & between(Nmut_nt,1,4),][sample(x = .N,min(c(.N,10000)))]
-    d <- GGally::ggpairs(cbind(log10(temp[,grep(names(output_dt),pattern="input"),with=F]+1), Nmut_nt=as.factor(temp[,Nmut_nt])),
-      columns = 1:length(grep(names(output_dt),pattern="input")),
+    d <- GGally::ggpairs(cbind(log10(temp[,grep(names(output_dt),pattern="_s0_"),with=F]+1), Nmut_nt=as.factor(temp[,Nmut_nt])),
+      columns = 1:length(grep(names(output_dt),pattern="_s0_")),
       mapping = ggplot2::aes(color = Nmut_nt),
       upper=list(continuous = "cor"))
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_2_scatterplotmatrix_random10kmutants.png"), d, width = 10, height = 10)

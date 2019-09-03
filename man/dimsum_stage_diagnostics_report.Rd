@@ -5,7 +5,7 @@
 \title{dimsum_stage_diagnostics_report}
 \usage{
 dimsum_stage_diagnostics_report(dimsum_meta, variant_data, report_outpath,
-  input_samples_pattern = "^input", output_samples_pattern = "^output")
+  input_samples_pattern = "_s0_", output_samples_pattern = "_s1_")
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
@@ -14,9 +14,9 @@ dimsum_stage_diagnostics_report(dimsum_meta, variant_data, report_outpath,
 
 \item{report_outpath}{diagnostics report output path (required)}
 
-\item{input_samples_pattern}{input samples string pattern (default: "^input")}
+\item{input_samples_pattern}{input samples string pattern (default: "_s0_")}
 
-\item{output_samples_pattern}{diagnostics report output path (default: "^output")}
+\item{output_samples_pattern}{diagnostics report output path (default: "_s1_")}
 }
 \value{
 Nothing

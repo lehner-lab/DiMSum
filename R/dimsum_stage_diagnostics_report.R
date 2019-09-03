@@ -6,8 +6,8 @@
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param variant_data path to variant data R Data file (required)
 #' @param report_outpath diagnostics report output path (required)
-#' @param input_samples_pattern input samples string pattern (default: "^input")
-#' @param output_samples_pattern diagnostics report output path (default: "^output")
+#' @param input_samples_pattern input samples string pattern (default: "_s0_")
+#' @param output_samples_pattern diagnostics report output path (default: "_s1_")
 #'
 #' @return Nothing
 #' @export
@@ -15,8 +15,8 @@ dimsum_stage_diagnostics_report <- function(
   dimsum_meta,
   variant_data,
   report_outpath,
-  input_samples_pattern = "^input",
-  output_samples_pattern = "^output"
+  input_samples_pattern = "_s0_",
+  output_samples_pattern = "_s1_"
   ){
   #Create report directory (if doesn't already exist)
   report_outpath <- gsub("/$", "", report_outpath)
