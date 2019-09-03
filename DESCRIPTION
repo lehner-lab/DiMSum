@@ -1,6 +1,6 @@
 Package: DiMSum
 Title: A pipeline for processing deep mutational scanning data
-Version: 0.3.10.9000
+Version: 0.3.11.9000
 Authors@R: c(
     person("Andre", "Faure", email = "ajfaure@gmail.com", role = c("aut", "cre")),
     person("Joern", "Schmiedel", email = "joern.schmiedel@gmail.com", role = c("aut")))
@@ -17,7 +17,7 @@ Imports:
     reshape2,
     seqinr,
     ShortRead
-SystemRequirements: cutadapt, fastqc, fastx_collapser, gunzip, usearch and basic unix commands (cat, cp, head)
+SystemRequirements: cutadapt, fastqc, gunzip, starcode, usearch and basic unix commands (cat, cp, head)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
