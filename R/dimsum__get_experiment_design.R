@@ -49,8 +49,18 @@ dimsum__get_experiment_design <- function(
   exp_design[which(exp_design[,"cutadapt3First"]==""),"cutadapt3First"] <- NA
   exp_design[which(exp_design[,"cutadapt3Second"]==""),"cutadapt3Second"] <- NA
 
+  ### Backwards compatibility
+  #Copy "experiment" and "biological_replicate" columns to "transformation_replicate" and "selection_replicate" respectively
+  if("experiment" %in% colnames(exp_design)){exp_design[,"transformation_replicate"] <- exp_design[,"experiment"]}
+  if("biological_replicate" %in% colnames(exp_design)){exp_design[,"selection_replicate"] <- exp_design[,"biological_replicate"]}
+
   #Check whether experiment design is valid
   dimsum__check_experiment_design(exp_design)
+
+  ### Temporary fix for stages relying on "experiment" and "biological_replicate" columns
+  #Copy "transformation_replicate" and "selection_replicate" to "experiment" and "biological_replicate" colums respectively
+  exp_design[,"experiment"] <- exp_design[,"transformation_replicate"]
+  exp_design[,"biological_replicate"] <- exp_design[,"selection_replicate"]
 
   #Check that each sample has 5' adapters (constant regions) specified (if unstranded library)
   if(!dimsum_meta[["stranded"]]){
