@@ -87,8 +87,9 @@ Calculate fitness and error estimates for a user-specified subset of substitutio
 * **7.4** Nucleotide variants with low input read counts likely representing sequencing errors ('fitnessMinInputCountAll', 'fitnessMinInputCountAny') are filtered out. Additionally, variants exceeding the maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively ('fitnessMaxSubstitutions') are filtered out. For amino acid substitutions, nonsynonymous variants with synonymous variants in other codons are discarded.
 * **7.5** Variants are aggregated at the amino acid level if the target molecule is a protein ('sequenceType'=coding). 
 * **7.6** Fitness and estimates of the associated error are then calculated with respect to the corresponding wild-type sequence score using the model derived in **7.3** above.
-
-An optional step (*coming soon: still in development*) will improve double mutant fitness estimates for low frequency variants using a Bayesian approach that incorporates priors based on observed single mutant counts ('bayesianDoubleFitness', 'bayesianDoubleFitnessLamD', 'fitnessHighConfidenceCount', 'fitnessDoubleHighConfidenceCount'). In the case of a growth-rate based assay, a 'generations' column can be supplied in the experimental design file in order to normalize fitness and error estimates accordingly (see below). Finally, fitness scores are merged between replicates in a weighted manner taking into account their respective errors.
+* **7.7** (*Coming soon: still in development*) Optionally improve double mutant fitness estimates for low frequency variants using a Bayesian approach that incorporates priors based on observed single mutant counts ('bayesianDoubleFitness', 'bayesianDoubleFitnessLamD', 'fitnessHighConfidenceCount', 'fitnessDoubleHighConfidenceCount').
+* **7.8** In the case of a growth-rate based assay, a 'generations' column can be supplied in the experimental design file in order to normalize fitness and error estimates accordingly (see below).
+* **7.9** Fitness scores are merged between replicates in a weighted manner that takes into account their respective errors.
 
 # Experimental design file
 
