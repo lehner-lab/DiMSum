@@ -80,7 +80,7 @@ Combine sample-wise variant counts and statistics to produce a unified results d
 
 ## Stage 7: CALCULATE FITNESS
 
-Calculate fitness and error estimates for all variants:
+Calculate fitness and error estimates for a user-specified subset of substitution variants:
 * **7.1** Indel variants not matching the WT sequence length are discarded.
 * **7.2** If internal constant region(s) are specified, these are  removed from all variants if a perfect match is found.
 * **7.3** An error model is fit to all variants to determine the contributions of count-based (Poisson), replicate and over-sequencing error terms.
