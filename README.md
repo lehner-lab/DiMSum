@@ -52,7 +52,7 @@ DiMSum -h
 
 # Pipeline
 
-The DiMSum pipeline processes raw sequencing reads (in FASTQ format) from deep mutational scanning (DMS) experiments to produce variant counts for each sample. These counts are suitable for use in downstream analyses of epistasis and [protein structure determination](https://github.com/lehner-lab/DMS2structure).
+The DiMSum pipeline processes raw sequencing reads (in FASTQ format) from deep mutational scanning (DMS) experiments to produce variant counts, fitness and error estimates. These estimates are suitable for use in downstream analyses of epistasis and [protein structure determination](https://github.com/lehner-lab/DMS2structure).
 
 ## Stage 1: DEMULTIPLEX READS
 
@@ -80,9 +80,15 @@ Combine sample-wise variant counts and statistics to produce a unified results d
 
 ## Stage 7: CALCULATE FITNESS
 
-Calculate fitness and error estimates for all variants. Firstly, indel variants not matching the WT sequence length are discarded. Secondly, if internal constant region(s) are specified, these are  removed from all variants if a perfect match is found. Thirdly, nucleotide variants with low input read counts likely representing sequencing errors ('fitnessMinInputCountAll', 'fitnessMinInputCountAny') are filtered out. Additionally, variants exceeding the maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively ('fitnessMaxSubstitutions') are filtered out. For amino acid substitutions, nonsynonymous variants with synonymous variants in other codons are discarded. Variants are then aggregated at the amino acid level if the target molecule is a protein ('sequenceType'=coding). 
+Calculate fitness and error estimates for all variants:
+* **7.1** Indel variants not matching the WT sequence length are discarded.
+* **7.2** If internal constant region(s) are specified, these are  removed from all variants if a perfect match is found.
+* **7.3** An error model is fit to all variants to determine the contributions of count-based (Poisson), replicate and over-sequencing error terms.
+* **7.4** Nucleotide variants with low input read counts likely representing sequencing errors ('fitnessMinInputCountAll', 'fitnessMinInputCountAny') are filtered out. Additionally, variants exceeding the maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively ('fitnessMaxSubstitutions') are filtered out. For amino acid substitutions, nonsynonymous variants with synonymous variants in other codons are discarded.
+* **7.5** Variants are aggregated at the amino acid level if the target molecule is a protein ('sequenceType'=coding). 
+* **7.6** Fitness and estimates of the associated error are then calculated with respect to the corresponding wild-type sequence score using the model derived in **7.3** above.
 
-Fitness and estimates of the associated error are then calculated with respect to the corresponding wild-type sequence score. An optional step exists to improve double mutant fitness estimates for low frequency variants using a Bayesian approach incorporating priors based on observed single mutant counts ('bayesianDoubleFitness', 'bayesianDoubleFitnessLamD', 'fitnessHighConfidenceCount', 'fitnessDoubleHighConfidenceCount'). In the case of a growth-rate based assay, a 'generations' column can be supplied in the experimental design file in order to normalize fitness and error estimates accordingly (see below). Finally, fitness scores are merged between replicates and error estimates incorporate both sampling and replicate variation.
+An optional step (*coming soon: still in development*) will improve double mutant fitness estimates for low frequency variants using a Bayesian approach that incorporates priors based on observed single mutant counts ('bayesianDoubleFitness', 'bayesianDoubleFitnessLamD', 'fitnessHighConfidenceCount', 'fitnessDoubleHighConfidenceCount'). In the case of a growth-rate based assay, a 'generations' column can be supplied in the experimental design file in order to normalize fitness and error estimates accordingly (see below). Finally, fitness scores are merged between replicates in a weighted manner taking into account their respective errors.
 
 # Experimental design file
 
