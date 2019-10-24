@@ -5,7 +5,7 @@
 \title{dimsum__filter_nuc_variants_coding}
 \usage{
 dimsum__filter_nuc_variants_coding(dimsum_meta, input_dt, wt_ntseq,
-  report = TRUE, report_outpath = NULL)
+  all_reps, report = TRUE, report_outpath = NULL)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
@@ -13,6 +13,8 @@ dimsum__filter_nuc_variants_coding(dimsum_meta, input_dt, wt_ntseq,
 \item{input_dt}{output path for plots and saved objects (required)}
 
 \item{wt_ntseq}{WT nucleotide sequence (required)}
+
+\item{all_reps}{list of replicates to retain (required)}
 
 \item{report}{whether or not to generate fitness summary plots (default: TRUE)}
 

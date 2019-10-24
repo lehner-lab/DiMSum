@@ -22,7 +22,9 @@ dimsum_stage_unique <- function(
   #Create unique directory (if doesn't already exist)
   unique_outpath <- gsub("/$", "", unique_outpath)
   dimsum__create_dir(unique_outpath, execute = execute, message = "DiMSum STAGE 5: COUNT UNIQUE VARIANTS")  
-  #Run fastx_collapser on all aligned read pair fastq files
+  #Add sample code (sample name plus experiment and replicate structure, but without split)
+  dimsum_meta[["exp_design"]][,"sample_code"] <- sapply(strsplit(dimsum_meta[["exp_design"]][,"aligned_pair"], '.split'), '[', 1)
+  #Run starcode on all aligned read pair fastq files
   message("Counting unique aligned reads with starcode:")
   all_fasta <- file.path(dimsum_meta[["exp_design"]][,"aligned_pair_directory"], dimsum_meta[['exp_design']][,"aligned_pair"])
   print(all_fasta)
@@ -33,8 +35,8 @@ dimsum_stage_unique <- function(
     dimsum_stage_unique_helper <- function(
       i
       ){
-      this_sample_name <- unique(dimsum_meta[["exp_design"]][,"sample_name"])[i]
-      read_pairs <- dimsum_meta[["exp_design"]][dimsum_meta[["exp_design"]][,"sample_name"]==this_sample_name,"aligned_pair"]
+      this_sample_code <- unique(dimsum_meta[["exp_design"]][,"sample_code"])[i]
+      read_pairs <- dimsum_meta[["exp_design"]][dimsum_meta[["exp_design"]][,"sample_code"]==this_sample_code,"aligned_pair"]
       #Concatenate FASTQ files
       output_file1 <- gsub("_split1.usearch$", ".usearch", read_pairs[1])
       temp_out <- system(paste0(
@@ -47,11 +49,11 @@ dimsum_stage_unique <- function(
     clust <- parallel::makeCluster(dimsum_meta[['numCores']])
     # make variables available to each core's workspace
     parallel::clusterExport(clust, list("dimsum_meta","unique_outpath"), envir = environment())
-    parallel::parSapply(clust,X = 1:length(unique(dimsum_meta[["exp_design"]][,"sample_name"])), dimsum_stage_unique_helper)
+    parallel::parSapply(clust,X = 1:length(unique(dimsum_meta[["exp_design"]][,"sample_code"])), dimsum_stage_unique_helper)
     parallel::stopCluster(clust)
     #Run starcode to count unique variants
-    for(this_sample_name in unique(dimsum_meta[["exp_design"]][,"sample_name"])){
-      read_pairs <- dimsum_meta[["exp_design"]][dimsum_meta[["exp_design"]][,"sample_name"]==this_sample_name,"aligned_pair"]
+    for(this_sample_code in unique(dimsum_meta[["exp_design"]][,"sample_code"])){
+      read_pairs <- dimsum_meta[["exp_design"]][dimsum_meta[["exp_design"]][,"sample_code"]==this_sample_code,"aligned_pair"]
       output_file1 <- gsub("_split1.usearch$", ".usearch", read_pairs[1])
       output_file2 <- gsub("_split1.usearch$", ".usearch.unique", read_pairs[1])
       temp_out <- system(paste0(

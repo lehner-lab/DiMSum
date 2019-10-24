@@ -33,53 +33,16 @@ dimsum__merge_fitness <- function(
   #Number of input and output replicates
   all_reps_str <- paste0(all_reps, collapse="")
 
-  #first check potential for replicate error
-  input_dt[,var_fitness := rowSums((rowMeans(.SD[,1:nchar(all_reps_str)],na.rm=T) - .SD[,1:nchar(all_reps_str)])^2/(.SD[,(nchar(all_reps_str)+1):(2*nchar(all_reps_str))]^2),na.rm=T) / 
-                rowSums(1/(.SD[,(nchar(all_reps_str)+1):(2*nchar(all_reps_str))]^2 ),na.rm=T),
-              ,.SDcols = c(grep(names(input_dt),pattern=paste0("fitness[", all_reps_str, "]")),grep(names(input_dt),pattern=paste0("sigma[", all_reps_str, "]")))]
-  input_dt[,avg_sigma := rowMeans(.SD[,(nchar(all_reps_str)+1):(2*nchar(all_reps_str))],na.rm=T),
-              ,.SDcols = c(grep(names(input_dt),pattern=paste0("fitness[", all_reps_str, "]")),grep(names(input_dt),pattern=paste0("sigma[", all_reps_str, "]")))]
-  input_dt[,isNA := rowSums(is.na(.SD)),,.SDcols = grep(names(input_dt),pattern=paste0("fitness[", all_reps_str, "]"))]
-  input_dt[isNA==0 & var_fitness != Inf & avg_sigma != Inf,avg_sigma_fit := loess(var_fitness ~ avg_sigma,span=0.75)$fitted]
-
-  replicate_error <- input_dt[,min(sqrt(avg_sigma_fit),na.rm=T)]
-  message(paste0("Replicate error is:", replicate_error))
-
-  #Average sigma versus fitness replicate error (hexbin for single and double nucleotide variants only)
-  if(report){    
-    d <- ggplot2::ggplot(input_dt[isNA==0 & !is.infinite(avg_sigma)],ggplot2::aes(avg_sigma)) +
-      ggplot2::stat_binhex(data = input_dt[isNA==0 & !is.infinite(avg_sigma) & between(Nmut_nt, 1, 2)], ggplot2::aes(y=sqrt(var_fitness), color = as.factor(Nmut_nt)), bins=100, size = 0.1) +
-      ggplot2::labs(color = "Nmut_nt") +
-      ggplot2::scale_fill_gradientn(colours=c("white", "black")) +
-      # ggplot2::geom_point(ggplot2::aes(y=sqrt(var_fitness))) +
-      ggplot2::geom_line(ggplot2::aes(y=sqrt(avg_sigma_fit)),color="black",linetype=2) +
-      ggplot2::geom_line(ggplot2::aes(y=sqrt(avg_sigma^2 + replicate_error^2)),color="black") +
-      ggplot2::geom_abline(color="darkgrey",linetype=2) + 
-      ggplot2::scale_x_log10() + 
-      ggplot2::scale_y_log10() +
-      ggplot2::xlab("Average count-based (Poisson) fitness error") + ggplot2::ylab("Fitness standard deviation between biological replicates") +
-      ggplot2::theme_bw() + ggplot2::theme(panel.grid.minor=ggplot2::element_blank())
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_5_fitness_replicateerror_vs_avgsigma.png"), d, width = 6, height = 5)
-  }
-
   #### all variants
   fitness_rx <- input_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]"),colnames(input_dt))]
-  sigma_rx <- sqrt(input_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]"),colnames(input_dt))]^2 + 
-                    matrix(replicate_error^2,nrow = dim(fitness_rx)[1],ncol = dim(fitness_rx)[2]))
-  # sigma_s2 <- random_effect_model(fitness_rx,sigma_rx)
-  # input_dt[,fitness := rowSums(fitness_rx/(sigma_rx^2 + sigma_s2),na.rm=T)/rowSums(1/(sigma_rx^2 + sigma_s2),na.rm=T)]
+  sigma_rx <- input_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]"),colnames(input_dt))]
   input_dt[,fitness := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
-  # input_dt[,sigma := sqrt(1/rowSums(1/(sigma_rx^2+sigma_s2),na.rm=T))]
   input_dt[,sigma := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
 
   #### singles
   fitness_rx <- singles_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]"),colnames(singles_dt))]
-  sigma_rx <- sqrt(singles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]"),colnames(singles_dt))]^2 + 
-                    matrix(replicate_error^2,nrow = dim(fitness_rx)[1],ncol = dim(fitness_rx)[2]))
-  # sigma_s2 <- random_effect_model(fitness_rx,sigma_rx)
-  # singles_dt[,fitness := rowSums(fitness_rx/(sigma_rx^2 + sigma_s2),na.rm=T)/rowSums(1/(sigma_rx^2 + sigma_s2),na.rm=T)]
+  sigma_rx <- singles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]"),colnames(singles_dt))]
   singles_dt[,fitness := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
-  # singles_dt[,sigma := sqrt(1/rowSums(1/(sigma_rx^2+sigma_s2),na.rm=T))]
   singles_dt[,sigma := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
   if(report){
     d <- ggplot2::ggplot(singles_dt[Nmut_aa==1],ggplot2::aes(fitness,sigma)) + 
@@ -92,12 +55,8 @@ dimsum__merge_fitness <- function(
   #### doubles
   #uncorrected fitness
   fitness_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]_uncorr"),colnames(doubles_dt))]
-  sigma_rx <- sqrt(doubles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]_uncorr"),colnames(doubles_dt))]^2 + 
-                    matrix(replicate_error^2,nrow = dim(fitness_rx)[1],ncol = dim(fitness_rx)[2]))
-  # sigma_s2 <- random_effect_model(fitness_rx,sigma_rx)
-  # doubles_dt[,fitness_uncorr := rowSums(fitness_rx/(sigma_rx^2 + sigma_s2),na.rm=T)/rowSums(1/(sigma_rx^2 + sigma_s2),na.rm=T)]
+  sigma_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]_uncorr"),colnames(doubles_dt))]
   doubles_dt[,fitness_uncorr := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
-  # doubles_dt[,sigma_uncorr := sqrt(1/rowSums(1/(sigma_rx^2+sigma_s2),na.rm=T))]
   doubles_dt[,sigma_uncorr := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
   if(report){
     d <- ggplot2::ggplot(doubles_dt,ggplot2::aes(fitness_uncorr,sigma_uncorr)) + 
@@ -110,12 +69,8 @@ dimsum__merge_fitness <- function(
   #conditioned fitness
   if(dimsum_meta[["bayesianDoubleFitness"]]){
     fitness_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]_cond"),colnames(doubles_dt))]
-    sigma_rx <- sqrt(doubles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]_cond"),colnames(doubles_dt))]^2 + 
-                      matrix(replicate_error^2,nrow = dim(fitness_rx)[1],ncol = dim(fitness_rx)[2]))
-    # sigma_s2 <- random_effect_model(fitness_rx,sigma_rx)
-    # doubles_dt[,fitness_cond := rowSums(fitness_rx/(sigma_rx^2 + sigma_s2),na.rm=T)/rowSums(1/(sigma_rx^2 + sigma_s2),na.rm=T)]
+    sigma_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]_cond"),colnames(doubles_dt))]
     doubles_dt[,fitness_cond := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
-    # doubles_dt[,sigma_cond := sqrt(1/rowSums(1/(sigma_rx^2+sigma_s2),na.rm=T))]
     doubles_dt[,sigma_cond := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
     if(report){
       d <- ggplot2::ggplot(doubles_dt,ggplot2::aes(fitness_cond,sigma_cond)) + 

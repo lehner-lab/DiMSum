@@ -26,8 +26,12 @@ dimsum__reports_summary <- function(dimsum_meta){
    \t\t<a href=\"#MERGE1\"> 5. Nucleotide mutation statistics </a><br>\
    \t\t<a href=\"#MERGE2\"> 6. Amino acid mutation statistics </a><br>\
    \t\t<a href=\"#COUNTDISTR\"> 7. Variant count distributions </a><br>\
-   \t\t<a href=\"#SCATTERMATRIX\"> 8. Inter-sample variant count diagnostic plot </a><br>\
-   \t\t<a href=\"#FITNESSERROR\"> 9. Fitness error diagnostic plot </a><br>\
+   \t\t<a href=\"#COUNTSCATTERMATRIX\"> 8. Inter-sample variant count diagnostic plot </a><br>\
+   \t\t<a href=\"#INPUTTHRESHOLD\"> 9. Input read threshold for full fitness range </a><br>\
+   \t\t<a href=\"#REPLICATEDEVIATION\"> 10. Affect of fitness normalisation on replicate deviations </a><br>\
+   \t\t<a href=\"#FITNESSDISTR\"> 11. Fitness distributions </a><br>\
+   \t\t<a href=\"#FITNESSSCATTERMATRIX\"> 12. Inter-sample variant fitness diagnostic plot </a><br>\
+   \t\t<a href=\"#FITNESSERROR\"> 13. Fitness error model </a><br>\
    \t</div>\
   \
    \t<div id=\"FASTQC\">\
@@ -51,7 +55,11 @@ dimsum__reports_summary <- function(dimsum_meta){
    \t\t<a href=\"#MERGE1\"> 5. Nucleotide mutation statistics </a><br>\
    \t\t<a href=\"#COUNTDISTR\"> 6. Variant count distributions </a><br>\
    \t\t<a href=\"#SCATTERMATRIX\"> 7. Inter-sample variant count diagnostic plot </a><br>\
-   \t\t<a href=\"#FITNESSERROR\"> 8. Fitness error diagnostic plot </a><br>\
+   \t\t<a href=\"#INPUTTHRESHOLD\"> 8. Input read threshold for full fitness range </a><br>\
+   \t\t<a href=\"#REPLICATEDEVIATION\"> 9. Affect of fitness normalisation on replicate deviations </a><br>\
+   \t\t<a href=\"#FITNESSDISTR\"> 10. Fitness distributions </a><br>\
+   \t\t<a href=\"#FITNESSSCATTERMATRIX\"> 11. Inter-sample variant fitness diagnostic plot </a><br>\
+   \t\t<a href=\"#FITNESSERROR\"> 12. Fitness error model </a><br>\
    \t</div>\
   \
    \t<div id=\"FASTQC\">\
@@ -106,14 +114,35 @@ dimsum__reports_summary <- function(dimsum_meta){
       <p><img src=\"reports/dimsum_stage_diagnostics_report_count_hist_output.png\" width=\"1200\"></p>\
     </div>\
   \
-      <div id=\"SCATTERMATRIX\">\
+      <div id=\"COUNTSCATTERMATRIX\">\
         <h2>8. Inter-sample variant count diagnostic plot</h2>\
       <p><img src=\"reports/dimsum_stage_diagnostics_report_scatterplotmatrix_all.png\" width=\"1200\"></p>\
     </div>\
   \
+      <div id=\"INPUTTHRESHOLD\">\
+        <h2>9. Input read threshold for full fitness range</h2>\
+      <p><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_fitness_inputcounts.png\" width=\"600\"></p>\
+    </div>\
+  \
+      <div id=\"REPLICATEDEVIATION\">\
+        <h2>10. Affect of fitness normalisation on replicate deviations</h2>\
+      <p><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_fitness_replicate_deviation_scatter.png\" width=\"600\"></p>\
+    </div>\
+  \
+      <div id=\"FITNESSDISTR\">\
+        <h2>11. Fitness distributions (before and after inter-replicate normalisation)</h2>\
+      <p><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density.png\" width=\"600\"><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density_norm.png\" width=\"600\"></p>\
+    </div>\
+  \
+      <div id=\"FITNESSSCATTERMATRIX\">\
+        <h2>12. Inter-sample variant fitness diagnostic plot (before and after inter-replicate normalisation)</h2>\
+      <p><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter.png\" width=\"1000\"></p>\
+      <p><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter_norm.png\" width=\"1000\"></p>\
+    </div>\
+  \
       <div id=\"FITNESSERROR\">\
-        <h2>9. Fitness error diagnostic plot</h2>\
-      <p><img src=\"reports/dimsum_stage_fitness_report_1_singledouble_fitness_replicateerror_vs_avgsigma.png\" width=\"1200\"></p>\
+        <h2>13. Fitness error model</h2>\
+      <p><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_repspec.png\" width=\"800\"></p>\
     </div>\
   \
    </body>\
@@ -144,14 +173,35 @@ dimsum__reports_summary <- function(dimsum_meta){
       <p><img src=\"reports/dimsum_stage_diagnostics_report_count_hist_output.png\" width=\"1200\"></p>\
     </div>\
   \
-      <div id=\"SCATTERMATRIX\">\
+      <div id=\"COUNTSCATTERMATRIX\">\
         <h2>7. Inter-sample variant count diagnostic plot</h2>\
       <p><img src=\"reports/dimsum_stage_diagnostics_report_scatterplotmatrix_all.png\" width=\"1200\"></p>\
     </div>\
   \
+      <div id=\"INPUTTHRESHOLD\">\
+        <h2>8. Input read threshold for full fitness range</h2>\
+      <p><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_fitness_inputcounts.png\" width=\"600\"></p>\
+    </div>\
+  \
+      <div id=\"REPLICATEDEVIATION\">\
+        <h2>9. Affect of fitness normalisation on replicate deviations</h2>\
+      <p><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_fitness_replicate_deviation_scatter.png\" width=\"600\"></p>\
+    </div>\
+  \
+      <div id=\"FITNESSDISTR\">\
+        <h2>10. Fitness distributions (before and after inter-replicate normalisation)</h2>\
+      <p><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density.png\" width=\"600\"><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density_norm.png\" width=\"600\"></p>\
+    </div>\
+  \
+      <div id=\"FITNESSSCATTERMATRIX\">\
+        <h2>11. Inter-sample variant fitness diagnostic plot (before and after inter-replicate normalisation)</h2>\
+      <p><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter.png\" width=\"1000\"></p>\
+      <p><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter_norm.png\" width=\"1000\"></p>\
+    </div>\
+  \
       <div id=\"FITNESSERROR\">\
-        <h2>8. Fitness error diagnostic plot</h2>\
-      <p><img src=\"reports/dimsum_stage_fitness_report_1_singledouble_fitness_replicateerror_vs_avgsigma.png\" width=\"1200\"></p>\
+        <h2>12. Fitness error model</h2>\
+      <p><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_repspec.png\" width=\"800\"></p>\
     </div>\
   \
    </body>\

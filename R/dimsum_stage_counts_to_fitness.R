@@ -83,21 +83,15 @@ dimsum_stage_counts_to_fitness <- function(
     wt_AAseq <- all_data[WT==T,aa_seq]
   }
 
-  ### Check fitness, count-based error and replicate error at nucleotide level (before filtering and aggregating at the AA level)
+  ### Fit error model
   ###########################
 
-  #Retain variants with max fitnessMaxSubstitutions nucleotide or amino acid substitutions only
-  if(dimsum_meta[["sequenceType"]]=="coding"){
-    dimsum__check_nt_fitness(
-      input_dt = data.table::copy(all_data)[Nmut_aa<=dimsum_meta[["fitnessMaxSubstitutions"]],],
-      all_reps = all_reps,
-      report_outpath = report_outpath)
-  }else{
-    dimsum__check_nt_fitness(
-      input_dt = data.table::copy(all_data)[Nmut_nt<=dimsum_meta[["fitnessMaxSubstitutions"]],],
-      all_reps = all_reps,
-      report_outpath = report_outpath)
-  }
+  #Fit error model (using variants with less than specified number of mutations)
+  model_result <- dimsum__error_model(
+    dimsum_meta = dimsum_meta,
+    input_dt = data.table::copy(all_data[Nmut_nt<=dimsum_meta[["errorModelMaxSubstitutions"]],]),
+    all_reps = all_reps,
+    report_outpath = report_outpath)
 
   ### Filter nucleotide variants
   ###########################
@@ -107,13 +101,15 @@ dimsum_stage_counts_to_fitness <- function(
       dimsum_meta = dimsum_meta,
       input_dt = all_data,
       wt_ntseq = wt_ntseq,
+      all_reps = all_reps,
       report_outpath = report_outpath)
   }else{
     nf_data <- dimsum__filter_nuc_variants_noncoding(
       dimsum_meta = dimsum_meta,
       input_dt = all_data,
       wt_ntseq = wt_ntseq,
-       report_outpath = report_outpath)
+      all_reps = all_reps,
+      report_outpath = report_outpath)
   }
 
   ### Aggregate counts from variants that are identical at the AA level and without synonymous mutations (if coding sequence)
@@ -146,10 +142,11 @@ dimsum_stage_counts_to_fitness <- function(
   ###########################
 
   nf_data_syn <- dimsum__calculate_fitness(
+    dimsum_meta = dimsum_meta,
     input_dt = nf_data_syn,
     all_reps = all_reps,
-    sequence_type = dimsum_meta[["sequenceType"]],
-    report_outpath = report_outpath)
+    error_model_dt = model_result[["error_model"]],
+    norm_model_dt = model_result[["norm_model"]])
 
   ### Wild type
   ###########################

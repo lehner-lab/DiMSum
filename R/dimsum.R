@@ -30,13 +30,15 @@
 #' @param wildtypeSequence Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed before fitness calculations.
 #' @param sequenceType Coding potential of sequence; either noncoding/coding/auto (default:auto)
 #' @param transLibrary Trans library design i.e. read pairs correspond to distinct peptides (no overlap)
-#' @param bayesianDoubleFitness Improve double mutant fitness estimates using Bayesian framework (default:F)
+#' @param bayesianDoubleFitness Improve double mutant fitness estimates using Bayesian framework (DISABLED: still in development)
 #' @param bayesianDoubleFitnessLamD Poisson distribution for score likelihood (default:0.025)
 #' @param fitnessMinInputCountAll Minimum input read count (in all replicate) to be retained during fitness calculations (default:0)
 #' @param fitnessMinInputCountAny Minimum input read count (in any replicate) to be retained during fitness calculations (default:5)
 #' @param fitnessHighConfidenceCount Minimum mean input read count for high confidence variants (default:10)
 #' @param fitnessDoubleHighConfidenceCount Minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)
+#' @param fitnessNormalise Normalise fitness values to minimise inter-replicate differences (default:T)
 #' @param fitnessMaxSubstitutions Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)
+#' @param errorModelMaxSubstitutions Maximum number of nucleotide substitutions used for error model fitting (default:2)
 #' @param retainIntermediateFiles Should intermediate files be retained? (default:F)
 #' @param splitChunkSize FASTQ file split chunk size in bytes (default:3758096384)
 #' @param retainedReplicates Comma-separated list of Input replicates (or experiment ids) to retain or 'all' (default:'all')
@@ -80,7 +82,9 @@ dimsum <- function(
   fitnessMinInputCountAny=5,
   fitnessHighConfidenceCount=10,
   fitnessDoubleHighConfidenceCount=50,
+  fitnessNormalise=T,
   fitnessMaxSubstitutions=2,
+  errorModelMaxSubstitutions=2,
   retainIntermediateFiles=F,
   splitChunkSize=3758096384,
   retainedReplicates="all",
@@ -161,7 +165,9 @@ dimsum <- function(
     "fitnessMinInputCountAny" = list(fitnessMinInputCountAny, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "fitnessHighConfidenceCount" = list(fitnessHighConfidenceCount, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "fitnessDoubleHighConfidenceCount" = list(fitnessDoubleHighConfidenceCount, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
+    "fitnessNormalise" = list(fitnessNormalise, c("logical")), #logical -- checked in dimsum__validate_input
     "fitnessMaxSubstitutions" = list(fitnessMaxSubstitutions, c("integer")), #positive integer (greater than 1) -- checked in dimsum__validate_input
+    "errorModelMaxSubstitutions" = list(errorModelMaxSubstitutions, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
     "retainIntermediateFiles" = list(retainIntermediateFiles, c("logical")), #logical -- checked in dimsum__validate_input
     "splitChunkSize" = list(splitChunkSize, c("double")), #strictly positive double -- checked in dimsum__validate_input
     "retainedReplicates" = list(retainedReplicates, c("character")), #comma-separated list of integers or "all" -- checked in dimsum__validate_input

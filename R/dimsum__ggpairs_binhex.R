@@ -28,7 +28,7 @@ dimsum__ggpairs_binhex <- function(
   cut = NULL,
   size = 0.5){
   #Check if something to plot
-  if(dim(input_dt)[1]==0){
+  if(dim(input_dt)[1] == 0){
     warning("dimsum__ggpairs_binhex.R: No data to plot (empty data.table 'input_dt').", call. = FALSE, immediate. = TRUE, noBreaks. = TRUE)
     return(NULL)
   }
@@ -46,19 +46,22 @@ dimsum__ggpairs_binhex <- function(
       if (y>x) {
         if(is.null(cut)){
           d <- GGally::putPlot(d, 
-            ggplot2::ggplot(plot_dt, ggplot2::aes_string(x=colnames(input_dt)[x],y=colnames(input_dt)[y])) + 
-            ggplot2::stat_binhex(bins=bins)
+            ggplot2::ggplot(plot_dt, ggplot2::aes_string(x = colnames(input_dt)[x], y = colnames(input_dt)[y])) + 
+            ggplot2::stat_binhex(bins = bins, size = size, color = "lightgrey") +
+            ggplot2::scale_fill_gradientn(colours = c("white", "black"), trans = "log10") +
+            ggplot2::geom_abline(color = "darkgrey", lty = 2)
             , y,x)
         }else{
           d <- GGally::putPlot(d, 
-            ggplot2::ggplot(plot_dt, ggplot2::aes_string(x=colnames(input_dt)[x],y=colnames(input_dt)[y])) + 
-            ggplot2::stat_binhex(ggplot2::aes(color = cut), bins=bins, size=size) +
-            ggplot2::scale_fill_gradientn(colours=c("white", "black"))
+            ggplot2::ggplot(plot_dt, ggplot2::aes_string(x = colnames(input_dt)[x], y = colnames(input_dt)[y])) + 
+            ggplot2::stat_binhex(ggplot2::aes(color = cut), bins = bins, size = size) +
+            ggplot2::scale_fill_gradientn(colours = c("white", "black"), trans = "log10") +
+            ggplot2::geom_abline(color = "darkgrey", lty = 2)
             , y,x)
         }
       }
     }
   }
-  d <- d + ggplot2::theme_bw() + ggplot2::theme(panel.grid.minor=ggplot2::element_blank())
+  d <- d + ggplot2::theme_bw() + ggplot2::theme(panel.grid.minor = ggplot2::element_blank())
   suppressWarnings(suppressMessages(ggplot2::ggsave(output_file, d, width = width, height = height)))
 }

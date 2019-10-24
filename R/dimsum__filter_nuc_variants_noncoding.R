@@ -6,6 +6,7 @@
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param input_dt output path for plots and saved objects (required)
 #' @param wt_ntseq WT nucleotide sequence (required)
+#' @param all_reps list of replicates to retain (required)
 #' @param report whether or not to generate fitness summary plots (default: TRUE)
 #' @param report_outpath fitness report output path
 #'
@@ -16,17 +17,21 @@ dimsum__filter_nuc_variants_noncoding <- function(
   dimsum_meta,
   input_dt,
   wt_ntseq,
+  all_reps,
   report = TRUE,
   report_outpath = NULL
   ){
 
   message("Filtering low count nucleotide variants...")
 
+  #Number of input and output replicates
+  all_reps_str <- paste0(all_reps, collapse="")
+
   #WT nucleotide sequences
   wt_ntseq_split <- strsplit(wt_ntseq,"")[[1]]
 
   #Sample names
-  input_samples <- names(input_dt)[grep("_e.*_s0_b.*_count$", names(input_dt))]
+  input_samples <- names(input_dt)[grep(paste0("e[", all_reps_str, "]_s0_b.*_count$"), names(input_dt))]
 
   ### Retain nucleotide variants with max dimsum_meta[["fitnessMaxSubstitutions"]] nucleotide mutations only
   ### Retain only variants with >dimsum_meta[["fitnessMinInputCountAny"]] input readcounts in ANY biological replicate and

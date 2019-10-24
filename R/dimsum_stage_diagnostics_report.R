@@ -79,7 +79,7 @@ dimsum_stage_diagnostics_report <- function(
       output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_all.png"),
       xlab = "log10(variant count + 1)",
       ylab = "log10(variant count + 1)",
-      title = "Substitution variant inter-sample count correlations (all samples)",
+      title = "Single and double substitution variant inter-sample count correlations (all samples)",
       cut = as.factor(temp_dt[data.table::between(Nmut_nt,1,2),Nmut_nt]),
       size = 0.1)
     dimsum__ggpairs_binhex(
@@ -87,7 +87,7 @@ dimsum_stage_diagnostics_report <- function(
       output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_all.pdf"),
       xlab = "log10(variant count + 1)",
       ylab = "log10(variant count + 1)",
-      title = "Substitution variant inter-sample count correlations (all samples)",
+      title = "Single and double substitution variant inter-sample count correlations (all samples)",
       cut = as.factor(temp_dt[data.table::between(Nmut_nt,1,2),Nmut_nt]),
       size = 0.1)
   }

@@ -15,7 +15,8 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   transLibrary = F, bayesianDoubleFitness = F,
   bayesianDoubleFitnessLamD = 0.025, fitnessMinInputCountAll = 0,
   fitnessMinInputCountAny = 5, fitnessHighConfidenceCount = 10,
-  fitnessDoubleHighConfidenceCount = 50, fitnessMaxSubstitutions = 2,
+  fitnessDoubleHighConfidenceCount = 50, fitnessNormalise = T,
+  fitnessMaxSubstitutions = 2, errorModelMaxSubstitutions = 2,
   retainIntermediateFiles = F, splitChunkSize = 3758096384,
   retainedReplicates = "all", startStage = 1, stopStage = 0,
   numCores = 1)
@@ -75,7 +76,7 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{transLibrary}{Trans library design i.e. read pairs correspond to distinct peptides (no overlap)}
 
-\item{bayesianDoubleFitness}{Improve double mutant fitness estimates using Bayesian framework (default:F)}
+\item{bayesianDoubleFitness}{Improve double mutant fitness estimates using Bayesian framework (DISABLED: still in development)}
 
 \item{bayesianDoubleFitnessLamD}{Poisson distribution for score likelihood (default:0.025)}
 
@@ -87,7 +88,11 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{fitnessDoubleHighConfidenceCount}{Minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)}
 
+\item{fitnessNormalise}{Normalise fitness values to minimise inter-replicate differences (default:T)}
+
 \item{fitnessMaxSubstitutions}{Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)}
+
+\item{errorModelMaxSubstitutions}{Maximum number of nucleotide substitutions used for error model fitting (default:2)}
 
 \item{retainIntermediateFiles}{Should intermediate files be retained? (default:F)}
 

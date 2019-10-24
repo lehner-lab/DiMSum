@@ -4,19 +4,19 @@
 \alias{dimsum__calculate_fitness}
 \title{dimsum__calculate_fitness}
 \usage{
-dimsum__calculate_fitness(input_dt, all_reps, sequence_type,
-  report = TRUE, report_outpath = NULL, verbose = T)
+dimsum__calculate_fitness(dimsum_meta, input_dt, all_reps, error_model_dt,
+  norm_model_dt, verbose = T)
 }
 \arguments{
+\item{dimsum_meta}{an experiment metadata object (required)}
+
 \item{input_dt}{input data.table (required)}
 
 \item{all_reps}{list of replicates to retain (required)}
 
-\item{sequence_type}{coding potential of sequence: noncoding/coding (required)}
+\item{error_model_dt}{error model data.table (required)}
 
-\item{report}{whether or not to generate fitness summary plots (default: TRUE)}
-
-\item{report_outpath}{fitness report output path}
+\item{norm_model_dt}{normalisation model data.table (required)}
 
 \item{verbose}{whether or not to print status messages (default: TRUE)}
 }
@@ -24,5 +24,5 @@ dimsum__calculate_fitness(input_dt, all_reps, sequence_type,
 Nothing
 }
 \description{
-Calculate fitness and count-based error.
+Calculate fitness and error.
 }

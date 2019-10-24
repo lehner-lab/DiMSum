@@ -87,10 +87,18 @@ dimsum__validate_input <- function(
     stop("Invalid 'fitnessMaxSubstitutions' argument. Only integers greater than 1 allowed.", call. = FALSE)
   }
 
+  #Check errorModelMaxSubstitutions argument greater than 0
+  if(dimsum_meta[["errorModelMaxSubstitutions"]]<1){
+    stop("Invalid 'errorModelMaxSubstitutions' argument. Only positive integers allowed (zero exclusive).", call. = FALSE)
+  }
+
   #Check usearchMaxee argument
   if(dimsum_meta[["usearchMaxee"]]<=0){
     stop("Invalid 'usearchMaxee' argument. Only positive doubles allowed (zero exclusive).", call. = FALSE)
   }
+
+  #Disable bayesianDoubleFitness option (TEMPORARY FIX: still in development)
+  dimsum_meta[["bayesianDoubleFitness"]] <- FALSE
 
   #Check bayesianDoubleFitnessLamD argument
   if(dimsum_meta[["bayesianDoubleFitnessLamD"]]<=0){
