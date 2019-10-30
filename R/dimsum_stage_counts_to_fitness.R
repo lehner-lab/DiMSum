@@ -83,30 +83,39 @@ dimsum_stage_counts_to_fitness <- function(
     wt_AAseq <- all_data[WT==T,aa_seq]
   }
 
+  ### Filter out low count nucleotide variants
+  ###########################
+
+  nf_data <- dimsum__filter_nuc_variants(
+    dimsum_meta = dimsum_meta,
+    input_dt = all_data,
+    wt_ntseq = wt_ntseq,
+    all_reps = all_reps)
+
   ### Fit error model
   ###########################
 
   #Fit error model (using variants with less than specified number of mutations)
   model_result <- dimsum__error_model(
     dimsum_meta = dimsum_meta,
-    input_dt = data.table::copy(all_data[Nmut_nt<=dimsum_meta[["errorModelMaxSubstitutions"]],]),
+    input_dt = data.table::copy(nf_data[Nmut_nt<=dimsum_meta[["errorModelMaxSubstitutions"]],]),
     all_reps = all_reps,
     report_outpath = report_outpath)
 
-  ### Filter nucleotide variants
+  ### Filter for desired coding / non-coding variants
   ###########################
 
   if(dimsum_meta[["sequenceType"]]=="coding"){
-    nf_data <- dimsum__filter_nuc_variants_coding(
+    nf_data <- dimsum__filter_variants_coding(
       dimsum_meta = dimsum_meta,
-      input_dt = all_data,
+      input_dt = nf_data,
       wt_ntseq = wt_ntseq,
       all_reps = all_reps,
       report_outpath = report_outpath)
   }else{
-    nf_data <- dimsum__filter_nuc_variants_noncoding(
+    nf_data <- dimsum__filter_variants_noncoding(
       dimsum_meta = dimsum_meta,
-      input_dt = all_data,
+      input_dt = nf_data,
       wt_ntseq = wt_ntseq,
       all_reps = all_reps,
       report_outpath = report_outpath)

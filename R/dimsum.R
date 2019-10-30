@@ -33,7 +33,7 @@
 #' @param bayesianDoubleFitness Improve double mutant fitness estimates using Bayesian framework (DISABLED: still in development)
 #' @param bayesianDoubleFitnessLamD Poisson distribution for score likelihood (default:0.025)
 #' @param fitnessMinInputCountAll Minimum input read count (in all replicate) to be retained during fitness calculations (default:0)
-#' @param fitnessMinInputCountAny Minimum input read count (in any replicate) to be retained during fitness calculations (default:5)
+#' @param fitnessMinInputCountAny Minimum input read count (in any replicate) to be retained during fitness calculations (default:0)
 #' @param fitnessHighConfidenceCount Minimum mean input read count for high confidence variants (default:10)
 #' @param fitnessDoubleHighConfidenceCount Minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)
 #' @param fitnessNormalise Normalise fitness values to minimise inter-replicate differences (default:T)
@@ -79,7 +79,7 @@ dimsum <- function(
   bayesianDoubleFitness=F,
   bayesianDoubleFitnessLamD=0.025,
   fitnessMinInputCountAll=0,
-  fitnessMinInputCountAny=5,
+  fitnessMinInputCountAny=0,
   fitnessHighConfidenceCount=10,
   fitnessDoubleHighConfidenceCount=50,
   fitnessNormalise=T,

@@ -47,6 +47,8 @@ dimsum__error_model <- function(
       .SDcols = c(
         grep(paste0("count_e", j, "_s0"), names(work_data)), 
         grep(paste0("count_e", j, "_s1"), names(work_data)))]
+    #Set infinite or undefined fitness values to NA
+    work_data[is.nan(get(paste0("fitness",j))) | is.infinite(get(paste0("fitness",j))), paste0("fitness",j) := NA]
   }  
 
   #Flag variants that don't have reads in all input/output replicates
@@ -74,7 +76,7 @@ dimsum__error_model <- function(
         X = rbind(X,Y)
       }
     }
-    d <- ggplot2::ggplot(X[input>0 & !is.nan(fitness) & !is.infinite(fitness),],ggplot2::aes(input,fitness)) +
+    d <- ggplot2::ggplot(X[input>0 & !is.na(fitness),],ggplot2::aes(input,fitness)) +
       ggplot2::geom_hex(size = 0.2, color = "lightgrey") +
       # ggplot2::scale_fill_viridis_c(trans="log10") +
       ggplot2::scale_fill_gradientn(colours = c("white", "black"), trans = "log10") +
@@ -220,6 +222,8 @@ dimsum__error_model <- function(
       work_data[,paste0("cbe",j) := sqrt(1/.SD[,2] + 1/.SD[,1] + wt_corr),,
         .SDcols = c(grep(paste0("count_e", j, "_s0"),names(work_data)),grep(paste0("count_e", j, "_s1"),names(work_data)))]
     }
+    #Set error of NA fitness values to NA
+    work_data[is.na(get(paste0("fitness",j))),paste0("cbe",j) := NA]
   }
 
   #Then calculate density of data along mean count based error (for density dependent weighting)
@@ -227,17 +231,10 @@ dimsum__error_model <- function(
   work_data[,mean_cbe := rowMeans(.SD),.SDcols = grep(paste0("^cbe[",all_reps_str,"]$"), names(work_data))]
   error_range <- seq(work_data[input_above_threshold == T & all_reads == T, log10(quantile(mean_cbe^2, probs=0.001))], 0, length.out = bins)
   D <- density(x = work_data[input_above_threshold == T & all_reads == T, log10(mean_cbe^2)],
-    from = work_data[,log10(quantile(mean_cbe^2, probs = 0.001))], to = 0, n = bins)
+    from = work_data[,log10(quantile(mean_cbe^2, probs = 0.001, na.rm = T))], to = 0, n = bins)
   work_data[,bin_error := findInterval(mean_cbe^2,vec = 10^error_range)]
   work_data[,bin_error_density := D$y[bin_error],bin_error]
   work_data[bin_error == 0, bin_error_density := work_data[bin_error > 0][which.min(bin_error), unique(bin_error_density)]]
-
-  ##########Manipulate fitness1
-  work_data_orig <- data.table::copy(work_data)
-
-  work_data <- data.table::copy(work_data_orig)
-  work_data[, fitness1 := fitness1+0.8]
-  ##########
 
   #Fit and write error model to file
   error_model <- dimsum__fit_error_model(

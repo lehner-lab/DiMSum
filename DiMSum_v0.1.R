@@ -47,7 +47,7 @@ option_list <- list(
   optparse::make_option(opt_str=c("--bayesianDoubleFitness", "-y"), type="logical", default=F, help = "Fitness: improve double mutant fitness estimates using Bayesian framework (DISABLED: still in development)"),
   optparse::make_option(opt_str=c("--bayesianDoubleFitnessLamD", "-d"), type="double", default=0.025, help = "Fitness: Poisson distribution for score likelihood (default:0.025)"),
   optparse::make_option(opt_str=c("--fitnessMinInputCountAll"), type="integer", default=0, help = "Fitness: minimum input read count (in all replicate) to be retained during fitness calculations (default:0)"),
-  optparse::make_option(opt_str=c("--fitnessMinInputCountAny"), type="integer", default=5, help = "Fitness: minimum input read count (in any replicate) to be retained during fitness calculations (default:5)"),
+  optparse::make_option(opt_str=c("--fitnessMinInputCountAny"), type="integer", default=0, help = "Fitness: minimum input read count (in any replicate) to be retained during fitness calculations (default:0)"),
   optparse::make_option(opt_str=c("--fitnessHighConfidenceCount"), type="integer", default=10, help = "Fitness: minimum mean input read count for high confidence variants (default:10)"),
   optparse::make_option(opt_str=c("--fitnessNormalise"), type="logical", default=T, help = "Normalise fitness values to minimise inter-replicate differences (default:T)"),
   optparse::make_option(opt_str=c("--fitnessDoubleHighConfidenceCount"), type="integer", default=50, help = "Fitness: minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)"),

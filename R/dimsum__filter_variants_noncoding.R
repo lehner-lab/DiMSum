@@ -1,7 +1,7 @@
 
-#' dimsum__filter_nuc_variants_coding
+#' dimsum__filter_variants_noncoding
 #'
-#' Filter nucleotide variants from coding sequences.
+#' Filter for desired non-coding variants.
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param input_dt output path for plots and saved objects (required)
@@ -13,7 +13,7 @@
 #' @return Nothing
 #' @export
 #' @import data.table
-dimsum__filter_nuc_variants_coding <- function(
+dimsum__filter_variants_noncoding <- function(
   dimsum_meta,
   input_dt,
   wt_ntseq,
@@ -22,7 +22,7 @@ dimsum__filter_nuc_variants_coding <- function(
   report_outpath = NULL
   ){
 
-  message("Filtering low count nucleotide variants...")
+  message("Filtering for desired non-coding variants...")
 
   #Number of input and output replicates
   all_reps_str <- paste0(all_reps, collapse="")
@@ -33,15 +33,11 @@ dimsum__filter_nuc_variants_coding <- function(
   #Sample names
   input_samples <- names(input_dt)[grep(paste0("e[", all_reps_str, "]_s0_b.*_count$"), names(input_dt))]
 
-  ### Retain nucleotide variants with max dimsum_meta[["fitnessMaxSubstitutions"]] amino acid mutations only
-  ### Retain only variants with >dimsum_meta[["fitnessMinInputCountAny"]] input readcounts in ANY biological replicate and
-  ### greater than dimsum_meta[["fitnessMinInputCountAll"]] input readcounts in ALL of the biological replicates
-  ### and either purely nonsynonymous mutations
-  ### or purely silent mutations
+  ### Retain nucleotide variants with max dimsum_meta[["fitnessMaxSubstitutions"]] nucleotide mutations only
   ###########################
 
-  #Retain nucleotide variants with max dimsum_meta[["fitnessMaxSubstitutions"]] amino acid mutations only
-  input_dt <- input_dt[Nmut_aa<=dimsum_meta[["fitnessMaxSubstitutions"]],]
+  #Retain nucleotide variants with max dimsum_meta[["fitnessMaxSubstitutions"]] nucleotide mutations only
+  input_dt <- input_dt[Nmut_nt<=dimsum_meta[["fitnessMaxSubstitutions"]],]
 
   #Add number of codons affected by mutations
   input_dt[,Nmut_codons := length(unique(ceiling(which(strsplit(nt_seq,"")[[1]] != wt_ntseq_split)/3))),nt_seq]
@@ -50,15 +46,14 @@ dimsum__filter_nuc_variants_coding <- function(
   if(report){
     temp_input_name <- names(input_dt)[grep("_e1_s0_b.*_count$", names(input_dt))][1]
     d <- ggplot2::ggplot(input_dt[between(Nmut_nt,1,4) & get(temp_input_name) > 0],
-           ggplot2::aes(get(temp_input_name),color=factor(Nmut_nt),linetype = Nmut_codons > 0)) +
+           ggplot2::aes(get(temp_input_name),color=factor(Nmut_nt))) +
       ggplot2::geom_density() +
       ggplot2::scale_x_log10()
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_input1_count_hist.png"), d, width = 7, height = 5)
   }
 
-  #### only retain variants with greater than dimsum_meta[["fitnessMinInputCountAny"]] input readcounts in ANY of the biological replicates and 
-  #### greater than dimsum_meta[["fitnessMinInputCountAll"]] input readcounts in ALL of the biological replicates
-  output_dt <- copy(input_dt[((Nmut_codons-Nmut_aa) == 0 | Nmut_aa == 0) & rowSums(input_dt[,input_samples,with=F]>dimsum_meta[["fitnessMinInputCountAny"]]) != 0 & rowSums(input_dt[,input_samples,with=F]<dimsum_meta[["fitnessMinInputCountAll"]]) == 0])
+  ### Output data.table
+  output_dt <- copy(input_dt)
 
   #Plot pairwise input sample count correlations for all single mutants (non-synonymous only)
   if(report){
@@ -68,7 +63,7 @@ dimsum__filter_nuc_variants_coding <- function(
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_2_scatterplotmatrix_singlemutants.png"), d, width = 10, height = 10)
   }
   
-  #Plot pairwise input sample count correlations for random sample of 10k variants (non-synonymous only)
+  #Plot pairwise input sample count correlations for random sample of 10k variants
   if(report){
     temp <- output_dt[is.na(WT) & between(Nmut_nt,1,4),][sample(x = .N,min(c(.N,10000)))]
     d <- GGally::ggpairs(cbind(log10(temp[,grep(names(output_dt),pattern="_s0_"),with=F]+1), Nmut_nt=as.factor(temp[,Nmut_nt])),
