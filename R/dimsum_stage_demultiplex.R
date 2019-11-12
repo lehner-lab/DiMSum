@@ -70,17 +70,14 @@ dimsum_stage_demultiplex <- function(
   }
   #Update names in list
   for(pair_name in rownames(fastq_pair_list)){
-    #Check if this system command should be executed
-    if(execute){
-      #Check if file extension incompatible with cutadapt (i.e. NOT ".fastq" or ".fastq.gz")
-      if(dimsum_meta[["fastqFileExtension"]]!=".fastq"){
-        #New FASTQ file names
-        new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], fastq_pair_list[pair_name,][1])
-        new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], fastq_pair_list[pair_name,][2])
-        #Update names in list
-        fastq_pair_list[pair_name,][1] <- new_fastq_name1
-        fastq_pair_list[pair_name,][2] <- new_fastq_name2
-      }
+    #Check if file extension incompatible with cutadapt (i.e. NOT ".fastq" or ".fastq.gz")
+    if(dimsum_meta[["fastqFileExtension"]]!=".fastq"){
+      #New FASTQ file names
+      new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], fastq_pair_list[pair_name,][1])
+      new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], fastq_pair_list[pair_name,][2])
+      #Update names in list
+      fastq_pair_list[pair_name,][1] <- new_fastq_name1
+      fastq_pair_list[pair_name,][2] <- new_fastq_name2
     }
   }
   #Check if file extension incompatible with cutadapt (i.e. NOT ".fastq" or ".fastq.gz")
@@ -90,7 +87,7 @@ dimsum_stage_demultiplex <- function(
   }
   #Demultiplex FASTQ files
   message("Demultiplexing FASTQ files with cutadapt:")
-  all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], unique(c(dimsum_meta[['barcode_design']][,"pair1"], dimsum_meta[['barcode_design']][,"pair2"])))
+  all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], unlist(fastq_pair_list))
   print(unique(all_fastq))
   message("Processing...")
   for(i in 1:dim(fastq_pair_list)[1]){message(paste0("\t", unique(unlist(fastq_pair_list[i,]))))}
@@ -157,14 +154,17 @@ dimsum_stage_demultiplex <- function(
   }
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
+  #Delete files when last stage complete
+  if(!dimsum_meta_new[["retainIntermediateFiles"]]){
+    dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], paste0("rm ", file.path(demultiplex_outpath, "*.fastq")))
+    if(dimsum_meta[["fastqFileExtension"]]!=".fastq"){
+      dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], paste0("rm ", unique(all_fastq)))
+    }
+  }
   #Update fastq metadata
   dimsum_meta_new[['exp_design']][,"pair_directory"] <- demultiplex_outpath
   dimsum_meta_new[["fastqFileExtension"]] <- ".fastq"
   dimsum_meta_new[["gzipped"]] <- FALSE
-  #Delete files when last stage complete
-  if(!dimsum_meta_new[["retainIntermediateFiles"]]){
-    dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], paste0("rm ", file.path(demultiplex_outpath, "*.fastq")))
-  }
   return(dimsum_meta_new)
 }
 

@@ -4,20 +4,15 @@
 \alias{dimsum__identify_single_nt_mutations}
 \title{dimsum__identify_single_nt_mutations}
 \usage{
-dimsum__identify_single_nt_mutations(input_dt, wt_ntseq, report = TRUE,
-  report_outpath = NULL)
+dimsum__identify_single_nt_mutations(input_dt, wt_ntseq)
 }
 \arguments{
 \item{input_dt}{input data.table (required)}
 
 \item{wt_ntseq}{WT nucleotide sequence (required)}
-
-\item{report}{whether or not to generate fitness summary plots (default: TRUE)}
-
-\item{report_outpath}{fitness report output path}
 }
 \value{
-Nothing
+data.table with single nucleotide variants
 }
 \description{
 Identify and annotate single nucleotide substitutions.

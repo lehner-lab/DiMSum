@@ -33,7 +33,7 @@ dimsum__fit_error_model_bootstrap <- function(
     tryCatch({
 
       #Create data concatenation for all combinations of replicates (can be improved?!)
-      bs_data <- input_dt[input_above_threshold == T & all_reads == T & Nmut_nt != 0][sample(.N,min(.N,maxN),replace = T)]
+      bs_data <- input_dt[input_above_threshold == T & all_reads == T & Nham_nt > 0][sample(.N,min(.N,maxN),replace = T)]
       F_data_list <- list() #fitness data
       E_data_list <- list() #count based error data (for weighting of datapoints)
       C_data_list <- list() #count data

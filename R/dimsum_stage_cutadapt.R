@@ -26,12 +26,13 @@ dimsum_stage_cutadapt <- function(
   #Create/overwrite cutadapt directory (if executed)
   cutadapt_outpath <- gsub("/$", "", cutadapt_outpath)
   dimsum__create_dir(cutadapt_outpath, execute = execute, message = "DiMSum STAGE 3: TRIM CONSTANT REGIONS")  
+  fastq_pair_list_nunique <- dimsum_meta[['exp_design']][,c('pair1', 'pair2')]
   #If not trans library: convert to linked adapters if 3' constant region expected to be sequenced
   if(!dimsum_meta[["transLibrary"]]){
     dimsum_meta <- dimsum__convert_linked_adapters(dimsum_meta = dimsum_meta)
   }
   #Not stranded library (and paired-end)
-  if( !dimsum_meta[["stranded"]] & dimsum_meta[["paired"]]){
+  if(!dimsum_meta[["stranded"]] & dimsum_meta[["paired"]]){
     #Swap reads in fastq files according to adapter presence
     message("Swapping reads in FASTQ files according to adapter presence")
     if(execute){
@@ -40,10 +41,10 @@ dimsum_stage_cutadapt <- function(
   }
   #Trim FASTQ file pairs
   message("Trimming FASTQ files with cutadapt:")
-  all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
+  all_fastq <- file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
   print(all_fastq)
   message("Processing...")
-  for(i in 1:dim(dimsum_meta[['exp_design']])[1]){
+  for(i in (1:dim(dimsum_meta[['exp_design']])[1])[!duplicated(fastq_pair_list_nunique)]){
     message(paste0("\t", unique(unlist(dimsum_meta[['exp_design']][i,c('pair1', 'pair2')]))))
     #Check if this system command should be executed
     if(execute){

@@ -11,6 +11,7 @@
 #' @param barcodeDesignPath Path to barcode design file (tab-separated plain text file with barcode design)
 #' @param barcodeErrorRate Maximum allowed error rate for the barcode (default:0.25)
 #' @param experimentDesignPath Path to experimental design file (tab-separated plain text file with replicate structure)
+#' @param experimentDesignPairDuplicates Are duplicate FASTQ files permitted in experimental design file? (default:F)
 #' @param cutadaptCut5First cutadapt: remove bases from start of first read (before constant region trimming)
 #' @param cutadaptCut5Second cutadapt: remove bases from start of second read (before constant region trimming)
 #' @param cutadaptCut3First cutadapt: remove bases from end of first read (before constant region trimming)
@@ -28,6 +29,7 @@
 #' @param outputPath Path to directory to use for output files
 #' @param projectName Project name
 #' @param wildtypeSequence Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed before fitness calculations.
+#' @param permittedSequences A sequence of nucleotide codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions i.e upper-case letters in wild-type nucleotide sequence (default:any base at mutated positions)
 #' @param sequenceType Coding potential of sequence; either noncoding/coding/auto (default:auto)
 #' @param transLibrary Trans library design i.e. read pairs correspond to distinct peptides (no overlap)
 #' @param bayesianDoubleFitness Improve double mutant fitness estimates using Bayesian framework (DISABLED: still in development)
@@ -57,6 +59,7 @@ dimsum <- function(
   barcodeDesignPath,
   barcodeErrorRate=0.25,
   experimentDesignPath,
+  experimentDesignPairDuplicates=F,
   cutadaptCut5First,
   cutadaptCut5Second,
   cutadaptCut3First,
@@ -74,6 +77,7 @@ dimsum <- function(
   outputPath,
   projectName,
   wildtypeSequence,
+  permittedSequences,
   sequenceType="auto",
   transLibrary=F,
   bayesianDoubleFitness=F,
@@ -140,6 +144,7 @@ dimsum <- function(
     "barcodeDesignPath" = list(barcodeDesignPath, c("character", "NULL")), #file exists (if not NULL)
     "barcodeErrorRate" = list(barcodeErrorRate, c("double")), #positive double (zero inclusive)
     "experimentDesignPath" = list(experimentDesignPath, c("character")), #file exists -- checked in dimsum__get_experiment_design
+    "experimentDesignPairDuplicates" = list(experimentDesignPairDuplicates, c("logical")), #logical -- checked in dimsum__validate_input
     "cutadaptCut5First" = list(cutadaptCut5First, c("integer", "NULL")), #strictly positive integer (if not NULL) -- checked in dimsum__get_experiment_design
     "cutadaptCut5Second" = list(cutadaptCut5Second, c("integer", "NULL")), #strictly positive integer (if not NULL) -- checked in dimsum__get_experiment_design
     "cutadaptCut3First" = list(cutadaptCut3First, c("integer", "NULL")), #strictly positive integer (if not NULL) -- checked in dimsum__get_experiment_design
@@ -156,7 +161,8 @@ dimsum <- function(
     "usearchMinovlen" = list(usearchMinovlen, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
     "outputPath" = list(outputPath, c("character")), #directory exists -- checked in dimsum__validate_input
     "projectName" = list(projectName, c("character")), #character string -- checked in dimsum__validate_input
-    "wildtypeSequence" = list(wildtypeSequence, c("character")), #AGCT character string -- checked in dimsum__validate_input
+    "wildtypeSequence" = list(wildtypeSequence, c("character")), #AaGgCcTt character string -- checked in dimsum__validate_input
+    "permittedSequences" = list(permittedSequences, c("character", "NULL")), #ACGTRYSWKMBDHVN character string -- checked in dimsum__validate_input
     "sequenceType" = list(sequenceType, c("character")), #character string; either noncoding/coding/auto -- checked in dimsum__validate_input
     "transLibrary" = list(transLibrary, c("logical")), #logical -- checked in dimsum__validate_input
     "bayesianDoubleFitness" = list(bayesianDoubleFitness, c("logical")), #logical -- checked in dimsum__validate_input

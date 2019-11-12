@@ -73,7 +73,13 @@ dimsum__calculate_fitness <- function(
   }
 
   #Remove unnecessary columns
-  output_dt <- input_dt[,.SD,merge_seq,.SDcols = c("aa_seq","Nins_nt","Ndel_nt","Nsub_nt","Nmut_nt","Nins_aa","Ndel_aa","Nsub_aa","Nmut_aa","Nmut_codons","WT","STOP",names(input_dt)[grep(names(input_dt),pattern="^count|^fitness|^sigma")])]
+  output_dt <- input_dt[,.SD,merge_seq,.SDcols = c(
+    "aa_seq","Nham_nt","Nham_aa",
+    "Nmut_codons","WT","STOP",names(input_dt)[grep(names(input_dt),pattern="^count|^fitness|^sigma")])]
+
+  #Remove variants without fitness estimates in any replicates
+  fitness_cols <- names(output_dt)[grep(paste0("fitness[", all_reps_str, "]_uncorr"), names(output_dt))]
+  output_dt <- output_dt[!is.nan(rowMeans(output_dt[,fitness_cols,with=F], na.rm = T))]
 
   #Calculate mean input counts
   output_dt[,mean_count := rowMeans(.SD),,.SDcols = paste0("count_e", all_reps, "_s0")]

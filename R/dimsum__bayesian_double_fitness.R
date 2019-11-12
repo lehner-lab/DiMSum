@@ -86,9 +86,9 @@ dimsum__bayesian_double_fitness <- function(
                              F = unlist(.SD[,3])),,
                           .SDcols = c(paste0("count_e",E,"_s0"),paste0("count_e",E,"_s1"),paste0("fitness",E,"_uncorr"))]
     # double_data = merge(double_data,singles_dt[,.(Pos,Mut,F1 = .SD),,.SDcols = paste0("fitness",E)],by.x = c("Pos1","Mut1"),by.y = c("Pos","Mut"))
-    double_data <- merge(double_data,singles_dt[!is.na(singles_dt[,paste0("fitness",E)]) & is.reads0==T,.(Pos,Mut,F1 = .SD),,.SDcols = paste0("fitness",E)],by.x = c("Pos1","Mut1"),by.y = c("Pos","Mut"))
+    double_data <- merge(double_data,singles_dt[!is.na(singles_dt[,paste0("fitness",E)]) & mean_count >= dimsum_meta[["fitnessHighConfidenceCount"]],.(Pos,Mut,F1 = .SD),,.SDcols = paste0("fitness",E)],by.x = c("Pos1","Mut1"),by.y = c("Pos","Mut"))
     # double_data = merge(double_data,singles_dt[,.(Pos,Mut,F2 = .SD),,.SDcols = paste0("fitness",E)],by.x = c("Pos2","Mut2"),by.y = c("Pos","Mut"))
-    double_data <- merge(double_data,singles_dt[!is.na(singles_dt[,paste0("fitness",E)]) & is.reads0==T,.(Pos,Mut,F2 = .SD),,.SDcols = paste0("fitness",E)],by.x = c("Pos2","Mut2"),by.y = c("Pos","Mut"))
+    double_data <- merge(double_data,singles_dt[!is.na(singles_dt[,paste0("fitness",E)]) & mean_count >= dimsum_meta[["fitnessHighConfidenceCount"]],.(Pos,Mut,F2 = .SD),,.SDcols = paste0("fitness",E)],by.x = c("Pos2","Mut2"),by.y = c("Pos","Mut"))
     
     Nneighbours <- 500
     score_prior_cond <- double_data[count_in >= dimsum_meta[["fitnessDoubleHighConfidenceCount"]] & F > -Inf & F1 > -Inf & F2 > -Inf]
@@ -110,7 +110,7 @@ dimsum__bayesian_double_fitness <- function(
   if(report){
     #Scatterplot matrix - singles
     if(dimsum_meta[["sequenceType"]]=="coding"){
-      d <- GGally::ggpairs(singles_dt[Nmut_aa==1 & apply(abs(singles_dt[,.SD,,.SDcols = paste0("fitness",all_reps)])==Inf, 1, sum)==0,
+      d <- GGally::ggpairs(singles_dt[Nham_aa==1 & apply(abs(singles_dt[,.SD,,.SDcols = paste0("fitness",all_reps)])==Inf, 1, sum)==0,
         grep(names(singles_dt),pattern="fitness"),with=F],
         upper=list(continuous = "cor"))
     }else{

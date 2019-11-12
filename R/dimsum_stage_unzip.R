@@ -25,7 +25,7 @@ dimsum_stage_unzip <- function(
   #All fastq files gzipped?
   if(dimsum_meta[["gzipped"]]){
     message("Unzipping FASTQ files:")
-    all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
+    all_fastq <- file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
     print(all_fastq)
     message("Processing...")
     message(paste0("\t", basename(all_fastq), "\n"))

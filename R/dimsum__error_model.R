@@ -25,7 +25,7 @@ dimsum__error_model <- function(
   #Number of input and output replicates
   all_reps_str <- paste0(all_reps, collapse="")
   
-  work_data <- input_dt[,.SD,,.SDcols = c("Nmut_nt","WT",
+  work_data <- input_dt[,.SD,,.SDcols = c("Nham_nt","WT",
     grep(names(input_dt),pattern=paste0("e[", all_reps_str, "]_s0_b"),value=T),
     grep(names(input_dt),pattern=paste0("e[", all_reps_str, "]_s1_b"),value=T))]
 
@@ -35,7 +35,7 @@ dimsum__error_model <- function(
     work_data[,paste0("count_e",E,"_s1") := rowSums(.SD),,.SDcols = idx]
     names(work_data)[grep(names(work_data),pattern = paste0("e",E,"_s0_b"))] <- paste0("count_e",E,"_s0")
   }
-  work_data <- work_data[,.SD,.SDcols = c("Nmut_nt","WT",names(work_data)[grep(names(work_data),pattern="^count")])]
+  work_data <- work_data[,.SD,.SDcols = c("Nham_nt","WT",names(work_data)[grep(names(work_data),pattern="^count")])]
 
   ### Calculate fitness
   ###########################
@@ -181,15 +181,15 @@ dimsum__error_model <- function(
       title = "After inter-replicate normalisation")
 
     #Fitness replicate deviations (all replicates)
-    X <- work_data[all_reads == T & input_above_threshold == T & Nmut_nt > 0, cbind(.SD - rowMeans(.SD), M = rowMeans(.SD)),
+    X <- work_data[all_reads == T & input_above_threshold == T & Nham_nt > 0, cbind(.SD - rowMeans(.SD), M = rowMeans(.SD)),
       .SDcols = grep(paste0("fitness[", all_reps_str, "]$"), names(work_data))]
-    Xnorm <- work_data[all_reads == T & input_above_threshold == T & Nmut_nt > 0, cbind(.SD - rowMeans(.SD), M = rowMeans(.SD)),
+    Xnorm <- work_data[all_reads == T & input_above_threshold == T & Nham_nt > 0, cbind(.SD - rowMeans(.SD), M = rowMeans(.SD)),
       .SDcols = grep(paste0("fitness[", all_reps_str, "]_norm$"), names(work_data))]
     Y <- rbind(reshape2::melt(X, id.vars = "M"), reshape2::melt(Xnorm, id.vars = "M"))
     Y[, replicate := strsplit(as.character(variable), "_")[[1]][1], variable]
     Y[, normalised := grepl('norm', variable), variable]
     d <- ggplot2::ggplot(Y,ggplot2::aes(M, value, color = normalised)) +
-      ggplot2::geom_smooth() +
+      ggplot2::geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
       ggplot2::geom_hline(yintercept = 0, lty = 2, color = "darkgrey") +
       ggplot2::labs(x = "Mean fitness", y = "Deviation from mean fitness", title = "Fitness replicate deviations (all replicates)") + 
       ggplot2::theme_bw() +
@@ -270,8 +270,12 @@ dimsum__error_model <- function(
     plot_error_model[lower < 0,lower := mean_value]
     # print(plot_error_model)
 
+    #Error model limits
+    rep_error_intercept <- mean(plot_error_model[parameter=="reperror",mean_value])
+    mult_error_slope <- median(plot_error_model[parameter!="reperror",mean_value])
+
     #For plot, calculate average variance of fitness values per bin
-    bs_data <- work_data[Nmut_nt > 0 & input_above_threshold == T & all_reads ==T]
+    bs_data <- work_data[Nham_nt > 0 & input_above_threshold == T & all_reads ==T]
     bs_data[,v := apply(.SD,1,var),.SDcols = grep(paste0("^fitness[", all_reps_str, "]$"), names(bs_data))]
     bs_data[,bin_mean_var := mean(v), bin_error]
     bs_data[,bin_N := .N, bin_error]
@@ -287,6 +291,7 @@ dimsum__error_model <- function(
       # ggplot2::scale_y_log10(limits = c(min(c(1, plot_error_model[parameter %in% c("input","output"), mean_value], plot_error_model[parameter %in% c("input", "output"), lower])),
       #   max(c(2.5, plot_error_model[parameter %in% c("input","output"), mean_value], plot_error_model[parameter %in% c("input", "output"), upper])))) +
       ggplot2::scale_y_log10() + ggplot2::theme_bw() + 
+      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
       ggplot2::labs(y = "Over-sequencing factor", x = "Replicate (input or output)")
 
     #Plot2: replicate error parameters +- sd
@@ -298,6 +303,7 @@ dimsum__error_model <- function(
       ggplot2::labs(y = "Replicate error", x = "Replicate")
 
     #Plot3: count based error against variance of fitness + fit
+    plot_cols <- dimsum__gg_color_hue(3)
     temp_mean_error <- unique(bs_data[,.(bin_mean_error, bin_mean_var, bin_N)])
     temp_mean_error[, ymin := bin_mean_var * (1-2/bin_N)]
     temp_mean_error[, ymax := bin_mean_var * (1+2/bin_N)]
@@ -305,13 +311,15 @@ dimsum__error_model <- function(
     temp_mean_error[ymax > bs_data[,quantile(v, 0.999)], ymax := bs_data[,quantile(v, 0.999)]]
     c <- ggplot2::ggplot(bs_data[v>=bs_data[,quantile(v, 0.001)] & v<=bs_data[,quantile(v, 0.999)],]) +
       ggplot2::stat_binhex(ggplot2::aes(mean_cbe^2, v), bins = 100, size = 0.2, color = "lightgrey") +
+      ggplot2::geom_abline(linetype = 2, size = 1) +
+      ggplot2::geom_abline(intercept = log10(mult_error_slope), linetype = 2, size = 1, color = plot_cols[2]) +
+      ggplot2::geom_hline(yintercept = rep_error_intercept, linetype = 2, size = 1, color = plot_cols[2]) +
       ggplot2::geom_pointrange(inherit.aes = F, data = temp_mean_error,
-        ggplot2::aes(x = bin_mean_error, y = bin_mean_var, ymin = ymin, ymax = ymax), color = "orange") +
+        ggplot2::aes(x = bin_mean_error, y = bin_mean_var, ymin = ymin, ymax = ymax), color = plot_cols[3]) +
       ggplot2::geom_line(inherit.aes = F, data = melt_bs_data,
-        ggplot2::aes(bin_mean_error, value), lty = 2, size = 1, color = "black") +
+        ggplot2::aes(bin_mean_error, value), size = 1, color = plot_cols[1]) +
       ggplot2::scale_y_log10(limits = c(bs_data[,quantile(v, 0.001)], bs_data[,quantile(v, 0.999)])) +
       ggplot2::scale_x_log10() +
-      ggplot2::geom_abline(color = "darkgrey",lty=2) +
       ggplot2::scale_fill_gradientn(colours = c("white", "black"), trans = "log10") +
       ggplot2::coord_cartesian(xlim = c(min((bs_data[,mean_cbe])^2), 10^max(error_range))) +
       ggplot2::theme_bw() + ggplot2::theme(panel.grid.minor = ggplot2::element_blank()) +

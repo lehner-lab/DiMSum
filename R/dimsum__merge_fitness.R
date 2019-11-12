@@ -45,7 +45,7 @@ dimsum__merge_fitness <- function(
   singles_dt[,fitness := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
   singles_dt[,sigma := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
   if(report){
-    d <- ggplot2::ggplot(singles_dt[Nmut_aa==1],ggplot2::aes(fitness,sigma)) + 
+    d <- ggplot2::ggplot(singles_dt[Nham_aa==1],ggplot2::aes(fitness,sigma)) + 
       ggplot2::geom_hex() + 
       ggplot2::scale_y_log10() + 
       ggplot2::coord_cartesian(ylim=c(0.01,1))
@@ -138,11 +138,6 @@ dimsum__merge_fitness <- function(
 
   message("Saving fitness estimates...")
 
-  # define which variants have enough reads
-  wt_dt[,is.reads0 := TRUE]
-  singles_dt[mean_count >= dimsum_meta[["fitnessHighConfidenceCount"]],is.reads0 := TRUE]
-  doubles_dt[mean_count >= dimsum_meta[["fitnessHighConfidenceCount"]],is.reads0 := TRUE]
-
   #Reformat columns
   if(dimsum_meta[["sequenceType"]]=="coding"){
     #Rename columns
@@ -166,10 +161,6 @@ dimsum__merge_fitness <- function(
     #Remove unnecessary columns
     unnecessary_cols <- c(
       "aa_seq",
-      "Nins_aa",
-      "Ndel_aa",
-      "Nsub_aa",
-      "Nmut_aa",
       "Nmut_codons",
       "STOP",
       "var_fitness",
@@ -195,8 +186,8 @@ dimsum__merge_fitness <- function(
   wildtype <- wt_dt
   doubles <- doubles_dt
   if(dimsum_meta[["sequenceType"]]=="coding"){
-    silent <- singles_dt[Nmut_aa==0]
-    singles <- singles_dt[Nmut_aa==1]
+    silent <- singles_dt[Nham_aa==0]
+    singles <- singles_dt[Nham_aa==1]
     save(all_variants, wildtype, silent, singles, doubles, file = file.path(fitness_outpath, paste0(dimsum_meta[["projectName"]], '_fitness_replicates.RData')))
   }else{
     singles <- singles_dt
@@ -208,10 +199,10 @@ dimsum__merge_fitness <- function(
 
   ##### finalize data.tables
   if(dimsum_meta[["sequenceType"]]=="coding"){
-    silent <- singles_dt[Nmut_aa==0,.(Pos,WT_AA,Mut,Nmut_nt,Nmut_aa,Nmut_codons,STOP,mean_count,is.reads0,fitness,sigma)]
-    singles <- singles_dt[Nmut_aa==1,.(Pos,WT_AA,Mut,Nmut_nt,Nmut_aa,Nmut_codons,STOP,mean_count,is.reads0,fitness,sigma)]
+    silent <- singles_dt[Nham_aa==0,.(Pos,WT_AA,Mut,Nham_nt,Nham_aa,Nmut_codons,STOP,mean_count,fitness,sigma)]
+    singles <- singles_dt[Nham_aa==1,.(Pos,WT_AA,Mut,Nham_nt,Nham_aa,Nmut_codons,STOP,mean_count,fitness,sigma)]
   }else{
-    singles <- singles_dt[,.(Pos,WT_nt,Mut,Nmut_nt,mean_count,is.reads0,fitness,sigma)]
+    singles <- singles_dt[,.(Pos,WT_nt,Mut,Nham_nt,mean_count,fitness,sigma)]
   }
 
   #for doubles #add single mutant fitness/sigma values to double mutant table
@@ -220,17 +211,11 @@ dimsum__merge_fitness <- function(
   doubles_dt[,fitness2 := singles[Pos == Pos2 & Mut == Mut2,fitness],.(Pos2,Mut2)]
   doubles_dt[,sigma2 := singles[Pos == Pos2 & Mut == Mut2,sigma],.(Pos2,Mut2)]
   if(dimsum_meta[["sequenceType"]]=="coding"){
-    retained_cols <- c("Pos1","Pos2","WT_AA1","WT_AA2","Mut1","Mut2","Nmut_nt","Nmut_aa","Nmut_codons","STOP","mean_count","is.reads0",
+    retained_cols <- c("Pos1","Pos2","WT_AA1","WT_AA2","Mut1","Mut2","Nham_nt","Nham_aa","Nmut_codons","STOP","mean_count",
       "fitness1","sigma1","fitness2","sigma2",
       "fitness_uncorr","sigma_uncorr",
       "fitness_cond","sigma_cond")
     doubles <- doubles_dt[,.SD,,.SDcols = names(doubles_dt)[names(doubles_dt) %in% retained_cols]]
-
-    #Exclude variants with STOP codons from downstream fitness analyses
-    wildtype[,is.fitness := TRUE]
-    silent[,is.fitness := TRUE]
-    singles[,is.fitness := !STOP]
-    doubles[,is.fitness := !STOP]
 
     #write data to files
     write.table(x = wildtype, file = file.path(fitness_outpath, "fitness_wildtype.txt"),
@@ -242,16 +227,11 @@ dimsum__merge_fitness <- function(
     write.table(x = doubles, file = file.path(fitness_outpath, "fitness_doubles.txt"),
                 quote = F,row.names = F, col.names = T)
   }else{
-    retained_cols <- c("Pos1","Pos2","WT_nt1","WT_nt2","Mut1","Mut2","Nmut_nt","mean_count","is.reads0",
+    retained_cols <- c("Pos1","Pos2","WT_nt1","WT_nt2","Mut1","Mut2","Nham_nt","mean_count",
       "fitness1","sigma1","fitness2","sigma2",
       "fitness_uncorr","sigma_uncorr",
       "fitness_cond","sigma_cond")
     doubles <- doubles_dt[,.SD,,.SDcols = names(doubles_dt)[names(doubles_dt) %in% retained_cols]]
-
-    #Exclude variants with STOP codons from downstream fitness analyses
-    wildtype[,is.fitness := TRUE]
-    singles[,is.fitness := TRUE]
-    doubles[,is.fitness := TRUE]
 
     #write data to files
     write.table(x = wildtype, file = file.path(fitness_outpath, "fitness_wildtype.txt"),

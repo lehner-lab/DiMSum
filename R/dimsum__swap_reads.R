@@ -11,6 +11,7 @@
 dimsum__swap_reads <- function(
   dimsum_meta,
   cutadapt_outpath){
+  fastq_pair_list_nunique <- dimsum_meta[['exp_design']][,c('pair1', 'pair2')]
   dimsum__swap_reads_helper <- function(
     i
     ){
@@ -68,6 +69,6 @@ dimsum__swap_reads <- function(
   clust <- parallel::makeCluster(dimsum_meta[['numCores']])
   # make variables available to each core's workspace
   parallel::clusterExport(clust, list("dimsum_meta","cutadapt_outpath"), envir = environment())
-  parallel::parSapply(clust,X = 1:dim(dimsum_meta[['exp_design']])[1], dimsum__swap_reads_helper)
+  parallel::parSapply(clust,X = (1:dim(dimsum_meta[['exp_design']])[1])[!duplicated(fastq_pair_list_nunique)], dimsum__swap_reads_helper)
   parallel::stopCluster(clust)
 }

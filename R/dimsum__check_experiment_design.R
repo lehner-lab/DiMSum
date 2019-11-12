@@ -3,11 +3,13 @@
 #'
 #' Validate metadata from experiment design file.
 #'
+#' @param dimsum_meta an experiment metadata object (required)
 #' @param exp_design experiment design data.frame (required)
 #'
 #' @return Nothing
 #' @export
 dimsum__check_experiment_design <- function(
+  dimsum_meta,
   exp_design
   ){
 
@@ -24,7 +26,7 @@ dimsum__check_experiment_design <- function(
     stop(paste0("One or more invalid FASTQ file name values in experimentDesign file (only characters allowed)"), call. = FALSE)
   }
   #Check for duplicated FASTQ files
-  if(sum(duplicated(exp_design[,c("pair1", "pair2")]))!=0){
+  if(sum(duplicated(exp_design[,c("pair1", "pair2")]))!=0 & !dimsum_meta[["experimentDesignPairDuplicates"]]){
     stop(paste0("Duplicate FASTQ files not allowed in experimentDesign file columns: 'pair1' and 'pair2'"), call. = FALSE)
   }
 
@@ -41,6 +43,16 @@ dimsum__check_experiment_design <- function(
   #Check only alphanumeric characters
   if(sum(!grepl("^[A-Za-z0-9]+$", exp_design[,"sample_name"], perl = T))!=0){
     stop(paste0("One or more invalid 'sample_name' values in experimentDesign file (only alphanumeric characters allowed)"), call. = FALSE)
+  }
+  #Check that all input sample names for the same transformation_replicate are identical
+  experiment_input <- unique(exp_design[exp_design[,"selection_id"]==0,c("sample_name", "transformation_replicate")])
+  if(sum(duplicated(experiment_input[,"transformation_replicate"]))!=0){
+    stop(paste0("One or more invalid input 'sample_name' values in experimentDesign file (must be identical for the same transformation replicate)"), call. = FALSE)
+  }
+  #Check that all output sample names for the same transformation_replicate and selection_replicate are identical
+  experiment_output <- unique(exp_design[exp_design[,"selection_id"]!=0,c("sample_name", "transformation_replicate", "selection_replicate")])
+  if(sum(duplicated(experiment_output[,c("transformation_replicate", "selection_replicate")]))!=0){
+    stop(paste0("One or more invalid output 'sample_name' values in experimentDesign file (must be identical for the same transformation replicate and selection replicate)"), call. = FALSE)
   }
 
   ### Experiment id checks (transformation_replicate column)

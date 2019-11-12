@@ -42,7 +42,7 @@ dimsum_stage_usearch <- function(
   if( dimsum_meta[["usearchMinovlen"]] < 5 ){temp_options <- paste0(temp_options, " -hspw ", dimsum_meta[["usearchMinovlen"]])}
   #Run USEARCH on all fastq file pairs
   message("Aligning paired-end FASTQ files with USEARCH:")
-  all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
+  all_fastq <- file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
   print(all_fastq)
   message("Processing...")
   #Trans library mode?

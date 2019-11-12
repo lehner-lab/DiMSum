@@ -22,11 +22,11 @@ dimsum_stage_split <- function(
   #Create/overwrite split directory (if executed)
   split_outpath <- gsub("/$", "", split_outpath)
   dimsum__create_dir(split_outpath, execute = execute, message = "SPLIT FASTQ FILES")  
-  fastq_pair_list <- dimsum_meta[['exp_design']][,c('pair1', 'pair2')]
+  fastq_pair_list <- unique(dimsum_meta[['exp_design']][,c('pair1', 'pair2')])
   rownames(fastq_pair_list) <- 1:dim(fastq_pair_list)[1]
   #Split FASTQ files
   message("Splitting FASTQ files:")
-  all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
+  all_fastq <- file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
   print(all_fastq)
   message("Processing...")
   message(paste0("\t", basename(all_fastq), "\n"))

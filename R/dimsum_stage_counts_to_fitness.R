@@ -42,7 +42,7 @@ dimsum_stage_counts_to_fitness <- function(
 
   #load variant data from RData file
   e1 <- new.env() 
-  load(file.path(dimsum_meta[["project_path"]], paste0(dimsum_meta[["projectName"]], '_variant_data_merge.RData')))
+  load(dimsum_meta[["variant_data_merge_path"]])
   all_data <- get('variant_data_merge', e1)
   rm(e1)
 
@@ -70,7 +70,7 @@ dimsum_stage_counts_to_fitness <- function(
 
   all_data <- all_data[nchar(nt_seq)==nchar(all_data[WT==T,nt_seq]),]
 
-  ### Remove perfectly matching internal constant region(s) if specified
+  ### Remove perfectly matching internal constant region(s) if specified (and subset to designed mutations)
   ###########################
 
   if(sum(!strsplit(dimsum_meta[["wildtypeSequenceCoded"]], "")[[1]] %in% c("A", "C", "G", "T"))!=0){
@@ -83,6 +83,13 @@ dimsum_stage_counts_to_fitness <- function(
     wt_AAseq <- all_data[WT==T,aa_seq]
   }
 
+  ### Subset variants to those with permitted mutations
+  ###########################
+
+  all_data <- dimsum__remove_forbidden_mutations(
+    dimsum_meta = dimsum_meta,
+    input_dt = all_data)
+
   ### Filter out low count nucleotide variants
   ###########################
 
@@ -92,13 +99,21 @@ dimsum_stage_counts_to_fitness <- function(
     wt_ntseq = wt_ntseq,
     all_reps = all_reps)
 
+  ### Calculate hamming distance
+  ###########################
+
+  #Calculate nucleotide hamming distance
+  nf_data[, Nham_nt := mapply(dimsum__hamming_distance, nt_seq, nf_data[WT==T,nt_seq])]
+  #Calculate amino acid hamming distance
+  nf_data[, Nham_aa := mapply(dimsum__hamming_distance, aa_seq, nf_data[WT==T,aa_seq])]
+
   ### Fit error model
   ###########################
 
   #Fit error model (using variants with less than specified number of mutations)
   model_result <- dimsum__error_model(
     dimsum_meta = dimsum_meta,
-    input_dt = data.table::copy(nf_data[Nmut_nt<=dimsum_meta[["errorModelMaxSubstitutions"]],]),
+    input_dt = data.table::copy(nf_data[Nham_nt<=dimsum_meta[["errorModelMaxSubstitutions"]],]),
     all_reps = all_reps,
     report_outpath = report_outpath)
 
@@ -110,15 +125,13 @@ dimsum_stage_counts_to_fitness <- function(
       dimsum_meta = dimsum_meta,
       input_dt = nf_data,
       wt_ntseq = wt_ntseq,
-      all_reps = all_reps,
-      report_outpath = report_outpath)
+      all_reps = all_reps)
   }else{
     nf_data <- dimsum__filter_variants_noncoding(
       dimsum_meta = dimsum_meta,
       input_dt = nf_data,
       wt_ntseq = wt_ntseq,
-      all_reps = all_reps,
-      report_outpath = report_outpath)
+      all_reps = all_reps)
   }
 
   ### Aggregate counts from variants that are identical at the AA level and without synonymous mutations (if coding sequence)
@@ -129,7 +142,9 @@ dimsum_stage_counts_to_fitness <- function(
       input_dt = nf_data)
   }else{
     nf_data[,merge_seq := nt_seq,nt_seq]
-    nf_data_syn <- nf_data[,.SD,merge_seq,.SDcols = c("aa_seq","Nins_nt","Ndel_nt","Nsub_nt","Nmut_nt","Nins_aa","Ndel_aa","Nsub_aa","Nmut_aa","Nmut_codons","WT","STOP",names(nf_data)[grep(names(nf_data),pattern="_count$")])]
+    nf_data_syn <- nf_data[,.SD,merge_seq,.SDcols = c(
+      "aa_seq","Nham_nt","Nham_aa",
+      "Nmut_codons","WT","STOP",names(nf_data)[grep(names(nf_data),pattern="_count$")])]
   }
 
   ### Aggregate counts for biological output replicates
@@ -143,11 +158,13 @@ dimsum_stage_counts_to_fitness <- function(
     nf_data_syn[,paste0("count_e",E,"_s1") := rowSums(.SD),,.SDcols = idx]
     names(nf_data_syn)[grep(names(nf_data_syn),pattern = paste0("e",E,"_s0_b"))] <- paste0("count_e",E,"_s0")
   }
-  nf_data_syn <- unique(nf_data_syn[,.SD,merge_seq,.SDcols = c("aa_seq","Nins_nt","Ndel_nt","Nsub_nt","Nmut_nt","Nins_aa","Ndel_aa","Nsub_aa","Nmut_aa","Nmut_codons","WT","STOP",names(nf_data_syn)[grep(names(nf_data_syn),pattern="^count")])])
+  nf_data_syn <- unique(nf_data_syn[,.SD,merge_seq,.SDcols = c(
+    "aa_seq","Nham_nt","Nham_aa",
+    "Nmut_codons","WT","STOP",names(nf_data_syn)[grep(names(nf_data_syn),pattern="^count")])])
 
   message("Done")
 
-  ### Calculate fitness and count-based error
+  ### Calculate fitness and count-based error (and remove variants without fitness estimates in any replicate)
   ###########################
 
   nf_data_syn <- dimsum__calculate_fitness(
@@ -168,17 +185,12 @@ dimsum_stage_counts_to_fitness <- function(
   if(dimsum_meta[["sequenceType"]]=="coding"){
     singles_silent <- dimsum__identify_single_aa_mutations(
       input_dt = nf_data_syn[!is.na(apply(nf_data_syn[,.SD,,.SDcols=paste0("fitness", all_reps, "_uncorr")], 1, sum)),],
-      wt_AAseq = wt_AAseq,
-      report_outpath = report_outpath)
+      wt_AAseq = wt_AAseq)
   }else{
     singles_silent <- dimsum__identify_single_nt_mutations(
       input_dt = nf_data_syn[!is.na(apply(nf_data_syn[,.SD,,.SDcols=paste0("fitness", all_reps, "_uncorr")], 1, sum)),],
-      wt_ntseq = wt_ntseq,
-      report_outpath = report_outpath)    
+      wt_ntseq = wt_ntseq)    
   }
-
-  #Identify high confidence singles
-  singles_silent[mean_count >= dimsum_meta[["fitnessHighConfidenceCount"]],is.reads0 := TRUE]
 
   ### Identify position and identity of double AA/NT mutations
   ###########################
@@ -187,14 +199,12 @@ dimsum_stage_counts_to_fitness <- function(
     doubles <- dimsum__identify_double_aa_mutations(
       input_dt = nf_data_syn,
       singles_dt = singles_silent,
-      wt_AAseq = wt_AAseq,
-      report_outpath = report_outpath)
+      wt_AAseq = wt_AAseq)
   }else{
     doubles <- dimsum__identify_double_nt_mutations(
       input_dt = nf_data_syn,
       singles_dt = singles_silent,
-      wt_ntseq = wt_ntseq,
-      report_outpath = report_outpath)
+      wt_ntseq = wt_ntseq)
   }
 
   ### Bayesian framework for fitness estimation for double mutants

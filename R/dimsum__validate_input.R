@@ -57,14 +57,34 @@ dimsum__validate_input <- function(
     stop(paste0("Invalid '", "fastqFileExtension", "' argument (only alphanumeric characters allowed)"), call. = FALSE)
   }
 
+  #WT sequence
   #Check WT sequence is valid (ACGT characters only) and save case-coded sequence
   all_characters <- unique(unlist(strsplit(dimsum_meta[["wildtypeSequence"]], "")))
   if(sum(!all_characters %in% c("A", "a", "C", "c", "G", "g", "T", "t"))!=0){
     stop("Invalid wild-type nucleotide sequence. Only valid nucleotide sequences allowed (A/C/G/T). Use lower-case letters (a/c/g/t) to indicate internal constant regions (removed before fitness calculations).", call. = FALSE)
-  }else{
-    #case-coded WT nucleotide sequence
-    dimsum_meta[["wildtypeSequenceCoded"]] <- dimsum_meta[["wildtypeSequence"]]
-    dimsum_meta[["wildtypeSequence"]] <- toupper(dimsum_meta[["wildtypeSequence"]])
+  }
+  #Check WT sequence contains at least one mutated position
+  if(sum(all_characters %in% c("A", "C", "G", "T"))==0){
+    stop("Invalid wild-type nucleotide sequence. Must contain at least one mutated position (A/C/G/T).", call. = FALSE)
+  }
+  #Case-coded WT nucleotide sequence
+  dimsum_meta[["wildtypeSequenceCoded"]] <- dimsum_meta[["wildtypeSequence"]]
+  dimsum_meta[["wildtypeSequence"]] <- toupper(dimsum_meta[["wildtypeSequence"]])
+
+  #permittedSequences
+  all_characters <- unlist(strsplit(dimsum_meta[["wildtypeSequenceCoded"]], ""))
+  #Set permittedSequences argument if not specified
+  if(is.null(dimsum_meta[["permittedSequences"]])){
+    dimsum_meta[["permittedSequences"]] <- paste0(rep("N", sum(all_characters %in% c("A", "C", "G", "T"))), collapse = "")
+  }
+  #Check permittedSequences argument has same length as mutated sequence
+  if(nchar(dimsum_meta[["permittedSequences"]]) != sum(all_characters %in% c("A", "C", "G", "T"))){
+    stop("Invalid 'permittedSequences' argument length. Length should match the number of mutated positions in the wild-type nucleotide sequence (A/C/G/T).", call. = FALSE)
+  }
+  #Check permittedSequences argument sequence is valid
+  all_characters <- unique(unlist(strsplit(dimsum_meta[["permittedSequences"]], "")))
+  if(sum(!all_characters %in% c("A", "C", "G", "T", "R", "Y", "S", "W", "K", "M", "B", "D", "H", "V", "N"))!=0){
+    stop("Invalid 'permittedSequences' argument. Only valid nucleotide codes allowed (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N).", call. = FALSE)
   }
 
   #Check strictly positive integer usearch... arguments

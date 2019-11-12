@@ -5,7 +5,7 @@
 \title{dimsum__filter_variants_noncoding}
 \usage{
 dimsum__filter_variants_noncoding(dimsum_meta, input_dt, wt_ntseq,
-  all_reps, report = TRUE, report_outpath = NULL)
+  all_reps)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
@@ -15,10 +15,6 @@ dimsum__filter_variants_noncoding(dimsum_meta, input_dt, wt_ntseq,
 \item{wt_ntseq}{WT nucleotide sequence (required)}
 
 \item{all_reps}{list of replicates to retain (required)}
-
-\item{report}{whether or not to generate fitness summary plots (default: TRUE)}
-
-\item{report_outpath}{fitness report output path}
 }
 \value{
 Nothing

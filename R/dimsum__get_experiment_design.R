@@ -55,7 +55,7 @@ dimsum__get_experiment_design <- function(
   if("biological_replicate" %in% colnames(exp_design)){exp_design[,"selection_replicate"] <- exp_design[,"biological_replicate"]}
 
   #Check whether experiment design is valid
-  dimsum__check_experiment_design(exp_design)
+  dimsum__check_experiment_design(dimsum_meta, exp_design)
 
   ### Temporary fix for stages relying on "experiment" and "biological_replicate" columns
   #Copy "transformation_replicate" and "selection_replicate" to "experiment" and "biological_replicate" colums respectively

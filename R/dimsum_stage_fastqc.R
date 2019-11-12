@@ -28,7 +28,7 @@ dimsum_stage_fastqc <- function(
   dimsum__create_dir(fastqc_outpath, execute = execute, message = "DiMSum STAGE 2: ASSESS READ QUALITY")  
   #Run FASTQC on all fastq files
   message("Running FASTQC on all files:")
-  all_fastq <- file.path(dimsum_meta[['exp_design']][,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,'pair1'], dimsum_meta[['exp_design']][,'pair2'])))
+  all_fastq <- file.path(dimsum_meta[['exp_design']][1,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,'pair1'], dimsum_meta[['exp_design']][,'pair2'])))
   print(all_fastq)
   message("Processing...")
   message(paste0("\t", basename(all_fastq), "\n"))

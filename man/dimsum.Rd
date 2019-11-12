@@ -6,13 +6,14 @@
 \usage{
 dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   stranded = T, paired = T, barcodeDesignPath,
-  barcodeErrorRate = 0.25, experimentDesignPath, cutadaptCut5First,
+  barcodeErrorRate = 0.25, experimentDesignPath,
+  experimentDesignPairDuplicates = F, cutadaptCut5First,
   cutadaptCut5Second, cutadaptCut3First, cutadaptCut3Second,
   cutadapt5First, cutadapt5Second, cutadapt3First, cutadapt3Second,
   cutadaptMinLength = 50, cutadaptErrorRate = 0.2, usearchMinQual,
   usearchMaxee, usearchMinlen = 64, usearchMinovlen = 16, outputPath,
-  projectName, wildtypeSequence, sequenceType = "auto",
-  transLibrary = F, bayesianDoubleFitness = F,
+  projectName, wildtypeSequence, permittedSequences,
+  sequenceType = "auto", transLibrary = F, bayesianDoubleFitness = F,
   bayesianDoubleFitnessLamD = 0.025, fitnessMinInputCountAll = 0,
   fitnessMinInputCountAny = 0, fitnessHighConfidenceCount = 10,
   fitnessDoubleHighConfidenceCount = 50, fitnessNormalise = T,
@@ -37,6 +38,8 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 \item{barcodeErrorRate}{Maximum allowed error rate for the barcode (default:0.25)}
 
 \item{experimentDesignPath}{Path to experimental design file (tab-separated plain text file with replicate structure)}
+
+\item{experimentDesignPairDuplicates}{Are duplicate FASTQ files permitted in experimental design file? (default:F)}
 
 \item{cutadaptCut5First}{cutadapt: remove bases from start of first read (before constant region trimming)}
 
@@ -71,6 +74,8 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 \item{projectName}{Project name}
 
 \item{wildtypeSequence}{Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed before fitness calculations.}
+
+\item{permittedSequences}{A sequence of nucleotide codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions i.e upper-case letters in wild-type nucleotide sequence (default:any base at mutated positions)}
 
 \item{sequenceType}{Coding potential of sequence; either noncoding/coding/auto (default:auto)}
 

@@ -4,9 +4,11 @@
 \alias{dimsum__check_experiment_design}
 \title{dimsum__check_experiment_design}
 \usage{
-dimsum__check_experiment_design(exp_design)
+dimsum__check_experiment_design(dimsum_meta, exp_design)
 }
 \arguments{
+\item{dimsum_meta}{an experiment metadata object (required)}
+
 \item{exp_design}{experiment design data.frame (required)}
 }
 \value{

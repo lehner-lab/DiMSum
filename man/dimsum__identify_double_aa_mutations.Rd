@@ -4,8 +4,7 @@
 \alias{dimsum__identify_double_aa_mutations}
 \title{dimsum__identify_double_aa_mutations}
 \usage{
-dimsum__identify_double_aa_mutations(input_dt, singles_dt, wt_AAseq,
-  report = TRUE, report_outpath = NULL)
+dimsum__identify_double_aa_mutations(input_dt, singles_dt, wt_AAseq)
 }
 \arguments{
 \item{input_dt}{input data.table (required)}
@@ -13,13 +12,9 @@ dimsum__identify_double_aa_mutations(input_dt, singles_dt, wt_AAseq,
 \item{singles_dt}{singles data.table (required)}
 
 \item{wt_AAseq}{WT amino acid sequence (required)}
-
-\item{report}{whether or not to generate fitness summary plots (default: TRUE)}
-
-\item{report_outpath}{fitness report output path}
 }
 \value{
-Nothing
+data.table with double amino acid variants
 }
 \description{
 Identify and annotate double AA substitutions.
