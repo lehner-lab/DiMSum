@@ -28,7 +28,7 @@ dimsum__identify_single_aa_mutations <- function(
   singles_silent[,WT_AA := wt_AAseq_split[Pos],aa_seq]
 
   #Remove unnecessary columns and rename fitness and sigma columns
-  singles_silent <- singles_silent[,cbind(Pos,WT_AA,Mut,Nham_nt,Nham_aa,Nmut_codons,STOP,mean_count,.SD),,.SDcols = grep("_uncorr", names(singles_silent))]
+  singles_silent <- singles_silent[,cbind(Pos,WT_AA,Mut,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,.SD),,.SDcols = grep("_uncorr", names(singles_silent))]
   names(singles_silent) <- gsub("_uncorr", "", names(singles_silent))
 
   return(singles_silent)

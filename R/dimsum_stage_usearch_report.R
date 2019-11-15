@@ -77,7 +77,7 @@ dimsum_stage_usearch_report <- function(
     ggplot2::geom_boxplot(ggplot2::aes(color = Length_quantile)) +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
-    ggplot2::coord_cartesian(ylim = c(0, max(plot_df[,'value'], na.rm = T))) +
+    # ggplot2::coord_cartesian(ylim = c(0, max(plot_df[,'value'], na.rm = T))) +
     ggplot2::labs(x = "Sample names", y = "Aligned length (bp)", title = paste0("Aligned length distributions (all splits)"))
   ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_usearch_report_mergedlength.png')), d, width=12, height=8)
   #New experiment metadata

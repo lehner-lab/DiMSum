@@ -5,7 +5,6 @@
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param input_dt output path for plots and saved objects (required)
-#' @param wt_ntseq WT nucleotide sequence (required)
 #' @param all_reps list of replicates to retain (required)
 #'
 #' @return Nothing
@@ -14,7 +13,6 @@
 dimsum__filter_nuc_variants <- function(
   dimsum_meta,
   input_dt,
-  wt_ntseq,
   all_reps
   ){
 
@@ -22,9 +20,6 @@ dimsum__filter_nuc_variants <- function(
 
   #Number of input and output replicates
   all_reps_str <- paste0(all_reps, collapse="")
-
-  #WT nucleotide sequences
-  wt_ntseq_split <- strsplit(wt_ntseq,"")[[1]]
 
   #Sample names
   input_samples <- names(input_dt)[grep(paste0("e[", all_reps_str, "]_s0_b.*_count$"), names(input_dt))]

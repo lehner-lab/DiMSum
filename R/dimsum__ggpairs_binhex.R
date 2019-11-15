@@ -13,6 +13,7 @@
 #' @param title the plot title
 #' @param cut a factor variable to colour the hexagon outlines (optional)
 #' @param size line width of hex bins when 'cut' specified (default: 0.5)
+#' @param thresholds named list of thresholds where item is numeric (list) of thresholds and name is linetype (optional)
 #'
 #' @return Nothing
 #' @export
@@ -26,7 +27,8 @@ dimsum__ggpairs_binhex <- function(
   ylab = "y",
   title = "",
   cut = NULL,
-  size = 0.5){
+  size = 0.5,
+  thresholds = NULL){
   #Check if something to plot
   if(dim(input_dt)[1] == 0){
     warning("dimsum__ggpairs_binhex.R: No data to plot (empty data.table 'input_dt').", call. = FALSE, immediate. = TRUE, noBreaks. = TRUE)
@@ -44,21 +46,21 @@ dimsum__ggpairs_binhex <- function(
   for (x in 1:dim(input_dt)[2]){
     for (y in 1:dim(input_dt)[2]){
       if (y>x) {
-        if(is.null(cut)){
-          d <- GGally::putPlot(d, 
-            ggplot2::ggplot(plot_dt, ggplot2::aes_string(x = colnames(input_dt)[x], y = colnames(input_dt)[y])) + 
-            ggplot2::stat_binhex(bins = bins, size = size, color = "lightgrey") +
-            ggplot2::scale_fill_gradientn(colours = c("white", "black"), trans = "log10") +
-            ggplot2::geom_abline(color = "darkgrey", lty = 2)
-            , y,x)
-        }else{
-          d <- GGally::putPlot(d, 
-            ggplot2::ggplot(plot_dt, ggplot2::aes_string(x = colnames(input_dt)[x], y = colnames(input_dt)[y])) + 
-            ggplot2::stat_binhex(ggplot2::aes(color = cut), bins = bins, size = size) +
-            ggplot2::scale_fill_gradientn(colours = c("white", "black"), trans = "log10") +
-            ggplot2::geom_abline(color = "darkgrey", lty = 2)
-            , y,x)
+        dpiece <- ggplot2::ggplot(plot_dt, ggplot2::aes_string(x = colnames(input_dt)[x], y = colnames(input_dt)[y]))
+        if(!is.null(thresholds)){
+          dpiece <- dpiece + 
+            ggplot2::geom_hline(yintercept = unlist(thresholds), linetype = unlist(names(thresholds)), color = "darkgrey") + 
+            ggplot2::geom_vline(xintercept = unlist(thresholds), linetype = unlist(names(thresholds)), color = "darkgrey")
         }
+        if(is.null(cut)){
+          dpiece <- dpiece + ggplot2::stat_binhex(bins = bins, size = size, color = "lightgrey")
+        }else{
+          dpiece <- dpiece + ggplot2::stat_binhex(ggplot2::aes(color = cut), bins = bins, size = size)
+        }
+        dpiece <- dpiece + 
+          ggplot2::scale_fill_gradientn(colours = c("white", "black"), trans = "log10") +
+          ggplot2::geom_abline(color = "darkgrey", lty = 2)
+      d <- GGally::putPlot(d, dpiece, y, x)    
       }
     }
   }

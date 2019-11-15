@@ -102,14 +102,9 @@ dimsum__validate_input <- function(
     stop("Invalid 'splitChunkSize' argument. Only positive integers allowed (zero exclusive).", call. = FALSE)
   }
 
-  #Check fitnessMaxSubstitutions argument greater than 1
-  if(dimsum_meta[["fitnessMaxSubstitutions"]]<2){
-    stop("Invalid 'fitnessMaxSubstitutions' argument. Only integers greater than 1 allowed.", call. = FALSE)
-  }
-
-  #Check errorModelMaxSubstitutions argument greater than 0
-  if(dimsum_meta[["errorModelMaxSubstitutions"]]<1){
-    stop("Invalid 'errorModelMaxSubstitutions' argument. Only positive integers allowed (zero exclusive).", call. = FALSE)
+  #Check maxSubstitutions argument greater than 1
+  if(dimsum_meta[["maxSubstitutions"]]<2){
+    stop("Invalid 'maxSubstitutions' argument. Only integers greater than 1 allowed.", call. = FALSE)
   }
 
   #Check usearchMaxee argument

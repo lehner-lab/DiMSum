@@ -17,10 +17,9 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   bayesianDoubleFitnessLamD = 0.025, fitnessMinInputCountAll = 0,
   fitnessMinInputCountAny = 0, fitnessHighConfidenceCount = 10,
   fitnessDoubleHighConfidenceCount = 50, fitnessNormalise = T,
-  fitnessMaxSubstitutions = 2, errorModelMaxSubstitutions = 2,
-  retainIntermediateFiles = F, splitChunkSize = 3758096384,
-  retainedReplicates = "all", startStage = 1, stopStage = 0,
-  numCores = 1)
+  maxSubstitutions = 2, retainIntermediateFiles = F,
+  splitChunkSize = 3758096384, retainedReplicates = "all",
+  startStage = 1, stopStage = 0, numCores = 1)
 }
 \arguments{
 \item{fastqFileDir}{Path to directory with input FASTQ files}
@@ -95,9 +94,7 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{fitnessNormalise}{Normalise fitness values to minimise inter-replicate differences (default:T)}
 
-\item{fitnessMaxSubstitutions}{Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)}
-
-\item{errorModelMaxSubstitutions}{Maximum number of nucleotide substitutions used for error model fitting (default:2)}
+\item{maxSubstitutions}{Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)}
 
 \item{retainIntermediateFiles}{Should intermediate files be retained? (default:F)}
 

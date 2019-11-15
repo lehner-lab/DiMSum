@@ -65,47 +65,13 @@ dimsum_stage_counts_to_fitness <- function(
   #Bayesian double mutant fitness estimates
   bayesian_double_fitness <- dimsum_meta[["bayesianDoubleFitness"]]
 
-  ### Subset to variants with same length as WT
-  ###########################
-
-  all_data <- all_data[nchar(nt_seq)==nchar(all_data[WT==T,nt_seq]),]
-
-  ### Remove perfectly matching internal constant region(s) if specified (and subset to designed mutations)
-  ###########################
-
-  if(sum(!strsplit(dimsum_meta[["wildtypeSequenceCoded"]], "")[[1]] %in% c("A", "C", "G", "T"))!=0){
-    all_data <- dimsum__remove_internal_constant_region(
-      input_dt = all_data,
-      wt_ccntseq = dimsum_meta[["wildtypeSequenceCoded"]])
-    #WT nucleotide sequences
-    wt_ntseq <- all_data[WT==T,nt_seq]
-    #WT AA sequences
-    wt_AAseq <- all_data[WT==T,aa_seq]
-  }
-
-  ### Subset variants to those with permitted mutations
-  ###########################
-
-  all_data <- dimsum__remove_forbidden_mutations(
-    dimsum_meta = dimsum_meta,
-    input_dt = all_data)
-
   ### Filter out low count nucleotide variants
   ###########################
 
   nf_data <- dimsum__filter_nuc_variants(
     dimsum_meta = dimsum_meta,
     input_dt = all_data,
-    wt_ntseq = wt_ntseq,
     all_reps = all_reps)
-
-  ### Calculate hamming distance
-  ###########################
-
-  #Calculate nucleotide hamming distance
-  nf_data[, Nham_nt := mapply(dimsum__hamming_distance, nt_seq, nf_data[WT==T,nt_seq])]
-  #Calculate amino acid hamming distance
-  nf_data[, Nham_aa := mapply(dimsum__hamming_distance, aa_seq, nf_data[WT==T,aa_seq])]
 
   ### Fit error model
   ###########################
@@ -113,29 +79,20 @@ dimsum_stage_counts_to_fitness <- function(
   #Fit error model (using variants with less than specified number of mutations)
   model_result <- dimsum__error_model(
     dimsum_meta = dimsum_meta,
-    input_dt = data.table::copy(nf_data[Nham_nt<=dimsum_meta[["errorModelMaxSubstitutions"]],]),
+    input_dt = data.table::copy(nf_data),
     all_reps = all_reps,
     report_outpath = report_outpath)
 
-  ### Filter for desired coding / non-coding variants
-  ###########################
-
-  if(dimsum_meta[["sequenceType"]]=="coding"){
-    nf_data <- dimsum__filter_variants_coding(
-      dimsum_meta = dimsum_meta,
-      input_dt = nf_data,
-      wt_ntseq = wt_ntseq,
-      all_reps = all_reps)
-  }else{
-    nf_data <- dimsum__filter_variants_noncoding(
-      dimsum_meta = dimsum_meta,
-      input_dt = nf_data,
-      wt_ntseq = wt_ntseq,
-      all_reps = all_reps)
-  }
-
   ### Aggregate counts from variants that are identical at the AA level and without synonymous mutations (if coding sequence)
   ###########################
+
+  #Add number of codons affected by mutations
+  wt_ntseq_split <- strsplit(wt_ntseq,"")[[1]]
+  nf_data[,Nmut_codons := length(unique(ceiling(which(strsplit(nt_seq,"")[[1]] != wt_ntseq_split)/3))),nt_seq]
+  #For coding sequences retain only either purely nonsynonymous mutations or purely silent mutations
+  if(dimsum_meta[["sequenceType"]]=="coding"){
+    nf_data <- nf_data[(Nmut_codons-Nham_aa) == 0 | Nham_aa == 0,]
+  }
 
   if(dimsum_meta[["sequenceType"]]=="coding"){
     nf_data_syn <- dimsum__aggregate_AA_variants(
@@ -144,7 +101,7 @@ dimsum_stage_counts_to_fitness <- function(
     nf_data[,merge_seq := nt_seq,nt_seq]
     nf_data_syn <- nf_data[,.SD,merge_seq,.SDcols = c(
       "aa_seq","Nham_nt","Nham_aa",
-      "Nmut_codons","WT","STOP",names(nf_data)[grep(names(nf_data),pattern="_count$")])]
+      "Nmut_codons","WT","STOP","STOP_readthrough",names(nf_data)[grep(names(nf_data),pattern="_count$")])]
   }
 
   ### Aggregate counts for biological output replicates
@@ -160,7 +117,7 @@ dimsum_stage_counts_to_fitness <- function(
   }
   nf_data_syn <- unique(nf_data_syn[,.SD,merge_seq,.SDcols = c(
     "aa_seq","Nham_nt","Nham_aa",
-    "Nmut_codons","WT","STOP",names(nf_data_syn)[grep(names(nf_data_syn),pattern="^count")])])
+    "Nmut_codons","WT","STOP","STOP_readthrough",names(nf_data_syn)[grep(names(nf_data_syn),pattern="^count")])])
 
   message("Done")
 

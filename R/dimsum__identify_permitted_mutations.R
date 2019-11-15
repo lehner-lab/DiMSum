@@ -1,20 +1,18 @@
 
-#' dimsum__remove_forbidden_mutations
+#' dimsum__identify_permitted_mutations
 #'
-#' Subset variants to those with permitted mutations.
+#' Identify variants with permitted mutations.
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param input_dt input data.table (required)
 #'
-#' @return A data.table with variants with permitted mutations only
+#' @return A data.table with permitted variants identified
 #' @export
 #' @import data.table
-dimsum__remove_forbidden_mutations <- function(
+dimsum__identify_permitted_mutations <- function(
   dimsum_meta,
   input_dt
   ){
-
-  message("Removing nucleotide variants without permitted mutations...")
 
   nuc_codes <- list(
     "A" = "A",
@@ -35,15 +33,11 @@ dimsum__remove_forbidden_mutations <- function(
     )
 
   #Loop over all nucleotide sequence positions and subset to permitted mutations
+  input_dt[, permitted := T]
   for(i in 1:nchar(dimsum_meta[["permittedSequences"]])){
-    input_dt <- input_dt[toupper(substr(nt_seq, i, i)) %in% nuc_codes[[substr(dimsum_meta[["permittedSequences"]], i, i)]]]
+    input_dt[!toupper(substr(nt_seq, i, i)) %in% nuc_codes[[substr(dimsum_meta[["permittedSequences"]], i, i)]], permitted := F]
   }
 
-  message("Done")
-
-  #Output data.table
-  output_dt <- input_dt
-
-  return(output_dt)
+  return(input_dt)
 
 }

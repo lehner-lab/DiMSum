@@ -27,7 +27,7 @@ dimsum__aggregate_AA_variants <- function(
   #Retain only one row per AA variant
   output_dt <- input_dt[!duplicated(merge_seq),.SD,merge_seq,.SDcols = c(
     "aa_seq","Nham_nt","Nham_aa",
-    "Nmut_codons","WT","STOP",names(input_dt)[grep(names(input_dt),pattern="_agg$")])]
+    "Nmut_codons","WT","STOP","STOP_readthrough",names(input_dt)[grep(names(input_dt),pattern="_agg$")])]
 
   message("Done")
 

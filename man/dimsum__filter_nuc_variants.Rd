@@ -4,14 +4,12 @@
 \alias{dimsum__filter_nuc_variants}
 \title{dimsum__filter_nuc_variants}
 \usage{
-dimsum__filter_nuc_variants(dimsum_meta, input_dt, wt_ntseq, all_reps)
+dimsum__filter_nuc_variants(dimsum_meta, input_dt, all_reps)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
 
 \item{input_dt}{output path for plots and saved objects (required)}
-
-\item{wt_ntseq}{WT nucleotide sequence (required)}
 
 \item{all_reps}{list of replicates to retain (required)}
 }

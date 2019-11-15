@@ -163,6 +163,7 @@ dimsum__merge_fitness <- function(
       "aa_seq",
       "Nmut_codons",
       "STOP",
+      "STOP_readthrough",
       "var_fitness",
       "avg_sigma",
       "isNA",
@@ -199,8 +200,8 @@ dimsum__merge_fitness <- function(
 
   ##### finalize data.tables
   if(dimsum_meta[["sequenceType"]]=="coding"){
-    silent <- singles_dt[Nham_aa==0,.(Pos,WT_AA,Mut,Nham_nt,Nham_aa,Nmut_codons,STOP,mean_count,fitness,sigma)]
-    singles <- singles_dt[Nham_aa==1,.(Pos,WT_AA,Mut,Nham_nt,Nham_aa,Nmut_codons,STOP,mean_count,fitness,sigma)]
+    silent <- singles_dt[Nham_aa==0,.(Pos,WT_AA,Mut,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
+    singles <- singles_dt[Nham_aa==1,.(Pos,WT_AA,Mut,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
   }else{
     singles <- singles_dt[,.(Pos,WT_nt,Mut,Nham_nt,mean_count,fitness,sigma)]
   }
@@ -211,7 +212,7 @@ dimsum__merge_fitness <- function(
   doubles_dt[,fitness2 := singles[Pos == Pos2 & Mut == Mut2,fitness],.(Pos2,Mut2)]
   doubles_dt[,sigma2 := singles[Pos == Pos2 & Mut == Mut2,sigma],.(Pos2,Mut2)]
   if(dimsum_meta[["sequenceType"]]=="coding"){
-    retained_cols <- c("Pos1","Pos2","WT_AA1","WT_AA2","Mut1","Mut2","Nham_nt","Nham_aa","Nmut_codons","STOP","mean_count",
+    retained_cols <- c("Pos1","Pos2","WT_AA1","WT_AA2","Mut1","Mut2","Nham_nt","Nham_aa","Nmut_codons","STOP","STOP_readthrough","mean_count",
       "fitness1","sigma1","fitness2","sigma2",
       "fitness_uncorr","sigma_uncorr",
       "fitness_cond","sigma_cond")

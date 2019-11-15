@@ -28,17 +28,11 @@ dimsum_stage_merge <- function(
   merge_outpath <- gsub("/$", "", merge_outpath)
   dimsum__create_dir(merge_outpath, execute = execute, message = "DiMSum STAGE 6: MERGE SAMPLE STATISTICS", overwrite_dir = FALSE)  
   #WT nucleotide sequence
-  wt_NTseq <- tolower(dimsum_meta[['wildtypeSequence']])
+  wt_ntseq <- tolower(dimsum_meta[['wildtypeSequence']])
   #WT AA sequence
-  wt_AAseq <- paste0(seqinr::translate(strsplit(wt_NTseq,split="")[[1]]),collapse="")
+  wt_AAseq <- paste0(seqinr::translate(strsplit(wt_ntseq,split="")[[1]]),collapse="")
   #Initialise merged variant data object
   variant_data <- NULL
-  #Nucleotide mutation count dictionaries
-  nuc_subst_dict <- list()
-  nuc_indel_dict <- list()
-  #AA mutation count dictionaries
-  aa_subst_dict <- list()
-  aa_indel_dict <- list()
   
   #Load variant count files
   message("Loading variant count files:")
@@ -53,49 +47,15 @@ dimsum_stage_merge <- function(
       #Initialise count table
       count_dt <- data.table(
         nt_seq = character(),
-        count = numeric(),
-        aa_seq = character(),
-        Nins_aa = integer(),
-        Ndel_aa = integer(),
-        Nsub_aa = integer(),
-        Nmut_aa = integer(),
-        Nins_nt = integer(),
-        Ndel_nt = integer(),
-        Nsub_nt = integer(),
-        Nmut_nt = integer())
+        count = numeric())
       #Load fasta file (if exists)
       if(!file.exists(count_file)){
         warning("dimsum_stage_merge.R: File does not exist.", call. = FALSE, immediate. = TRUE, noBreaks. = TRUE)
-        #Save nucleotide mutation distribution (with/without indels)
-        nuc_subst_dict[[count_file]] <- NA
-        nuc_indel_dict[[count_file]] <- NA
-        #Save amino acid mutation distribution (with/without indels)
-        aa_subst_dict[[count_file]] <- NA
-        aa_indel_dict[[count_file]] <- NA
       }else{
         #Create variant count table with nucleotide and amino acid sequence
         count_dt <- fread(count_file)
         names(count_dt) <- c("nt_seq", "count")
         count_dt[, nt_seq := tolower(nt_seq)]
-        suppressWarnings(count_dt[, aa_seq := as.character(Biostrings::translate(Biostrings::DNAStringSet(nt_seq)))])
-        #Calculate number of aa mutations (insertions, deletions, substitutions)
-        mut_counts <- attr(utils::adist(count_dt[,aa_seq], wt_AAseq, counts = T), "counts")
-        count_dt[,Nins_aa := mut_counts[,1,2]]
-        count_dt[,Ndel_aa := mut_counts[,1,1]]
-        count_dt[,Nsub_aa := mut_counts[,1,3]]
-        count_dt[,Nmut_aa := Nins_aa+Ndel_aa+Nsub_aa]
-        #Calculate number of nucleotide mutations (insertions, deletions, substitutions)
-        mut_counts <- attr(utils::adist(count_dt[,nt_seq], wt_NTseq, counts = T), "counts")
-        count_dt[,Nins_nt := mut_counts[,1,2]]
-        count_dt[,Ndel_nt := mut_counts[,1,1]]
-        count_dt[,Nsub_nt := mut_counts[,1,3]]
-        count_dt[,Nmut_nt := Nins_nt+Ndel_nt+Nsub_nt]
-        #Save nucleotide mutation distribution (with/without indels)
-        nuc_subst_dict[[count_file]] <- tapply(count_dt[Nsub_nt==Nmut_nt,count], count_dt[Nsub_nt==Nmut_nt,Nsub_nt], sum)
-        nuc_indel_dict[[count_file]] <- tapply(count_dt[Nsub_nt!=Nmut_nt,count], count_dt[Nsub_nt!=Nmut_nt, .(Nindels_nt = Nins_nt + Ndel_nt)][,Nindels_nt], sum)
-        #Save amino acid mutation distribution (with/without indels)
-        aa_subst_dict[[count_file]] <- tapply(count_dt[Nsub_aa==Nmut_aa,count], count_dt[Nsub_aa==Nmut_aa,Nsub_aa], sum)
-        aa_indel_dict[[count_file]] <- tapply(count_dt[Nsub_aa!=Nmut_aa,count], count_dt[Nsub_aa!=Nmut_aa, .(Nindels_aa = Nins_aa + Ndel_aa)][,Nindels_aa], sum)
       }
       #First file loaded
       if(is.null(variant_data)){
@@ -109,39 +69,37 @@ dimsum_stage_merge <- function(
   }
   #Check if this code should be executed
   if(execute){
-    #Save mutation statistics dictionaries
-    mutation_stats_dicts <- list(
-      "nuc_subst_dict" = nuc_subst_dict, 
-      "nuc_indel_dict" = nuc_indel_dict, 
-      "aa_subst_dict" = aa_subst_dict,
-      "aa_indel_dict" = aa_indel_dict)
-    save(mutation_stats_dicts, file = file.path(dimsum_meta[["tmp_path"]], "mutation_stats_dicts.RData"))
     #Replace NA counts with zeros
     variant_data[is.na(variant_data)] <- 0
-    #Indicate WT sequence
-    variant_data[nt_seq == wt_NTseq,WT := TRUE]
-    #Indicate STOPs
-    variant_data[,STOP := ifelse(length(grep(aa_seq,pattern="\\*"))==1,TRUE,FALSE),aa_seq]
-    #Merge technical counts
+
+    #Merge counts from technical replicates
     split_base <- unique(sapply(strsplit(colnames(variant_data)[grep('_count', colnames(variant_data))], "_t"), '[', 1))
     variant_data_merge <- dimsum__sum_datatable_columns(dt=variant_data, column_patterns=split_base, suffix="_count")
+
+    #Process variants to separate into indel, rejected and retained variants data.tables
+    variant_list <- dimsum__process_merged_variants(dimsum_meta = dimsum_meta, input_dt = variant_data_merge)
+
     #Save merged variant data
     message("Saving merged variant data...")
+    write.table(variant_list[["indel_variants"]], file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_indel_variant_data_merge.tsv')), sep = "\t", quote = F, row.names = F)
+    write.table(variant_list[["rejected_variants"]], file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_rejected_variant_data_merge.tsv')), sep = "\t", quote = F, row.names = F)
+    variant_data_merge <- variant_list[["retained_variants"]]
     save(variant_data_merge, file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.RData')))
-    write.table(variant_data_merge, file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.tsv')), sep = "\t", quote = F, row.names = F)
+    write.table(variant_list[["retained_variants"]], file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.tsv')), sep = "\t", quote = F, row.names = F)
     message("Done")
   }
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Merged variant data path
   dimsum_meta_new[["variant_data_merge_path"]] <- file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.RData')) 
-  #Load mutation statistics
+  #Load previously saved mutation statistics
   load(file.path(dimsum_meta[["tmp_path"]], "mutation_stats_dicts.RData"))
-  #AA mutation results
+  #Add to metadata
   dimsum_meta_new[["aa_subst_counts"]] <- mutation_stats_dicts[["aa_subst_dict"]]
-  dimsum_meta_new[["aa_indel_counts"]] <- mutation_stats_dicts[["aa_indel_dict"]]
-  #Nucleotide mutation results
   dimsum_meta_new[["nuc_subst_counts"]] <- mutation_stats_dicts[["nuc_subst_dict"]]
+  dimsum_meta_new[["nuc_tmsub_counts"]] <- mutation_stats_dicts[["nuc_tmsub_dict"]]
+  dimsum_meta_new[["nuc_frbdn_counts"]] <- mutation_stats_dicts[["nuc_frbdn_dict"]]
+  dimsum_meta_new[["nuc_const_counts"]] <- mutation_stats_dicts[["nuc_const_dict"]]
   dimsum_meta_new[["nuc_indel_counts"]] <- mutation_stats_dicts[["nuc_indel_dict"]]
   #Delete files when last stage complete
   if(!dimsum_meta_new[["retainIntermediateFiles"]]){
@@ -152,10 +110,7 @@ dimsum_stage_merge <- function(
   #Generate merge report
   if(report){
     dimsum_meta_new_report <- dimsum_stage_merge_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
-    dimsum_stage_diagnostics_report(
-      dimsum_meta = dimsum_meta_new_report,
-      variant_data = file.path(merge_outpath, paste0(dimsum_meta_new_report[["projectName"]], '_variant_data_merge.RData')), 
-      report_outpath = report_outpath)
+    dimsum_stage_diagnostics_report(dimsum_meta = dimsum_meta_new_report, report_outpath = report_outpath)
     return(dimsum_meta_new_report)
   }
   return(dimsum_meta_new)

@@ -6,7 +6,7 @@
 \usage{
 dimsum__ggpairs_binhex(input_dt, output_file, width = 12, height = 12,
   bins = 50, xlab = "x", ylab = "y", title = "", cut = NULL,
-  size = 0.5)
+  size = 0.5, thresholds = NULL)
 }
 \arguments{
 \item{input_dt}{input data table (required)}
@@ -28,6 +28,8 @@ dimsum__ggpairs_binhex(input_dt, output_file, width = 12, height = 12,
 \item{cut}{a factor variable to colour the hexagon outlines (optional)}
 
 \item{size}{line width of hex bins when 'cut' specified (default: 0.5)}
+
+\item{thresholds}{named list of thresholds where item is numeric (list) of thresholds and name is linetype (optional)}
 }
 \value{
 Nothing

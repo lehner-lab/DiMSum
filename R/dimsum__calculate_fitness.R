@@ -75,7 +75,7 @@ dimsum__calculate_fitness <- function(
   #Remove unnecessary columns
   output_dt <- input_dt[,.SD,merge_seq,.SDcols = c(
     "aa_seq","Nham_nt","Nham_aa",
-    "Nmut_codons","WT","STOP",names(input_dt)[grep(names(input_dt),pattern="^count|^fitness|^sigma")])]
+    "Nmut_codons","WT","STOP","STOP_readthrough",names(input_dt)[grep(names(input_dt),pattern="^count|^fitness|^sigma")])]
 
   #Remove variants without fitness estimates in any replicates
   fitness_cols <- names(output_dt)[grep(paste0("fitness[", all_reps_str, "]_uncorr"), names(output_dt))]

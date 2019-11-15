@@ -1,15 +1,15 @@
 
-#' dimsum__remove_internal_constant_region
+#' dimsum__identify_internal_constant_region
 #'
-#' Remove internal constant region from nucleotide sequences (if perfect match found).
+#' Identify internal constant region from nucleotide sequences.
 #'
 #' @param input_dt input data.table (required)
 #' @param wt_ccntseq case-coded WT nucleotide sequence (required)
 #'
-#' @return A data.table with internal constant regions removed from nucleotide sequences (if perfect match found)
+#' @return A data.table with internal constant regions identified from nucleotide sequences
 #' @export
 #' @import data.table
-dimsum__remove_internal_constant_region <- function(
+dimsum__identify_internal_constant_region <- function(
   input_dt,
   wt_ccntseq
   ){
@@ -34,6 +34,9 @@ dimsum__remove_internal_constant_region <- function(
   #Update nucleotide and amino acid sequences
   input_dt[constant_region==T, nt_seq := nt_seq_wcnst]
   suppressWarnings(input_dt[constant_region==T, aa_seq := as.character(Biostrings::translate(Biostrings::DNAStringSet(nt_seq)))])
+
+  #Indicate STOPs
+  input_dt <- rbind(dimsum__identify_STOP_mutations(input_dt[constant_region==T,]), input_dt[constant_region==F,])
 
   #Remove unnecessary columns
   output_dt <- input_dt[,.SD,,.SDcols = names(input_dt)[!names(input_dt) %in% c("nt_seq_cnst", "nt_seq_wcnst")]]
