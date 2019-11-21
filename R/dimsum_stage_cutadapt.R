@@ -52,8 +52,38 @@ dimsum_stage_cutadapt <- function(
       temp_options <- dimsum__get_cutadapt_options(dimsum_meta = dimsum_meta, exp_design_row = i)
       #Options for removing a fixed number of bases from beginning or end of either read in pair
       temp_cut_options <- dimsum__get_cutadapt_options(dimsum_meta = dimsum_meta, exp_design_row = i, option_type = "cut")
+      #Insufficient cutadapt options specified to run cutadapt
+      if(temp_options=="" & temp_cut_options==""){
+        #Copy files  
+        temp_out <- system(paste0(
+          "cp ",
+          file.path(dimsum_meta[["exp_design"]][,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
+          " ",
+          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt"))))
+        if(dimsum_meta[["paired"]]){
+          temp_out <- system(paste0(
+            "cp ",
+            file.path(dimsum_meta[["exp_design"]][,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
+            " ",
+            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt"))))
+          #Total number of FASTQ records
+          temp_out <- system(paste0(
+            "wc -l ",
+            file.path(dimsum_meta[["exp_design"]][,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
+            " ",
+            file.path(dimsum_meta[["exp_design"]][,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
+            " > ",
+            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.stdout")))) 
+        }else{
+          #Total number of FASTQ records
+          temp_out <- system(paste0(
+            "wc -l ",
+            file.path(dimsum_meta[["exp_design"]][,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
+            " > ",
+            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.stdout")))) 
+        }
       #Not stranded library (and paired-end)
-      if( !dimsum_meta[["stranded"]] & dimsum_meta[["paired"]]){
+      }else if( !dimsum_meta[["stranded"]] & dimsum_meta[["paired"]]){
         #Run cutadapt on the swapped  
         temp_out <- system(paste0(
           "cutadapt",

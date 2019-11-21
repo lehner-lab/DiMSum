@@ -12,6 +12,7 @@
 #' @param barcodeErrorRate Maximum allowed error rate for the barcode (default:0.25)
 #' @param experimentDesignPath Path to experimental design file (tab-separated plain text file with replicate structure)
 #' @param experimentDesignPairDuplicates Are duplicate FASTQ files permitted in experimental design file? (default:F)
+#' @param barcodeIdentityPath Path to barcode identity file (tab-separated plain text file mapping barcodes to variants)
 #' @param cutadaptCut5First cutadapt: remove bases from start of first read (before constant region trimming)
 #' @param cutadaptCut5Second cutadapt: remove bases from start of second read (before constant region trimming)
 #' @param cutadaptCut3First cutadapt: remove bases from end of first read (before constant region trimming)
@@ -36,6 +37,8 @@
 #' @param bayesianDoubleFitnessLamD Poisson distribution for score likelihood (default:0.025)
 #' @param fitnessMinInputCountAll Minimum input read count (in all replicate) to be retained during fitness calculations (default:0)
 #' @param fitnessMinInputCountAny Minimum input read count (in any replicate) to be retained during fitness calculations (default:0)
+#' @param fitnessMinOutputCountAll Minimum output read count (in all replicate) to be retained during fitness calculations (default:0)
+#' @param fitnessMinOutputCountAny Minimum output read count (in any replicate) to be retained during fitness calculations (default:0)
 #' @param fitnessHighConfidenceCount Minimum mean input read count for high confidence variants (default:10)
 #' @param fitnessDoubleHighConfidenceCount Minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)
 #' @param fitnessNormalise Normalise fitness values to minimise inter-replicate differences (default:T)
@@ -59,6 +62,7 @@ dimsum <- function(
   barcodeErrorRate=0.25,
   experimentDesignPath,
   experimentDesignPairDuplicates=F,
+  barcodeIdentityPath,
   cutadaptCut5First,
   cutadaptCut5Second,
   cutadaptCut3First,
@@ -83,6 +87,8 @@ dimsum <- function(
   bayesianDoubleFitnessLamD=0.025,
   fitnessMinInputCountAll=0,
   fitnessMinInputCountAny=0,
+  fitnessMinOutputCountAll=0,
+  fitnessMinOutputCountAny=0,
   fitnessHighConfidenceCount=10,
   fitnessDoubleHighConfidenceCount=50,
   fitnessNormalise=T,
@@ -143,6 +149,7 @@ dimsum <- function(
     "barcodeErrorRate" = list(barcodeErrorRate, c("double")), #positive double (zero inclusive)
     "experimentDesignPath" = list(experimentDesignPath, c("character")), #file exists -- checked in dimsum__get_experiment_design
     "experimentDesignPairDuplicates" = list(experimentDesignPairDuplicates, c("logical")), #logical -- checked in dimsum__validate_input
+    "barcodeIdentityPath" = list(barcodeIdentityPath, c("character", "NULL")), #file exists (if not NULL)
     "cutadaptCut5First" = list(cutadaptCut5First, c("integer", "NULL")), #strictly positive integer (if not NULL) -- checked in dimsum__get_experiment_design
     "cutadaptCut5Second" = list(cutadaptCut5Second, c("integer", "NULL")), #strictly positive integer (if not NULL) -- checked in dimsum__get_experiment_design
     "cutadaptCut3First" = list(cutadaptCut3First, c("integer", "NULL")), #strictly positive integer (if not NULL) -- checked in dimsum__get_experiment_design
@@ -167,6 +174,8 @@ dimsum <- function(
     "bayesianDoubleFitnessLamD" = list(bayesianDoubleFitnessLamD, c("double")), #strictly positive double -- checked in dimsum__validate_input
     "fitnessMinInputCountAll" = list(fitnessMinInputCountAll, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "fitnessMinInputCountAny" = list(fitnessMinInputCountAny, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
+    "fitnessMinOutputCountAll" = list(fitnessMinOutputCountAll, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
+    "fitnessMinOutputCountAny" = list(fitnessMinOutputCountAny, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "fitnessHighConfidenceCount" = list(fitnessHighConfidenceCount, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "fitnessDoubleHighConfidenceCount" = list(fitnessDoubleHighConfidenceCount, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "fitnessNormalise" = list(fitnessNormalise, c("logical")), #logical -- checked in dimsum__validate_input

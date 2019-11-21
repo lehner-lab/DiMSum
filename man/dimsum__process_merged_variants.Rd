@@ -12,8 +12,8 @@ dimsum__process_merged_variants(dimsum_meta, input_dt)
 \item{input_dt}{output path for plots and saved objects (required)}
 }
 \value{
-A list of data.tables containing indel variants, rejected variants (constant region variants and not permitted sequences) and retained variants
+A list of data.tables containing indel variants, rejected variants (internal constant region variants, not permitted sequences and variants with too many substititions) and retained variants
 }
 \description{
-Process nucleotide variants to remove indels, constant region variants and not permitted sequences.
+Process nucleotide variants to remove indels, internal constant region variants, not permitted sequences and variants with too many substitions.
 }

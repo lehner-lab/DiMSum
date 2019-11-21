@@ -81,6 +81,7 @@ dimsum_stage_merge <- function(
 
     #Save merged variant data
     message("Saving merged variant data...")
+    write.table(variant_list[["nobarcode_variants"]], file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_nobarcode_variant_data_merge.tsv')), sep = "\t", quote = F, row.names = F)
     write.table(variant_list[["indel_variants"]], file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_indel_variant_data_merge.tsv')), sep = "\t", quote = F, row.names = F)
     write.table(variant_list[["rejected_variants"]], file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_rejected_variant_data_merge.tsv')), sep = "\t", quote = F, row.names = F)
     variant_data_merge <- variant_list[["retained_variants"]]
@@ -101,6 +102,7 @@ dimsum_stage_merge <- function(
   dimsum_meta_new[["nuc_frbdn_counts"]] <- mutation_stats_dicts[["nuc_frbdn_dict"]]
   dimsum_meta_new[["nuc_const_counts"]] <- mutation_stats_dicts[["nuc_const_dict"]]
   dimsum_meta_new[["nuc_indel_counts"]] <- mutation_stats_dicts[["nuc_indel_dict"]]
+  dimsum_meta_new[["nuc_nbarc_counts"]] <- mutation_stats_dicts[["nuc_nbarc_dict"]]
   #Delete files when last stage complete
   if(!dimsum_meta_new[["retainIntermediateFiles"]]){
     if(dimsum_meta_new[["stopStage"]]==this_stage){

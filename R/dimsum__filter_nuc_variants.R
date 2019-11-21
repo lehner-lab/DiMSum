@@ -23,16 +23,24 @@ dimsum__filter_nuc_variants <- function(
 
   #Sample names
   input_samples <- names(input_dt)[grep(paste0("e[", all_reps_str, "]_s0_b.*_count$"), names(input_dt))]
+  output_samples <- names(input_dt)[grep(paste0("e[", all_reps_str, "]_s1_b.*_count$"), names(input_dt))]
 
-  #### Retain variants with input read counts > "fitnessMinInputCountAny" in ANY biological replicates 
-  #### Retain variants with input read counts > "fitnessMinInputCountAll" in ALL biological replicates
+  #### Retain variants with input/output read counts > "fitnessMinInputCountAny" in ANY biological replicates 
+  #### Retain variants with input/output read counts > "fitnessMinInputCountAll" in ALL biological replicates
   output_dt <- copy(input_dt)
-  output_dt <- output_dt[rowSums(input_dt[,input_samples,with=F]>=dimsum_meta[["fitnessMinInputCountAny"]]) != 0]
+  output_dt <- output_dt[rowSums(output_dt[,input_samples,with=F]>=dimsum_meta[["fitnessMinInputCountAny"]]) != 0]
+  output_dt <- output_dt[rowSums(output_dt[,output_samples,with=F]>=dimsum_meta[["fitnessMinOutputCountAny"]]) != 0]
   output_dt <- output_dt[rowSums(output_dt[,input_samples,with=F]<dimsum_meta[["fitnessMinInputCountAll"]]) == 0]
+  output_dt <- output_dt[rowSums(output_dt[,output_samples,with=F]<dimsum_meta[["fitnessMinOutputCountAll"]]) == 0]
 
   #### Set input read counts < "fitnessMinInputCountAny" to NA
   for(i in input_samples){
     output_dt[get(i) < dimsum_meta[["fitnessMinInputCountAny"]], as.character(i) := NA]
+  }
+
+  #### Set output read counts < "fitnessMinOutputCountAny" to NA
+  for(i in output_samples){
+    output_dt[get(i) < dimsum_meta[["fitnessMinOutputCountAny"]], as.character(i) := NA]
   }
 
   message("Done")

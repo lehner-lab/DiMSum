@@ -27,9 +27,10 @@ dimsum_stage_merge_report <- function(
     'nuc_tmsub_sum'=sapply(dimsum_meta[['nuc_tmsub_counts']], sum),
     'nuc_frbdn_sum'=sapply(dimsum_meta[['nuc_frbdn_counts']], sum),
     'nuc_const_sum'=sapply(dimsum_meta[['nuc_const_counts']], sum),    
-    'nuc_indel_sum'=sapply(dimsum_meta[['nuc_indel_counts']], sum))
+    'nuc_indel_sum'=sapply(dimsum_meta[['nuc_indel_counts']], sum),
+    'nuc_nbarc_sum'=sapply(dimsum_meta[['nuc_nbarc_counts']], sum))
   nuc_subst_df[is.na(nuc_subst_df)] <- 0
-  nuc_subst_df[,'pairname'] <- unique(sapply(strsplit(merge_df[,'aligned_pair'], '_t'), '[', 1))
+  nuc_subst_df[,'pairname'] <- dimsum__plot_samplename(unique(sapply(strsplit(merge_df[,'aligned_pair'], '_t'), '[', 1)))
   nuc_subst_df_collapse <- plyr::ddply(nuc_subst_df, "pairname", plyr::summarise, 
     nuc_subst_0 = sum(nuc_subst_0), 
     nuc_subst_1 = sum(nuc_subst_1), 
@@ -38,7 +39,8 @@ dimsum_stage_merge_report <- function(
     nuc_tmsub_sum = sum(nuc_tmsub_sum),
     nuc_frbdn_sum = sum(nuc_frbdn_sum),
     nuc_const_sum = sum(nuc_const_sum),
-    nuc_indel_sum = sum(nuc_indel_sum))
+    nuc_indel_sum = sum(nuc_indel_sum),
+    nuc_nbarc_sum = sum(nuc_nbarc_sum))
   nuc_subst_df_collapse[,'nuc_subst_3plus'] <- nuc_subst_df_collapse[,'nuc_subst_sum']-nuc_subst_df_collapse[,'nuc_subst_0']-nuc_subst_df_collapse[,'nuc_subst_1']-nuc_subst_df_collapse[,'nuc_subst_2']
   nuc_subst_df_collapse_perc <- nuc_subst_df_collapse
   nuc_subst_df_collapse_perc[,colnames(nuc_subst_df_collapse_perc)[-1]] <- nuc_subst_df_collapse_perc[,colnames(nuc_subst_df_collapse_perc)[-1]]/(
@@ -46,7 +48,8 @@ dimsum_stage_merge_report <- function(
     nuc_subst_df_collapse_perc[,'nuc_tmsub_sum'] + 
     nuc_subst_df_collapse_perc[,'nuc_frbdn_sum'] + 
     nuc_subst_df_collapse_perc[,'nuc_const_sum'] + 
-    nuc_subst_df_collapse_perc[,'nuc_indel_sum']) * 100
+    nuc_subst_df_collapse_perc[,'nuc_indel_sum'] +
+    nuc_subst_df_collapse_perc[,'nuc_nbarc_sum']) * 100
   nuc_subst_df_collapse_perc <- nuc_subst_df_collapse_perc[,-which(colnames(nuc_subst_df_collapse_perc) == "nuc_subst_sum")]
   temp_colnames <- c(
     "0 hamming dist.",
@@ -56,6 +59,7 @@ dimsum_stage_merge_report <- function(
     "not permitted",
     "internal constant region",
     "indel",
+    "invalid barcode",
     "3+ hamming dist.")
   colnames(nuc_subst_df_collapse_perc)[-1] <- temp_colnames
   nuc_subst_df_collapse <- nuc_subst_df_collapse[,-which(colnames(nuc_subst_df_collapse) == "nuc_subst_sum")]
@@ -71,7 +75,8 @@ dimsum_stage_merge_report <- function(
     "too many",
     "not permitted",
     "internal constant region",
-    "indel"))
+    "indel",
+    "invalid barcode"))
   d <- ggplot2::ggplot(plot_df, ggplot2::aes(pairname, value)) +
     ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +
     ggplot2::theme_bw() +
@@ -89,7 +94,8 @@ dimsum_stage_merge_report <- function(
     "too many",
     "not permitted",
     "internal constant region",
-    "indel"))
+    "indel",
+    "invalid barcode"))
   d <- ggplot2::ggplot(plot_df, ggplot2::aes(pairname, value)) +
     ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +
     ggplot2::theme_bw() +
@@ -108,9 +114,10 @@ dimsum_stage_merge_report <- function(
     'nuc_tmsub_sum'=sapply(dimsum_meta[['nuc_tmsub_counts']], sum),
     'nuc_frbdn_sum'=sapply(dimsum_meta[['nuc_frbdn_counts']], sum),
     'nuc_const_sum'=sapply(dimsum_meta[['nuc_const_counts']], sum),    
-    'nuc_indel_sum'=sapply(dimsum_meta[['nuc_indel_counts']], sum))
+    'nuc_indel_sum'=sapply(dimsum_meta[['nuc_indel_counts']], sum),
+    'nuc_nbarc_sum'=sapply(dimsum_meta[['nuc_nbarc_counts']], sum))
   aa_subst_df[is.na(aa_subst_df)] <- 0
-  aa_subst_df[,'pairname'] <- unique(sapply(strsplit(merge_df[,'aligned_pair'], '_t'), '[', 1))
+  aa_subst_df[,'pairname'] <- dimsum__plot_samplename(unique(sapply(strsplit(merge_df[,'aligned_pair'], '_t'), '[', 1)))
   aa_subst_df_collapse <- plyr::ddply(aa_subst_df, "pairname", plyr::summarise, 
     aa_subst_0 = sum(aa_subst_0), 
     aa_subst_1 = sum(aa_subst_1), 
@@ -119,7 +126,8 @@ dimsum_stage_merge_report <- function(
     nuc_tmsub_sum = sum(nuc_tmsub_sum),
     nuc_frbdn_sum = sum(nuc_frbdn_sum),
     nuc_const_sum = sum(nuc_const_sum),
-    nuc_indel_sum = sum(nuc_indel_sum))
+    nuc_indel_sum = sum(nuc_indel_sum),
+    nuc_nbarc_sum = sum(nuc_nbarc_sum))
   aa_subst_df_collapse[,'aa_subst_3plus'] <- aa_subst_df_collapse[,'aa_subst_sum']-aa_subst_df_collapse[,'aa_subst_0']-aa_subst_df_collapse[,'aa_subst_1']-aa_subst_df_collapse[,'aa_subst_2']
   aa_subst_df_collapse_perc <- aa_subst_df_collapse
   aa_subst_df_collapse_perc[,colnames(aa_subst_df_collapse_perc)[-1]] <- aa_subst_df_collapse_perc[,colnames(aa_subst_df_collapse_perc)[-1]]/(
@@ -127,7 +135,8 @@ dimsum_stage_merge_report <- function(
     aa_subst_df_collapse_perc[,'nuc_tmsub_sum'] + 
     aa_subst_df_collapse_perc[,'nuc_frbdn_sum'] + 
     aa_subst_df_collapse_perc[,'nuc_const_sum'] + 
-    aa_subst_df_collapse_perc[,'nuc_indel_sum']) * 100
+    aa_subst_df_collapse_perc[,'nuc_indel_sum'] +
+    aa_subst_df_collapse_perc[,'nuc_nbarc_sum']) * 100
   aa_subst_df_collapse_perc <- aa_subst_df_collapse_perc[,-which(colnames(aa_subst_df_collapse_perc) == "aa_subst_sum")]
   temp_colnames <- c(
     "0 hamming dist.",
@@ -137,6 +146,7 @@ dimsum_stage_merge_report <- function(
     "not permitted",
     "internal constant region",
     "indel",
+    "invalid barcode",
     "3+ hamming dist.")
   colnames(aa_subst_df_collapse_perc)[-1] <- temp_colnames
   aa_subst_df_collapse <- aa_subst_df_collapse[,-which(colnames(aa_subst_df_collapse) == "aa_subst_sum")]
@@ -152,7 +162,8 @@ dimsum_stage_merge_report <- function(
     "too many",
     "not permitted",
     "internal constant region",
-    "indel"))
+    "indel",
+    "invalid barcode"))
   d <- ggplot2::ggplot(plot_df, ggplot2::aes(pairname, value)) +
     ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +
     ggplot2::theme_bw() +
@@ -170,7 +181,8 @@ dimsum_stage_merge_report <- function(
     "too many",
     "not permitted",
     "internal constant region",
-    "indel"))
+    "indel",
+    "invalid barcode"))
   d <- ggplot2::ggplot(plot_df, ggplot2::aes(pairname, value)) +
     ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +
     ggplot2::theme_bw() +

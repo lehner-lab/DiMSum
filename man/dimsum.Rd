@@ -7,15 +7,16 @@
 dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   stranded = T, paired = T, barcodeDesignPath,
   barcodeErrorRate = 0.25, experimentDesignPath,
-  experimentDesignPairDuplicates = F, cutadaptCut5First,
-  cutadaptCut5Second, cutadaptCut3First, cutadaptCut3Second,
-  cutadapt5First, cutadapt5Second, cutadapt3First, cutadapt3Second,
-  cutadaptMinLength = 50, cutadaptErrorRate = 0.2, usearchMinQual,
-  usearchMaxee, usearchMinlen = 64, usearchMinovlen = 16, outputPath,
-  projectName, wildtypeSequence, permittedSequences,
-  sequenceType = "auto", transLibrary = F, bayesianDoubleFitness = F,
-  bayesianDoubleFitnessLamD = 0.025, fitnessMinInputCountAll = 0,
-  fitnessMinInputCountAny = 0, fitnessHighConfidenceCount = 10,
+  experimentDesignPairDuplicates = F, barcodeIdentityPath,
+  cutadaptCut5First, cutadaptCut5Second, cutadaptCut3First,
+  cutadaptCut3Second, cutadapt5First, cutadapt5Second, cutadapt3First,
+  cutadapt3Second, cutadaptMinLength = 50, cutadaptErrorRate = 0.2,
+  usearchMinQual, usearchMaxee, usearchMinlen = 64,
+  usearchMinovlen = 16, outputPath, projectName, wildtypeSequence,
+  permittedSequences, sequenceType = "auto", transLibrary = F,
+  bayesianDoubleFitness = F, bayesianDoubleFitnessLamD = 0.025,
+  fitnessMinInputCountAll = 0, fitnessMinInputCountAny = 0,
+  fitnessHighConfidenceCount = 10,
   fitnessDoubleHighConfidenceCount = 50, fitnessNormalise = T,
   maxSubstitutions = 2, retainIntermediateFiles = F,
   splitChunkSize = 3758096384, retainedReplicates = "all",
@@ -39,6 +40,8 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 \item{experimentDesignPath}{Path to experimental design file (tab-separated plain text file with replicate structure)}
 
 \item{experimentDesignPairDuplicates}{Are duplicate FASTQ files permitted in experimental design file? (default:F)}
+
+\item{barcodeIdentityPath}{Path to barcode identity file (tab-separated plain text file mapping barcodes to variants)}
 
 \item{cutadaptCut5First}{cutadapt: remove bases from start of first read (before constant region trimming)}
 

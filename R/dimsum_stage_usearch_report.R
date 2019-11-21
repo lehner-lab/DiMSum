@@ -45,7 +45,7 @@ dimsum_stage_usearch_report <- function(
   usearch_df <- cbind(dimsum_meta[['exp_design']][,c('aligned_pair', 'total_read_pairs')], usearch_df)
   usearch_df[,'cutadapt_pairs_too_short'] <- usearch_df[,'total_read_pairs'] - usearch_df[,'usearch_total_read_pairs']
   #Plot 1: read pair count statistics
-  usearch_df[,'pairname'] <- sapply(strsplit(usearch_df[,'aligned_pair'], '.split'), '[', 1)
+  usearch_df[,'pairname'] <- dimsum__plot_samplename(sapply(strsplit(usearch_df[,'aligned_pair'], '.split'), '[', 1))
   usearch_df_collapse <- plyr::ddply(usearch_df, "pairname", plyr::summarise, 
     total_read_pairs = sum(total_read_pairs), 
     usearch_aligned = sum(usearch_merged), 

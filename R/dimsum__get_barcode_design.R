@@ -30,7 +30,7 @@ dimsum__get_barcode_design <- function(
     }
   }
 
-  #Check whether experiment design is valid
+  #Check whether barcode design is valid
   dimsum__check_barcode_design(barcode_design)
 
   #Check FASTQ files exist

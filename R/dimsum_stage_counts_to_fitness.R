@@ -141,11 +141,11 @@ dimsum_stage_counts_to_fitness <- function(
 
   if(dimsum_meta[["sequenceType"]]=="coding"){
     singles_silent <- dimsum__identify_single_aa_mutations(
-      input_dt = nf_data_syn[!is.na(apply(nf_data_syn[,.SD,,.SDcols=paste0("fitness", all_reps, "_uncorr")], 1, sum)),],
+      input_dt = nf_data_syn,
       wt_AAseq = wt_AAseq)
   }else{
     singles_silent <- dimsum__identify_single_nt_mutations(
-      input_dt = nf_data_syn[!is.na(apply(nf_data_syn[,.SD,,.SDcols=paste0("fitness", all_reps, "_uncorr")], 1, sum)),],
+      input_dt = nf_data_syn,
       wt_ntseq = wt_ntseq)    
   }
 

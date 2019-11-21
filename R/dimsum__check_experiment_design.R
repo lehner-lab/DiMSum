@@ -15,9 +15,9 @@ dimsum__check_experiment_design <- function(
 
   ### Column existence checks 
   #Check if mandatory columns present
-  mandatory_cols <- c("sample_name", "transformation_replicate", "selection_id", "selection_replicate", "technical_replicate", "pair1", "pair2")
+  mandatory_cols <- c("sample_name", "experiment_replicate", "selection_id", "selection_replicate", "technical_replicate", "pair1", "pair2")
   if(sum(unlist(lapply(mandatory_cols, "%in%", colnames(exp_design)))==FALSE)!=0){
-    stop(paste0("One or more mandatory columns missing from experimentDesign file ('sample_name', 'transformation_replicate', 'selection_id', 'selection_replicate', 'technical_replicate', 'pair1', 'pair2')"), call. = FALSE)
+    stop(paste0("One or more mandatory columns missing from experimentDesign file ('sample_name', 'experiment_replicate', 'selection_id', 'selection_replicate', 'technical_replicate', 'pair1', 'pair2')"), call. = FALSE)
   }
 
   ### FASTQ file checks (pair1/pair2 columns)
@@ -36,7 +36,7 @@ dimsum__check_experiment_design <- function(
     stop(paste0("One or more invalid 'sample_name' values in experimentDesign file (only characters allowed)"), call. = FALSE)
   }
   #Check for duplicated sample names (after collapsing on technical replicate id)
-  sample_names_collapsed <- unique(exp_design[,c("sample_name", "transformation_replicate", "selection_id", "selection_replicate")])[,"sample_name"]
+  sample_names_collapsed <- unique(exp_design[,c("sample_name", "experiment_replicate", "selection_id", "selection_replicate")])[,"sample_name"]
   if(sum(duplicated(sample_names_collapsed))!=0){
     stop(paste0("Duplicate 'sample_name' values not allowed in experimentDesign file (if not technical replicates)"), call. = FALSE)
   }
@@ -44,24 +44,28 @@ dimsum__check_experiment_design <- function(
   if(sum(!grepl("^[A-Za-z0-9]+$", exp_design[,"sample_name"], perl = T))!=0){
     stop(paste0("One or more invalid 'sample_name' values in experimentDesign file (only alphanumeric characters allowed)"), call. = FALSE)
   }
-  #Check that all input sample names for the same transformation_replicate are identical
-  experiment_input <- unique(exp_design[exp_design[,"selection_id"]==0,c("sample_name", "transformation_replicate")])
-  if(sum(duplicated(experiment_input[,"transformation_replicate"]))!=0){
-    stop(paste0("One or more invalid input 'sample_name' values in experimentDesign file (must be identical for the same transformation replicate)"), call. = FALSE)
+  #Check that all input sample names for the same experiment_replicate are identical
+  experiment_input <- unique(exp_design[exp_design[,"selection_id"]==0,c("sample_name", "experiment_replicate")])
+  if(sum(duplicated(experiment_input[,"experiment_replicate"]))!=0){
+    stop(paste0("One or more invalid input 'sample_name' values in experimentDesign file (must be identical for the same experiment replicate)"), call. = FALSE)
   }
-  #Check that all output sample names for the same transformation_replicate and selection_replicate are identical
-  experiment_output <- unique(exp_design[exp_design[,"selection_id"]!=0,c("sample_name", "transformation_replicate", "selection_replicate")])
-  if(sum(duplicated(experiment_output[,c("transformation_replicate", "selection_replicate")]))!=0){
-    stop(paste0("One or more invalid output 'sample_name' values in experimentDesign file (must be identical for the same transformation replicate and selection replicate)"), call. = FALSE)
+  #Check that all output sample names for the same experiment_replicate and selection_replicate are identical
+  experiment_output <- unique(exp_design[exp_design[,"selection_id"]!=0,c("sample_name", "experiment_replicate", "selection_replicate")])
+  if(sum(duplicated(experiment_output[,c("experiment_replicate", "selection_replicate")]))!=0){
+    stop(paste0("One or more invalid output 'sample_name' values in experimentDesign file (must be identical for the same experiment replicate and selection replicate)"), call. = FALSE)
   }
 
-  ### Experiment id checks (transformation_replicate column)
-  #Check transformation_replicate strictly positive integer
-  if(typeof(exp_design[,"transformation_replicate"])!="integer"){
-    stop(paste0("One or more invalid 'transformation_replicate' values in experimentDesign file (only positive integers allowed)"), call. = FALSE)
+  ### Experiment id checks (experiment_replicate column)
+  #Check experiment_replicate strictly positive integer
+  if(typeof(exp_design[,"experiment_replicate"])!="integer"){
+    stop(paste0("One or more invalid 'experiment_replicate' values in experimentDesign file (only positive integers allowed)"), call. = FALSE)
   }
-  if(sum(exp_design[,"transformation_replicate"]<=0)!=0){
-    stop(paste0("One or more invalid 'transformation_replicate' values in experimentDesign file (only positive integers allowed)"), call. = FALSE)
+  if(sum(exp_design[,"experiment_replicate"]<=0)!=0){
+    stop(paste0("One or more invalid 'experiment_replicate' values in experimentDesign file (only positive integers allowed)"), call. = FALSE)
+  }
+  #Check that at least two experimental replicates exist (requirement to run error model)
+  if(length(unique(exp_design[,"experiment_replicate"]))<2){
+    stop(paste0("One or more invalid 'experiment_replicate' values in experimentDesign file (at least two replicates required)"), call. = FALSE)
   }
 
   ### Selection id checks (selection_id column)
@@ -74,11 +78,11 @@ dimsum__check_experiment_design <- function(
   }
 
   ### Minimum required matrix data checks
-  #Check if at least one input and output sample present for each transformation_replicate
-  experiment_input <- unique(exp_design[exp_design[,"selection_id"]==0,"transformation_replicate"])
-  experiment_output <- unique(exp_design[exp_design[,"selection_id"]!=0,"transformation_replicate"])
+  #Check if at least one input and output sample present for each experiment_replicate
+  experiment_input <- unique(exp_design[exp_design[,"selection_id"]==0,"experiment_replicate"])
+  experiment_output <- unique(exp_design[exp_design[,"selection_id"]!=0,"experiment_replicate"])
   if(length(experiment_input)!=length(experiment_output) | sum(!experiment_input %in% experiment_output)!=0){
-    stop(paste0("All transformation replicates should have at least one sample before and after selection in experimentDesign file"), call. = FALSE)
+    stop(paste0("All experiment replicates should have at least one sample before and after selection in experimentDesign file"), call. = FALSE)
   }
 
   ### Biological replicate id checks (selection_replicate column)
@@ -104,18 +108,18 @@ dimsum__check_experiment_design <- function(
   }
 
   ### Duplicate matrix row checks
-  #Check for duplicated rows in the following columns: "transformation_replicate", "selection_id", "selection_replicate", "technical_replicate"
-  if(sum(duplicated(exp_design[,c("transformation_replicate", "selection_id", "selection_replicate", "technical_replicate")]))!=0){
+  #Check for duplicated rows in the following columns: "experiment_replicate", "selection_id", "selection_replicate", "technical_replicate"
+  if(sum(duplicated(exp_design[,c("experiment_replicate", "selection_id", "selection_replicate", "technical_replicate")]))!=0){
     stop(paste0("One or more duplicated rows in experimentDesign file matrix (sample rows should be unique)"), call. = FALSE)
   }
 
-  ### 5'/3' adapter/cut existence checks
-  #Check that at least one cutadapt argument specified for all samples
-  if(sum(is.na(exp_design[,"cutadapt5First"]))!=0 & sum(is.na(exp_design[,"cutadapt5Second"]))!=0 & sum(is.na(exp_design[,"cutadapt3First"]))!=0 & sum(is.na(exp_design[,"cutadapt3Second"]))!=0){
-    if(sum(is.na(exp_design[,"cutadaptCut5First"]))!=0 & sum(is.na(exp_design[,"cutadaptCut5Second"]))!=0 & sum(is.na(exp_design[,"cutadaptCut3First"]))!=0 & sum(is.na(exp_design[,"cutadaptCut3Second"]))!=0){
-      stop("At least one of cutadapt5First, cutadapt5Second, cutadapt3First, cutadapt3Second, cutadaptCut5First, cutadaptCut5Second, cutadaptCut3First, cutadaptCut3Second must be specified for all samples. Please check that the corresponding experiment design file columns are correct.", call. = FALSE)
-    }
-  }
+  # ### 5'/3' adapter/cut existence checks
+  # #Check that at least one cutadapt argument specified for all samples
+  # if(sum(is.na(exp_design[,"cutadapt5First"]))!=0 & sum(is.na(exp_design[,"cutadapt5Second"]))!=0 & sum(is.na(exp_design[,"cutadapt3First"]))!=0 & sum(is.na(exp_design[,"cutadapt3Second"]))!=0){
+  #   if(sum(is.na(exp_design[,"cutadaptCut5First"]))!=0 & sum(is.na(exp_design[,"cutadaptCut5Second"]))!=0 & sum(is.na(exp_design[,"cutadaptCut3First"]))!=0 & sum(is.na(exp_design[,"cutadaptCut3Second"]))!=0){
+  #     stop("At least one of cutadapt5First, cutadapt5Second, cutadapt3First, cutadapt3Second, cutadaptCut5First, cutadaptCut5Second, cutadaptCut3First, cutadaptCut3Second must be specified for all samples. Please check that the corresponding experiment design file columns are correct.", call. = FALSE)
+  #   }
+  # }
 
   ### Constant region checks
   #Check constant region columns are of type character (or logical i.e. all empty/NA)
@@ -123,7 +127,7 @@ dimsum__check_experiment_design <- function(
     stop(paste0("One or more invalid constant region sequences. Only valid nucleotide sequences allowed (A/C/T/G)."), call. = FALSE)
   }
   #Check constant region sequences are valid (ACGT characters only)
-  all_characters <- unique(unlist(strsplit(unlist(exp_design[,c("cutadapt5First", "cutadapt5Second", "cutadapt3First", "cutadapt3Second")]), "")))
+  all_characters <- unique(unlist(strsplit(as.character(unlist(exp_design[,c("cutadapt5First", "cutadapt5Second", "cutadapt3First", "cutadapt3Second")])), "")))
   if(sum(!all_characters %in% c("A", "C", "G", "T", NA))!=0){
     stop("Invalid constant region sequences. Only valid nucleotide sequences allowed (A/C/T/G).", call. = FALSE)
   }

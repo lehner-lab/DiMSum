@@ -22,7 +22,7 @@ dimsum_stage_cutadapt_report <- function(
   total_reads_list <- list()
   for(i in 1:length(cutadapt_files)){
     if(dimsum_meta[["paired"]]){
-      trim_list <- dimsum__parse_cutadapt_output(cutadapt_files[i])
+      trim_list <- dimsum__parse_cutadapt_output(cutadapt_files[i], ran_cutadapt = dimsum_meta[['exp_design']][i,'run_cutadapt'])
       total_reads_list[[i]] <- trim_list[['total_reads']]
       cutadapt_read1_list[[trim_list[['name_read1']]]] <- c(
         trim_list[['total_read1_a5']]-trim_list[['total_read1_both']], 
@@ -35,7 +35,7 @@ dimsum_stage_cutadapt_report <- function(
         trim_list[['total_read2_both']], 
         trim_list[['total_reads']])
     }else{
-      trim_list <- dimsum__parse_cutadapt_output_single_end(cutadapt_files[i])
+      trim_list <- dimsum__parse_cutadapt_output_single_end(cutadapt_files[i], ran_cutadapt = dimsum_meta[['exp_design']][i,'run_cutadapt'])
       total_reads_list[[i]] <- trim_list[['total_reads']]
       cutadapt_read1_list[[trim_list[['name_read1']]]] <- c(
         trim_list[['total_read1_a5']]-trim_list[['total_read1_both']], 

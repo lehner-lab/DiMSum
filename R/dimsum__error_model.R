@@ -68,11 +68,11 @@ dimsum__error_model <- function(
       if(length(X) == 0) {
         X = work_data[,.SD,,.SDcols = c(paste0("count_e", j, "_s0"),paste0("fitness",j))] 
         names(X) = c("input","fitness")
-        X[,rep:=j]
+        X[,rep := paste0("replicate", j)]
       }else{
         Y = work_data[,.SD,,.SDcols = c(paste0("count_e", j, "_s0"),paste0("fitness",j))] 
         names(Y) = c("input","fitness")
-        Y[,rep:=j]
+        Y[,rep := paste0("replicate", j)]
         X = rbind(X,Y)
       }
     }

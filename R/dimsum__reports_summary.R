@@ -25,10 +25,10 @@ dimsum__reports_summary <- function(dimsum_meta){
    \t\t<a href=\"#USEARCH2\"> 4. Aligned length (USEARCH) </a><br>\
    \t\t<a href=\"#MERGE1\"> 5. Nucleotide mutation statistics </a><br>\
    \t\t<a href=\"#MERGE2\"> 6. Amino acid mutation statistics </a><br>\
-   \t\t<a href=\"#COUNTDISTR\"> 7. Variant count distributions </a><br>\
+   \t\t<a href=\"#COUNTDISTR\"> 7. Marginal input variant count distributions </a><br>\
    \t\t<a href=\"#COUNTSCATTERMATRIX\"> 8. Inter-sample variant count diagnostic plot </a><br>\
    \t\t<a href=\"#INPUTTHRESHOLD\"> 9. Input read threshold for full fitness range </a><br>\
-   \t\t<a href=\"#REPLICATEDEVIATION\"> 10. Affect of fitness normalisation on replicate deviations </a><br>\
+   \t\t<a href=\"#REPLICATEDEVIATION\"> 10. Effect of fitness normalisation on replicate deviations </a><br>\
    \t\t<a href=\"#FITNESSDISTR\"> 11. Fitness distributions </a><br>\
    \t\t<a href=\"#FITNESSSCATTERMATRIX\"> 12. Inter-sample variant fitness diagnostic plot </a><br>\
    \t\t<a href=\"#FITNESSERROR\"> 13. Fitness error model </a><br>\
@@ -53,10 +53,10 @@ dimsum__reports_summary <- function(dimsum_meta){
    \t\t<a href=\"#USEARCH1\"> 3. Alignment of overlapping paired-end reads (USEARCH) </a><br>\
    \t\t<a href=\"#USEARCH2\"> 4. Aligned length (USEARCH) </a><br>\
    \t\t<a href=\"#MERGE1\"> 5. Nucleotide mutation statistics </a><br>\
-   \t\t<a href=\"#COUNTDISTR\"> 6. Variant count distributions </a><br>\
+   \t\t<a href=\"#COUNTDISTR\"> 6. Marginal input variant count distributions </a><br>\
    \t\t<a href=\"#SCATTERMATRIX\"> 7. Inter-sample variant count diagnostic plot </a><br>\
    \t\t<a href=\"#INPUTTHRESHOLD\"> 8. Input read threshold for full fitness range </a><br>\
-   \t\t<a href=\"#REPLICATEDEVIATION\"> 9. Affect of fitness normalisation on replicate deviations </a><br>\
+   \t\t<a href=\"#REPLICATEDEVIATION\"> 9. Effect of fitness normalisation on replicate deviations </a><br>\
    \t\t<a href=\"#FITNESSDISTR\"> 10. Fitness distributions </a><br>\
    \t\t<a href=\"#FITNESSSCATTERMATRIX\"> 11. Inter-sample variant fitness diagnostic plot </a><br>\
    \t\t<a href=\"#FITNESSERROR\"> 12. Fitness error model </a><br>\
@@ -109,9 +109,8 @@ dimsum__reports_summary <- function(dimsum_meta){
    \t</div>\
   \
       <div id=\"COUNTDISTR\">\
-        <h2>7. Variant count distributions</h2>\
-      <p><img src=\"reports/dimsum_stage_diagnostics_report_count_hist_input.png\" width=\"1200\"></p>\
-      <p><img src=\"reports/dimsum_stage_diagnostics_report_count_hist_output.png\" width=\"1200\"></p>\
+        <h2>7. Marginal input variant count distributions</h2>\
+      <p><img src=\"reports/dimsum_stage_diagnostics_report_count_hist_input_nt.png\" width=\"1200\"></p>\
     </div>\
   \
       <div id=\"COUNTSCATTERMATRIX\">\
@@ -125,7 +124,7 @@ dimsum__reports_summary <- function(dimsum_meta){
     </div>\
   \
       <div id=\"REPLICATEDEVIATION\">\
-        <h2>10. Affect of fitness normalisation on replicate deviations</h2>\
+        <h2>10. Effect of fitness normalisation on replicate deviations</h2>\
       <p><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_fitness_replicate_deviation_scatter.png\" width=\"600\"></p>\
     </div>\
   \
@@ -168,9 +167,8 @@ dimsum__reports_summary <- function(dimsum_meta){
     </div>\
   \
       <div id=\"COUNTDISTR\">\
-        <h2>6. Variant count distributions</h2>\
-      <p><img src=\"reports/dimsum_stage_diagnostics_report_count_hist_input.png\" width=\"1200\"></p>\
-      <p><img src=\"reports/dimsum_stage_diagnostics_report_count_hist_output.png\" width=\"1200\"></p>\
+        <h2>6. Marginal input variant count distributions</h2>\
+      <p><img src=\"reports/dimsum_stage_diagnostics_report_count_hist_input_nt.png\" width=\"1200\"></p>\
     </div>\
   \
       <div id=\"COUNTSCATTERMATRIX\">\
@@ -184,7 +182,7 @@ dimsum__reports_summary <- function(dimsum_meta){
     </div>\
   \
       <div id=\"REPLICATEDEVIATION\">\
-        <h2>9. Affect of fitness normalisation on replicate deviations</h2>\
+        <h2>9. Effect of fitness normalisation on replicate deviations</h2>\
       <p><img src=\"reports/dimsum_stage_fitness_report_1_errormodel_fitness_replicate_deviation_scatter.png\" width=\"600\"></p>\
     </div>\
   \

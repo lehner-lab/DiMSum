@@ -159,6 +159,25 @@ dimsum__validate_input <- function(
     }
   }
 
+  #Check if barcodeIdentityPath specified
+  if(!is.null(dimsum_meta[["barcodeIdentityPath"]])){
+    #Load barcode identity table
+    if(!file.exists(dimsum_meta[["barcodeIdentityPath"]])){
+      stop(paste0("Invalid '", "barcodeIdentityPath", "' argument (file not found)"), call. = FALSE)
+    }
+    #Load file
+    barcode_dt <- fread(dimsum_meta[["barcodeIdentityPath"]])
+    #Check if mandatory columns present
+    mandatory_cols <- c("barcode", "variant")
+    if(sum(unlist(lapply(mandatory_cols, "%in%", colnames(barcode_dt)))==FALSE)!=0){
+      stop(paste0("One or more mandatory columns missing from barcodeIdentity file ('barcode', 'variant')"), call. = FALSE)
+    }
+    #Check all columns are of type character 
+    if(typeof(barcode_dt[,barcode])!="character" | typeof(barcode_dt[,variant])!="character"){
+      stop(paste0("One or more invalid values in barcodeIdentity file (only A/C/G/T characters allowed)"), call. = FALSE)
+    }
+  }
+
   #Return
   return(dimsum_meta)
 }

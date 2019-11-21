@@ -1,12 +1,12 @@
 
 #' dimsum__process_merged_variants
 #'
-#' Process nucleotide variants to remove indels, constant region variants and not permitted sequences.
+#' Process nucleotide variants to remove indels, internal constant region variants, not permitted sequences and variants with too many substitions.
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param input_dt output path for plots and saved objects (required)
 #'
-#' @return A list of data.tables containing indel variants, rejected variants (constant region variants and not permitted sequences) and retained variants
+#' @return A list of data.tables containing indel variants, rejected variants (internal constant region variants, not permitted sequences and variants with too many substititions) and retained variants
 #' @export
 #' @import data.table
 dimsum__process_merged_variants <- function(
@@ -24,12 +24,44 @@ dimsum__process_merged_variants <- function(
   wt_AAseq <- paste0(seqinr::translate(strsplit(wt_ntseq,split="")[[1]]),collapse="")
 
   #Nucleotide mutation count dictionaries
+  nuc_nbarc_dict <- list()
   nuc_indel_dict <- list()
   nuc_const_dict <- list()
   nuc_frbdn_dict <- list()
   nuc_tmsub_dict <- list()
   nuc_subst_dict <- list()
   aa_subst_dict <- list()
+
+  ### Debarcode variants (if barcode identity file supplied)
+  ###########################
+
+  variant_dt[, barcode_valid := TRUE]
+
+  if(!is.null(dimsum_meta[["barcodeIdentityPath"]])){
+    variant_dt <- dimsum__debarcode_variants(
+      input_dt = variant_dt,
+      barcode_path = dimsum_meta[["barcodeIdentityPath"]])
+  }
+
+  #No barcode variant count statistics
+  nuc_nbarc_dict <- as.list(apply(
+    variant_dt[barcode_valid==F,.SD,,.SDcols = names(variant_dt)[grepl("_count$", names(variant_dt))]], 
+    2, sum))
+
+  #No barcode variants
+  nobarcode_variant_dt <- data.table::copy(variant_dt[barcode_valid==F,.SD,,.SDcols = c(
+    "nt_seq",
+    names(variant_dt)[grepl("_count$", names(variant_dt))],
+    "barcode_valid")])
+
+  ### Update remaining variants
+  ###########################
+
+  #Remaining variants with valid barcodes
+  variant_dt <- variant_dt[barcode_valid==T,.SD,,.SDcols = c(
+    "nt_seq",
+    names(variant_dt)[grepl("_count$", names(variant_dt))],
+    "barcode_valid")]
 
   #Define indel variants as those with length different from WT
   variant_dt[, indel := F]
@@ -43,8 +75,9 @@ dimsum__process_merged_variants <- function(
   variant_dt[indel==F, Nham_aa := mapply(dimsum__hamming_distance, aa_seq, wt_AAseq)]
   #Reorder
   variant_dt <- variant_dt[,.SD,,.SDcols = c(
-    "nt_seq", "aa_seq", "indel", "Nham_nt", "Nham_aa", 
-    names(variant_dt)[grepl("_count$", names(variant_dt))])]
+    "nt_seq", "aa_seq", "Nham_nt", "Nham_aa", 
+    names(variant_dt)[grepl("_count$", names(variant_dt))],
+    "barcode_valid", "indel")]
 
   ### Indel variants
   ###########################
@@ -57,7 +90,8 @@ dimsum__process_merged_variants <- function(
   #Indel variants
   indel_variant_dt <- data.table::copy(variant_dt[indel==T,.SD,,.SDcols = c(
     "nt_seq", "aa_seq",
-    names(variant_dt)[grepl("_count$", names(variant_dt))])])
+    names(variant_dt)[grepl("_count$", names(variant_dt))],
+    "barcode_valid", "indel")])
 
   ### Update remaining variants
   ###########################
@@ -65,7 +99,8 @@ dimsum__process_merged_variants <- function(
   #Remaining variants without indels
   variant_dt <- variant_dt[indel==F,.SD,,.SDcols = c(
     "nt_seq", "aa_seq", "Nham_nt", "Nham_aa",
-    names(variant_dt)[grepl("_count$", names(variant_dt))])]
+    names(variant_dt)[grepl("_count$", names(variant_dt))],
+    "barcode_valid", "indel")]
   #Indicate WT sequence
   variant_dt[nt_seq == wt_ntseq,WT := TRUE]
   #Indicate STOPs
@@ -91,7 +126,7 @@ dimsum__process_merged_variants <- function(
   rejected_variant_dt <- data.table::copy(variant_dt[constant_region==F,.SD,,.SDcols = c(
     "nt_seq", "aa_seq",
     names(variant_dt)[grepl("_count$", names(variant_dt))], 
-    "constant_region")])
+    "barcode_valid", "indel", "constant_region")])
 
   ### Update remaining variants
   ###########################
@@ -122,7 +157,7 @@ dimsum__process_merged_variants <- function(
     data.table::copy(variant_dt[permitted==F,.SD,,.SDcols = c(
     "nt_seq", "aa_seq",
     names(variant_dt)[grepl("_count$", names(variant_dt))],
-    "constant_region", "permitted")]), fill = T)
+    "barcode_valid", "indel", "constant_region", "permitted")]), fill = T)
 
   ### Update remaining variants
   ###########################
@@ -150,13 +185,16 @@ dimsum__process_merged_variants <- function(
     data.table::copy(variant_dt[too_many_substitutions==T,.SD,,.SDcols = c(
     "nt_seq", "aa_seq",
     names(variant_dt)[grepl("_count$", names(variant_dt))],
-    "constant_region", "permitted", "too_many_substitutions")]), fill = T)
+    "barcode_valid", "indel", "constant_region", "permitted", "too_many_substitutions")]), fill = T)
 
   ### Remaining variants
   ###########################
 
   #Remaining variants without too many substition variants
-  variant_dt <- variant_dt[too_many_substitutions==F,]
+  variant_dt <- variant_dt[too_many_substitutions==F,.SD,,.SDcols = c(
+    "nt_seq", "aa_seq", "WT", "STOP", "STOP_readthrough", "Nham_nt", "Nham_aa",
+    names(variant_dt)[grepl("_count$", names(variant_dt))],
+    "barcode_valid", "indel", "constant_region", "permitted", "too_many_substitutions")]
 
   #Filtered variant nucleotide distributions
   for(count_column in names(variant_dt)[grepl("_count$", names(variant_dt))]){
@@ -184,12 +222,14 @@ dimsum__process_merged_variants <- function(
     "nuc_tmsub_dict" = nuc_tmsub_dict,
     "nuc_frbdn_dict" = nuc_frbdn_dict, 
     "nuc_const_dict" = nuc_const_dict, 
-    "nuc_indel_dict" = nuc_indel_dict)
+    "nuc_indel_dict" = nuc_indel_dict,
+    "nuc_nbarc_dict" = nuc_nbarc_dict)
   save(mutation_stats_dicts, file = file.path(dimsum_meta[["tmp_path"]], "mutation_stats_dicts.RData"))
 
   message("Done")
 
   return(list(
+    "nobarcode_variants" = nobarcode_variant_dt,
     "indel_variants" = indel_variant_dt,
     "rejected_variants" = rejected_variant_dt,
     "retained_variants" = variant_dt))
