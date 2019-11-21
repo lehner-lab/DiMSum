@@ -138,7 +138,7 @@ Your file must have the following columns:
 
 * **PROJECT_DIR/PROJECT_NAME_variant_data_merge.RData** R data object with variant counts and statistics ('variant_data_merge' data.table).
 * **PROJECT_DIR/PROJECT_NAME_variant_data_merge.tsv** Tab-separated plain text file with variant counts and statistics.
-* **PROJECT_DIR/PROJECT_NAME_nobarcode_variant_data_merge.tsv** Tab-separated plain text file with sequenced barcodes that were not defined in the variant identity file.
+* **PROJECT_DIR/PROJECT_NAME_nobarcode_variant_data_merge.tsv** Tab-separated plain text file with sequenced barcodes that were not found in the variant identity file.
 * **PROJECT_DIR/PROJECT_NAME_indel_variant_data_merge.tsv** Tab-separated plain text file with indel variants.
 * **PROJECT_DIR/PROJECT_NAME_rejected_variant_data_merge.tsv** Tab-separated plain text file with rejected variants (internal constant region mutants, mutations inconsistent with the library design or variants with too many substitutions).
 * **PROJECT_DIR/reports_summary.html** DiMSum pipeline summary report and diagnostic plots in html format.
