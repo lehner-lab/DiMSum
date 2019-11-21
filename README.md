@@ -128,7 +128,7 @@ When including a barcode design file, ensure that all 'new_pair_prefix' column e
 
 # Variant identity file
 
-If your raw FASTQ sequencing files contain variant barcodes you will need to provide a tab-separated plain text file describing how barcodes map to variants.
+If your raw FASTQ sequencing files contain variant barcodes you will need to provide a tab-separated plain text file describing how barcodes map to variants. You can download [this](./example_variantIdentity.txt) file to use as a template. 
 
 Your file must have the following columns:
 * **barcode** DNA barcode (A/C/G/T characters only).
