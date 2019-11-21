@@ -64,7 +64,7 @@ Produce raw read quality reports using FastQC.
 
 ## Stage 3: TRIM CONSTANT REGIONS
 
-Remove constant region sequences from read 5’ and 3’ ends using cutadapt. 5' constant region sequences are required (3' sequences are optional). By default the sequences of 3' constant regions are assumed to be the reverse complement of 5' constant region sequences. Stage-specific arguments: 'cutadaptCut5First', 'cutadaptCut5Second', 'cutadaptCut3First', 'cutadaptCut3Second', 'cutadapt5First', 'cutadapt5Second', 'cutadapt3First', 'cutadapt3Second', 'cutadaptMinLength', 'cutadaptErrorRate'.
+Remove constant region sequences from read 5’ and 3’ ends using cutadapt. By default the sequences of 3' constant regions are assumed to be the reverse complement of 5' constant region sequences. Stage-specific arguments: 'cutadaptCut5First', 'cutadaptCut5Second', 'cutadaptCut3First', 'cutadaptCut3Second', 'cutadapt5First', 'cutadapt5Second', 'cutadapt3First', 'cutadapt3Second', 'cutadaptMinLength', 'cutadaptErrorRate'.
 
 ## Stage 4: ALIGN PAIRED-END READS
 
@@ -74,22 +74,25 @@ Align overlapping read pairs using USEARCH (paired-end cis libraries only i.e. '
 
 Tally counts of unique variant sequences using [starcode](https://github.com/gui11aume/starcode).
 
-## Stage 6: MERGE SAMPLE STATISTICS
+## Stage 6: MERGE SAMPLE STATISTICS AND FILTER VARIANTS
 
-Combine sample-wise variant counts and statistics to produce a unified results data.table. Variant counts are aggregated across technical replicates.
+Combine sample-wise variant counts and statistics to produce a unified results data.table. After aggregating counts across technical replicates, variants are processed and filtered according to user specifications:
+* **6.1** For barcoded libraries, read counts are aggregated at the variant level for barcode/variant mappings specified in the variant identity file (see below). Undefined/misread barcodes are ignored.
+* **6.2** Indel variants (defined as those not matching the wild-type nucleotide sequence length) are removed.
+* **6.3** If internal constant region(s) are specified (lower-case letter in 'wildtypeSequence' argument), these are excised from all variants if a perfect match is found.
+* **6.4** Variants with mutations inconsistent with the library design are removed (specified with 'permittedSequences' argument).
+* **6.5** Variants with more substitions than specified with 'maxSubstitutions' are also removed.
 
 ## Stage 7: CALCULATE FITNESS
 
 Calculate fitness and error estimates for a user-specified subset of substitution variants:
-* **7.1** Indel variants not matching the WT sequence length are discarded.
-* **7.2** If internal constant region(s) are specified, these are  removed from all variants if a perfect match is found.
-* **7.3** An error model is fit to all variants to determine the contributions of count-based (Poisson), replicate and over-sequencing error terms.
-* **7.4** Nucleotide variants with low input read counts likely representing sequencing errors ('fitnessMinInputCountAll', 'fitnessMinInputCountAny') are filtered out. Additionally, variants exceeding the maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively ('fitnessMaxSubstitutions') are filtered out. For amino acid substitutions, nonsynonymous variants with synonymous variants in other codons are discarded.
-* **7.5** Variants are aggregated at the amino acid level if the target molecule is a protein ('sequenceType'=coding). 
-* **7.6** Fitness and estimates of the associated error are then calculated with respect to the corresponding wild-type sequence score using the model derived in **7.3** above.
-* **7.7** (*Coming soon: still in development*) Optionally improve double mutant fitness estimates for low frequency variants using a Bayesian approach that incorporates priors based on observed single mutant counts ('bayesianDoubleFitness', 'bayesianDoubleFitnessLamD', 'fitnessHighConfidenceCount', 'fitnessDoubleHighConfidenceCount').
-* **7.8** In the case of a growth-rate based assay, a 'generations' column can be supplied in the experimental design file in order to normalize fitness and error estimates accordingly (see below).
-* **7.9** Fitness scores are merged between replicates in a weighted manner that takes into account their respective errors.
+* **7.1** Low count variants are removed according to user-specified soft ('fitnessMinInputCountAny', 'fitnessMinOutputCountAny') and hard ('fitnessMinInputCountAll', 'fitnessMinOutputCountAll') thresholds to minimise the impact of fake variants from sequencing errors.
+* **7.2** An error model is fit to a high confidence subset of variants to determine count-based (Poisson), replicate and over-sequencing error terms.
+* **7.3** Variants are aggregated at the amino acid level if the target molecule is a protein ('sequenceType'=coding). Nonsynonymous variants with synonymous variants in other codons are discarded.
+* **7.4** Fitness and estimates of the associated error are then calculated with respect to the corresponding wild-type sequence score using the model derived in **7.3** above.
+* **7.5** (*Coming soon: still in development*) Optionally improve double mutant fitness estimates for low frequency variants using a Bayesian approach that incorporates priors based on observed single mutant counts ('bayesianDoubleFitness', 'bayesianDoubleFitnessLamD', 'fitnessHighConfidenceCount', 'fitnessDoubleHighConfidenceCount').
+* **7.6** In the case of a growth-rate based assay, a 'generations' column can be supplied in the experimental design file in order to normalize fitness and error estimates accordingly (see below).
+* **7.7** Fitness scores are merged between replicates in a weighted manner that takes into account their respective errors.
 
 # Experimental design file
 
@@ -97,9 +100,9 @@ To run this pipeline, you will first need to describe your experimental design (
 
 Your file must have the following columns:
 * **sample_name** A sensible sample name e.g. 'input1' (alphanumeric characters only).
-* **transformation_replicate** An integer identifier denoting distinct variant library transformations i.e. a set of input and output replicates originating from the same plasmid library transformation or input biological replicate (strictly positive integer).
+* **experiment_replicate** An integer identifier denoting distinct experiments (e.g. distinct plasmid library transformations) i.e. a set of input and output replicates originating from the same input biological replicate (strictly positive integer).
 * **selection_id** An integer inidicating whether samples were sequenced before (0) or after (1) selection. Subsequent (serial) rounds of selection are indicated by higher numbers i.e. 2, 3, etc. (positive integer, zero included).
-* **selection_replicate** An integer denoting distinct replicate selections (or biological output replicates) each derived from the same input sample (strictly positive integer). Entries should be blank (empty string) for all input samples (each input sample corresponds to a unique transformation).
+* **selection_replicate** An integer denoting distinct replicate selections (or biological output replicates) each derived from the same input sample (strictly positive integer). Entries should be blank (empty string) for all input samples (each input sample corresponds to a unique experiment).
 * **technical_replicate** An integer denoting technical replicates (a strictly positive integer) corresponding to sample re-sequencing i.e. extracted DNA originating from the same sample split between separate sequencing lanes or files. Leave this column blank (empty string) when no technical replicates are present.
 * **pair1** FASTQ file name of the first read in a given pair.
 * **pair2** FASTQ file name of the second read in a given pair (omit for single-end library designs i.e. 'paired'=F).
@@ -113,19 +116,31 @@ In addition to these mandatory columns, additional columns may be included to sp
 
 # Barcode design file
 
-If your raw FASTQ sequencing files contain multiplexed samples you will need to provide a tab-separated plain text file describing how barcodes map to samples. You can download [this](./example_barcodeDesign.txt) file to use as a template.
+If your raw FASTQ sequencing files contain multiplexed samples you will need to provide a tab-separated plain text file describing how index tags map to samples. You can download [this](./example_barcodeDesign.txt) file to use as a template.
 
 Your file must have the following columns:
 * **pair1** FASTQ file name of the first read in a given pair.
 * **pair2** FASTQ file name of the second read in a given pair (omit for single-end library designs i.e. 'paired'=F).
-* **barcode** Sample DNA barcode (A/C/G/T characters only).
+* **barcode** Sample index tag (A/C/G/T characters only).
 * **new_pair_prefix** FASTQ file prefix of demultiplexed sample reads i.e. excluding file extension (alphanumeric and underscore characters only).
 
 When including a barcode design file, ensure that all 'new_pair_prefix' column entries correspond to 'pair1' and 'pair2' column entries in the experiment design file by appending '1.fastq' and '2.fastq' to the prefix for the first and second read respectively.
 
+# Variant identity file
+
+If your raw FASTQ sequencing files contain variant barcodes you will need to provide a tab-separated plain text file describing how barcodes map to variants. You can download [this](./example_variantIdentity.txt) file to use as a template. 
+
+Your file must have the following columns:
+* **barcode** DNA barcode (A/C/G/T characters only).
+* **variant** Associated DNA variant (A/C/G/T characters only).
+
 # Output
 
 * **PROJECT_DIR/PROJECT_NAME_variant_data_merge.RData** R data object with variant counts and statistics ('variant_data_merge' data.table).
+* **PROJECT_DIR/PROJECT_NAME_variant_data_merge.tsv** Tab-separated plain text file with variant counts and statistics.
+* **PROJECT_DIR/PROJECT_NAME_nobarcode_variant_data_merge.tsv** Tab-separated plain text file with sequenced barcodes that were not found in the variant identity file.
+* **PROJECT_DIR/PROJECT_NAME_indel_variant_data_merge.tsv** Tab-separated plain text file with indel variants.
+* **PROJECT_DIR/PROJECT_NAME_rejected_variant_data_merge.tsv** Tab-separated plain text file with rejected variants (internal constant region mutants, mutations inconsistent with the library design or variants with too many substitutions).
 * **PROJECT_DIR/reports_summary.html** DiMSum pipeline summary report and diagnostic plots in html format.
 
 
