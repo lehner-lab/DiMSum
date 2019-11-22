@@ -136,6 +136,7 @@ Your file must have the following columns:
 
 # Output
 
+* **PROJECT_DIR/PROJECT_NAME_fitness_replicates.RData** R data object with replicate (and merged) variant fitness scores and associated errors ('all_variants' data.table).
 * **PROJECT_DIR/PROJECT_NAME_variant_data_merge.RData** R data object with variant counts and statistics ('variant_data_merge' data.table).
 * **PROJECT_DIR/PROJECT_NAME_variant_data_merge.tsv** Tab-separated plain text file with variant counts and statistics.
 * **PROJECT_DIR/PROJECT_NAME_nobarcode_variant_data_merge.tsv** Tab-separated plain text file with sequenced barcodes that were not found in the variant identity file.
