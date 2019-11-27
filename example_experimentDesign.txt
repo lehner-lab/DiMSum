@@ -1,1 +1,16 @@
-sample_name	transformation_replicate	selection_id	selection_replicate	technical_replicate	pair1	pair2input1	1	0		1	Input_Rep1_t1_read1.fastq	Input_Rep1_t1_read2.fastqinput1	1	0		2	Input_Rep1_t2_read1.fastq	Input_Rep1_t2_read2.fastqoutput1A	1	1	1	1	Output1_Rep1_t1_read1.fastq	Output1_Rep1_t1_read2.fastqoutput1A	1	1	1	2	Output1_Rep1_t2_read1.fastq	Output1_Rep1_t2_read2.fastqoutput1B	1	1	2	1	Output2_Rep1_t1_read1.fastq	Output2_Rep1_t1_read2.fastqinput2	2	0		1	Input_Rep2_t1_read1.fastq	Input_Rep2_t1_read2.fastqinput2	2	0		2	Input_Rep2_t2_read1.fastq	Input_Rep2_t2_read2.fastqoutput2A	2	1	1	1	Output1_Rep2_t1_read1.fastq	Output1_Rep2_t1_read2.fastqoutput2A	2	1	1	2	Output1_Rep2_t2_read1.fastq	Output1_Rep2_t2_read2.fastqoutput2B	2	1	2	1	Output2_Rep2_t1_read1.fastq	Output2_Rep2_t1_read2.fastqinput3	3	0		1	Input_Rep3_t1_read1.fastq	Input_Rep3_t1_read2.fastqinput3	3	0		2	Input_Rep3_t2_read1.fastq	Input_Rep3_t2_read2.fastqoutput3A	3	1	1	1	Output1_Rep3_t1_read1.fastq	Output1_Rep3_t1_read2.fastqoutput3A	3	1	1	2	Output1_Rep3_t2_read1.fastq	Output1_Rep3_t2_read2.fastqoutput3B	3	1	2	1	Output2_Rep3_t1_read1.fastq	Output2_Rep3_t1_read2.fastq
+sample_name	experiment_replicate	selection_id	selection_replicate	technical_replicate	pair1	pair2
+input1	1	0		1	Input_Rep1_t1_read1.fastq	Input_Rep1_t1_read2.fastq
+input1	1	0		2	Input_Rep1_t2_read1.fastq	Input_Rep1_t2_read2.fastq
+output1A	1	1	1	1	Output1_Rep1_t1_read1.fastq	Output1_Rep1_t1_read2.fastq
+output1A	1	1	1	2	Output1_Rep1_t2_read1.fastq	Output1_Rep1_t2_read2.fastq
+output1B	1	1	2	1	Output2_Rep1_t1_read1.fastq	Output2_Rep1_t1_read2.fastq
+input2	2	0		1	Input_Rep2_t1_read1.fastq	Input_Rep2_t1_read2.fastq
+input2	2	0		2	Input_Rep2_t2_read1.fastq	Input_Rep2_t2_read2.fastq
+output2A	2	1	1	1	Output1_Rep2_t1_read1.fastq	Output1_Rep2_t1_read2.fastq
+output2A	2	1	1	2	Output1_Rep2_t2_read1.fastq	Output1_Rep2_t2_read2.fastq
+output2B	2	1	2	1	Output2_Rep2_t1_read1.fastq	Output2_Rep2_t1_read2.fastq
+input3	3	0		1	Input_Rep3_t1_read1.fastq	Input_Rep3_t1_read2.fastq
+input3	3	0		2	Input_Rep3_t2_read1.fastq	Input_Rep3_t2_read2.fastq
+output3A	3	1	1	1	Output1_Rep3_t1_read1.fastq	Output1_Rep3_t1_read2.fastq
+output3A	3	1	1	2	Output1_Rep3_t2_read1.fastq	Output1_Rep3_t2_read2.fastq
+output3B	3	1	2	1	Output2_Rep3_t1_read1.fastq	Output2_Rep3_t1_read2.fastq
