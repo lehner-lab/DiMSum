@@ -16,6 +16,7 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   permittedSequences, sequenceType = "auto", transLibrary = F,
   bayesianDoubleFitness = F, bayesianDoubleFitnessLamD = 0.025,
   fitnessMinInputCountAll = 0, fitnessMinInputCountAny = 0,
+  fitnessMinOutputCountAll = 0, fitnessMinOutputCountAny = 0,
   fitnessHighConfidenceCount = 10,
   fitnessDoubleHighConfidenceCount = 50, fitnessNormalise = T,
   maxSubstitutions = 2, retainIntermediateFiles = F,
@@ -90,6 +91,10 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 \item{fitnessMinInputCountAll}{Minimum input read count (in all replicate) to be retained during fitness calculations (default:0)}
 
 \item{fitnessMinInputCountAny}{Minimum input read count (in any replicate) to be retained during fitness calculations (default:0)}
+
+\item{fitnessMinOutputCountAll}{Minimum output read count (in all replicate) to be retained during fitness calculations (default:0)}
+
+\item{fitnessMinOutputCountAny}{Minimum output read count (in any replicate) to be retained during fitness calculations (default:0)}
 
 \item{fitnessHighConfidenceCount}{Minimum mean input read count for high confidence variants (default:10)}
 

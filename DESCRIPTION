@@ -1,12 +1,13 @@
 Package: DiMSum
 Title: A pipeline for processing deep mutational scanning data
-Version: 0.3.29.9000
+Version: 0.3.30.9000
 Authors@R: c(
     person("Andre", "Faure", email = "ajfaure@gmail.com", role = c("aut", "cre")),
     person("Joern", "Schmiedel", email = "joern.schmiedel@gmail.com", role = c("aut")))
 Description: A pipeline for processing deep mutational scanning (DMS) data. 
 Depends: R (>= 3.5.2)
 Imports:
+    cowplot,
     data.table,
     ggplot2,
     gridExtra,
@@ -16,7 +17,9 @@ Imports:
     plyr,
     reshape2,
     seqinr,
+    Biostrings,
     GGally,
+    IRanges,
     ShortRead
 SystemRequirements: cutadapt, fastqc, gunzip, starcode, usearch and basic unix commands (cat, cp, head)
 License: MIT + file LICENSE
