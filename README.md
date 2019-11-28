@@ -10,7 +10,7 @@ Welcome to the GitHub repository for DiMSum: A pipeline for analyzing deep mutat
 
 To run the DiMSum pipeline you will need the following software and associated packages:
 
-* **[R](https://www.r-project.org/) >=v3.5.2** (data.table, ggplot2, gridExtra, hexbin, optparse, parallel, plyr, reshape2, seqinr, GGally, ShortRead)
+* **[R](https://www.r-project.org/) >=v3.5.2** (cowplot, data.table, ggplot2, gridExtra, hexbin, optparse, parallel, plyr, reshape2, seqinr, Biostrings, GGally, IRanges, ShortRead)
 * **[FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) v0.11.3**
 * **[cutadapt](https://cutadapt.readthedocs.io/en/stable/) v2.4**
 * **[USEARCH 32-bit](https://drive5.com/usearch/download.html) v10.0**
