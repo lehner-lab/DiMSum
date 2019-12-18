@@ -30,6 +30,16 @@ dimsum__get_barcode_design <- function(
     }
   }
 
+  #Set barcode1 column equal to barcode column (backwards compatibility)
+  if("barcode" %in% colnames(barcode_design)){
+    barcode_design[,"barcode1"] <- barcode_design[,"barcode"]
+  }
+
+  #Set barcode1 column equal to barcode column (backwards compatibility)
+  if(!"barcode2" %in% colnames(barcode_design)){
+    barcode_design[,"barcode2"] <- barcode_design[,"barcode1"]
+  }
+
   #Check whether barcode design is valid
   dimsum__check_barcode_design(barcode_design)
 

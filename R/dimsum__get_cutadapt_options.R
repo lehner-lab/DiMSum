@@ -23,6 +23,8 @@ dimsum__get_cutadapt_options <- function(
     if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt5Second"]) ){temp_options <- ifelse(dimsum_meta[['paired']], paste0(temp_options, ' -G ', dimsum_meta[['exp_design']][i,"cutadapt5Second"]), temp_options)}
     if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt3First"]) ){temp_options <- paste0(temp_options, " -a ", dimsum_meta[['exp_design']][i,"cutadapt3First"])}
     if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt3Second"]) & dimsum_meta[['paired']] ){temp_options <- paste0(temp_options, " -A ", dimsum_meta[['exp_design']][i,"cutadapt3Second"])}
+    #Discard untrimmed reads if at least one constant region trimming option specified
+    if( !dimsum_meta[['exp_design']][i,"run_cutadapt_cutonly"] ){temp_options <- paste0(temp_options, " --discard-untrimmed")}
     return(temp_options)
   }
 

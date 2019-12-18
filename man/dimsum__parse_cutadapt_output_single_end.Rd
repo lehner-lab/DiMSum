@@ -4,12 +4,15 @@
 \alias{dimsum__parse_cutadapt_output_single_end}
 \title{dimsum__parse_cutadapt_output_single_end}
 \usage{
-dimsum__parse_cutadapt_output_single_end(file_path, ran_cutadapt = T)
+dimsum__parse_cutadapt_output_single_end(file_path, ran_cutadapt = T,
+  ran_cutadapt_cutonly = F)
 }
 \arguments{
 \item{file_path}{path to cutadapt output file (required)}
 
 \item{ran_cutadapt}{whether this is a bona fide cutadapt output file (default:T)}
+
+\item{ran_cutadapt_cutonly}{whether cutadapt was run using "Cut" options only (default:F)}
 }
 \value{
 a list of read trimming count statistics

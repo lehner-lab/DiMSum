@@ -146,7 +146,7 @@ dimsum__validate_input <- function(
   }
 
   #Check sequenceType one of noncoding/coding/auto
-  if(!dimsum_meta[["sequenceType"]] %in% c("nonconding", "coding", "auto")){
+  if(!dimsum_meta[["sequenceType"]] %in% c("noncoding", "coding", "auto")){
     stop("Invalid 'sequenceType' argument. Only noncoding/coding/auto allowed.", call. = FALSE)
   }else if(dimsum_meta[["sequenceType"]]=="auto"){
     dimsum_meta[["sequenceType"]] <- dimsum__detect_sequence_type(dimsum_meta[["wildtypeSequence"]])

@@ -63,13 +63,39 @@ dimsum_stage_diagnostics_report <- function(
   #     title = paste0("Amino acid substitution variant count distributions (input samples)"))
   # }
 
-  #Plot 3: all-vs-all sample count correlations
+  #Plot 3a: all-vs-all sample count correlations - all variants
+  if(length(input_samples)!=0 | length(output_samples)!=0){
+    temp_dt <- variant_data_merge[,.SD,.SDcols = c(input_samples, output_samples, "Nham_nt")]
+    names(temp_dt)[grep("_count", names(temp_dt))] <- dimsum__plot_samplename(names(temp_dt)[grep("_count", names(temp_dt))])
+    dimsum__ggpairs_binhex(
+      input_dt = log10(temp_dt[,.SD,.SDcols = dimsum__plot_samplename(c(input_samples, output_samples))]+1), 
+      output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_all.png"),
+      xlab = "log10(variant count + 1)",
+      ylab = "log10(variant count + 1)",
+      title = "Substitution variant inter-sample count correlations (all samples)",
+      size = 0.1,
+      thresholds = list(
+        "dotted" = log10(dimsum_meta[["fitnessMinInputCountAny"]] + 1), 
+        "dashed" = log10(dimsum_meta[["fitnessMinInputCountAll"]] + 1)))
+    dimsum__ggpairs_binhex(
+      input_dt = log10(temp_dt[,.SD,.SDcols = dimsum__plot_samplename(c(input_samples, output_samples))]+1), 
+      output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_all.pdf"),
+      xlab = "log10(variant count + 1)",
+      ylab = "log10(variant count + 1)",
+      title = "Substitution variant inter-sample count correlations (all samples)",
+      size = 0.1,
+      thresholds = list(
+        "dotted" = log10(dimsum_meta[["fitnessMinInputCountAny"]] + 1), 
+        "dashed" = log10(dimsum_meta[["fitnessMinInputCountAll"]] + 1)))
+  }
+
+  #Plot 3b: all-vs-all sample count correlations - only singles and doubles
   if(length(input_samples)!=0 | length(output_samples)!=0){
     temp_dt <- variant_data_merge[,.SD,.SDcols = c(input_samples, output_samples, "Nham_nt")]
     names(temp_dt)[grep("_count", names(temp_dt))] <- dimsum__plot_samplename(names(temp_dt)[grep("_count", names(temp_dt))])
     dimsum__ggpairs_binhex(
       input_dt = log10(temp_dt[data.table::between(Nham_nt,1,2),.SD,.SDcols = dimsum__plot_samplename(c(input_samples, output_samples))]+1), 
-      output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_all.png"),
+      output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_singles_doubles.png"),
       xlab = "log10(variant count + 1)",
       ylab = "log10(variant count + 1)",
       title = "Single and double substitution variant inter-sample count correlations (all samples)",
@@ -80,7 +106,7 @@ dimsum_stage_diagnostics_report <- function(
         "dashed" = log10(dimsum_meta[["fitnessMinInputCountAll"]] + 1)))
     dimsum__ggpairs_binhex(
       input_dt = log10(temp_dt[data.table::between(Nham_nt,1,2),.SD,.SDcols = dimsum__plot_samplename(c(input_samples, output_samples))]+1), 
-      output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_all.pdf"),
+      output_file = file.path(report_outpath, "dimsum_stage_diagnostics_report_scatterplotmatrix_singles_doubles.pdf"),
       xlab = "log10(variant count + 1)",
       ylab = "log10(variant count + 1)",
       title = "Single and double substitution variant inter-sample count correlations (all samples)",
@@ -90,5 +116,6 @@ dimsum_stage_diagnostics_report <- function(
         "dotted" = log10(dimsum_meta[["fitnessMinInputCountAny"]] + 1), 
         "dashed" = log10(dimsum_meta[["fitnessMinInputCountAll"]] + 1)))
   }
+
 }
 

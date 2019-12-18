@@ -53,7 +53,7 @@ dimsum_stage_cutadapt <- function(
       #Options for removing a fixed number of bases from beginning or end of either read in pair
       temp_cut_options <- dimsum__get_cutadapt_options(dimsum_meta = dimsum_meta, exp_design_row = i, option_type = "cut")
       #Insufficient cutadapt options specified to run cutadapt
-      if(temp_options=="" & temp_cut_options==""){
+      if(!dimsum_meta[['exp_design']][i,"run_cutadapt"]){
         #Copy files  
         temp_out <- system(paste0(
           "cp ",
@@ -88,7 +88,7 @@ dimsum_stage_cutadapt <- function(
         temp_out <- system(paste0(
           "cutadapt",
           temp_options,
-          " --discard-untrimmed --minimum-length ",
+          " --minimum-length ",
           as.character(dimsum_meta[['exp_design']][i,"cutadaptMinLength"]),
           " -e ",
           as.character(dimsum_meta[['exp_design']][i,"cutadaptErrorRate"]),
@@ -113,7 +113,7 @@ dimsum_stage_cutadapt <- function(
             "cutadapt",
             temp_options,
             temp_cut_options,
-            " --discard-untrimmed --minimum-length ",
+            " --minimum-length ",
             as.character(dimsum_meta[['exp_design']][i,"cutadaptMinLength"]),
             " -e ",
             as.character(dimsum_meta[['exp_design']][i,"cutadaptErrorRate"]),
@@ -136,7 +136,7 @@ dimsum_stage_cutadapt <- function(
             "cutadapt",
             temp_options,
             temp_cut_options,
-            " --discard-untrimmed --minimum-length ",
+            " --minimum-length ",
             as.character(dimsum_meta[['exp_design']][i,"cutadaptMinLength"]),
             " -e ",
             as.character(dimsum_meta[['exp_design']][i,"cutadaptErrorRate"]),

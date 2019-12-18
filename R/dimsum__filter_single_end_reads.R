@@ -50,20 +50,37 @@ dimsum__filter_single_end_reads <- function(
     a_stats[['Alignments_zero_diffs']] <- a_stats[['Alignments_zero_diffs']] + sum(fq_lengths>=min_len)
     #Read quality matrices
     qmat <- as(Biostrings::quality(fq), "matrix")
+
+    #Go to next iteration if empty matrix
+    if(sum(fq_lengths>=min_len)==0){next}
     #Number of bases with qualities less than minimum specified?
-    non_merge_num_bases_too_low_qual <- apply(qmat<min_qual, 1, sum, na.rm = T)
+    if(sum(fq_lengths>=min_len)==1){
+      non_merge_num_bases_too_low_qual <- sum(qmat<min_qual, na.rm = T)
+    }else{
+      non_merge_num_bases_too_low_qual <- apply(qmat<min_qual, 1, sum, na.rm = T)
+    }
     #Update statistics
     a_stats[['Min_Q_too_low']] <- a_stats[['Min_Q_too_low']] + sum(non_merge_num_bases_too_low_qual!=0)
     #Subset to sequences with all base qualities not less than specified
     fq <- fq[non_merge_num_bases_too_low_qual==0]
     #Read error probability matrices
     emat <- 10^(qmat[non_merge_num_bases_too_low_qual==0,]/(-10))
+
+    #Go to next iteration if empty matrix
+    if(sum(non_merge_num_bases_too_low_qual==0)==0){next}
     #Expected number of read errors
-    exp_num_read_errors <- apply(emat, 1, sum, na.rm = T)
+    if(sum(non_merge_num_bases_too_low_qual==0)==1){
+      exp_num_read_errors <- sum(emat, na.rm = T)
+    }else{
+      exp_num_read_errors <- apply(emat, 1, sum, na.rm = T)
+    }
     #Update statistics
     a_stats[['Exp.errs._too_high']] <- a_stats[['Exp.errs._too_high']] + sum(exp_num_read_errors>max_ee)
     #Subset to sequences with less than specified expected number of read errors
     fq <- fq[exp_num_read_errors<=max_ee]
+
+    #Go to next iteration if no fastq records remain
+    if(sum(exp_num_read_errors<=max_ee)==0){next}
     #Write to file
     dimsum__writeFastq(shortreads = fq, outputFile = output_FASTQ, initial_write = initial_write)
     initial_write <- FALSE
@@ -71,6 +88,12 @@ dimsum__filter_single_end_reads <- function(
     a_stats[['Merged']] <- a_stats[['Merged']] + length(fq)
     a_stats[['merged_lengths']] <- c(a_stats[['merged_lengths']], IRanges::width(ShortRead::sread(fq)))
   }
+  
+  #Write empty FASTQ file if no records written thus far
+  if(initial_write){
+    dimsum__writeFastq(shortreads = ShortRead::ShortReadQ(), outputFile = output_FASTQ, initial_write = initial_write)
+  }
+
   #Update length statistics
   if(a_stats[['Merged']]!=0){
     a_stats[['Merged_length_min']] <- min(a_stats[['merged_lengths']])

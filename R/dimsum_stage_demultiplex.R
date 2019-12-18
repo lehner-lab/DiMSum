@@ -38,8 +38,12 @@ dimsum_stage_demultiplex <- function(
       pair_name <- rownames(fastq_pair_list)[i]
       temp_design <- dimsum_meta[['barcode_design']][dimsum_meta[['barcode_design']][,'pair1']==fastq_pair_list[pair_name,'pair1'],]
       write(
-        x = c(rbind(paste0('>', temp_design[,"new_pair_prefix"]), paste0('^', temp_design[,"barcode"]))), 
-        file = file.path(demultiplex_outpath, paste0('demultiplex_barcode-file_', pair_name, '.fasta')), 
+        x = c(rbind(paste0('>', temp_design[,"new_pair_prefix"]), paste0('^', temp_design[,"barcode1"]))), 
+        file = file.path(demultiplex_outpath, paste0('demultiplex_barcode1-file_', pair_name, '.fasta')), 
+        sep="\n")
+      write(
+        x = c(rbind(paste0('>', temp_design[,"new_pair_prefix"]), paste0('^', temp_design[,"barcode2"]))), 
+        file = file.path(demultiplex_outpath, paste0('demultiplex_barcode2-file_', pair_name, '.fasta')), 
         sep="\n")
       #Check if file extension incompatible with cutadapt (i.e. NOT ".fastq" or ".fastq.gz")
       if(dimsum_meta[["fastqFileExtension"]]!=".fastq"){
@@ -102,9 +106,9 @@ dimsum_stage_demultiplex <- function(
         temp_out <- system(paste0(
           "cutadapt",
           " -g file:",
-          file.path(demultiplex_outpath, paste0('demultiplex_barcode-file_', pair_name, '.fasta')),
+          file.path(demultiplex_outpath, paste0('demultiplex_barcode1-file_', pair_name, '.fasta')),
           " -G file:",
-          file.path(demultiplex_outpath, paste0('demultiplex_barcode-file_', pair_name, '.fasta')),
+          file.path(demultiplex_outpath, paste0('demultiplex_barcode2-file_', pair_name, '.fasta')),
           " -e ",
           as.character(dimsum_meta[["barcodeErrorRate"]]),
           " --no-indels ",
@@ -129,7 +133,7 @@ dimsum_stage_demultiplex <- function(
         temp_out <- system(paste0(
           "cutadapt",
           " -g file:",
-          file.path(demultiplex_outpath, paste0('demultiplex_barcode-file_', pair_name, '.fasta')),
+          file.path(demultiplex_outpath, paste0('demultiplex_barcode1-file_', pair_name, '.fasta')),
           " -e ",
           as.character(dimsum_meta[["barcodeErrorRate"]]),
           " --no-indels ",

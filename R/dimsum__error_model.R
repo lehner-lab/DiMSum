@@ -41,9 +41,7 @@ dimsum__error_model <- function(
   ###########################
 
   for(j in all_reps){
-    wt_corr <- as.numeric(work_data[WT==T, log(.SD[,2]/.SD[,1]),,
-      .SDcols = c(grep(paste0("count_e", j, "_s0"), names(work_data)), grep(paste0("count_e", j, "_s1"), names(work_data)))])
-    work_data[, paste0("fitness",j) := log(.SD[,2]/.SD[,1]) - wt_corr,,
+    work_data[, paste0("fitness",j) := log(.SD[,2]/.SD[,1]),,
       .SDcols = c(
         grep(paste0("count_e", j, "_s0"), names(work_data)), 
         grep(paste0("count_e", j, "_s1"), names(work_data)))]
@@ -54,13 +52,24 @@ dimsum__error_model <- function(
   #Flag variants that don't have reads in all input/output replicates
   work_data[, all_reads := rowSums(.SD > 0) == (2*nchar(all_reps_str)),,.SDcols = grep(paste0("count_e[", all_reps_str, "]_s[01]"), names(work_data))]
 
+  #Check if WT data present in all input/output replicates
+  if(work_data[WT == T & all_reads == T,.N]==0){
+    stop(paste0("Cannot proceed with error modelling: WT variant has zero count in at least one input/output replicate"), call. = FALSE)
+  }
+
   ### Find input read threshold for full fitness range
   ###########################
 
   input_count_threshold <- work_data[all_reads == T,exp(-quantile(.SD,probs = 0.01,na.rm=T)),,.SDcols = grep("fitness",names(work_data))]
   #Define variants above threshold for later use
   work_data[,input_above_threshold := rowSums(.SD > input_count_threshold) == nchar(all_reps_str),,.SDcols = grep(paste0("count_e[", all_reps_str, "]_s0"),names(work_data))]
-  
+
+  #Correct for WT fitness
+  for(j in all_reps){
+    wt_corr <- as.numeric(work_data[WT==T, .SD,,.SDcols = paste0("fitness",j)])
+    work_data[, paste0("fitness",j) := .SD - wt_corr,,.SDcols = paste0("fitness",j)]
+  }  
+
   #Plot input counts versus fitness with threshold
   if(report){
     X <- data.table::data.table()
@@ -87,6 +96,11 @@ dimsum__error_model <- function(
       ggplot2::labs(x = "Input variant count (log scale)", y = "Fitness", title = "Replicate fitness versus input variant counts")
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_inputcounts.pdf"), d, width = 6, height = 6)
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_inputcounts.png"), d, width = 6, height = 6)
+  }
+
+  #Check if data remains above input read threshold (and data present in all input/output replicates)
+  if(work_data[input_above_threshold == T & all_reads == T,.N]==0){
+    stop(paste0("Cannot proceed with error modelling: insufficent data satisfying full fitness range"), call. = FALSE)
   }
 
   ### QC plots for fitness between replicates (before normalisation)

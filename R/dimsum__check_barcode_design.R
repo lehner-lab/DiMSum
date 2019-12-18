@@ -13,9 +13,9 @@ dimsum__check_barcode_design <- function(
 
   ### Column existence checks 
   #Check if mandatory columns present
-  mandatory_cols <- c("pair1", "pair2", "barcode", "new_pair_prefix")
+  mandatory_cols <- c("pair1", "pair2", "barcode1", "barcode2", "new_pair_prefix")
   if(sum(unlist(lapply(mandatory_cols, "%in%", colnames(barcode_design)))==FALSE)!=0){
-    stop(paste0("One or more mandatory columns missing from barcodeDesign file ('pair1', 'pair2', 'barcode', 'new_pair_prefix')"), call. = FALSE)
+    stop(paste0("One or more mandatory columns missing from barcodeDesign file ('pair1', 'pair2', 'barcode1', 'barcode2', 'new_pair_prefix')"), call. = FALSE)
   }
 
   ### FASTQ file checks (pair1/pair2 columns)
@@ -31,11 +31,11 @@ dimsum__check_barcode_design <- function(
 
   ### Barcode checks
   #Check barcode column is of type character 
-  if(typeof(barcode_design[,"barcode"])!="character"){
-    stop(paste0("One or more invalid 'barcode' values in barcodeDesign file (only characters allowed)"), call. = FALSE)
+  if(typeof(barcode_design[,"barcode1"])!="character" | typeof(barcode_design[,"barcode2"])!="character"){
+    stop(paste0("One or more invalid barcode values in barcodeDesign file (only characters allowed)"), call. = FALSE)
   }
   #Check barcode sequences are valid (ACGT characters only)
-  all_characters <- unique(unlist(strsplit(unlist(barcode_design[,c("barcode")]), "")))
+  all_characters <- unique(unlist(strsplit(as.character(unlist(barcode_design[,c("barcode1", "barcode2")])), "")))
   if(sum(!all_characters %in% c("A", "C", "G", "T", NA))!=0){
     stop("Invalid barcode sequences. Only valid nucleotide sequences allowed (A/C/T/G).", call. = FALSE)
   }
@@ -56,7 +56,7 @@ dimsum__check_barcode_design <- function(
 
   ### Duplicate matrix row checks
   #Check for duplicated rows in the following column pairs: "pair1":"barcode" and "pair2":"barcode"
-  if(sum(duplicated(barcode_design[,c("pair1", "barcode")]))!=0 | sum(duplicated(barcode_design[,c("pair2", "barcode")]))!=0){
+  if(sum(duplicated(barcode_design[,c("pair1", "barcode1", "barcode2")]))!=0 | sum(duplicated(barcode_design[,c("pair2", "barcode1", "barcode2")]))!=0){
     stop(paste0("One or more duplicated mappings in barcodeDesign file matrix (FASTQ file to barcode mapping should be unique)"), call. = FALSE)
   }
 

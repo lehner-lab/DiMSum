@@ -103,6 +103,12 @@ dimsum__process_merged_variants <- function(
     "barcode_valid", "indel")]
   #Indicate WT sequence
   variant_dt[nt_seq == wt_ntseq,WT := TRUE]
+
+  #Check if WT sequence exists
+  if(variant_dt[WT==T,.N]==0){
+    stop(paste0("Cannot proceed variant processing: WT variant not found"), call. = FALSE)
+  }
+
   #Indicate STOPs
   variant_dt <- dimsum__identify_STOP_mutations(variant_dt)
 

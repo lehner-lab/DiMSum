@@ -61,6 +61,8 @@ dimsum__get_experiment_design <- function(
   num_cutadapt_options <- apply(!is.na(exp_design[,c("cutadapt5First", "cutadapt5Second", "cutadapt3First", "cutadapt3Second")]), 1, sum)
   num_cutadaptCut_options <- apply(!is.na(exp_design[,c("cutadaptCut5First", "cutadaptCut5Second", "cutadaptCut3First", "cutadaptCut3Second")]), 1, sum)
   exp_design[,"run_cutadapt"] <- num_cutadapt_options | num_cutadaptCut_options
+  #Indicate for which samples cutadapt should be run in "Cut" mode only
+  exp_design[,"run_cutadapt_cutonly"] <- !num_cutadapt_options & num_cutadaptCut_options
 
   ### Temporary fix for stages relying on "experiment" and "biological_replicate" columns
   #Copy "experiment_replicate" and "selection_replicate" to "experiment" and "biological_replicate" colums respectively

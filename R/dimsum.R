@@ -204,8 +204,13 @@ dimsum <- function(
   exp_metadata[["tmp_path"]] <- file.path(exp_metadata[["project_path"]], "tmp")
   suppressWarnings(dir.create(exp_metadata[["tmp_path"]]))
 
-  #inisiDelete intermediate files string
+  #Initialise delete intermediate files string
   exp_metadata[["deleteIntermediateFiles"]] <- NULL
+
+  #Write report html (preemptively)
+  write(dimsum__reports_summary(dimsum_meta = exp_metadata), file = file.path(exp_metadata[["project_path"]], "reports_summary.html"))
+  #Initialise reports directory (and erase if already exists)
+  dimsum__create_dir(file.path(exp_metadata[["project_path"]], "reports"), execute = T)
 
   ### Pipeline stages
   ###########################
@@ -253,12 +258,6 @@ dimsum <- function(
   dimsum__save_metadata(dimsum_meta = pipeline[['7_fitness']], n = 1)
   message("Done")
 
-  ### Save report html
-  ###########################
-
-  message("\n\n\nSaving summary report...")
-  write(dimsum__reports_summary(dimsum_meta = pipeline[['7_fitness']]), file = file.path(pipeline[['7_fitness']][["project_path"]], "reports_summary.html"))
-  message("Done")
 }
 
 
