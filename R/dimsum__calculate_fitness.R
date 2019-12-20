@@ -82,7 +82,7 @@ dimsum__calculate_fitness <- function(
   output_dt <- output_dt[!is.nan(rowMeans(output_dt[,fitness_cols,with=F], na.rm = T))]
 
   #Calculate mean input counts
-  output_dt[,mean_count := rowMeans(.SD),,.SDcols = paste0("count_e", all_reps, "_s0")]
+  output_dt[,mean_count := rowMeans(.SD, na.rm = T),,.SDcols = paste0("count_e", all_reps, "_s0")]
 
   if(verbose){message("Done")}
 

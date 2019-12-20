@@ -85,7 +85,9 @@ dimsum_stage_merge <- function(
     write.table(variant_list[["indel_variants"]], file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_indel_variant_data_merge.tsv')), sep = "\t", quote = F, row.names = F)
     write.table(variant_list[["rejected_variants"]], file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_rejected_variant_data_merge.tsv')), sep = "\t", quote = F, row.names = F)
     variant_data_merge <- variant_list[["retained_variants"]]
-    save(variant_data_merge, file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.RData')))
+    save(variant_data_merge, 
+      file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.RData')),
+      version = 2)
     write.table(variant_list[["retained_variants"]], file=file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.tsv')), sep = "\t", quote = F, row.names = F)
     message("Done")
   }

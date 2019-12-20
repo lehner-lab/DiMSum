@@ -42,11 +42,35 @@ dimsum_stage_fastqc_report <- function(
       fastqc_list[[filename]] <- temp_df
     }
     fastqc_df1 <- dimsum__cbind_fill(lapply(fastqc_list, '[', 'Mean'))
-    colnames(fastqc_df1) <- names(fastqc_list)
-    fastqc_df1[,'base_position'] <- 1:length(rownames(fastqc_df1))
+    #Temporarily code NAs as Inf (dimsum__cbind_fill assumes no NAs)
+    fastqc_df1[is.na(fastqc_df1)] <- Inf
     fastqc_df2 <- dimsum__cbind_fill(lapply(fastqc_list, '[', '10th Percentile'))
-    colnames(fastqc_df2) <- names(fastqc_list)
-    fastqc_df2[,'base_position'] <- 1:length(rownames(fastqc_df1))
+    #Temporarily code NAs as Inf (dimsum__cbind_fill assumes no NAs)
+    fastqc_df2[is.na(fastqc_df2)] <- Inf
+
+    #convert to lists
+    fastqc_df1_list <- lapply(lapply(as.list(fastqc_df1), as.data.frame), 
+      function(x){
+        rownames(x)<-rownames(fastqc_df1)
+        return(x)})
+    #convert to list
+    fastqc_df2_list <- lapply(lapply(as.list(fastqc_df2), as.data.frame), 
+      function(x){
+        rownames(x)<-rownames(fastqc_df2)
+        return(x)})
+
+    #Join lists
+    fastqc_df_list <- c(fastqc_df1_list, fastqc_df2_list)
+    #Consistent ranges (dimsum__cbind_fill assumes no NAs)
+    fastqc_df <- dimsum__cbind_fill(fastqc_df_list)
+    #Decode Inf as NA
+    fastqc_df[is.infinite(as.matrix(fastqc_df))] <- NA
+    #Split
+    fastqc_df1 <- fastqc_df[,1:dim(fastqc_df1)[2]]
+    fastqc_df1[,'base_position'] <- 1:length(rownames(fastqc_df1))
+    fastqc_df2 <- fastqc_df[,(dim(fastqc_df2)[2]+1):dim(fastqc_df)[2]]
+    fastqc_df2[,'base_position'] <- 1:length(rownames(fastqc_df2))
+
     #Plot
     plot_df1 <- reshape2::melt(fastqc_df1, id="base_position")
     plot_df1[,'statistic'] <- 'Mean'

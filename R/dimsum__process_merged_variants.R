@@ -230,7 +230,9 @@ dimsum__process_merged_variants <- function(
     "nuc_const_dict" = nuc_const_dict, 
     "nuc_indel_dict" = nuc_indel_dict,
     "nuc_nbarc_dict" = nuc_nbarc_dict)
-  save(mutation_stats_dicts, file = file.path(dimsum_meta[["tmp_path"]], "mutation_stats_dicts.RData"))
+  save(mutation_stats_dicts, 
+    file = file.path(dimsum_meta[["tmp_path"]], "mutation_stats_dicts.RData"),
+    version = 2)
 
   message("Done")
 

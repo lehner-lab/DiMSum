@@ -189,10 +189,14 @@ dimsum__merge_fitness <- function(
   if(dimsum_meta[["sequenceType"]]=="coding"){
     silent <- singles_dt[Nham_aa==0]
     singles <- singles_dt[Nham_aa==1]
-    save(all_variants, wildtype, silent, singles, doubles, file = file.path(fitness_outpath, paste0(dimsum_meta[["projectName"]], '_fitness_replicates.RData')))
+    save(all_variants, wildtype, silent, singles, doubles, 
+      file = file.path(fitness_outpath, paste0(dimsum_meta[["projectName"]], '_fitness_replicates.RData')),
+      version = 2)
   }else{
     singles <- singles_dt
-    save(all_variants, wildtype, singles, doubles, file = file.path(fitness_outpath, paste0(dimsum_meta[["projectName"]], '_fitness_replicates.RData')))
+    save(all_variants, wildtype, singles, doubles, 
+      file = file.path(fitness_outpath, paste0(dimsum_meta[["projectName"]], '_fitness_replicates.RData')),
+      version = 2)
   }
 
   ### Output plain text files

@@ -90,7 +90,7 @@ dimsum_stage_counts_to_fitness <- function(
   wt_ntseq_split <- strsplit(wt_ntseq,"")[[1]]
   nf_data[,Nmut_codons := length(unique(ceiling(which(strsplit(nt_seq,"")[[1]] != wt_ntseq_split)/3))),nt_seq]
   #For coding sequences retain only either purely nonsynonymous mutations or purely silent mutations
-  if(dimsum_meta[["sequenceType"]]=="coding"){
+  if(dimsum_meta[["sequenceType"]]=="coding" & !dimsum_meta[["mixedSubstitutions"]]){
     nf_data <- nf_data[(Nmut_codons-Nham_aa) == 0 | Nham_aa == 0,]
   }
 

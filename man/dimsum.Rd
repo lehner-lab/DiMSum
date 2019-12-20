@@ -19,9 +19,10 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   fitnessMinOutputCountAll = 0, fitnessMinOutputCountAny = 0,
   fitnessHighConfidenceCount = 10,
   fitnessDoubleHighConfidenceCount = 50, fitnessNormalise = T,
-  maxSubstitutions = 2, retainIntermediateFiles = F,
-  splitChunkSize = 3758096384, retainedReplicates = "all",
-  startStage = 1, stopStage = 0, numCores = 1)
+  maxSubstitutions = 2, mixedSubstitutions = F,
+  retainIntermediateFiles = F, splitChunkSize = 3758096384,
+  retainedReplicates = "all", startStage = 1, stopStage = 0,
+  numCores = 1)
 }
 \arguments{
 \item{fastqFileDir}{Path to directory with input FASTQ files}
@@ -103,6 +104,8 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 \item{fitnessNormalise}{Normalise fitness values to minimise inter-replicate differences (default:T)}
 
 \item{maxSubstitutions}{Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)}
+
+\item{mixedSubstitutions}{Are coding sequences with both synonymous and nonsynonymous substitutions allowed? (default:F)}
 
 \item{retainIntermediateFiles}{Should intermediate files be retained? (default:F)}
 
