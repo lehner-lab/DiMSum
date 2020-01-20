@@ -60,7 +60,7 @@ Demultiplex samples and trim read barcodes using cutadapt (optional). This stage
 
 ## Stage 2: ASSESS READ QUALITY
 
-Produce raw read quality reports using FastQC.
+Produce raw read quality reports using FastQC (and unzip and split FASTQ files if necessary).
 
 ## Stage 3: TRIM CONSTANT REGIONS
 
