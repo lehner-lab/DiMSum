@@ -13,5 +13,5 @@ dimsum__range_df(input_df)
 a single ranged data.frame
 }
 \description{
-Collapse a data.frame to ranged row.names.
+Collapse a data.frame with integer rownames to ranged row.names.
 }

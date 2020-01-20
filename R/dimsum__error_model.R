@@ -98,9 +98,11 @@ dimsum__error_model <- function(
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_inputcounts.png"), d, width = 6, height = 6)
   }
 
-  #Check if data remains above input read threshold (and data present in all input/output replicates)
-  if(work_data[input_above_threshold == T & all_reads == T,.N]==0){
-    stop(paste0("Cannot proceed with error modelling: insufficent data satisfying full fitness range"), call. = FALSE)
+  #Check if sufficient data remains above input read threshold (and data present in all input/output replicates)
+  #Define minimum #variants for fitting = 10 x number of fitted parameters (3 x #reps)
+  min_n_variants <- 10 * 3 * length(all_reps)
+  if(work_data[input_above_threshold == T & all_reads == T & Nham_nt > 0,.N] < min_n_variants){
+    stop(paste0("Cannot proceed with error modelling: insufficent number of variants satisfying full fitness range"), call. = FALSE)
   }
 
   ### QC plots for fitness between replicates (before normalisation)

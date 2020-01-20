@@ -32,6 +32,13 @@ dimsum__process_merged_variants <- function(
   nuc_subst_dict <- list()
   aa_subst_dict <- list()
 
+  ### Reverse complement (if necessary)
+  ###########################
+
+  if(dimsum_meta[["reverseComplement"]]){
+    variant_dt[,nt_seq := tolower(as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(nt_seq))))]
+  }
+
   ### Debarcode variants (if barcode identity file supplied)
   ###########################
 

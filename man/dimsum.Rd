@@ -13,11 +13,11 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   cutadapt3Second, cutadaptMinLength = 50, cutadaptErrorRate = 0.2,
   usearchMinQual, usearchMaxee, usearchMinlen = 64,
   usearchMinovlen = 16, outputPath, projectName, wildtypeSequence,
-  permittedSequences, sequenceType = "auto", transLibrary = F,
-  bayesianDoubleFitness = F, bayesianDoubleFitnessLamD = 0.025,
-  fitnessMinInputCountAll = 0, fitnessMinInputCountAny = 0,
-  fitnessMinOutputCountAll = 0, fitnessMinOutputCountAny = 0,
-  fitnessHighConfidenceCount = 10,
+  permittedSequences, reverseComplement = F, sequenceType = "auto",
+  transLibrary = F, bayesianDoubleFitness = F,
+  bayesianDoubleFitnessLamD = 0.025, fitnessMinInputCountAll = 0,
+  fitnessMinInputCountAny = 0, fitnessMinOutputCountAll = 0,
+  fitnessMinOutputCountAny = 0, fitnessHighConfidenceCount = 10,
   fitnessDoubleHighConfidenceCount = 50, fitnessNormalise = T,
   maxSubstitutions = 2, mixedSubstitutions = F,
   retainIntermediateFiles = F, splitChunkSize = 3758096384,
@@ -80,6 +80,8 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 \item{wildtypeSequence}{Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed before fitness calculations.}
 
 \item{permittedSequences}{A sequence of nucleotide codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions i.e upper-case letters in wild-type nucleotide sequence (default:any base at mutated positions)}
+
+\item{reverseComplement}{Reverse complement variant sequences before processing? (default:F)}
 
 \item{sequenceType}{Coding potential of sequence; either noncoding/coding/auto (default:auto)}
 

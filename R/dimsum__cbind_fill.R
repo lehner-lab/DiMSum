@@ -12,6 +12,7 @@ dimsum__cbind_fill <- function(df_list){
     n <- max(sapply(nm, nrow)) 
     temp_df <- as.data.frame(do.call(cbind, lapply(nm, function (x) 
         rbind(x, matrix(, n-nrow(x), ncol(x))))))
+    rownames(temp_df) <- 1:dim(temp_df)[1]
     temp_df <- dimsum__range_df(temp_df)
     colnames(temp_df) <- names(df_list)
     temp_df

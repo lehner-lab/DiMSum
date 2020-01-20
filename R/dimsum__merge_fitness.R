@@ -7,7 +7,6 @@
 #' @param input_dt input data.table (required)
 #' @param doubles_dt doubles data.table (required)
 #' @param singles_dt singles data.table (required)
-#' @param wt_dt WT data.table (required)
 #' @param all_reps list of replicates to retain (required)
 #' @param fitness_outpath output path for saved objects (required)
 #' @param report whether or not to generate fitness summary plots (default: TRUE)
@@ -21,7 +20,6 @@ dimsum__merge_fitness <- function(
   input_dt,
   doubles_dt,
   singles_dt,
-  wt_dt,
   all_reps,
   fitness_outpath,
   report = TRUE,
@@ -44,13 +42,6 @@ dimsum__merge_fitness <- function(
   sigma_rx <- singles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]"),colnames(singles_dt))]
   singles_dt[,fitness := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
   singles_dt[,sigma := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
-  if(report){
-    d <- ggplot2::ggplot(singles_dt[Nham_aa==1],ggplot2::aes(fitness,sigma)) + 
-      ggplot2::geom_hex() + 
-      ggplot2::scale_y_log10() + 
-      ggplot2::coord_cartesian(ylim=c(0.01,1))
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_5_sigma_vs_fitness_singles.png"), d, width = 5, height = 5)
-  }
 
   #### doubles
   #uncorrected fitness
@@ -58,13 +49,6 @@ dimsum__merge_fitness <- function(
   sigma_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]_uncorr"),colnames(doubles_dt))]
   doubles_dt[,fitness_uncorr := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
   doubles_dt[,sigma_uncorr := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
-  if(report){
-    d <- ggplot2::ggplot(doubles_dt,ggplot2::aes(fitness_uncorr,sigma_uncorr)) + 
-      ggplot2::geom_hex() + 
-      ggplot2::scale_y_log10() + 
-      ggplot2::coord_cartesian(ylim=c(0.01,1))
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_5_sigma_vs_fitness_doubles_uncorr.png"), d, width = 5, height = 5)
-  }
 
   #conditioned fitness
   if(dimsum_meta[["bayesianDoubleFitness"]]){
@@ -72,63 +56,6 @@ dimsum__merge_fitness <- function(
     sigma_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]_cond"),colnames(doubles_dt))]
     doubles_dt[,fitness_cond := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
     doubles_dt[,sigma_cond := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
-    if(report){
-      d <- ggplot2::ggplot(doubles_dt,ggplot2::aes(fitness_cond,sigma_cond)) + 
-        ggplot2::geom_hex() + 
-        ggplot2::scale_y_log10() + 
-        ggplot2::coord_cartesian(ylim=c(0.01,1))
-      ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_5_sigma_vs_fitness_doubles_cond.png"), d, width = 5, height = 5)
-    }
-  }
-
-  #Plot to compare double fitness estimates
-  if(report){
-    p1<-ggplot2::ggplot(doubles_dt,ggplot2::aes(mean_count,fitness_uncorr)) + 
-      ggplot2::geom_hex() + 
-      ggplot2::scale_x_log10() +
-      ggplot2::scale_fill_continuous(trans="log10")
-    p3<-ggplot2::ggplot(doubles_dt[between(bin_count,2,8)],ggplot2::aes(fitness_uncorr,..scaled..,color=factor(bin_count))) +
-      ggplot2::geom_density(adjust=1)
-    p5<-ggplot2::ggplot(doubles_dt,ggplot2::aes(fitness_uncorr,sigma_uncorr)) + 
-      ggplot2::geom_hex() + 
-      ggplot2::scale_y_log10() +
-      ggplot2::coord_cartesian(ylim = c(0.05,1.5))
-    if(dimsum_meta[["bayesianDoubleFitness"]]){
-      p2<-ggplot2::ggplot(doubles_dt,ggplot2::aes(mean_count,fitness_cond)) + 
-        ggplot2::geom_hex()+ 
-        ggplot2::scale_x_log10() +
-        ggplot2::scale_fill_continuous(trans="log10")
-      p4<-ggplot2::ggplot(doubles_dt[between(bin_count,2,8)],ggplot2::aes(fitness_cond,..scaled..,color=factor(bin_count))) +
-        ggplot2::geom_density(adjust=1)
-      p6<-ggplot2::ggplot(doubles_dt,ggplot2::aes(fitness_cond,sigma_cond)) + 
-        ggplot2::geom_hex()+ 
-        ggplot2::scale_y_log10() +
-        ggplot2::coord_cartesian(ylim = c(0.05,1.5))
-    }
-    ggplot2::theme_set(ggplot2::theme_minimal())
-    #Plot
-    if(dimsum_meta[["bayesianDoubleFitness"]]){
-      d <- cowplot::plot_grid(plotlist = list(p1,p2,p3,p4,p5,p6),nrow=3)
-      rm(p1,p2,p3,p4,p5,p6)
-      ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_5_doubles_fitness_estimates.png"), d, width = 10, height = 10)
-    }else{
-      d <- cowplot::plot_grid(plotlist = list(p1,p3,p5),nrow=3)
-      rm(p1,p3,p5)
-      ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_5_doubles_fitness_estimates.png"), d, width = 5, height = 10)
-    }
-  }
-
-  #Plot fitness values against each other
-  if(report & dimsum_meta[["bayesianDoubleFitness"]]){
-    set.seed(1)
-    d <- GGally::ggpairs(doubles_dt[sample(.N,1000),.(fitness_uncorr,fitness_cond)])
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_5_doubles_fitness_estimates_scattermatrix.png"), d, width = 10, height = 10)
-  }
-
-  #Plot sigma values against each other
-  if(report & dimsum_meta[["bayesianDoubleFitness"]]){
-    d <- GGally::ggpairs(doubles_dt[,.(sigma_uncorr,sigma_cond)])
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_5_doubles_sigma_estimates_scattermatrix.png"), d, width = 10, height = 10)
   }
 
   message("Done")
@@ -141,7 +68,6 @@ dimsum__merge_fitness <- function(
   #Reformat columns
   if(dimsum_meta[["sequenceType"]]=="coding"){
     #Rename columns
-    names(wt_dt)[names(wt_dt)=="merge_seq"] <- "nt_seq"
     #Remove unnecessary columns
     unnecessary_cols <- c(
       "var_fitness",
@@ -151,13 +77,11 @@ dimsum__merge_fitness <- function(
       "counts_for_bins",
       "bin_count")
     input_dt <- input_dt[,.SD,,.SDcols = names(input_dt)[!names(input_dt) %in% unnecessary_cols]]
-    wt_dt <- wt_dt[,.SD,,.SDcols = names(wt_dt)[!names(wt_dt) %in% unnecessary_cols]]
     singles_dt <- singles_dt[,.SD,,.SDcols = names(singles_dt)[!names(singles_dt) %in% unnecessary_cols]]
     doubles_dt <- doubles_dt[,.SD,,.SDcols = names(doubles_dt)[!names(doubles_dt) %in% unnecessary_cols]]
   }else{
     #Rename columns
     names(input_dt)[names(input_dt)=="merge_seq"] <- "nt_seq"
-    names(wt_dt)[names(wt_dt)=="merge_seq"] <- "nt_seq"
     #Remove unnecessary columns
     unnecessary_cols <- c(
       "aa_seq",
@@ -172,19 +96,17 @@ dimsum__merge_fitness <- function(
       "counts_for_bins",
       "bin_count")
     input_dt <- input_dt[,.SD,,.SDcols = names(input_dt)[!names(input_dt) %in% unnecessary_cols]]
-    wt_dt <- wt_dt[,.SD,,.SDcols = names(wt_dt)[!names(wt_dt) %in% unnecessary_cols]]
     singles_dt <- singles_dt[,.SD,,.SDcols = names(singles_dt)[!names(singles_dt) %in% unnecessary_cols]]
     doubles_dt <- doubles_dt[,.SD,,.SDcols = names(doubles_dt)[!names(doubles_dt) %in% unnecessary_cols]]
     #Rename WT_AA columns to WT_nt
     names(input_dt)[grep("^WT_AA", names(input_dt))] <- gsub("WT_AA", "WT_nt", names(input_dt)[grep("^WT_AA", names(input_dt))])
-    names(wt_dt)[grep("^WT_AA", names(wt_dt))] <- gsub("WT_AA", "WT_nt", names(wt_dt)[grep("^WT_AA", names(wt_dt))])
     names(singles_dt)[grep("^WT_AA", names(singles_dt))] <- gsub("WT_AA", "WT_nt", names(singles_dt)[grep("^WT_AA", names(singles_dt))])
     names(doubles_dt)[grep("^WT_AA", names(doubles_dt))] <- gsub("WT_AA", "WT_nt", names(doubles_dt)[grep("^WT_AA", names(doubles_dt))])
   }
 
   #Rename objects
   all_variants <- input_dt
-  wildtype <- wt_dt
+  wildtype <- all_variants[WT==T,,,.SDcols = names(all_variants)[!grepl("^count_", names(all_variants))]]
   doubles <- doubles_dt
   if(dimsum_meta[["sequenceType"]]=="coding"){
     silent <- singles_dt[Nham_aa==0]

@@ -4,7 +4,7 @@
 \alias{dimsum__merge_fitness}
 \title{dimsum__merge_fitness}
 \usage{
-dimsum__merge_fitness(dimsum_meta, input_dt, doubles_dt, singles_dt, wt_dt,
+dimsum__merge_fitness(dimsum_meta, input_dt, doubles_dt, singles_dt,
   all_reps, fitness_outpath, report = TRUE, report_outpath = NULL)
 }
 \arguments{
@@ -15,8 +15,6 @@ dimsum__merge_fitness(dimsum_meta, input_dt, doubles_dt, singles_dt, wt_dt,
 \item{doubles_dt}{doubles data.table (required)}
 
 \item{singles_dt}{singles data.table (required)}
-
-\item{wt_dt}{WT data.table (required)}
 
 \item{all_reps}{list of replicates to retain (required)}
 

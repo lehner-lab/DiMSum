@@ -234,7 +234,6 @@ dimsum_stage_counts_to_fitness <- function(
     input_dt = nf_data_syn,
     doubles_dt = doubles,
     singles_dt = singles_silent,
-    wt_dt = wildtype,
     all_reps = all_reps,
     fitness_outpath = fitness_outpath,
     report = TRUE,

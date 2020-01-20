@@ -31,6 +31,7 @@
 #' @param projectName Project name
 #' @param wildtypeSequence Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed before fitness calculations.
 #' @param permittedSequences A sequence of nucleotide codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions i.e upper-case letters in wild-type nucleotide sequence (default:any base at mutated positions)
+#' @param reverseComplement Reverse complement variant sequences before processing? (default:F)
 #' @param sequenceType Coding potential of sequence; either noncoding/coding/auto (default:auto)
 #' @param transLibrary Trans library design i.e. read pairs correspond to distinct peptides (no overlap)
 #' @param bayesianDoubleFitness Improve double mutant fitness estimates using Bayesian framework (DISABLED: still in development)
@@ -82,6 +83,7 @@ dimsum <- function(
   projectName,
   wildtypeSequence,
   permittedSequences,
+  reverseComplement=F,
   sequenceType="auto",
   transLibrary=F,
   bayesianDoubleFitness=F,
@@ -170,6 +172,7 @@ dimsum <- function(
     "projectName" = list(projectName, c("character")), #character string -- checked in dimsum__validate_input
     "wildtypeSequence" = list(wildtypeSequence, c("character")), #AaGgCcTt character string -- checked in dimsum__validate_input
     "permittedSequences" = list(permittedSequences, c("character", "NULL")), #ACGTRYSWKMBDHVN character string -- checked in dimsum__validate_input
+    "reverseComplement" = list(reverseComplement, c("logical")), #logical -- checked in dimsum__validate_input
     "sequenceType" = list(sequenceType, c("character")), #character string; either noncoding/coding/auto -- checked in dimsum__validate_input
     "transLibrary" = list(transLibrary, c("logical")), #logical -- checked in dimsum__validate_input
     "bayesianDoubleFitness" = list(bayesianDoubleFitness, c("logical")), #logical -- checked in dimsum__validate_input

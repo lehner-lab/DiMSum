@@ -1,7 +1,7 @@
 
 #' dimsum__range_df
 #'
-#' Collapse a data.frame to ranged row.names.
+#' Collapse a data.frame with integer rownames to ranged row.names.
 #'
 #' @param input_df input data.frame (required)
 #'
