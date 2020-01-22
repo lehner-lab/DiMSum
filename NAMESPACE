@@ -2,11 +2,13 @@
 
 export(dimsum)
 export(dimsum__aggregate_AA_variants)
+export(dimsum__aggregate_AA_variants_fitness)
 export(dimsum__bayesian_double_fitness)
 export(dimsum__calculate_fitness)
 export(dimsum__cbind_fill)
 export(dimsum__check_barcode_design)
 export(dimsum__check_experiment_design)
+export(dimsum__check_variants)
 export(dimsum__concatenate_reads)
 export(dimsum__convert_linked_adapters)
 export(dimsum__create_dir)

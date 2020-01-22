@@ -21,7 +21,7 @@ dimsum__calculate_fitness(dimsum_meta, input_dt, all_reps, error_model_dt,
 \item{verbose}{whether or not to print status messages (default: TRUE)}
 }
 \value{
-Nothing
+data.table with fitness and error
 }
 \description{
 Calculate fitness and error.

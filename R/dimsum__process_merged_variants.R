@@ -113,7 +113,7 @@ dimsum__process_merged_variants <- function(
 
   #Check if WT sequence exists
   if(variant_dt[WT==T,.N]==0){
-    stop(paste0("Cannot proceed variant processing: WT variant not found"), call. = FALSE)
+    stop(paste0("Cannot proceed with variant processing: WT variant not found"), call. = FALSE)
   }
 
   #Indicate STOPs

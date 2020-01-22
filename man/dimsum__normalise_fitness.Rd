@@ -17,7 +17,7 @@ dimsum__normalise_fitness(dimsum_meta, input_dt, all_reps,
 \item{fitness_suffix}{fitness and sigma suffix (default:"")}
 }
 \value{
-Nothing
+data.table with normalised fitness and error
 }
 \description{
 Normalise fitness and error for differences in number of generations.

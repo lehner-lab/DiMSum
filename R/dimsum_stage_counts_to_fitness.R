@@ -44,6 +44,7 @@ dimsum_stage_counts_to_fitness <- function(
   e1 <- new.env() 
   load(dimsum_meta[["variant_data_merge_path"]])
   all_data <- get('variant_data_merge', e1)
+  dimsum__check_variants(dimsum_meta = dimsum_meta, input_dt = all_data)
   rm(e1)
 
   #WT nucleotide sequences
@@ -51,10 +52,6 @@ dimsum_stage_counts_to_fitness <- function(
 
   #WT AA sequences
   wt_AAseq <- all_data[WT==T,aa_seq]
-
-  #Sample names
-  input_samples <- names(all_data)[grep("_e.*_s0_b.*_count$", names(all_data))]
-  output_samples <- names(all_data)[grep("_e.*_s1_b.*_count$", names(all_data))]
 
   #Determine replicates to retain
   all_reps <- unique(dimsum_meta[["exp_design"]][,"experiment"])
@@ -73,6 +70,40 @@ dimsum_stage_counts_to_fitness <- function(
     input_dt = all_data,
     all_reps = all_reps)
 
+  ### Aggregate counts at the AA level (if coding sequence and "mixedSubstitutions"==T)
+  ###########################
+
+  #Add number of codons affected by mutations
+  wt_ntseq_split <- strsplit(wt_ntseq,"")[[1]]
+  nf_data[,Nmut_codons := length(unique(ceiling(which(strsplit(nt_seq,"")[[1]] != wt_ntseq_split)/3))),nt_seq]
+
+  #For coding sequences aggregate variant counts at the AA level
+  if(dimsum_meta[["sequenceType"]]=="coding" & dimsum_meta[["mixedSubstitutions"]]){
+    nf_data <- dimsum__aggregate_AA_variants(
+      dimsum_meta = dimsum_meta,      
+      input_dt = nf_data,
+      all_reps = all_reps)
+  }else{
+    nf_data[,merge_seq := nt_seq]
+  }
+
+  ### Aggregate counts for biological output replicates
+  ###########################
+
+  message("Aggregating counts for biological output replicates...")
+
+  #Add up counts for biological output reps
+  for (E in all_reps) {
+    idx <- names(nf_data)[grep(names(nf_data),pattern = paste0("e",E,"_s1_b"))]
+    nf_data[!rowSums(is.na(nf_data[,.SD,.SDcols = idx]))==length(idx),paste0("count_e",E,"_s1") := rowSums(.SD, na.rm = T),,.SDcols = idx]
+    names(nf_data)[grep(names(nf_data),pattern = paste0("e",E,"_s0_b"))] <- paste0("count_e",E,"_s0")
+  }
+  nf_data <- nf_data[,.SD,,.SDcols = c(
+    "merge_seq","nt_seq","aa_seq","Nham_nt","Nham_aa",
+    "Nmut_codons","WT","STOP","STOP_readthrough",names(nf_data)[grep(names(nf_data),pattern="^count")])]
+
+  message("Done")
+
   ### Fit error model
   ###########################
 
@@ -83,69 +114,53 @@ dimsum_stage_counts_to_fitness <- function(
     all_reps = all_reps,
     report_outpath = report_outpath)
 
-  ### Aggregate counts from variants that are identical at the AA level and without synonymous mutations (if coding sequence)
-  ###########################
-
-  #Add number of codons affected by mutations
-  wt_ntseq_split <- strsplit(wt_ntseq,"")[[1]]
-  nf_data[,Nmut_codons := length(unique(ceiling(which(strsplit(nt_seq,"")[[1]] != wt_ntseq_split)/3))),nt_seq]
-  #For coding sequences retain only either purely nonsynonymous mutations or purely silent mutations
-  if(dimsum_meta[["sequenceType"]]=="coding" & !dimsum_meta[["mixedSubstitutions"]]){
-    nf_data <- nf_data[(Nmut_codons-Nham_aa) == 0 | Nham_aa == 0,]
-  }
-
-  if(dimsum_meta[["sequenceType"]]=="coding"){
-    nf_data_syn <- dimsum__aggregate_AA_variants(
-      input_dt = nf_data)
-  }else{
-    nf_data[,merge_seq := nt_seq,nt_seq]
-    nf_data_syn <- nf_data[,.SD,merge_seq,.SDcols = c(
-      "aa_seq","Nham_nt","Nham_aa",
-      "Nmut_codons","WT","STOP","STOP_readthrough",names(nf_data)[grep(names(nf_data),pattern="_count$")])]
-  }
-
-  ### Aggregate counts for biological output replicates
-  ###########################
-
-  message("Aggregating counts for biological output replicates...")
-
-  #Add up counts for biological output reps
-  for (E in all_reps) {
-    idx <- names(nf_data_syn)[grep(names(nf_data_syn),pattern = paste0("e",E,"_s1_b"))]
-    nf_data_syn[,paste0("count_e",E,"_s1") := rowSums(.SD),,.SDcols = idx]
-    names(nf_data_syn)[grep(names(nf_data_syn),pattern = paste0("e",E,"_s0_b"))] <- paste0("count_e",E,"_s0")
-  }
-  nf_data_syn <- unique(nf_data_syn[,.SD,merge_seq,.SDcols = c(
-    "aa_seq","Nham_nt","Nham_aa",
-    "Nmut_codons","WT","STOP","STOP_readthrough",names(nf_data_syn)[grep(names(nf_data_syn),pattern="^count")])])
-
-  message("Done")
-
   ### Calculate fitness and count-based error (and remove variants without fitness estimates in any replicate)
   ###########################
 
-  nf_data_syn <- dimsum__calculate_fitness(
+  nff_data <- dimsum__calculate_fitness(
     dimsum_meta = dimsum_meta,
-    input_dt = nf_data_syn,
+    input_dt = nf_data,
     all_reps = all_reps,
     error_model_dt = model_result[["error_model"]],
     norm_model_dt = model_result[["norm_model"]])
 
+  ### Remove variants with both synonymous and nonsynonymous substutions (if coding sequence and "mixedSubstitutions"==F)
+  ### Merge fitness and error at the AA level (if coding sequence and "mixedSubstitutions"==F)
+  ###########################
+
+  #For coding sequences remove nonsynonymous variants with silent/synonymous substitutions in other codons
+  #and aggregate nonsynonymous variant fitness and error at the AA level
+  if(dimsum_meta[["sequenceType"]]=="coding" & !dimsum_meta[["mixedSubstitutions"]]){
+    nff_data <- nff_data[(Nmut_codons-Nham_aa) == 0 | Nham_aa == 0,]
+    nff_data <- dimsum__aggregate_AA_variants_fitness(
+      dimsum_meta = dimsum_meta,      
+      input_dt = nff_data,
+      all_reps = all_reps)
+  }else{
+    if(dimsum_meta[["sequenceType"]]!="coding"){nff_data[,merge_seq := nt_seq,nt_seq]}
+    nff_data <- nff_data[,.SD,merge_seq,.SDcols = c(
+      "aa_seq","Nham_nt","Nham_aa",
+      "Nmut_codons","WT","STOP","STOP_readthrough",
+      names(nff_data)[grep(names(nff_data),pattern="^count")],
+      "mean_count",
+      names(nff_data)[grep(names(nff_data),pattern="^fitness|sigma")])]
+  }
+
   ### Wild type
   ###########################
 
-  wildtype <- nf_data_syn[WT==TRUE,]
+  wildtype <- nff_data[WT==TRUE,]
 
   ### Identify position and identity of single AA/NT mutations (and all silent mutants in the case of AA mutations)
   ###########################
 
   if(dimsum_meta[["sequenceType"]]=="coding"){
     singles_silent <- dimsum__identify_single_aa_mutations(
-      input_dt = nf_data_syn,
+      input_dt = nff_data,
       wt_AAseq = wt_AAseq)
   }else{
     singles_silent <- dimsum__identify_single_nt_mutations(
-      input_dt = nf_data_syn,
+      input_dt = nff_data,
       wt_ntseq = wt_ntseq)    
   }
 
@@ -154,12 +169,12 @@ dimsum_stage_counts_to_fitness <- function(
 
   if(dimsum_meta[["sequenceType"]]=="coding"){
     doubles <- dimsum__identify_double_aa_mutations(
-      input_dt = nf_data_syn,
+      input_dt = nff_data,
       singles_dt = singles_silent,
       wt_AAseq = wt_AAseq)
   }else{
     doubles <- dimsum__identify_double_nt_mutations(
-      input_dt = nf_data_syn,
+      input_dt = nff_data,
       singles_dt = singles_silent,
       wt_ntseq = wt_ntseq)
   }
@@ -196,9 +211,9 @@ dimsum_stage_counts_to_fitness <- function(
 
     message("Normalising fitness and error for differences in number of generations...")
 
-    nf_data_syn <- dimsum__normalise_fitness(
+    nff_data <- dimsum__normalise_fitness(
       dimsum_meta = dimsum_meta,
-      input_dt = nf_data_syn,
+      input_dt = nff_data,
       all_reps = all_reps,
       fitness_suffix="_uncorr"
       )
@@ -231,7 +246,7 @@ dimsum_stage_counts_to_fitness <- function(
 
   dimsum__merge_fitness(
     dimsum_meta = dimsum_meta,
-    input_dt = nf_data_syn,
+    input_dt = nff_data,
     doubles_dt = doubles,
     singles_dt = singles_silent,
     all_reps = all_reps,

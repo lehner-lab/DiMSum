@@ -4,10 +4,10 @@
 #' Filter out low count nucleotide variants.
 #'
 #' @param dimsum_meta an experiment metadata object (required)
-#' @param input_dt output path for plots and saved objects (required)
+#' @param input_dt input data.table (required)
 #' @param all_reps list of replicates to retain (required)
 #'
-#' @return Nothing
+#' @return data.table with low count nucleotide variants filtered out
 #' @export
 #' @import data.table
 dimsum__filter_nuc_variants <- function(
@@ -42,6 +42,8 @@ dimsum__filter_nuc_variants <- function(
   for(i in output_samples){
     output_dt[get(i) < dimsum_meta[["fitnessMinOutputCountAny"]], as.character(i) := NA]
   }
+
+  dimsum__check_variants(dimsum_meta = dimsum_meta, input_dt = output_dt)
 
   message("Done")
 

@@ -8,7 +8,7 @@
 #' @param all_reps list of replicates to retain (required)
 #' @param fitness_suffix fitness and sigma suffix (default:"")
 #'
-#' @return Nothing
+#' @return data.table with normalised fitness and error
 #' @export
 #' @import data.table
 dimsum__normalise_fitness <- function(

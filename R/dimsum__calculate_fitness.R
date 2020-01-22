@@ -10,7 +10,7 @@
 #' @param norm_model_dt normalisation model data.table (required)
 #' @param verbose whether or not to print status messages (default: TRUE)
 #'
-#' @return Nothing
+#' @return data.table with fitness and error
 #' @export
 #' @import data.table
 dimsum__calculate_fitness <- function(
@@ -73,8 +73,8 @@ dimsum__calculate_fitness <- function(
   }
 
   #Remove unnecessary columns
-  output_dt <- input_dt[,.SD,merge_seq,.SDcols = c(
-    "aa_seq","Nham_nt","Nham_aa",
+  output_dt <- input_dt[,.SD,,.SDcols = c(
+    "merge_seq","nt_seq","aa_seq","Nham_nt","Nham_aa",
     "Nmut_codons","WT","STOP","STOP_readthrough",names(input_dt)[grep(names(input_dt),pattern="^count|^fitness|^sigma")])]
 
   #Remove variants without fitness estimates in any replicates
@@ -83,6 +83,12 @@ dimsum__calculate_fitness <- function(
 
   #Calculate mean input counts
   output_dt[,mean_count := rowMeans(.SD, na.rm = T),,.SDcols = paste0("count_e", all_reps, "_s0")]
+
+  #Save fitness estimates 
+  all_variants <- output_dt
+  save(all_variants, 
+    file = file.path(dimsum_meta[["fitness_path"]], paste0(dimsum_meta[["projectName"]], '_fitness_intermediate.RData')),
+    version = 2)
 
   if(verbose){message("Done")}
 

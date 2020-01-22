@@ -10,7 +10,7 @@ dimsum__filter_variants_noncoding(dimsum_meta, input_dt, wt_ntseq,
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
 
-\item{input_dt}{output path for plots and saved objects (required)}
+\item{input_dt}{input data.table (required)}
 
 \item{wt_ntseq}{WT nucleotide sequence (required)}
 

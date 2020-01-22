@@ -25,17 +25,7 @@ dimsum__error_model <- function(
   #Number of input and output replicates
   all_reps_str <- paste0(all_reps, collapse="")
   
-  work_data <- input_dt[,.SD,,.SDcols = c("Nham_nt","WT",
-    grep(names(input_dt),pattern=paste0("e[", all_reps_str, "]_s0_b"),value=T),
-    grep(names(input_dt),pattern=paste0("e[", all_reps_str, "]_s1_b"),value=T))]
-
-  #Add up counts for biological output reps
-  for(E in all_reps){
-    idx <- names(work_data)[grep(names(work_data),pattern = paste0("e",E,"_s1_b"))]
-    work_data[,paste0("count_e",E,"_s1") := rowSums(.SD),,.SDcols = idx]
-    names(work_data)[grep(names(work_data),pattern = paste0("e",E,"_s0_b"))] <- paste0("count_e",E,"_s0")
-  }
-  work_data <- work_data[,.SD,.SDcols = c("Nham_nt","WT",names(work_data)[grep(names(work_data),pattern="^count")])]
+  work_data <- input_dt[,.SD,.SDcols = c("Nham_nt","WT",names(input_dt)[grep(names(input_dt),pattern="^count")])]
 
   ### Calculate fitness
   ###########################

@@ -44,7 +44,7 @@
 #' @param fitnessDoubleHighConfidenceCount Minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)
 #' @param fitnessNormalise Normalise fitness values to minimise inter-replicate differences (default:T)
 #' @param maxSubstitutions Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)
-#' @param mixedSubstitutions Are coding sequences with both synonymous and nonsynonymous substitutions allowed? (default:F)
+#' @param mixedSubstitutions For coding sequences, are nonsynonymous variants with silent/synonymous substitutions in other codons allowed? (default:F)
 #' @param retainIntermediateFiles Should intermediate files be retained? (default:F)
 #' @param splitChunkSize FASTQ file split chunk size in bytes (default:3758096384)
 #' @param retainedReplicates Comma-separated list of Input replicates (or experiment ids) to retain or 'all' (default:'all')

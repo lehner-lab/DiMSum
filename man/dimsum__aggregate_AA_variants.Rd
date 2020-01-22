@@ -4,13 +4,17 @@
 \alias{dimsum__aggregate_AA_variants}
 \title{dimsum__aggregate_AA_variants}
 \usage{
-dimsum__aggregate_AA_variants(input_dt)
+dimsum__aggregate_AA_variants(dimsum_meta, input_dt, all_reps)
 }
 \arguments{
-\item{input_dt}{output path for plots and saved objects (required)}
+\item{dimsum_meta}{an experiment metadata object (required)}
+
+\item{input_dt}{input data.table (required)}
+
+\item{all_reps}{list of replicates to retain (required)}
 }
 \value{
-Nothing
+data.table with aggregated counts
 }
 \description{
 Aggregate counts from variants that are identical at the AA level and without synonymous mutations.

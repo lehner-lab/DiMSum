@@ -9,12 +9,12 @@ dimsum__filter_nuc_variants(dimsum_meta, input_dt, all_reps)
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
 
-\item{input_dt}{output path for plots and saved objects (required)}
+\item{input_dt}{input data.table (required)}
 
 \item{all_reps}{list of replicates to retain (required)}
 }
 \value{
-Nothing
+data.table with low count nucleotide variants filtered out
 }
 \description{
 Filter out low count nucleotide variants.

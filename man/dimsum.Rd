@@ -107,7 +107,7 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{maxSubstitutions}{Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)}
 
-\item{mixedSubstitutions}{Are coding sequences with both synonymous and nonsynonymous substitutions allowed? (default:F)}
+\item{mixedSubstitutions}{For coding sequences, are nonsynonymous variants with silent/synonymous substitutions in other codons allowed? (default:F)}
 
 \item{retainIntermediateFiles}{Should intermediate files be retained? (default:F)}
 

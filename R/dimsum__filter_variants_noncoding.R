@@ -4,7 +4,7 @@
 #' Filter for desired non-coding variants.
 #'
 #' @param dimsum_meta an experiment metadata object (required)
-#' @param input_dt output path for plots and saved objects (required)
+#' @param input_dt input data.table (required)
 #' @param wt_ntseq WT nucleotide sequence (required)
 #' @param all_reps list of replicates to retain (required)
 #'
