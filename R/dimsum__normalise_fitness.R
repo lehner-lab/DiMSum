@@ -26,7 +26,7 @@ dimsum__normalise_fitness <- function(
   #Normalise fitness and sigma by mean generations
   for (E in all_reps) {
     for(i in c("fitness", "sigma")){
-      input_dt[,paste0(i, E, fitness_suffix) := .SD/generations_mean[paste0("e", E)],,.SDcols = paste0(i, E, fitness_suffix)]
+      input_dt[,paste0(i, E, fitness_suffix) := log2(exp(.SD/generations_mean[paste0("e", E)])),,.SDcols = paste0(i, E, fitness_suffix)]
     }
   }
 

@@ -43,7 +43,7 @@ dimsum_stage_usearch_report <- function(
   usearch_df <- as.data.frame(apply(as.data.frame(do.call('rbind', usearch_list)), 2, unlist))
   #Merge experimental design with USEARCH report statistics
   usearch_df <- cbind(dimsum_meta[['exp_design']][,c('aligned_pair', 'total_read_pairs')], usearch_df)
-  usearch_df[,'cutadapt_pairs_too_short'] <- usearch_df[,'total_read_pairs'] - usearch_df[,'usearch_total_read_pairs']
+  usearch_df[,'cutadapt_not_written'] <- usearch_df[,'total_read_pairs'] - usearch_df[,'usearch_total_read_pairs']
   #Plot 1: read pair count statistics
   usearch_df[,'pairname'] <- dimsum__plot_samplename(sapply(strsplit(usearch_df[,'aligned_pair'], '.split'), '[', 1))
   usearch_df_collapse <- plyr::ddply(usearch_df, "pairname", plyr::summarise, 
@@ -56,7 +56,7 @@ dimsum_stage_usearch_report <- function(
     usearch_alignment_too_short = sum(usearch_alignment_too_short), 
     usearch_exp_errs_too_high = sum(usearch_exp_errs_too_high),
     usearch_min_Q_too_low = sum(usearch_min_Q_too_low),
-    cutadapt_pairs_too_short = sum(cutadapt_pairs_too_short)
+    cutadapt_not_written = sum(cutadapt_not_written)
     )
   usearch_df_collapse_perc <- usearch_df_collapse
   usearch_df_collapse_perc[,3:11] <- as.data.frame(t(scale(t(usearch_df_collapse_perc[,3:11]), center = F, scale = usearch_df_collapse_perc[,'total_read_pairs'])))*100

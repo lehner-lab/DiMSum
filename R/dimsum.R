@@ -19,10 +19,11 @@
 #' @param cutadaptCut3Second cutadapt: remove bases from end of second read (before constant region trimming)
 #' @param cutadapt5First cutadapt: sequence of 5' constant region (of the first read)
 #' @param cutadapt5Second cutadapt: sequence of 5' constant region (of the second read)
-#' @param cutadapt3First cutadapt: sequence of 3' constant region (of the first read; default: reverse complement of cutadapt5Second)
-#' @param cutadapt3Second cutadapt: sequence of 3' constant region (of the second read; default: reverse complement of cutadapt5First)
+#' @param cutadapt3First cutadapt: sequence of 3' constant region (of the first read; default: reverse complement of cutadapt5Second if not linked)
+#' @param cutadapt3Second cutadapt: sequence of 3' constant region (of the second read; default: reverse complement of cutadapt5First if not linked)
 #' @param cutadaptMinLength cutadapt: Discard reads shorter than LENGTH (default:50)
 #' @param cutadaptErrorRate cutadapt: Maximum allowed error rate (default:0.2)
+#' @param cutadaptOverlap cutadapt: Overlap between read and adapter for an adapter to be found (default:3)
 #' @param usearchMinQual USEARCH: minimum observed base quality to retain read pair
 #' @param usearchMaxee USEARCH: maximum number of expected errors to retain read pair
 #' @param usearchMinlen USEARCH: Discard pair if either read is shorter than this (default:64)
@@ -34,6 +35,7 @@
 #' @param reverseComplement Reverse complement variant sequences before processing? (default:F)
 #' @param sequenceType Coding potential of sequence; either noncoding/coding/auto (default:auto)
 #' @param transLibrary Trans library design i.e. read pairs correspond to distinct peptides (no overlap)
+#' @param transLibraryReverseComplement Reverse complement second read in pair before concatenating (default:F)
 #' @param bayesianDoubleFitness Improve double mutant fitness estimates using Bayesian framework (DISABLED: still in development)
 #' @param bayesianDoubleFitnessLamD Poisson distribution for score likelihood (default:0.025)
 #' @param fitnessMinInputCountAll Minimum input read count (in all replicate) to be retained during fitness calculations (default:0)
@@ -75,6 +77,7 @@ dimsum <- function(
   cutadapt3Second,
   cutadaptMinLength=50,
   cutadaptErrorRate=0.2,
+  cutadaptOverlap=3,
   usearchMinQual,
   usearchMaxee,
   usearchMinlen=64,
@@ -86,6 +89,7 @@ dimsum <- function(
   reverseComplement=F,
   sequenceType="auto",
   transLibrary=F,
+  transLibraryReverseComplement=F,
   bayesianDoubleFitness=F,
   bayesianDoubleFitnessLamD=0.025,
   fitnessMinInputCountAll=0,
@@ -164,6 +168,7 @@ dimsum <- function(
     "cutadapt3Second" = list(cutadapt3Second, c("character", "NULL")), #AGCT character string (if not NULL) -- checked in dimsum__get_experiment_design
     "cutadaptMinLength" = list(cutadaptMinLength, c("integer")), #strictly positive integer -- checked in dimsum__get_experiment_design
     "cutadaptErrorRate" = list(cutadaptErrorRate, c("double")), #positive double (zero inclusive) -- checked in dimsum__get_experiment_design
+    "cutadaptOverlap" = list(cutadaptOverlap, c("integer")), #positive double (zero inclusive) -- checked in dimsum__get_experiment_design
     "usearchMinQual" = list(usearchMinQual, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
     "usearchMaxee" = list(usearchMaxee, c("double")), #strictly positive double -- checked in dimsum__validate_input
     "usearchMinlen" = list(usearchMinlen, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
@@ -175,6 +180,7 @@ dimsum <- function(
     "reverseComplement" = list(reverseComplement, c("logical")), #logical -- checked in dimsum__validate_input
     "sequenceType" = list(sequenceType, c("character")), #character string; either noncoding/coding/auto -- checked in dimsum__validate_input
     "transLibrary" = list(transLibrary, c("logical")), #logical -- checked in dimsum__validate_input
+    "transLibraryReverseComplement" = list(transLibraryReverseComplement, c("logical")), #logical -- checked in dimsum__validate_input
     "bayesianDoubleFitness" = list(bayesianDoubleFitness, c("logical")), #logical -- checked in dimsum__validate_input
     "bayesianDoubleFitnessLamD" = list(bayesianDoubleFitnessLamD, c("double")), #strictly positive double -- checked in dimsum__validate_input
     "fitnessMinInputCountAll" = list(fitnessMinInputCountAll, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input

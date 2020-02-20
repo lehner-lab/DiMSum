@@ -22,6 +22,11 @@ dimsum__debarcode_variants <- function(
   #Variants with valid barcodes
   input_dt[!nt_seq %in% names(barcode_list), barcode_valid := FALSE]
 
+  #Check if no valid barcodes
+  if(input_dt[barcode_valid==T,.N]==0){
+    stop(paste0("Cannot proceed with variant processing: No valid barcodes found"), call. = FALSE)
+  }
+
   #Debarcode variants
   debarcode_dt <- input_dt[barcode_valid==T,]
   debarcode_dt[, nt_seq := unlist(barcode_list[nt_seq])]

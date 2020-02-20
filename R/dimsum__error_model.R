@@ -44,6 +44,16 @@ dimsum__error_model <- function(
 
   #Check if WT data present in all input/output replicates
   if(work_data[WT == T & all_reads == T,.N]==0){
+    input_dt[, all_reads := rowSums(.SD > 0) == (2*nchar(all_reps_str)),,.SDcols = grep(paste0("count_e[", all_reps_str, "]_s[01]"), names(input_dt))]
+    input_dt[, mean_count := rowMeans(.SD),,.SDcols = grep(paste0("count_e[", all_reps_str, "]_s0"), names(input_dt))]
+    message(paste0("WT variant has zero count in at least one input/output replicate. Did you mean to specify one of the following?"))
+    if(dimsum_meta[["sequenceType"]]=="coding" & dimsum_meta[["mixedSubstitutions"]]){
+      print(input_dt[all_reads == T,][order(mean_count, decreasing = T)[1:5],.(aa_seq, all_reads, mean_count)])
+    }else if(dimsum_meta[["sequenceType"]]=="coding"){
+      print(input_dt[all_reads == T,][order(mean_count, decreasing = T)[1:5],.(nt_seq = toupper(nt_seq), aa_seq, all_reads, mean_count)])
+    }else{
+      print(input_dt[all_reads == T,][order(mean_count, decreasing = T)[1:5],.(nt_seq = toupper(nt_seq), all_reads, mean_count)])
+    }
     stop(paste0("Cannot proceed with error modelling: WT variant has zero count in at least one input/output replicate"), call. = FALSE)
   }
 

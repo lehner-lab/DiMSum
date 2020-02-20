@@ -59,7 +59,8 @@ dimsum_stage_usearch <- function(
           output_REPORT = file.path(usearch_outpath, paste0(sample_names[i], '.report')),
           min_qual = dimsum_meta[["usearchMinQual"]],
           max_ee = dimsum_meta[["usearchMaxee"]],
-          min_len = dimsum_meta[["usearchMinlen"]])
+          min_len = dimsum_meta[["usearchMinlen"]],
+          reverse_complement_second_read = dimsum_meta[["transLibraryReverseComplement"]])
       }
       # Setup cluster
       clust <- parallel::makeCluster(dimsum_meta[['numCores']])

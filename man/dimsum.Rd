@@ -11,10 +11,11 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   cutadaptCut5First, cutadaptCut5Second, cutadaptCut3First,
   cutadaptCut3Second, cutadapt5First, cutadapt5Second, cutadapt3First,
   cutadapt3Second, cutadaptMinLength = 50, cutadaptErrorRate = 0.2,
-  usearchMinQual, usearchMaxee, usearchMinlen = 64,
-  usearchMinovlen = 16, outputPath, projectName, wildtypeSequence,
-  permittedSequences, reverseComplement = F, sequenceType = "auto",
-  transLibrary = F, bayesianDoubleFitness = F,
+  cutadaptOverlap = 3, usearchMinQual, usearchMaxee,
+  usearchMinlen = 64, usearchMinovlen = 16, outputPath, projectName,
+  wildtypeSequence, permittedSequences, reverseComplement = F,
+  sequenceType = "auto", transLibrary = F,
+  transLibraryReverseComplement = F, bayesianDoubleFitness = F,
   bayesianDoubleFitnessLamD = 0.025, fitnessMinInputCountAll = 0,
   fitnessMinInputCountAny = 0, fitnessMinOutputCountAll = 0,
   fitnessMinOutputCountAny = 0, fitnessHighConfidenceCount = 10,
@@ -57,13 +58,15 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{cutadapt5Second}{cutadapt: sequence of 5' constant region (of the second read)}
 
-\item{cutadapt3First}{cutadapt: sequence of 3' constant region (of the first read; default: reverse complement of cutadapt5Second)}
+\item{cutadapt3First}{cutadapt: sequence of 3' constant region (of the first read; default: reverse complement of cutadapt5Second if not linked)}
 
-\item{cutadapt3Second}{cutadapt: sequence of 3' constant region (of the second read; default: reverse complement of cutadapt5First)}
+\item{cutadapt3Second}{cutadapt: sequence of 3' constant region (of the second read; default: reverse complement of cutadapt5First if not linked)}
 
 \item{cutadaptMinLength}{cutadapt: Discard reads shorter than LENGTH (default:50)}
 
 \item{cutadaptErrorRate}{cutadapt: Maximum allowed error rate (default:0.2)}
+
+\item{cutadaptOverlap}{cutadapt: Overlap between read and adapter for an adapter to be found (default:3)}
 
 \item{usearchMinQual}{USEARCH: minimum observed base quality to retain read pair}
 
@@ -86,6 +89,8 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 \item{sequenceType}{Coding potential of sequence; either noncoding/coding/auto (default:auto)}
 
 \item{transLibrary}{Trans library design i.e. read pairs correspond to distinct peptides (no overlap)}
+
+\item{transLibraryReverseComplement}{Reverse complement second read in pair before concatenating (default:F)}
 
 \item{bayesianDoubleFitness}{Improve double mutant fitness estimates using Bayesian framework (DISABLED: still in development)}
 

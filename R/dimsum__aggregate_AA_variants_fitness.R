@@ -37,6 +37,7 @@ dimsum__aggregate_AA_variants_fitness <- function(
   for(j in c(input_samples, output_samples)){
     #Aggregate counts accross identical AA variants
     input_dt[!is.na(get(j)),paste0(j,"_agg") := sum(.SD, na.rm = T),merge_seq,.SDcols = j]
+    input_dt[,paste0(j,"_agg") := unique(na.omit(.SD)),merge_seq,.SDcols = paste0(j,"_agg")]
   }
 
   #Calculate mean input counts

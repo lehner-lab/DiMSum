@@ -5,7 +5,8 @@
 \title{dimsum__concatenate_reads}
 \usage{
 dimsum__concatenate_reads(input_FASTQ1, input_FASTQ2, output_FASTQ,
-  output_REPORT, min_qual, max_ee, min_len)
+  output_REPORT, min_qual, max_ee, min_len,
+  reverse_complement_second_read = FALSE)
 }
 \arguments{
 \item{input_FASTQ1}{Path to first read FASTQ file (required)}
@@ -21,10 +22,12 @@ dimsum__concatenate_reads(input_FASTQ1, input_FASTQ2, output_FASTQ,
 \item{max_ee}{Maximum number of expected errors to retain read pair (required)}
 
 \item{min_len}{Discard pair if either read is shorter than this (required)}
+
+\item{reverse_complement_second_read}{Reverse complement second read before concatenation (default:FALSE)}
 }
 \value{
 Nothing
 }
 \description{
-Concatentate reads (without reverse complementing second read in pair).
+Concatenate reads (with or without reverse complementing second read in pair).
 }

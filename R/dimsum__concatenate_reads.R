@@ -1,7 +1,7 @@
 
 #' dimsum__concatenate_reads
 #'
-#' Concatentate reads (without reverse complementing second read in pair).
+#' Concatenate reads (with or without reverse complementing second read in pair).
 #'
 #' @param input_FASTQ1 Path to first read FASTQ file (required)
 #' @param input_FASTQ2 Path to second read FASTQ file (required)
@@ -10,6 +10,7 @@
 #' @param min_qual Minimum observed base quality to retain read pair (required)
 #' @param max_ee Maximum number of expected errors to retain read pair (required)
 #' @param min_len Discard pair if either read is shorter than this (required)
+#' @param reverse_complement_second_read Reverse complement second read before concatenation (default:FALSE)
 #'
 #' @return Nothing
 #' @export
@@ -20,7 +21,8 @@ dimsum__concatenate_reads <- function(
   output_REPORT,
   min_qual,
   max_ee,
-  min_len
+  min_len,
+  reverse_complement_second_read = FALSE
   ){
   #Alignment statistics
   a_stats <- list()
@@ -75,6 +77,8 @@ dimsum__concatenate_reads <- function(
     #Subset to sequences with less than specified expected number of read errors
     fq1 <- fq1[exp_num_read_errors<=max_ee]
     fq2 <- fq2[exp_num_read_errors<=max_ee]
+    #Reverse complement second read if necessary
+    if(reverse_complement_second_read){fq2 <- Biostrings::reverseComplement(fq2)}
     #Concatenate sequence
     fqc <- ShortRead::ShortReadQ(
       sread = Biostrings::DNAStringSet(paste0(as.character(ShortRead::sread(fq1)), as.character(ShortRead::sread(fq2)))), 

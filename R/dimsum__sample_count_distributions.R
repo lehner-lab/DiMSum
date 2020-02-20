@@ -42,8 +42,11 @@ dimsum__sample_count_distributions <- function(
   #WT frequency
   plot_dt_wt <- plot_dt[WT==T,.SD,,.SDcols = c("variable", "value")]
 
+  # #Most abundant variant frequency
+  # plot_dt_ma <- plot_dt[,.(value=max(value)),variable]
+
   #Fake single expected frequency
-  plot_dt_fsingles <- plot_dt[WT==T]
+  plot_dt_fsingles <- data.table::copy(plot_dt_wt)
   plot_dt_fsingles[, value := (round((value - 1)*error_rate/4) + 1)]
   plot_dt_fsingles[, Hamming_distance := factor(1)]
 
@@ -62,6 +65,7 @@ dimsum__sample_count_distributions <- function(
   d <- ggplot2::ggplot(plot_dt, ggplot2::aes(value, color = Hamming_distance)) +
     ggplot2::geom_density() + ggplot2::scale_x_log10() + ggplot2::theme_bw() +
     ggplot2::labs(x = "variant count + 1 (log scale)", y = "Density", title = title) +
+    # ggplot2::geom_vline(data = plot_dt_ma, ggplot2::aes(xintercept = value), linetype = 2) +
     ggplot2::geom_vline(data = plot_dt_wt, ggplot2::aes(xintercept = value), linetype = 2) +
     ggplot2::geom_vline(data = plot_dt_fsingles, ggplot2::aes(xintercept = value, color = Hamming_distance), linetype = 2) +
     ggplot2::geom_vline(data = plot_dt_fdoubles, ggplot2::aes(xintercept = value, color = Hamming_distance), linetype = 2) +

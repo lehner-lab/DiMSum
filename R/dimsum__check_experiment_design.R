@@ -127,7 +127,7 @@ dimsum__check_experiment_design <- function(
     stop(paste0("One or more invalid constant region sequences. Only valid nucleotide sequences allowed (A/C/T/G)."), call. = FALSE)
   }
   #Check constant region sequences are valid (ACGT characters only)
-  all_characters <- unique(unlist(strsplit(as.character(unlist(exp_design[,c("cutadapt5First", "cutadapt5Second", "cutadapt3First", "cutadapt3Second")])), "")))
+  all_characters <- unique(unlist(strsplit(gsub("[ACGT]\\.\\.\\.[ACGT]", "", as.character(unlist(exp_design[,c("cutadapt5First", "cutadapt5Second", "cutadapt3First", "cutadapt3Second")]))), "")))
   if(sum(!all_characters %in% c("A", "C", "G", "T", NA))!=0){
     stop("Invalid constant region sequences. Only valid nucleotide sequences allowed (A/C/T/G).", call. = FALSE)
   }

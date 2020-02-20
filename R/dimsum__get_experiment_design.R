@@ -42,6 +42,7 @@ dimsum__get_experiment_design <- function(
   if(!"cutadapt3Second" %in% colnames(exp_design)){exp_design[,"cutadapt3Second"] <- ifelse(is.null(dimsum_meta[["cutadapt3Second"]]), NA, dimsum_meta[["cutadapt3Second"]])}
   if(!"cutadaptMinLength" %in% colnames(exp_design)){exp_design[,"cutadaptMinLength"] <- ifelse(is.null(dimsum_meta[["cutadaptMinLength"]]), NA, dimsum_meta[["cutadaptMinLength"]])}
   if(!"cutadaptErrorRate" %in% colnames(exp_design)){exp_design[,"cutadaptErrorRate"] <- ifelse(is.null(dimsum_meta[["cutadaptErrorRate"]]), NA, dimsum_meta[["cutadaptErrorRate"]])}
+  if(!"cutadaptOverlap" %in% colnames(exp_design)){exp_design[,"cutadaptOverlap"] <- ifelse(is.null(dimsum_meta[["cutadaptOverlap"]]), NA, dimsum_meta[["cutadaptOverlap"]])}
   if(!"generations" %in% colnames(exp_design)){exp_design[,"generations"] <- NA}
   #Convert empty string constant region sequences to NA
   exp_design[which(exp_design[,"cutadapt5First"]==""),"cutadapt5First"] <- NA
