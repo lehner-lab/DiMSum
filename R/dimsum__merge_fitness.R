@@ -26,7 +26,7 @@ dimsum__merge_fitness <- function(
   report_outpath = NULL
   ){
 
-  message("Merging fitness estimates from biological replicates...")
+  dimsum__status_message("Merging fitness estimates from biological replicates...\n")
 
   #Number of input and output replicates
   all_reps_str <- paste0(all_reps, collapse="")
@@ -58,12 +58,12 @@ dimsum__merge_fitness <- function(
     doubles_dt[,sigma_cond := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
   }
 
-  message("Done")
+  dimsum__status_message("Done\n")
 
   ### Output replicate data files
   ###########################
 
-  message("Saving fitness estimates...")
+  dimsum__status_message("Saving fitness estimates...\n")
 
   #Reformat columns
   if(dimsum_meta[["sequenceType"]]=="coding"){
@@ -172,6 +172,6 @@ dimsum__merge_fitness <- function(
                 quote = F,row.names = F, col.names = T)
   }
 
-  message("Done")
+  dimsum__status_message("Done\n")
 
 }

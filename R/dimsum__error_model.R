@@ -20,7 +20,14 @@ dimsum__error_model <- function(
   report_outpath = NULL
   ){
 
-  message("Fit error model...")
+  #Return NULL model if no fit required
+  if(!dimsum_meta[["fitnessErrorModel"]]){
+    return(list(
+      "error_model" = NULL,
+      "norm_model" = NULL))
+  }
+
+  dimsum__status_message("Fit error model...\n")
 
   #Number of input and output replicates
   all_reps_str <- paste0(all_reps, collapse="")
@@ -46,7 +53,7 @@ dimsum__error_model <- function(
   if(work_data[WT == T & all_reads == T,.N]==0){
     input_dt[, all_reads := rowSums(.SD > 0) == (2*nchar(all_reps_str)),,.SDcols = grep(paste0("count_e[", all_reps_str, "]_s[01]"), names(input_dt))]
     input_dt[, mean_count := rowMeans(.SD),,.SDcols = grep(paste0("count_e[", all_reps_str, "]_s0"), names(input_dt))]
-    message(paste0("WT variant has zero count in at least one input/output replicate. Did you mean to specify one of the following?"))
+    dimsum__status_message(paste0("WT variant has zero count in at least one input/output replicate. Did you mean to specify one of the following?\n"))
     if(dimsum_meta[["sequenceType"]]=="coding" & dimsum_meta[["mixedSubstitutions"]]){
       print(input_dt[all_reads == T,][order(mean_count, decreasing = T)[1:5],.(aa_seq, all_reads, mean_count)])
     }else if(dimsum_meta[["sequenceType"]]=="coding"){
@@ -93,7 +100,7 @@ dimsum__error_model <- function(
       ggplot2::geom_vline(xintercept = input_count_threshold, lty = 2) +
       ggplot2::geom_hline(yintercept = 0, lty = 2, color = "darkgrey") +
       ggplot2::facet_wrap(rep ~ .) + ggplot2::theme_bw() +
-      ggplot2::labs(x = "Input variant count (log scale)", y = "Fitness", title = "Replicate fitness versus input variant counts")
+      ggplot2::labs(x = "Input variant count (log scale)", y = "Fitness")#, title = "Replicate fitness versus input variant counts")
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_inputcounts.pdf"), d, width = 6, height = 6)
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_inputcounts.png"), d, width = 6, height = 6)
   }
@@ -114,26 +121,24 @@ dimsum__error_model <- function(
     X[,replicate := gsub("fitness", "", as.character(variable)),variable]
     d <- ggplot2::ggplot(X,ggplot2::aes(value,color=replicate)) +
       ggplot2::geom_density() +
-      ggplot2::labs(x = "Fitness", y = "Density", color = "replicate", title = "Before inter-replicate normalisation") + 
+      ggplot2::labs(x = "Fitness", y = "Density", color = "replicate") +#, title = "Before inter-replicate normalisation") + 
       ggplot2::geom_vline(xintercept = 0, lty = 2, color = "darkgrey") +
       ggplot2::theme_bw()
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density.pdf"), d, width = 6, height = 6)
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density.png"), d, width = 6, height = 6)
+    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density.pdf"), d, width = 6, height = 4)
+    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density.png"), d, width = 6, height = 4)
 
     #Fitness correlations (all replicates)
     dimsum__ggpairs_binhex(
       input_dt = work_data[all_reads == T,.SD,,.SDcols = paste0("fitness", all_reps)], 
       output_file = file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter.pdf"),
       xlab = "Fitness",
-      ylab = "Fitness",
-      title = "Before inter-replicate normalisation")
+      ylab = "Fitness")#, title = "Before inter-replicate normalisation")
     #Fitness correlations (all replicates)
     dimsum__ggpairs_binhex(
       input_dt = work_data[all_reads == T,.SD,,.SDcols = paste0("fitness", all_reps)], 
       output_file = file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter.png"),
       xlab = "Fitness",
-      ylab = "Fitness",
-      title = "Before inter-replicate normalisation")
+      ylab = "Fitness")#, title = "Before inter-replicate normalisation")
   }
 
   ### Calculate replicate normalisation parameters (scale and center/shift) to minimise inter-replicate differences
@@ -175,26 +180,24 @@ dimsum__error_model <- function(
     X[,replicate := gsub("_norm", "", gsub("fitness", "", as.character(variable))),variable]
     d <- ggplot2::ggplot(X,ggplot2::aes(value,color=replicate)) +
       ggplot2::geom_density() +
-      ggplot2::labs(x = "Fitness", y = "Density", color = "replicate", title = "After inter-replicate normalisation") + 
+      ggplot2::labs(x = "Fitness", y = "Density", color = "replicate") +#, title = "After inter-replicate normalisation") + 
       ggplot2::geom_vline(xintercept = 0, lty = 2, color = "darkgrey") +
       ggplot2::theme_bw()
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density_norm.pdf"), d, width = 6, height = 6)
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density_norm.png"), d, width = 6, height = 6)
+    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density_norm.pdf"), d, width = 6, height = 4)
+    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density_norm.png"), d, width = 6, height = 4)
 
     #Fitness correlations (all replicates)
     dimsum__ggpairs_binhex(
       input_dt = work_data[all_reads == T,.SD,,.SDcols = paste0("fitness", all_reps, "_norm")], 
       output_file = file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter_norm.pdf"),
       xlab = "Fitness",
-      ylab = "Fitness",
-      title = "After inter-replicate normalisation")
+      ylab = "Fitness")#, title = "After inter-replicate normalisation")
     #Fitness correlations (all replicates)
     dimsum__ggpairs_binhex(
       input_dt = work_data[all_reads == T,.SD,,.SDcols = paste0("fitness", all_reps, "_norm")], 
       output_file = file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter_norm.png"),
       xlab = "Fitness",
-      ylab = "Fitness",
-      title = "After inter-replicate normalisation")
+      ylab = "Fitness")#, title = "After inter-replicate normalisation")
 
     #Fitness replicate deviations (all replicates)
     X <- work_data[all_reads == T & input_above_threshold == T & Nham_nt > 0, cbind(.SD - rowMeans(.SD), M = rowMeans(.SD)),
@@ -207,7 +210,7 @@ dimsum__error_model <- function(
     d <- ggplot2::ggplot(Y,ggplot2::aes(M, value, color = normalised)) +
       ggplot2::geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
       ggplot2::geom_hline(yintercept = 0, lty = 2, color = "darkgrey") +
-      ggplot2::labs(x = "Mean fitness", y = "Deviation from mean fitness", title = "Fitness replicate deviations (all replicates)") + 
+      ggplot2::labs(x = "Mean fitness", y = "Deviation from mean fitness") +#, title = "Fitness replicate deviations (all replicates)") + 
       ggplot2::theme_bw() +
       ggplot2::facet_wrap(. ~ replicate)
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicate_deviation_scatter.pdf"), d, width = 6, height = 6)
@@ -349,7 +352,10 @@ dimsum__error_model <- function(
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_repspec.png"), p, width = 9, height = 9)
   }
 
-  message("Done")
+  dimsum__status_message("Done\n")
+
+  #Render report
+  dimsum__render_report(dimsum_meta = dimsum_meta)
 
   return(list(
     "error_model" = error_model,

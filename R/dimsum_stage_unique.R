@@ -14,42 +14,46 @@ dimsum_stage_unique <- function(
   unique_outpath,
   save_workspace = TRUE
   ){
+
   #Whether or not to execute the system command
-  this_stage <- 5
-  execute <- (dimsum_meta[["startStage"]] <= this_stage & (dimsum_meta[["stopStage"]] == 0 | dimsum_meta[["stopStage"]] >= this_stage))
+  this_stage <- 3
+  execute <- (dimsum_meta[["startStage"]] <= this_stage & dimsum_meta[["stopStage"]] >= this_stage)
+
+  #WRAP not run
+  if(!is.null(dimsum_meta[["countPath"]])){
+    return(dimsum_meta)
+  }
+
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
+
   #Create unique directory (if doesn't already exist)
   unique_outpath <- gsub("/$", "", unique_outpath)
-  dimsum__create_dir(unique_outpath, execute = execute, message = "DiMSum STAGE 5: COUNT UNIQUE VARIANTS")  
+  dimsum__create_dir(unique_outpath, execute = execute, message = "COUNT UNIQUE VARIANTS")  
+
+  #Input files
+  all_fasta <- file.path(dimsum_meta[["exp_design"]][,"aligned_pair_directory"], dimsum_meta[['exp_design']][,"aligned_pair"])
+  #Check if all input files exist
+  dimsum__check_files_exist(
+    required_files = all_fasta,
+    stage_number = this_stage,
+    execute = execute)
+
   #Add sample code (sample name plus experiment and replicate structure, but without split)
   dimsum_meta[["exp_design"]][,"sample_code"] <- sapply(strsplit(dimsum_meta[["exp_design"]][,"aligned_pair"], '.split'), '[', 1)
+
   #Run starcode on all aligned read pair fastq files
-  message("Counting unique aligned reads with starcode:")
-  all_fasta <- file.path(dimsum_meta[["exp_design"]][,"aligned_pair_directory"], dimsum_meta[['exp_design']][,"aligned_pair"])
-  print(all_fasta)
-  message("Processing...")
-  for(i in 1:dim(dimsum_meta[["exp_design"]])[1]){message(paste0("\t", dimsum_meta[["exp_design"]][i,"aligned_pair"]))}
+  dimsum__status_message("Counting unique aligned reads with starcode:\n")
+  dimsum__status_message(paste0(all_fasta, "\n"))
+  dimsum__status_message("Processing...\n")
+  for(i in 1:dim(dimsum_meta[["exp_design"]])[1]){dimsum__status_message(paste0("\t", dimsum_meta[["exp_design"]][i,"aligned_pair"], "\n"))}
   #Check if this system command should be executed
   if(execute){
-    dimsum_stage_unique_helper <- function(
-      i
-      ){
-      this_sample_code <- unique(dimsum_meta[["exp_design"]][,"sample_code"])[i]
-      read_pairs <- dimsum_meta[["exp_design"]][dimsum_meta[["exp_design"]][,"sample_code"]==this_sample_code,"aligned_pair"]
-      #Concatenate FASTQ files
-      output_file1 <- gsub("_split1.usearch$", ".usearch", read_pairs[1])
-      temp_out <- system(paste0(
-        "cat ",
-        paste(file.path(dimsum_meta[["exp_design"]][,"aligned_pair_directory"][1], read_pairs), collapse = " "),
-        " > ",
-        file.path(unique_outpath, output_file1)))
-    }
     # Setup cluster
     clust <- parallel::makeCluster(dimsum_meta[['numCores']])
     # make variables available to each core's workspace
     parallel::clusterExport(clust, list("dimsum_meta","unique_outpath"), envir = environment())
-    parallel::parSapply(clust,X = 1:length(unique(dimsum_meta[["exp_design"]][,"sample_code"])), dimsum_stage_unique_helper)
+    parallel::parSapply(clust,X = 1:length(unique(dimsum_meta[["exp_design"]][,"sample_code"])), dimsum__unique_helper)
     parallel::stopCluster(clust)
     #Run starcode to count unique variants
     for(this_sample_code in unique(dimsum_meta[["exp_design"]][,"sample_code"])){
@@ -76,11 +80,12 @@ dimsum_stage_unique <- function(
   #Delete files when last stage complete
   if(!dimsum_meta_new[["retainIntermediateFiles"]]){
     if(dimsum_meta_new[["stopStage"]]==this_stage){
-      temp_out <- mapply(system, dimsum_meta_new[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+      temp_out <- mapply(file.remove, dimsum_meta_new[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+      temp_out <- mapply(file.create, dimsum_meta_new[["touchIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
     }else{
       dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], 
-        paste0("rm ", file.path(unique_outpath, "*.usearch")),
-        paste0("rm ", file.path(unique_outpath, "*.unique")))
+        file.path(unique_outpath, dir(unique_outpath, "*.usearch$")),
+        file.path(unique_outpath, dir(unique_outpath, "*.unique$")))
     }
   }
   return(dimsum_meta_new)

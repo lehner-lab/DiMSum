@@ -14,68 +14,51 @@ dimsum_stage_demultiplex <- function(
   demultiplex_outpath,
   save_workspace = TRUE
   ){
+
   #Whether or not to execute the system command
-  this_stage <- 1
-  execute <- (dimsum_meta[["startStage"]] <= this_stage & (dimsum_meta[["stopStage"]] == 0 | dimsum_meta[["stopStage"]] >= this_stage))
-  #Save current workspace for debugging purposes
-  if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
-  #Create/overwrite demultiplex directory (if executed)
-  demultiplex_outpath <- gsub("/$", "", demultiplex_outpath)
-  dimsum__create_dir(demultiplex_outpath, execute = execute, message = "DiMSum STAGE 1: DEMULTIPLEX READS")  
-  #Demultiplex parameters specified?
-  if( !'barcode_design' %in% names(dimsum_meta) ){
-    message("Skipping this stage (assuming all fastq files already demultiplexed)")
+  this_stage <- 0
+  execute <- (dimsum_meta[["startStage"]] <= this_stage & dimsum_meta[["stopStage"]] >= this_stage)
+
+  #WRAP not run
+  if(!is.null(dimsum_meta[["countPath"]])){
     return(dimsum_meta)
   }
+
+  #Save current workspace for debugging purposes
+  if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
+
+  #Create/overwrite demultiplex directory (if executed)
+  demultiplex_outpath <- gsub("/$", "", demultiplex_outpath)
+  dimsum__create_dir(demultiplex_outpath, execute = execute, message = "DiMSum STAGE 0: DEMULTIPLEX READS")  
+
+  #Demultiplex parameters specified?
+  if( !'barcode_design' %in% names(dimsum_meta) ){
+    dimsum__status_message("Skipping this stage (assuming all fastq files already demultiplexed)")
+    return(dimsum_meta)
+  }
+
+  #Input files
   fastq_pair_list <- unique(dimsum_meta[['barcode_design']][,c('pair1', 'pair2')])
   rownames(fastq_pair_list) = 1:dim(fastq_pair_list)[1]
+  #Check if all input files exist
+  dimsum__check_files_exist(
+    required_files = file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], unlist(fastq_pair_list)),
+    stage_number = this_stage,
+    execute = execute)
+  
   #Reformat barcode files for cutadapt (and copy and rename FASTQ files if necessary)
   #Check if this system command should be executed
   if(execute){
-    dimsum_stage_demultiplex_cp_helper <- function(
-      i
-      ){
-      pair_name <- rownames(fastq_pair_list)[i]
-      temp_design <- dimsum_meta[['barcode_design']][dimsum_meta[['barcode_design']][,'pair1']==fastq_pair_list[pair_name,'pair1'],]
-      write(
-        x = c(rbind(paste0('>', temp_design[,"new_pair_prefix"]), paste0('^', temp_design[,"barcode1"]))), 
-        file = file.path(demultiplex_outpath, paste0('demultiplex_barcode1-file_', pair_name, '.fasta')), 
-        sep="\n")
-      write(
-        x = c(rbind(paste0('>', temp_design[,"new_pair_prefix"]), paste0('^', temp_design[,"barcode2"]))), 
-        file = file.path(demultiplex_outpath, paste0('demultiplex_barcode2-file_', pair_name, '.fasta')), 
-        sep="\n")
-      #Check if file extension incompatible with cutadapt (i.e. NOT ".fastq" or ".fastq.gz")
-      if(dimsum_meta[["fastqFileExtension"]]!=".fastq"){
-        #Copy FASTQ files to temp directory and format extension
-        new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], fastq_pair_list[pair_name,][1])
-        new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], fastq_pair_list[pair_name,][2])
-        temp_out <- system(paste0(
-          "cp ",
-          file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[pair_name,][1]),
-          " ",
-          file.path(demultiplex_outpath, new_fastq_name1)))
-        #If second read in pair exists
-        if(dimsum_meta[["paired"]]){
-          temp_out <- system(paste0(
-            "cp ",
-            file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[pair_name,][2]),
-            " ",
-            file.path(demultiplex_outpath, new_fastq_name2)))
-        }
-      }
-    }
     # Setup cluster
     clust <- parallel::makeCluster(dimsum_meta[['numCores']])
     # make variables available to each core's workspace
     parallel::clusterExport(clust, list("dimsum_meta","fastq_pair_list","demultiplex_outpath"), envir = environment())
-    parallel::parSapply(clust,X = 1:nrow(fastq_pair_list), dimsum_stage_demultiplex_cp_helper)
+    parallel::parSapply(clust,X = 1:nrow(fastq_pair_list), dimsum__demultiplex_cp_helper)
     parallel::stopCluster(clust)
   }
-  #Update names in list
-  for(pair_name in rownames(fastq_pair_list)){
-    #Check if file extension incompatible with cutadapt (i.e. NOT ".fastq" or ".fastq.gz")
-    if(dimsum_meta[["fastqFileExtension"]]!=".fastq"){
+  #Update names in list if file extension incompatible with cutadapt (i.e. NOT ".fastq" or ".fastq.gz")
+  if(dimsum_meta[["fastqFileExtension"]]!=".fastq"){
+    for(pair_name in rownames(fastq_pair_list)){
       #New FASTQ file names
       new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], fastq_pair_list[pair_name,][1])
       new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], fastq_pair_list[pair_name,][2])
@@ -83,86 +66,31 @@ dimsum_stage_demultiplex <- function(
       fastq_pair_list[pair_name,][1] <- new_fastq_name1
       fastq_pair_list[pair_name,][2] <- new_fastq_name2
     }
-  }
-  #Check if file extension incompatible with cutadapt (i.e. NOT ".fastq" or ".fastq.gz")
-  if(dimsum_meta[["fastqFileExtension"]]!=".fastq"){
     #Update FASTQ file directory in list
     dimsum_meta[["exp_design"]][,"pair_directory"] <- demultiplex_outpath
   }
   #Demultiplex FASTQ files
-  message("Demultiplexing FASTQ files with cutadapt:")
+  dimsum__status_message("Demultiplexing FASTQ files with cutadapt:\n")
   all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], unlist(fastq_pair_list))
-  print(unique(all_fastq))
-  message("Processing...")
-  for(i in 1:dim(fastq_pair_list)[1]){message(paste0("\t", unique(unlist(fastq_pair_list[i,]))))}
+  dimsum__status_message(paste0(unique(all_fastq), "\n"))
+  dimsum__status_message("Processing...\n")
+  for(i in 1:dim(fastq_pair_list)[1]){dimsum__status_message(paste0("\t", unique(unlist(fastq_pair_list[i,])), "\n"))}
   #Check if this system command should be executed
   if(execute){
-    dimsum_stage_demultiplex_helper <- function(
-      i
-      ){
-      pair_name <- rownames(fastq_pair_list)[i]
-      #Demultiplex using cutadapt
-      if(dimsum_meta[["paired"]]){
-        temp_out <- system(paste0(
-          "cutadapt",
-          " -g file:",
-          file.path(demultiplex_outpath, paste0('demultiplex_barcode1-file_', pair_name, '.fasta')),
-          " -G file:",
-          file.path(demultiplex_outpath, paste0('demultiplex_barcode2-file_', pair_name, '.fasta')),
-          " -e ",
-          as.character(dimsum_meta[["barcodeErrorRate"]]),
-          " --no-indels ",
-          " --pair-adapters ",
-          " --untrimmed-output ",
-          file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.unknown.fastq")),
-          " --untrimmed-paired-output ",
-          file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][2], ".demultiplex.unknown.fastq")),
-          " -o ",
-          file.path(demultiplex_outpath, "{name}1.fastq"),
-          " -p ",
-          file.path(demultiplex_outpath, "{name}2.fastq"),
-          " ",
-          file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[pair_name,][1]),
-          " ",
-          file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[pair_name,][2]),
-          " > ",
-          file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.stdout")),
-          " 2> ",
-          file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.stderr"))))
-      }else{
-        temp_out <- system(paste0(
-          "cutadapt",
-          " -g file:",
-          file.path(demultiplex_outpath, paste0('demultiplex_barcode1-file_', pair_name, '.fasta')),
-          " -e ",
-          as.character(dimsum_meta[["barcodeErrorRate"]]),
-          " --no-indels ",
-          " --untrimmed-output ",
-          file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.unknown.fastq")),
-          " -o ",
-          file.path(demultiplex_outpath, "{name}1.fastq"),
-          " ",
-          file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[pair_name,][1]),
-          " > ",
-          file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.stdout")),
-          " 2> ",
-          file.path(demultiplex_outpath, paste0(fastq_pair_list[pair_name,][1], ".demultiplex.stderr"))))        
-      }
-    }
     # Setup cluster
     clust <- parallel::makeCluster(dimsum_meta[['numCores']])
     # make variables available to each core's workspace
     parallel::clusterExport(clust, list("dimsum_meta","demultiplex_outpath","fastq_pair_list"), envir = environment())
-    parallel::parSapply(clust,X = 1:nrow(fastq_pair_list), dimsum_stage_demultiplex_helper)
+    parallel::parSapply(clust,X = 1:nrow(fastq_pair_list), dimsum__demultiplex_helper)
     parallel::stopCluster(clust)
   }
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Delete files when last stage complete
   if(!dimsum_meta_new[["retainIntermediateFiles"]]){
-    dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], paste0("rm ", file.path(demultiplex_outpath, "*.fastq")))
+    dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], file.path(demultiplex_outpath, dir(demultiplex_outpath, "*.fastq$")))
     if(dimsum_meta[["fastqFileExtension"]]!=".fastq"){
-      dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], paste0("rm ", unique(all_fastq)))
+      dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], unique(all_fastq))
     }
   }
   #Update fastq metadata

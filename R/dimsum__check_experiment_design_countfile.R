@@ -1,14 +1,14 @@
 
-#' dimsum__check_experiment_design
+#' dimsum__check_experiment_design_countfile
 #'
-#' Validate metadata from experiment design file.
+#' Validate metadata from experiment design file when countPath specified.
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param exp_design experiment design data.frame (required)
 #'
 #' @return Nothing
 #' @export
-dimsum__check_experiment_design <- function(
+dimsum__check_experiment_design_countfile <- function(
   dimsum_meta,
   exp_design
   ){
@@ -20,15 +20,15 @@ dimsum__check_experiment_design <- function(
     stop(paste0("One or more mandatory columns missing from experimentDesign file ('sample_name', 'experiment_replicate', 'selection_id', 'selection_replicate', 'technical_replicate', 'pair1', 'pair2')"), call. = FALSE)
   }
 
-  ### FASTQ file checks (pair1/pair2 columns)
-  #Check file name columns are of type character 
-  if(typeof(exp_design[,"pair1"])!="character" | typeof(exp_design[,"pair2"])!="character"){
-    stop(paste0("One or more invalid FASTQ file name values in experimentDesign file (only characters allowed)"), call. = FALSE)
-  }
-  #Check for duplicated FASTQ files
-  if(sum(duplicated(exp_design[,c("pair1", "pair2")]))!=0 & !dimsum_meta[["experimentDesignPairDuplicates"]]){
-    stop(paste0("Duplicate FASTQ files not allowed in experimentDesign file columns: 'pair1' and 'pair2'"), call. = FALSE)
-  }
+  # ### FASTQ file checks (pair1/pair2 columns)
+  # #Check file name columns are of type character 
+  # if(typeof(exp_design[,"pair1"])!="character" | typeof(exp_design[,"pair2"])!="character"){
+  #   stop(paste0("One or more invalid FASTQ file name values in experimentDesign file (only characters allowed)"), call. = FALSE)
+  # }
+  # #Check for duplicated FASTQ files
+  # if(sum(duplicated(exp_design[,c("pair1", "pair2")]))!=0 & !dimsum_meta[["experimentDesignPairDuplicates"]]){
+  #   stop(paste0("Duplicate FASTQ files not allowed in experimentDesign file columns: 'pair1' and 'pair2'"), call. = FALSE)
+  # }
 
   ### Sample name checks (sample_name column)
   #Check sample name column is of type character 
@@ -98,18 +98,18 @@ dimsum__check_experiment_design <- function(
     stop(paste0("One or more invalid 'selection_replicate' values in experimentDesign file (only positive integers allowed)"), call. = FALSE)
   }
 
-  ### Technical replicate id checks (technical_replicate column)
-  #Check technical_replicate strictly positive integer (or all missing/NA)
-  if(typeof(exp_design[,"technical_replicate"])!="integer" & sum(!is.na(exp_design[,"technical_replicate"]))!=0){
-    stop(paste0("One or more invalid 'technical_replicate' values in experimentDesign file (only positive integers allowed)"), call. = FALSE)
-  }
-  if(sum(exp_design[,"technical_replicate"]<=0, na.rm = T)!=0){
-    stop(paste0("One or more invalid 'technical_replicate' values in experimentDesign file (only positive integers allowed)"), call. = FALSE)
-  }
+  # ### Technical replicate id checks (technical_replicate column)
+  # #Check technical_replicate strictly positive integer (or all missing/NA)
+  # if(typeof(exp_design[,"technical_replicate"])!="integer" & sum(!is.na(exp_design[,"technical_replicate"]))!=0){
+  #   stop(paste0("One or more invalid 'technical_replicate' values in experimentDesign file (only positive integers allowed)"), call. = FALSE)
+  # }
+  # if(sum(exp_design[,"technical_replicate"]<=0, na.rm = T)!=0){
+  #   stop(paste0("One or more invalid 'technical_replicate' values in experimentDesign file (only positive integers allowed)"), call. = FALSE)
+  # }
 
   ### Duplicate matrix row checks
-  #Check for duplicated rows in the following columns: "experiment_replicate", "selection_id", "selection_replicate", "technical_replicate"
-  if(sum(duplicated(exp_design[,c("experiment_replicate", "selection_id", "selection_replicate", "technical_replicate")]))!=0){
+  #Check for duplicated rows in the following columns: "experiment_replicate", "selection_id", "selection_replicate"
+  if(sum(duplicated(exp_design[,c("experiment_replicate", "selection_id", "selection_replicate")]))!=0){
     stop(paste0("One or more duplicated rows in experimentDesign file matrix (sample rows should be unique)"), call. = FALSE)
   }
 
@@ -121,50 +121,50 @@ dimsum__check_experiment_design <- function(
   #   }
   # }
 
-  ### Constant region checks
-  #Check constant region columns are of type character (or logical i.e. all empty/NA)
-  if(sum(!unlist(lapply(exp_design[,c("cutadapt5First", "cutadapt5Second", "cutadapt3First", "cutadapt3Second")], typeof)) %in% c("character", "logical"))!=0){
-    stop(paste0("One or more invalid constant region sequences. Only valid nucleotide sequences allowed (A/C/T/G)."), call. = FALSE)
-  }
-  #Check constant region sequences are valid (ACGT characters only)
-  all_characters <- unique(unlist(strsplit(gsub("[ACGT]\\.\\.\\.[ACGT]", "", as.character(unlist(exp_design[,c("cutadapt5First", "cutadapt5Second", "cutadapt3First", "cutadapt3Second")]))), "")))
-  if(sum(!all_characters %in% c("A", "C", "G", "T", NA))!=0){
-    stop("Invalid constant region sequences. Only valid nucleotide sequences allowed (A/C/T/G).", call. = FALSE)
-  }
+  # ### Constant region checks
+  # #Check constant region columns are of type character (or logical i.e. all empty/NA)
+  # if(sum(!unlist(lapply(exp_design[,c("cutadapt5First", "cutadapt5Second", "cutadapt3First", "cutadapt3Second")], typeof)) %in% c("character", "logical"))!=0){
+  #   stop(paste0("One or more invalid constant region sequences. Only valid nucleotide sequences allowed (A/C/T/G)."), call. = FALSE)
+  # }
+  # #Check constant region sequences are valid (ACGT characters only)
+  # all_characters <- unique(unlist(strsplit(gsub("[ACGT]\\.\\.\\.[ACGT]", "", as.character(unlist(exp_design[,c("cutadapt5First", "cutadapt5Second", "cutadapt3First", "cutadapt3Second")]))), "")))
+  # if(sum(!all_characters %in% c("A", "C", "G", "T", NA))!=0){
+  #   stop("Invalid constant region sequences. Only valid nucleotide sequences allowed (A/C/T/G).", call. = FALSE)
+  # }
 
-  ### Misc cutadapt argument checks
-  #Check cutadaptCut... columns are of type integer (or logical i.e. all empty/NA)
-  if(sum(!unlist(lapply(exp_design[,c("cutadaptCut5First", "cutadaptCut5Second", "cutadaptCut3First", "cutadaptCut3Second")], typeof)) %in% c("integer", "logical"))!=0){
-    stop(paste0("One or more invalid 'cutadaptCut...' arguments. Only positive integers allowed (zero exclusive)."), call. = FALSE)
-  }
-  #Check strictly positive integer cutadaptCut... arguments (if not NA)
-  if(sum(unlist(exp_design[,c("cutadaptCut5First", "cutadaptCut5Second", "cutadaptCut3First", "cutadaptCut3Second")])<=0, na.rm = T)!=0){
-    stop("Invalid 'cutadaptCut...' arguments. Only positive integers allowed (zero exclusive).", call. = FALSE)
-  }
-  #Check cutadaptMinLength strictly positive integer
-  if(typeof(exp_design[,"cutadaptMinLength"])!="integer"){
-    stop("Invalid 'cutadaptMinLength' argument. Only positive integers allowed (zero exclusive).", call. = FALSE)
-  }
-  #Check cutadaptMinLength argument
-  if(sum(exp_design[,c("cutadaptMinLength")]<1)!=0){
-    stop("Invalid 'cutadaptMinLength' argument. Only positive integers allowed (zero exclusive).", call. = FALSE)
-  }
-  #Check cutadaptErrorRate double
-  if(typeof(exp_design[,"cutadaptErrorRate"])!="double"){
-    stop("Invalid 'cutadaptErrorRate' argument. Only positive doubles less than 1 allowed (zero inclusive).", call. = FALSE)
-  }
-  #Check cutadaptErrorRate positive double less than 1
-  if(sum(exp_design[,c("cutadaptErrorRate")]<0)!=0 | sum(exp_design[,c("cutadaptErrorRate")]>=1)!=0){
-    stop("Invalid 'cutadaptErrorRate' argument. Only positive doubles less than 1 allowed (zero inclusive).", call. = FALSE)
-  }
-  #Check cutadaptOverlap integer
-  if(typeof(exp_design[,"cutadaptOverlap"])!="integer"){
-    stop("Invalid 'cutadaptOverlap' argument. Only positive integers allowed (zero inclusive).", call. = FALSE)
-  }
-  #Check cutadaptOverlap positive integer zero inclusive
-  if(sum(exp_design[,c("cutadaptOverlap")]<0)!=0){
-    stop("Invalid 'cutadaptOverlap' argument. Only positive integers allowed (zero inclusive).", call. = FALSE)
-  }
+  # ### Misc cutadapt argument checks
+  # #Check cutadaptCut... columns are of type integer (or logical i.e. all empty/NA)
+  # if(sum(!unlist(lapply(exp_design[,c("cutadaptCut5First", "cutadaptCut5Second", "cutadaptCut3First", "cutadaptCut3Second")], typeof)) %in% c("integer", "logical"))!=0){
+  #   stop(paste0("One or more invalid 'cutadaptCut...' arguments. Only positive integers allowed (zero exclusive)."), call. = FALSE)
+  # }
+  # #Check strictly positive integer cutadaptCut... arguments (if not NA)
+  # if(sum(unlist(exp_design[,c("cutadaptCut5First", "cutadaptCut5Second", "cutadaptCut3First", "cutadaptCut3Second")])<=0, na.rm = T)!=0){
+  #   stop("Invalid 'cutadaptCut...' arguments. Only positive integers allowed (zero exclusive).", call. = FALSE)
+  # }
+  # #Check cutadaptMinLength strictly positive integer
+  # if(typeof(exp_design[,"cutadaptMinLength"])!="integer"){
+  #   stop("Invalid 'cutadaptMinLength' argument. Only positive integers allowed (zero exclusive).", call. = FALSE)
+  # }
+  # #Check cutadaptMinLength argument
+  # if(sum(exp_design[,c("cutadaptMinLength")]<1)!=0){
+  #   stop("Invalid 'cutadaptMinLength' argument. Only positive integers allowed (zero exclusive).", call. = FALSE)
+  # }
+  # #Check cutadaptErrorRate double
+  # if(typeof(exp_design[,"cutadaptErrorRate"])!="double"){
+  #   stop("Invalid 'cutadaptErrorRate' argument. Only positive doubles less than 1 allowed (zero inclusive).", call. = FALSE)
+  # }
+  # #Check cutadaptErrorRate positive double less than 1
+  # if(sum(exp_design[,c("cutadaptErrorRate")]<0)!=0 | sum(exp_design[,c("cutadaptErrorRate")]>=1)!=0){
+  #   stop("Invalid 'cutadaptErrorRate' argument. Only positive doubles less than 1 allowed (zero inclusive).", call. = FALSE)
+  # }
+  # #Check cutadaptOverlap integer
+  # if(typeof(exp_design[,"cutadaptOverlap"])!="integer"){
+  #   stop("Invalid 'cutadaptOverlap' argument. Only positive integers allowed (zero inclusive).", call. = FALSE)
+  # }
+  # #Check cutadaptOverlap positive integer zero inclusive
+  # if(sum(exp_design[,c("cutadaptOverlap")]<0)!=0){
+  #   stop("Invalid 'cutadaptOverlap' argument. Only positive integers allowed (zero inclusive).", call. = FALSE)
+  # }
 
   ### Generations checks
   #Check generations column is of type double (or logical i.e. all empty/NA)

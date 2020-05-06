@@ -17,7 +17,7 @@ dimsum__filter_variants_coding <- function(
   wt_ntseq,
   all_reps){
 
-  # message("Filtering for desired coding variants...")
+  # dimsum__status_message("Filtering for desired coding variants...\n")
 
   # #Number of input and output replicates
   # all_reps_str <- paste0(all_reps, collapse="")
@@ -41,7 +41,7 @@ dimsum__filter_variants_coding <- function(
   # ### Retain only either purely nonsynonymous mutations or purely silent mutations
   # output_dt <- copy(input_dt[((Nmut_codons-Nham_aa) == 0 | Nham_aa == 0)])
   
-  # message("Done")
+  # dimsum__status_message("Done\n")
 
   # return(output_dt)
 

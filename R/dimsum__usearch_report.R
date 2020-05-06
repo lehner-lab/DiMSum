@@ -1,5 +1,5 @@
 
-#' dimsum_stage_usearch_report
+#' dimsum__usearch_report
 #'
 #' Generate USEARCH summary plots for all samples.
 #'
@@ -8,18 +8,27 @@
 #'
 #' @return an updated experiment metadata object
 #' @export
-dimsum_stage_usearch_report <- function(
+dimsum__usearch_report <- function(
   dimsum_meta,
   report_outpath
   ){
+
   #Create report directory (if doesn't already exist)
   report_outpath <- gsub("/$", "", report_outpath)
   suppressWarnings(dir.create(report_outpath))
-  #Get cutadapt results for all read pairs
+
+  #Input files
   usearch_files <- file.path(dimsum_meta[['exp_design']][,'aligned_pair_directory'], gsub('.usearch$', '.report', dimsum_meta[['exp_design']][,'aligned_pair']))
+  #Check if all input files exist
+  dimsum__check_files_exist(
+    required_files = usearch_files,
+    execute = TRUE,
+    exit = FALSE)
+
+  #Get cutadapt results for all read pairs
   usearch_list <- list()
   for(i in 1:length(usearch_files)){
-    temp_out <- system(paste0("cat ", usearch_files[i]), intern=TRUE)
+    temp_out <- readLines(usearch_files[i])
     usearch_list[[i]] <- list()
     usearch_list[[i]][['usearch_merge_length_low_quartile']] <- as.integer(rev(unlist(strsplit(temp_out[grep('Low quartile', temp_out)], ' ')))[4])
     usearch_list[[i]][['usearch_merge_length_median']] <- as.integer(rev(unlist(strsplit(temp_out[grep('Median', temp_out)], ' ')))[3])
@@ -68,8 +77,8 @@ dimsum_stage_usearch_report <- function(
     ggplot2::geom_col(ggplot2::aes(fill = Alignment_status)) +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
-    ggplot2::labs(x = "Sample names", y = "Read pairs (percentage)", title = paste0("Read pair alignment statistics"))
-  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_usearch_report_paircounts.png')), d, width=12, height=8)
+    ggplot2::labs(x = "Sample names", y = "Read pairs (percentage)")#, title = paste0("Read pair alignment statistics"))
+  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__usearch_report_paircounts.png')), d, width=12, height=8)
   #Plot2: read pair merge length statistics
   plot_df <- reshape2::melt(usearch_df[,grep('pairname|usearch_merge_', colnames(usearch_df))], id="pairname")
   plot_df[,'Length_quantile'] <- factor(plot_df[,'variable'])
@@ -78,8 +87,12 @@ dimsum_stage_usearch_report <- function(
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
     # ggplot2::coord_cartesian(ylim = c(0, max(plot_df[,'value'], na.rm = T))) +
-    ggplot2::labs(x = "Sample names", y = "Aligned length (bp)", title = paste0("Aligned length distributions (all splits)"))
-  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_usearch_report_mergedlength.png')), d, width=12, height=8)
+    ggplot2::labs(x = "Sample names", y = "Aligned length (bp)")#, title = paste0("Aligned length distributions (all splits)"))
+  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__usearch_report_mergedlength.png')), d, width=12, height=6)
+
+  #Render report
+  dimsum__render_report(dimsum_meta = dimsum_meta)
+
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Update fastq metadata

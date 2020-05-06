@@ -1,5 +1,5 @@
 
-#' dimsum_stage_cutadapt_report
+#' dimsum__cutadapt_report
 #'
 #' Generate cutadapt summary plots for all fastq files.
 #'
@@ -8,15 +8,24 @@
 #'
 #' @return an updated experiment metadata object
 #' @export
-dimsum_stage_cutadapt_report <- function(
+dimsum__cutadapt_report <- function(
   dimsum_meta,
   report_outpath
   ){
+
   #Create report directory (if doesn't already exist)
   report_outpath <- gsub("/$", "", report_outpath)
   suppressWarnings(dir.create(report_outpath))
-  #Get cutadapt results for all read pairs
+
+  #Input files
   cutadapt_files <- file.path(dimsum_meta[['exp_design']][,'pair_directory'], paste0(dimsum_meta[['exp_design']][,'pair1'], '.stdout'))
+  #Check if all input files exist
+  dimsum__check_files_exist(
+    required_files = cutadapt_files,
+    execute = TRUE,
+    exit = FALSE)
+
+  #Get cutadapt results for all read pairs
   cutadapt_read1_list <- list()
   cutadapt_read2_list <- list()
   total_reads_list <- list()
@@ -69,8 +78,8 @@ dimsum_stage_cutadapt_report <- function(
     ggplot2::geom_col(ggplot2::aes(fill = Region_trimmed)) +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
-    ggplot2::labs(x = "FASTQ files", y = "Reads trimmed (percentage)", title = paste0("Read 1 percentage constant region identified and trimmed"))
-  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_cutadapt_report_pair1.png')), d, width=12, height=8)
+    ggplot2::labs(x = "FASTQ files", y = "Reads trimmed (percentage)")#, title = paste0("Read 1 percentage constant region identified and trimmed"))
+  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__cutadapt_report_pair1.png')), d, width=12, height=8)
   #Second read (if paired design)
   if(dimsum_meta[["paired"]]){
     cutadapt_read2_df <- as.data.frame(do.call('rbind', cutadapt_read2_list))
@@ -91,9 +100,13 @@ dimsum_stage_cutadapt_report <- function(
       ggplot2::geom_col(ggplot2::aes(fill = Region_trimmed)) +
       ggplot2::theme_bw() +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
-      ggplot2::labs(x = "FASTQ files", y = "Reads trimmed (percentage)", title = paste0("Read 2 percentage constant region identified and trimmed"))
-    ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_cutadapt_report_pair2.png')), d, width=12, height=8)
+      ggplot2::labs(x = "FASTQ files", y = "Reads trimmed (percentage)")#, title = paste0("Read 2 percentage constant region identified and trimmed"))
+    ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__cutadapt_report_pair2.png')), d, width=12, height=8)
   }
+
+  #Render report
+  dimsum__render_report(dimsum_meta = dimsum_meta)
+
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Update fastq metadata

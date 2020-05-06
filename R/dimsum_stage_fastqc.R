@@ -18,20 +18,36 @@ dimsum_stage_fastqc <- function(
   report_outpath = NULL,
   save_workspace = TRUE
   ){
+
   #Whether or not to execute the system command
-  this_stage <- 2
-  execute <- (dimsum_meta[["startStage"]] <= this_stage & (dimsum_meta[["stopStage"]] == 0 | dimsum_meta[["stopStage"]] >= this_stage))
+  this_stage <- 1
+  execute <- (dimsum_meta[["startStage"]] <= this_stage & dimsum_meta[["stopStage"]] >= this_stage)
+
+  #WRAP not run
+  if(!is.null(dimsum_meta[["countPath"]])){
+    return(dimsum_meta)
+  }
+
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
+
   #Create/overwrite FASTQC directory (if executed)
   fastqc_outpath <- gsub("/$", "", fastqc_outpath)
-  dimsum__create_dir(fastqc_outpath, execute = execute, message = "DiMSum STAGE 2: ASSESS READ QUALITY")  
-  #Run FASTQC on all fastq files
-  message("Running FASTQC on all files:")
+  dimsum__create_dir(fastqc_outpath, execute = execute, message = "DiMSum STAGE 1: ASSESS READ QUALITY")  
+
+  #Input files
   all_fastq <- file.path(dimsum_meta[['exp_design']][1,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,'pair1'], dimsum_meta[['exp_design']][,'pair2'])))
-  print(all_fastq)
-  message("Processing...")
-  message(paste0("\t", basename(all_fastq), "\n"))
+  #Check if all input files exist
+  dimsum__check_files_exist(
+    required_files = all_fastq,
+    stage_number = this_stage,
+    execute = execute)
+
+  #Run FASTQC on all fastq files
+  dimsum__status_message("Running FASTQC on all files:\n")
+  dimsum__status_message(paste0(all_fastq, "\n"))
+  dimsum__status_message("Processing...\n")
+  dimsum__status_message(paste0("\t", basename(all_fastq), "\n"))
   #Check if this system command should be executed
   if(execute){
     temp_out <- system(paste0(
@@ -55,7 +71,12 @@ dimsum_stage_fastqc <- function(
   dimsum_meta_new[['exp_design']][,"fastqc_directory"] <- fastqc_outpath
   #Generate FASTQC report
   if(report){
-    dimsum_meta_new_report <- dimsum_stage_fastqc_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
+    tryCatch({
+      dimsum_meta_new_report <- dimsum__fastqc_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
+      }, error=function(e){
+        dimsum__status_message("There were problems while running 'dimsum__fastqc_report'\n")
+        dimsum_meta_new_report <- dimsum_meta_new
+        })
     return(dimsum_meta_new_report)
   }
   return(dimsum_meta_new)

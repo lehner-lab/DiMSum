@@ -24,7 +24,7 @@ dimsum__bayesian_double_fitness <- function(
   report_outpath = NULL
   ){
 
-  message("Calculating Bayesian double mutant fitness estimates...")
+  dimsum__status_message("Calculating Bayesian double mutant fitness estimates...\n")
 
   #Poisson distribution for score likelihood
   lam_d <- dimsum_meta[["bayesianDoubleFitnessLamD"]]
@@ -135,7 +135,7 @@ dimsum__bayesian_double_fitness <- function(
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_4_doubles_bayesian_framework_scattermatrix_doubles_cond.png"), d, width = 10, height = 10)
   }
   
-  message("Done")
+  dimsum__status_message("Done\n")
 
   return(doubles_dt)
 

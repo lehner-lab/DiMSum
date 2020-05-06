@@ -14,7 +14,7 @@ dimsum__parse_cutadapt_output <- function(
   ran_cutadapt=T,
   ran_cutadapt_cutonly=F
   ){
-  temp_out <- system(paste0("cat ", file_path), intern=TRUE)
+  temp_out <- readLines(file_path)
   if(!ran_cutadapt){
     name_read1 <- basename(rev(unlist(strsplit(temp_out[1], ' ')))[1])
     name_read2 <- basename(rev(unlist(strsplit(temp_out[2], ' ')))[1])

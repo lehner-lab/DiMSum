@@ -16,7 +16,7 @@ dimsum__filter_nuc_variants <- function(
   all_reps
   ){
 
-  message("Filtering out low count nucleotide variants...")
+  dimsum__status_message("Filtering out low count nucleotide variants...\n")
 
   #Number of input and output replicates
   all_reps_str <- paste0(all_reps, collapse="")
@@ -45,7 +45,7 @@ dimsum__filter_nuc_variants <- function(
 
   dimsum__check_variants(dimsum_meta = dimsum_meta, input_dt = output_dt)
 
-  message("Done")
+  dimsum__status_message("Done\n")
 
   return(output_dt)
 

@@ -16,7 +16,7 @@ dimsum__aggregate_AA_variants <- function(
   all_reps
   ){
 
-  message("Aggregating counts for identical amino acid variants...")
+  dimsum__status_message("Aggregating counts for identical amino acid variants...\n")
 
   #Number of input and output replicates
   all_reps_str <- paste0(all_reps, collapse="")
@@ -50,7 +50,7 @@ dimsum__aggregate_AA_variants <- function(
   #Revert to original names of aggregated count columns
   names(output_dt)[grep(names(output_dt),pattern="_agg$")] <- gsub("_agg$", "", names(output_dt)[grep(names(output_dt),pattern="_agg$")])
 
-  message("Done")
+  dimsum__status_message("Done\n")
 
   return(output_dt)
 

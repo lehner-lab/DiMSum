@@ -1,0 +1,326 @@
+---
+title: "DiMSum Report"
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+
+<!-- SETUP -->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+load("report_settings.RData")
+```
+
+<!-- Logo -->
+
+```{r logo_image, echo=FALSE, fig.cap="", out.width = '100'}
+knitr::include_graphics("Dumpling.png")
+```
+
+<!-- Settings -->
+
+```{r settings, echo=FALSE, results='asis'}
+cat(paste0("## Settings
+
+**DiMSum version:** ", doc_settings[["dimsum_version"]], "\n
+**Project name:** ", doc_settings[["project_name"]], "\n
+**Run Started:** ", doc_settings[["start_time"]], "\n
+**Run Completed:** ", doc_settings[["end_time"]], "\n
+**Command-line arguments:**"))
+```
+
+```{r arguments, echo=FALSE}
+cat(paste(formatDL(unlist(doc_settings[["arg_list"]])), collapse = "\n"))
+```
+
+<!-- PIPELINE STAGES -->
+
+```{r stages, echo=FALSE, results='asis'}
+cat(paste0("## Pipeline stages
+
+The DiMSum pipeline consists of five stages grouped into two modules which can be run independently:
+
+ - **WRAP** (Stages 1-3) processes raw FastQ files generating a table of variant counts
+ - **STEAM** (Stages 4-5) analyses variant counts generating variant fitness and error estimates
+
+Below you will find summary plots with results of each stage corresponding to the module(s) that were run.
+
+"))
+```
+
+<!-- QUALITYCONTROL -->
+
+```{r qualitycontrol1, echo=FALSE, results='asis', eval=doc_settings[["show_qualitycontrol1"]]}
+cat("## 1. **QC** raw reads (WRAP)
+
+DiMSum Stage 1 (QC) summarises base qualities from each raw FastQ file using [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/).
+
+The plot below shows 10th percentile (upper) and mean (lower) Phred quality scores at the indicated positions in the forward reads (Read 1) in all FastQ files (see legend). Vertical dashed lines separate constant region sequences (5') from variable region sequences (3') as specified by Stage 2-specific arguments (see TRIM below).
+
+If mean read qualities are low (Phred score<30) in the constant region sequence, it might be necessary to increase the maximum allowable number of mismatches during trimming i.e. Stage 2 ('cutadaptErrorRate'). If qualities are low in the variable region sequence, it may be necessary to adjust Stage 3 (ALIGN) options ('usearchMinQual', 'usearchMaxee'). Be aware that changing these options from their defaults can severely impact the number of 'fake' (spurious) variants due to sequencing errors. See [DiMSum documentation](https://github.com/lehner-lab/DiMSum) for details.")
+```
+
+```{r qualitycontrol1_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_qualitycontrol1"]]}
+knitr::include_graphics("dimsum__fastqc_report_pair1_fastqc.png")
+```
+
+<!-- QUALITYCONTROL (image2) -->
+
+```{r qualitycontrol2, echo=FALSE, results='asis', eval=doc_settings[["show_qualitycontrol2"]]}
+cat("The plot below is similar to the one above except quality scores for reverse reads (Read 2) are shown.")
+```
+
+```{r qualitycontrol2_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_qualitycontrol2"]]}
+knitr::include_graphics("dimsum__fastqc_report_pair2_fastqc.png")
+```
+
+<!-- TRIM -->
+
+```{r trim1, echo=FALSE, results='asis', eval=doc_settings[["show_trim1"]]}
+cat("## 2. **TRIM** constant regions (WRAP)
+
+DiMSum Stage 2 (TRIM) removes constant region sequences at the start (5') and/or end (3') of each read with [Cutadapt](https://cutadapt.readthedocs.io/en/stable/) if required.
+
+The plot below shows the percentage of forward reads (Read 1) in which the specified constant regions were matched and trimmed (see legend), shown separately for each FastQ file.
+
+Untrimmed reads (or read pairs) are discarded if constant region sequences are specified but not found. Trimmed reads are also discarded if the trimmed sequence length is too short ('cutadaptMinLength'). If the percentage of trimmed reads is low, check that constant region sequences were correctly specified ('cutadapt5First', 'cutadapt5Second', 'cutadapt3First', 'cutadapt3Second'). It may also be necessary to increase the maximum allowable number of mismatches ('cutadaptErrorRate') if sequence qualities are low or decrease the minimum allowable overlap between read and constant region ('cutadaptOverlap') if constant region sequences are very short (<3bp). See [DiMSum documentation](https://github.com/lehner-lab/DiMSum) for details.")
+```
+
+```{r trim1_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_trim1"]]}
+knitr::include_graphics("dimsum__cutadapt_report_pair1.png")
+```
+
+<!-- TRIM (image2) -->
+
+```{r trim2, echo=FALSE, results='asis', eval=doc_settings[["show_trim2"]]}
+cat("The plot below is similar to the one above except trimming statistics for reverse reads (Read 2) are shown.")
+```
+
+```{r trim2_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_trim2"]]}
+knitr::include_graphics("dimsum__cutadapt_report_pair2.png")
+```
+
+<!-- ALIGN -->
+
+```{r align1, echo=FALSE, results='asis', eval=doc_settings[["show_align1"]]}
+cat("## 3. **ALIGN** PE reads (WRAP)
+
+DiMSum Stage 3 (ALIGN) aligns paired-end reads using [USEARCH](http://www.drive5.com/usearch/). This stage also filters the resulting variant sequences based on minimum base quality, total number of expected base calling errors and sequence length. If reads are the result of **single-end** sequencing, these same filters are applied.
+
+The plot below shows the total percentage of reads (or read pairs) retained for downstream analysis ('usearch_aligned'), shown separately for each FastQ file. Remaining reads are discarded. Details of each category are as follows:
+
+ - **'usearch_aligned'** (retained)
+ - **'usearch_too_many_diffs'** (discarded: >5 mismatches in the alignment)
+ - **'usearch_fwd_too_short'** (discarded: forward read too short, see 'usearchMinlen' option)
+ - **'usearch_rev_too_short'** (discarded: reverse read too short, see 'usearchMinlen' option)
+ - **'usearch_no_alignment_found'** (discarded: no alignment found)
+ - **'usearch_alignment_too_short'** (discarded: alignment too short, see 'usearchMinovlen' option)
+ - **'usearch_exp_errs_too_high'** (discarded: total number of expected base calling errors too high, see 'usearchMaxee' option)
+ - **'usearch_min_Q_too_low'** (discarded: minimum base quality too low, see 'usearchMinQual' option)
+ - **'cutadapt_not_written'** (discarded: read discarded in Stage 2)
+
+If the percentage of reads retained is low (<<50%), the above options may need to be adjsted. See [DiMSum documentation](https://github.com/lehner-lab/DiMSum) for details.
+
+")
+```
+
+```{r align1_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_align1"]]}
+knitr::include_graphics("dimsum__usearch_report_paircounts.png")
+```
+
+<!-- ALIGN (image2) -->
+
+```{r align2, echo=FALSE, results='asis', eval=doc_settings[["show_align1"]]}
+cat("The plot below shows variant sequence length distributions after alignment, shown separately for all samples. The upper quartile, lower quartile and median are show in each case (see legend). Check that the median sequence length is as expected (e.g. wild-type sequence length without indels).")
+```
+
+```{r align2_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_align1"]]}
+knitr::include_graphics("dimsum__usearch_report_mergedlength.png")
+```
+
+<!-- PROCESS -->
+
+```{r process1, echo=FALSE, results='asis', eval=doc_settings[["show_process1"]]}
+cat("## 4. **PROCESS** variants (STEAM)
+
+DiMSum Stage 4 (PROCESS) processes sequences and filters them in order to retain user-specified nucleotide or amino acid substitution variants of interest. The result is a table of variant counts for all samples. Read count diagnostic plots can then be used to rapidly check for the presence of problematic variants (likely the result of sequencing errors) and take steps to remove them (see Sections 4.1 and 4.2 below).
+
+The plot below shows the **percentage of reads** retained or discarded in each sample according to the following criteria:
+
+ - **'0 hamming dist.'** (retained: wild-type sequence)
+ - **'1 hamming dist.'** (retained: 1 nucleotide substitutions from wild-type sequence)
+ - **'2 hamming dist.'** (retained: 2 nucleotide substitutions from wild-type sequence)
+ - **'3 hamming dist.'** (retained: >3 nucleotide substitutions from wild-type sequence)
+ - **'mixed'** (discarded: nonsynonymous variants have synonymous substitutions in other codons, see 'mixedSubstitutions' option)
+ - **'too many'** (discarded: too many nucleotide or amino acid substitutions, see 'maxSubstitutions' option)
+ - **'not permitted'** (discarded: nucleotide substitution not permitted, see 'wildtypeSequence' option)
+ - **'internal constant region'** (discarded: nucleotide substitution within internal constant sequence, see 'wildtypeSequence' option)
+ - **'indel'** (discarded: insertion or deletion variant)
+ - **'invalid barcode'** (discarded: reads represent barcode sequences, but are not found in the user-supplied barcode identity file, see 'barcodeIdentityPath' option)
+
+See [DiMSum documentation](https://github.com/lehner-lab/DiMSum) for more details.
+
+")
+```
+
+```{r process1_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_process1"]]}
+knitr::include_graphics("dimsum__merge_report_nucmutationpercentages.png")
+```
+
+<!-- PROCESS (image2) -->
+
+```{r process2, echo=FALSE, results='asis', eval=doc_settings[["show_process1"]]}
+cat("Nucleotide variant statistics (counts). The plot below is similar to the one above instead the **total number of reads** (rather than the percentage) in each sample is shown.")
+```
+
+```{r process2_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_process1"]]}
+knitr::include_graphics("dimsum__merge_report_nucmutationcounts.png")
+```
+
+<!-- PROCESS (image3) -->
+
+```{r process3, echo=FALSE, results='asis', eval=doc_settings[["show_processA"]]}
+cat("Amino acid variant statistics (percentages). The plots below are similar to the ones above instead  **amino acid** (rather than nucleotide) hamming distances are shown.")
+```
+
+```{r process3_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_processA"]]}
+knitr::include_graphics("dimsum__merge_report_aamutationpercentages.png")
+```
+
+<!-- PROCESS (image4) -->
+
+```{r process4, echo=FALSE, results='asis', eval=doc_settings[["show_processA"]]}
+cat("Amino acid variant statistics (counts).")
+```
+
+```{r process4_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_processA"]]}
+knitr::include_graphics("dimsum__merge_report_aamutationcounts.png")
+```
+
+<!-- PROCESS (image5) -->
+
+```{r process5, echo=FALSE, results='asis', eval=doc_settings[["show_process1"]]}
+cat("### 4.1 Input count distributions
+
+The **diagnostic plot** below shows marginal variant count distributions separately for all Input samples and stratified by the number of nucleotide substitutions (Hamming distance to the wild-type sequence). Distributions corresponding to Hamming distances greater than 12 are not shown. Wild-type sequence counts are indicated by the black vertical dashed line. 
+
+Expected counts from 'fake' variants (due to base-call errors at a rate corresponding to the 'usearchMinQual' option) are indicated by coloured dashed lines. Bimodal distributions (or unimodal distributions not surpassing the indicated thresholds) indicate variants originating from sequencing errors likely due to a library 'bottleneck'. A minimum input count threshold should be chosen to remove such variants (see 'fitnessMinInputCountAll' option applied in Stage 5 and [DiMSum documentation](https://github.com/lehner-lab/DiMSum) for more details.).
+
+")
+```
+
+```{r process5_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_process1"]]}
+knitr::include_graphics("dimsum__diagnostics_report_count_hist_input_nt.png")
+```
+
+<!-- PROCESS (image6) -->
+
+```{r process6, echo=FALSE, results='asis', eval=doc_settings[["show_process1"]]}
+cat("### 4.2 Sample count correlations
+    
+The **diagnostic plot** below is a scatterplot matrix depicting correlations between variant counts from all Input and Output samples. Matrix cells in the upper triangle show Pearson correlation coefficients. Matrix cells in the lower triangle show scatterplot equivalents (hexagonal heatmaps of 2d bin counts). Matrix diagonal cells indicate count densities.
+
+Distinct variant populations or 'flaps' i.e. subsets of variants that appear at high counts in one replicate but at low counts in another (and not due to selection) indicate replicate or DNA extraction 'bottlenecks'. Minimum input count thresholds should be chosen to remove such variants (see 'fitnessMinInputCountAll', 'fitnessMinInputCountAny', 'fitnessMinOutputCountAll' and 'fitnessMinOutputCountAny' options applied in Stage 5 and [DiMSum documentation](https://github.com/lehner-lab/DiMSum) for more details).
+")
+```
+
+```{r process6_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_process1"]]}
+knitr::include_graphics("dimsum__diagnostics_report_scatterplotmatrix_all.png")
+```
+
+<!-- ANALYSE -->
+
+```{r analyse1, echo=FALSE, results='asis', eval=doc_settings[["show_analyse1"]]}
+cat("## 5. **ANALYSE** counts (STEAM)
+
+### 5.1 Input threshold for error model
+
+The plot below shows the minimum Input count threshold (black vertical dashed line) above which variants are expected to span the full fitness range (y-axis spread). Variants surpassing this threshold are used to fit the error model. Subplots indicate data corresponding to independent biological replicates.
+
+A strong dependency between Input variant counts and fitness (negative correlation) can indicate a harsh selection i.e. a high level of variants that 'drop-out' or are undetected in the Output.
+
+")
+```
+
+```{r analyse1_image, echo=FALSE, fig.cap="", out.width = '60%', eval=doc_settings[["show_analyse1"]]}
+knitr::include_graphics("dimsum_stage_fitness_report_1_errormodel_fitness_inputcounts.png")
+```
+
+<!-- ANALYSE (image2) -->
+
+```{r analyse2, echo=FALSE, results='asis', eval=doc_settings[["show_analyse1"]]}
+cat("### 5.2 Replicate fitness distributions
+    
+The plot below shows replicate fitness distributions (without normalisation between replicates). The fitness of the wild-type sequence is indicated by the vertical dashed line (Fitness=0). Only variants retained during error model fitting are depicted (see Section 5.1 above).
+
+Linear differences between replicate fitness distributions can be corrected by (scale and shift) normalisation before error model fitting (see 'fitnessNormalise' option).
+")
+```
+
+```{r analyse2_image, echo=FALSE, fig.cap="", out.width = '60%', eval=doc_settings[["show_analyse1"]]}
+knitr::include_graphics("dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density.png")
+```
+
+<!-- ANALYSE (image3) -->
+
+```{r analyse3, echo=FALSE, results='asis', eval=doc_settings[["show_analyseN"]]}
+cat("The plot below shows replicate fitness distributions after normalisation. Remaining differences in the shapes of the fitness distributions after normalisation indicate systematic errors between replicates. Affected replicates should be excluded from error model fitting (see 'retainedReplicates' option).
+")
+```
+
+```{r analyse3_image, echo=FALSE, fig.cap="", out.width = '60%', eval=doc_settings[["show_analyseN"]]}
+knitr::include_graphics("dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density_norm.png")
+```
+
+<!-- ANALYSE (image4) -->
+
+```{r analyse4, echo=FALSE, results='asis', eval=doc_settings[["show_analyse1"]]}
+cat("### 5.3 Replicate fitness correlations")
+```
+
+```{r analyse4_1, echo=FALSE, results='asis', eval=!doc_settings[["show_analyseN"]]}
+cat("The **diagnostic plot** below is a scatterplot matrix depicting correlations between fitness estimates from all replicates. Matrix cells in the upper triangle show Pearson correlation coefficients. Matrix cells in the lower triangle show scatterplot equivalents (hexagonal heatmaps of 2d bin fitness). Matrix diagonal cells indicate fitness densities. Only variants retained during error model fitting are depicted (see Section 5.1 above).
+
+Poor correlations indicate systematic errors between replicates. Affected replicates should be excluded from error model fitting (see 'retainedReplicates' option).
+
+")
+```
+
+```{r analyse4_image, echo=FALSE, fig.cap="", out.width = '100%', eval=!doc_settings[["show_analyseN"]]}
+knitr::include_graphics("dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter.png")
+```
+
+<!-- ANALYSE (image5) -->
+
+```{r analyse5, echo=FALSE, results='asis', eval=doc_settings[["show_analyseN"]]}
+cat("The **diagnostic plot** below is a scatterplot matrix depicting correlations between fitness estimates from all replicates after normalisation (see Section 5.2). Matrix cells in the upper triangle show Pearson correlation coefficients. Matrix cells in the lower triangle show scatterplot equivalents (hexagonal heatmaps of 2d bin fitness). Matrix diagonal cells indicate fitness densities. Only variants retained during error model fitting are depicted (see Section 5.1 above).
+
+Poor correlations indicate systematic errors between replicates. Affected replicates should be excluded from error model fitting (see 'retainedReplicates' option).")
+```
+
+```{r analyse5_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_analyseN"]]}
+knitr::include_graphics("dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter_norm.png")
+```
+
+<!-- ANALYSE (image6) -->
+
+```{r analyse6, echo=FALSE, results='asis', eval=doc_settings[["show_analyse1"]]}
+cat("### 5.4 Fitness error model
+
+The upper panels in the plot below indicate multiplicative (upper left panel) and additive (upper right panel) error terms estimated by the DiMSum error model. Dots give mean and error bars indicate the standard deviation of parameters over 100 bootstraps.
+
+The lower panel in the plot below shows variance of fitness scores between replicates as a function of sequencing count-based (Poisson) variance expectation (average across replicates). The DiMSum error model (red line) describes deviations from expectation in the observed variance of fitness scores (black dashed line). The diagonal green dashed line indicates the multiplicative error term contribution. The horizontal green dashed line indicates the additive error term contribution and blue dots show mean variance per bin.
+
+A good fit of the DiMSum error model (red line) to the binned observations (blue points) indicates that the estimated parameters (upper panels) accurately describe the variation in fitness between replicates.
+
+")
+```
+
+```{r analyse6_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_analyse1"]]}
+knitr::include_graphics("dimsum_stage_fitness_report_1_errormodel_repspec.png")
+```
+

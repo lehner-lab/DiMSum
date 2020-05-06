@@ -19,9 +19,11 @@ dimsum_stage_counts_to_fitness <- function(
   report_outpath = NULL,
   save_workspace = TRUE
   ){
+
   #Whether or not to execute the system command
-  this_stage <- 7
-  execute <- (dimsum_meta[["startStage"]] <= this_stage & (dimsum_meta[["stopStage"]] == 0 | dimsum_meta[["stopStage"]] >= this_stage))
+  this_stage <- 5
+  execute <- (dimsum_meta[["startStage"]] <= this_stage & dimsum_meta[["stopStage"]] >= this_stage)
+
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
 
@@ -35,11 +37,17 @@ dimsum_stage_counts_to_fitness <- function(
 
   #Create/overwrite fitness directory (if executed)
   fitness_outpath <- gsub("/$", "", fitness_outpath)
-  dimsum__create_dir(fitness_outpath, execute = execute, message = "DiMSum STAGE 7: CALCULATE FITNESS", overwrite_dir = FALSE) 
+  dimsum__create_dir(fitness_outpath, execute = execute, message = "DiMSum STAGE 5: ANALYSE VARIANT COUNTS", overwrite_dir = FALSE) 
+
+  #Check if all input files exist
+  dimsum__check_files_exist(
+    required_files = dimsum_meta[["variant_data_merge_path"]],
+    stage_number = this_stage,
+    execute = execute)
 
   ### Load variant data
   ###########################
-
+    
   #load variant data from RData file
   e1 <- new.env() 
   load(dimsum_meta[["variant_data_merge_path"]])
@@ -59,8 +67,11 @@ dimsum_stage_counts_to_fitness <- function(
     all_reps <- unique(as.integer(strsplit(dimsum_meta[["retainedReplicates"]], ",")[[1]]))
   }
 
-  #Bayesian double mutant fitness estimates
-  bayesian_double_fitness <- dimsum_meta[["bayesianDoubleFitness"]]
+  #Check if only one experimental replicate exists (requirement for normalisation and error model fit)
+  if(length(unique(dimsum_meta[["exp_design"]][,"experiment_replicate"]))<2){
+    dimsum_meta[["fitnessNormalise"]] <- FALSE
+    dimsum_meta[["fitnessErrorModel"]] <- FALSE
+  }
 
   ### Filter out low count nucleotide variants
   ###########################
@@ -72,10 +83,6 @@ dimsum_stage_counts_to_fitness <- function(
 
   ### Aggregate counts at the AA level (if coding sequence and "mixedSubstitutions"==T)
   ###########################
-
-  #Add number of codons affected by mutations
-  wt_ntseq_split <- strsplit(wt_ntseq,"")[[1]]
-  nf_data[,Nmut_codons := length(unique(ceiling(which(strsplit(nt_seq,"")[[1]] != wt_ntseq_split)/3))),nt_seq]
 
   #For coding sequences aggregate variant counts at the AA level
   if(dimsum_meta[["sequenceType"]]=="coding" & dimsum_meta[["mixedSubstitutions"]]){
@@ -90,7 +97,7 @@ dimsum_stage_counts_to_fitness <- function(
   ### Aggregate counts for biological output replicates
   ###########################
 
-  message("Aggregating counts for biological output replicates...")
+  dimsum__status_message("Aggregating counts for biological output replicates...\n")
 
   #Add up counts for biological output reps
   for (E in all_reps) {
@@ -102,7 +109,7 @@ dimsum_stage_counts_to_fitness <- function(
     "merge_seq","nt_seq","aa_seq","Nham_nt","Nham_aa",
     "Nmut_codons","WT","STOP","STOP_readthrough",names(nf_data)[grep(names(nf_data),pattern="^count")])]
 
-  message("Done")
+  dimsum__status_message("Done\n")
 
   ### Fit error model
   ###########################
@@ -187,8 +194,8 @@ dimsum_stage_counts_to_fitness <- function(
   doubles[,bin_count := findInterval(log10(counts_for_bins),seq(0.5,4,0.25))]
   # doubles[,.(.N,mean(counts_for_bins)),bin_count][order(bin_count)]
 
-  if(!bayesian_double_fitness){
-    message("Skipping Bayesian double mutant fitness estimation")
+  if(!dimsum_meta[["bayesianDoubleFitness"]]){
+    dimsum__status_message("Skipping Bayesian double mutant fitness estimation\n")
   }else{
     doubles <- dimsum__bayesian_double_fitness(
       dimsum_meta = dimsum_meta,
@@ -205,11 +212,11 @@ dimsum_stage_counts_to_fitness <- function(
   #Check that number of generations supplied for all output samples
   if(sum(is.na(dimsum_meta[["exp_design"]][dimsum_meta[["exp_design"]][,"selection_id"]==1,"generations"]))!=0){
 
-    message("Skipping normalisation by number of generations")
+    dimsum__status_message("Skipping normalisation by number of generations\n")
 
   }else{
 
-    message("Normalising fitness and error for differences in number of generations...")
+    dimsum__status_message("Normalising fitness and error for differences in number of generations...\n")
 
     nff_data <- dimsum__normalise_fitness(
       dimsum_meta = dimsum_meta,
@@ -228,7 +235,7 @@ dimsum_stage_counts_to_fitness <- function(
       all_reps = all_reps,
       fitness_suffix="_uncorr"
       )
-    if(bayesian_double_fitness){
+    if(dimsum_meta[["bayesianDoubleFitness"]]){
       doubles <- dimsum__normalise_fitness(
         dimsum_meta = dimsum_meta,
         input_dt = doubles,
@@ -237,7 +244,7 @@ dimsum_stage_counts_to_fitness <- function(
         )
     }
 
-    message("Done")
+    dimsum__status_message("Done\n")
 
   }
 
@@ -256,8 +263,9 @@ dimsum_stage_counts_to_fitness <- function(
 
   #Delete files when last stage complete
   if(!dimsum_meta[["retainIntermediateFiles"]]){
-    if(dimsum_meta[["stopStage"]]==this_stage | dimsum_meta[["stopStage"]]==0){
-      temp_out <- mapply(system, dimsum_meta[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+    if(dimsum_meta[["stopStage"]]==this_stage){
+      temp_out <- mapply(file.remove, dimsum_meta[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+      temp_out <- mapply(file.create, dimsum_meta[["touchIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
     }
   }
 

@@ -10,6 +10,9 @@
 dimsum__validate_input <- function(
   input_list
   ){
+
+  input_list_original <- input_list
+
   #Check all input parameter types correct
   for(input_arg in names(input_list)){
     #Integer arguments
@@ -37,13 +40,29 @@ dimsum__validate_input <- function(
   #Metadata object
   dimsum_meta <- sapply(input_list, '[', 1)
 
-  #Reformat directory paths and check if they exist (remove trailing "/" if present)
-  for(input_arg in c("fastqFileDir", "outputPath")){
-    dimsum_meta[[input_arg]] <- gsub("/$", "", dimsum_meta[[input_arg]])
-    #Check if directory paths exist
-    if(!file.exists(dimsum_meta[[input_arg]])){
-      stop(paste0("Invalid '", input_arg, "' argument (directory not found)"), call. = FALSE)
+  #Save original command-line arguments
+  dimsum_meta[["arg_list"]] <- sapply(input_list_original, '[', 1)
+
+  #Either fastqFileDir or countPath need to be specified
+  if(!is.null(dimsum_meta[["fastqFileDir"]])){
+    #Reformat fastqFileDir and check if exists (remove trailing "/" if present)
+    dimsum_meta[["fastqFileDir"]] <- gsub("/$", "", dimsum_meta[["fastqFileDir"]])
+    if(!file.exists(dimsum_meta[["fastqFileDir"]])){
+      stop(paste0("Invalid 'fastqFileDir' argument (directory not found)"), call. = FALSE)
     }
+  }else if(!is.null(dimsum_meta[["countPath"]])){
+    #Check if exists
+    if(!file.exists(dimsum_meta[["countPath"]])){
+      stop(paste0("Invalid 'countPath' argument (file not found)"), call. = FALSE)
+    }
+  }else{
+    stop(paste0("Either 'fastqFileDir' or 'countPath' arguments must be specified"), call. = FALSE)
+  }
+
+  #Reformat outputPath and check if exists (remove trailing "/" if present)
+  dimsum_meta[["outputPath"]] <- gsub("/$", "", dimsum_meta[["outputPath"]])
+  if(!file.exists(dimsum_meta[["outputPath"]])){
+    stop(paste0("Invalid 'outputPath' argument (directory not found)"), call. = FALSE)
   }
 
   #FASTQ file extension
@@ -97,7 +116,7 @@ dimsum__validate_input <- function(
     stop("Invalid 'fitness...Count...' arguments. Only positive integers allowed (zero inclusive).", call. = FALSE)
   }
 
-  #Check strictly positive integer splitChunkSize argument
+  #Check strictly positive double splitChunkSize argument
   if(dimsum_meta[["splitChunkSize"]]<=0){
     stop("Invalid 'splitChunkSize' argument. Only positive integers allowed (zero exclusive).", call. = FALSE)
   }
@@ -105,6 +124,11 @@ dimsum__validate_input <- function(
   #Check maxSubstitutions argument greater than 1
   if(dimsum_meta[["maxSubstitutions"]]<2){
     stop("Invalid 'maxSubstitutions' argument. Only integers greater than 1 allowed.", call. = FALSE)
+  }
+
+  #Check barcodeErrorRate argument
+  if(dimsum_meta[["barcodeErrorRate"]]<0 | dimsum_meta[["barcodeErrorRate"]]>=1){
+    stop("Invalid 'barcodeErrorRate' argument. Only positive doubles less than 1 allowed (zero inclusive).", call. = FALSE)
   }
 
   #Check usearchMaxee argument
@@ -121,13 +145,13 @@ dimsum__validate_input <- function(
   }
 
   #Check startStage argument
-  if(dimsum_meta[["startStage"]]<=0){
-    stop("Invalid 'startStage' argument. Only positive integers allowed (zero exclusive).", call. = FALSE)
+  if(dimsum_meta[["startStage"]]<0){
+    stop("Invalid 'startStage' argument. Only positive integers allowed (zero inclusive).", call. = FALSE)
   }
 
   #Check stopStage argument
-  if(dimsum_meta[["stopStage"]]<0){
-    stop("Invalid 'stopStage' argument. Only positive integers allowed (zero inclusive).", call. = FALSE)
+  if(dimsum_meta[["stopStage"]]<=0){
+    stop("Invalid 'stopStage' argument. Only positive integers allowed (zero exclusive).", call. = FALSE)
   }
 
   #Check numCores argument
@@ -177,6 +201,15 @@ dimsum__validate_input <- function(
       stop(paste0("One or more invalid values in barcodeIdentity file (only A/C/G/T characters allowed)"), call. = FALSE)
     }
   }
+
+  #Set fitnessNormalise to FALSE if fitnessErrorModel is FALSE
+  if(!dimsum_meta[["fitnessErrorModel"]]){
+    dimsum_meta[["fitnessNormalise"]] <- FALSE
+  }
+
+  #Set run start/end time
+  dimsum_meta[["start_time"]] <- Sys.time()
+  dimsum_meta[["end_time"]] <- "In progress"
 
   #Return
   return(dimsum_meta)

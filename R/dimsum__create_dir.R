@@ -17,12 +17,12 @@ dimsum__create_dir <- function(
   overwrite_dir = TRUE){
   if(!execute){
     if(!is.null(message)){
-      message(paste("\n\n\n*******", message, "(not executed)", "*******\n\n\n"))
+      dimsum__status_message(paste("\n\n\n*******", message, "(not executed)", "*******\n\n\n"))
     }
     return()
   }
   if(!is.null(message)){
-    message(paste("\n\n\n*******", message, "*******\n\n\n"))
+    dimsum__status_message(paste("\n\n\n*******", message, "*******\n\n\n"))
   }
   if(dir.exists(dimsum_dir) & overwrite_dir){
     unlink(dimsum_dir, recursive = TRUE)

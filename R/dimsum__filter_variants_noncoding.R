@@ -17,7 +17,7 @@ dimsum__filter_variants_noncoding <- function(
   wt_ntseq,
   all_reps){
 
-  # message("Filtering for desired non-coding variants...")
+  # dimsum__status_message("Filtering for desired non-coding variants...\n")
 
   # #Number of input and output replicates
   # all_reps_str <- paste0(all_reps, collapse="")
@@ -40,7 +40,7 @@ dimsum__filter_variants_noncoding <- function(
   # ### Output data.table
   # output_dt <- copy(input_dt)
   
-  # message("Done")
+  # dimsum__status_message("Done\n")
 
   # return(output_dt)
 

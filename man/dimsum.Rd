@@ -7,11 +7,11 @@
 dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   stranded = T, paired = T, barcodeDesignPath,
   barcodeErrorRate = 0.25, experimentDesignPath,
-  experimentDesignPairDuplicates = F, barcodeIdentityPath,
+  experimentDesignPairDuplicates = F, barcodeIdentityPath, countPath,
   cutadaptCut5First, cutadaptCut5Second, cutadaptCut3First,
   cutadaptCut3Second, cutadapt5First, cutadapt5Second, cutadapt3First,
   cutadapt3Second, cutadaptMinLength = 50, cutadaptErrorRate = 0.2,
-  cutadaptOverlap = 3, usearchMinQual, usearchMaxee,
+  cutadaptOverlap = 3, usearchMinQual = 30, usearchMaxee = 0.5,
   usearchMinlen = 64, usearchMinovlen = 16, outputPath, projectName,
   wildtypeSequence, permittedSequences, reverseComplement = F,
   sequenceType = "auto", transLibrary = F,
@@ -20,15 +20,15 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   fitnessMinInputCountAny = 0, fitnessMinOutputCountAll = 0,
   fitnessMinOutputCountAny = 0, fitnessHighConfidenceCount = 10,
   fitnessDoubleHighConfidenceCount = 50, fitnessNormalise = T,
-  maxSubstitutions = 2, mixedSubstitutions = F,
-  retainIntermediateFiles = F, splitChunkSize = 3758096384,
-  retainedReplicates = "all", startStage = 1, stopStage = 0,
-  numCores = 1)
+  fitnessErrorModel = T, maxSubstitutions = 2,
+  mixedSubstitutions = F, retainIntermediateFiles = F,
+  splitChunkSize = 3758096384, retainedReplicates = "all",
+  startStage = 0, stopStage = 5, numCores = 1)
 }
 \arguments{
-\item{fastqFileDir}{Path to directory with input FASTQ files}
+\item{fastqFileDir}{Path to directory with input FASTQ files (required for WRAP)}
 
-\item{fastqFileExtension}{FASTQ file extension (default:".fastq")}
+\item{fastqFileExtension}{FASTQ file extension (default:'.fastq')}
 
 \item{gzipped}{Are FASTQ files are gzipped? (default:T)}
 
@@ -46,6 +46,8 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{barcodeIdentityPath}{Path to barcode identity file (tab-separated plain text file mapping barcodes to variants)}
 
+\item{countPath}{Path to variant count file for analysis with STEAM only (tab-separated plain text file with sample counts for all variants)}
+
 \item{cutadaptCut5First}{cutadapt: remove bases from start of first read (before constant region trimming)}
 
 \item{cutadaptCut5Second}{cutadapt: remove bases from start of second read (before constant region trimming)}
@@ -54,23 +56,23 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{cutadaptCut3Second}{cutadapt: remove bases from end of second read (before constant region trimming)}
 
-\item{cutadapt5First}{cutadapt: sequence of 5' constant region (of the first read)}
+\item{cutadapt5First}{cutadapt: sequence of 5' constant region to be trimmed (of the first read)}
 
-\item{cutadapt5Second}{cutadapt: sequence of 5' constant region (of the second read)}
+\item{cutadapt5Second}{cutadapt: sequence of 5' constant region to be trimmed (of the second read)}
 
-\item{cutadapt3First}{cutadapt: sequence of 3' constant region (of the first read; default: reverse complement of cutadapt5Second if not linked)}
+\item{cutadapt3First}{cutadapt: sequence of 3' constant region to be trimmed (of the first read; default: reverse complement of cutadapt5Second if not linked)}
 
-\item{cutadapt3Second}{cutadapt: sequence of 3' constant region (of the second read; default: reverse complement of cutadapt5First if not linked)}
+\item{cutadapt3Second}{cutadapt: sequence of 3' constant region to be trimmed (of the second read; default: reverse complement of cutadapt5First if not linked)}
 
-\item{cutadaptMinLength}{cutadapt: Discard reads shorter than LENGTH (default:50)}
+\item{cutadaptMinLength}{cutadapt: Discard reads shorter than LENGTH after trimming (default:50)}
 
-\item{cutadaptErrorRate}{cutadapt: Maximum allowed error rate (default:0.2)}
+\item{cutadaptErrorRate}{cutadapt: Maximum allowed error rate for trimming (default:0.2)}
 
-\item{cutadaptOverlap}{cutadapt: Overlap between read and adapter for an adapter to be found (default:3)}
+\item{cutadaptOverlap}{cutadapt: Minimum overlap between read and constant region for trimming (default:3)}
 
-\item{usearchMinQual}{USEARCH: minimum observed base quality to retain read pair}
+\item{usearchMinQual}{USEARCH: minimum observed base quality to retain read pair (default:30)}
 
-\item{usearchMaxee}{USEARCH: maximum number of expected errors to retain read pair}
+\item{usearchMaxee}{USEARCH: maximum number of expected errors to retain read pair (default:0.5)}
 
 \item{usearchMinlen}{USEARCH: Discard pair if either read is shorter than this (default:64)}
 
@@ -80,7 +82,7 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{projectName}{Project name}
 
-\item{wildtypeSequence}{Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed before fitness calculations.}
+\item{wildtypeSequence}{Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed during WRAP.}
 
 \item{permittedSequences}{A sequence of nucleotide codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions i.e upper-case letters in wild-type nucleotide sequence (default:any base at mutated positions)}
 
@@ -88,7 +90,7 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{sequenceType}{Coding potential of sequence; either noncoding/coding/auto (default:auto)}
 
-\item{transLibrary}{Trans library design i.e. read pairs correspond to distinct peptides (no overlap)}
+\item{transLibrary}{Trans library design i.e. read pairs correspond to distinct peptides with no overlap (default:F)}
 
 \item{transLibraryReverseComplement}{Reverse complement second read in pair before concatenating (default:F)}
 
@@ -110,6 +112,8 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{fitnessNormalise}{Normalise fitness values to minimise inter-replicate differences (default:T)}
 
+\item{fitnessErrorModel}{Fit fitness error model (default:T)}
+
 \item{maxSubstitutions}{Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)}
 
 \item{mixedSubstitutions}{For coding sequences, are nonsynonymous variants with silent/synonymous substitutions in other codons allowed? (default:F)}
@@ -120,9 +124,9 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{retainedReplicates}{Comma-separated list of Input replicates (or experiment ids) to retain or 'all' (default:'all')}
 
-\item{startStage}{Start at a specified pipeline stage (default:1)}
+\item{startStage}{Start at a specified pipeline stage (default:0)}
 
-\item{stopStage}{Stop at a specified pipeline stage (default:0 i.e. no stop condition)}
+\item{stopStage}{Stop at a specified pipeline stage (default:5)}
 
 \item{numCores}{Number of available CPU cores (default:1)}
 }

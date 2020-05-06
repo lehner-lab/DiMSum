@@ -1,5 +1,5 @@
 
-#' dimsum_stage_fastqc_report
+#' dimsum__fastqc_report
 #'
 #' Generate FASTQC summary plots for all fastq files.
 #'
@@ -8,23 +8,34 @@
 #'
 #' @return an updated experiment metadata object
 #' @export
-dimsum_stage_fastqc_report <- function(
+dimsum__fastqc_report <- function(
   dimsum_meta,
   report_outpath
   ){
+
   #Create report directory (if doesn't already exist)
   report_outpath <- gsub("/$", "", report_outpath)
   suppressWarnings(dir.create(report_outpath))
+
+  #Input files
+  all_fastqc <- file.path(dimsum_meta[["exp_design"]][,'fastqc_directory'], unique(c(dimsum_meta[['exp_design']][,"pair1_fastqc"], dimsum_meta[['exp_design']][,"pair2_fastqc"])))
+  #Check if all input files exist
+  dimsum__check_files_exist(
+    required_files = all_fastqc,
+    execute = TRUE,
+    exit = FALSE)
+
   #Initialise read length
   dimsum_meta[['exp_design']][,"pair1_length"] <- NA
   dimsum_meta[['exp_design']][,"pair2_length"] <- NA
+
   #Get results for all fastq files
   for(col_name in c('pair1_fastqc', 'pair2_fastqc')){
     fastqc_files <- file.path(dimsum_meta[['exp_design']][,'fastqc_directory'], dimsum_meta[['exp_design']][,col_name])
     fastqc_list <- list()
     encoding <- list()
     for(i in 1:length(fastqc_files)){
-      temp_out <- system(paste0("head -n ", 500, ' ', fastqc_files[i]), intern=TRUE)
+      temp_out <- readLines(fastqc_files[i], 500)
       filename <- gsub('Filename\\t', '', temp_out[4])
       encoding[[i]] <- gsub('Encoding\\t', '', temp_out[6])
       read_length <- gsub('Sequence length\\t', '', temp_out[9])
@@ -108,15 +119,20 @@ dimsum_stage_fastqc_report <- function(
         ggplot2::geom_hline(yintercept=c(20, 28), linetype = 2) +
         ggplot2::theme_bw() +
         ggplot2::coord_cartesian(ylim = c(0, max(plot_df[,'value']))) + ggplot2::geom_vline(xintercept = vr_boundaries_pos, linetype = 2) +
-        ggplot2::annotate("text", label = "variable region" , x = median(unique(plot_df[,"base_position"])), y = 0) + 
+        #ggplot2::annotate("text", label = "variable region" , x = median(unique(plot_df[,"base_position"])), y = 0) + 
         ggplot2::scale_x_continuous(
         breaks = (1:length(rownames(fastqc_df1)))[seq(1, length(rownames(fastqc_df1)), 5)],
         label = rownames(fastqc_df1)[seq(1, length(rownames(fastqc_df1)), 5)]) +
-        ggplot2::labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Read ", gsub("pair|_fastqc", "", col_name), " quality scores across all bases (", encoding_format, ")"))
+        #ggplot2::labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Read ", gsub("pair|_fastqc", "", col_name), " quality scores across all bases (", encoding_format, ")"))
+        ggplot2::labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Base quality score encoding: ", encoding_format))
       d <- d + ggplot2::facet_wrap(~statistic, nrow=2, ncol=1)
-      ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_fastqc_report_', col_name, '.png')), d, width=12, height=8)
+      ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__fastqc_report_', col_name, '.png')), d, width=12, height=8)
     }
   }
+
+  #Render report
+  dimsum__render_report(dimsum_meta = dimsum_meta)
+
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Update fastq metadata

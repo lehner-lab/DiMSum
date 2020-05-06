@@ -18,14 +18,31 @@ dimsum_stage_usearch <- function(
   report_outpath = NULL,
   save_workspace = TRUE
   ){
+
   #Whether or not to execute the system command
-  this_stage <- 4
-  execute <- (dimsum_meta[["startStage"]] <= this_stage & (dimsum_meta[["stopStage"]] == 0 | dimsum_meta[["stopStage"]] >= this_stage))
+  this_stage <- 3
+  execute <- (dimsum_meta[["startStage"]] <= this_stage & dimsum_meta[["stopStage"]] >= this_stage)
+
+  #WRAP not run
+  if(!is.null(dimsum_meta[["countPath"]])){
+    return(dimsum_meta)
+  }
+
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
+
   #Create/overwrite usearch directory (if executed)
   usearch_outpath <- gsub("/$", "", usearch_outpath)
-  dimsum__create_dir(usearch_outpath, execute = execute, message = "DiMSum STAGE 4: ALIGN PAIRED-END READS") 
+  dimsum__create_dir(usearch_outpath, execute = execute, message = "DiMSum STAGE 3: ALIGN PAIRED-END READS") 
+
+  #Input files
+  all_fastq <- file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
+  #Check if all input files exist
+  dimsum__check_files_exist(
+    required_files = all_fastq,
+    stage_number = this_stage,
+    execute = execute)
+
   #Sample names
   sample_names <- paste0(
     dimsum_meta[["exp_design"]][,"sample_name"], '_e', 
@@ -34,56 +51,33 @@ dimsum_stage_usearch <- function(
     dimsum_meta[["exp_design"]][,"biological_replicate"], '_t', 
     dimsum_meta[["exp_design"]][,"technical_replicate"], '_split', 
     dimsum_meta[["exp_design"]][,"split"], sep = "")
+
   #Additional usearch options related to alignment length
   temp_options <- paste0(' -fastq_minovlen ', dimsum_meta[["usearchMinovlen"]])
   if( dimsum_meta[["usearchMinovlen"]] < 16 ){temp_options <- paste0(temp_options, " -xdrop_nw ", dimsum_meta[["usearchMinovlen"]])}
   if( dimsum_meta[["usearchMinovlen"]] < 16 ){temp_options <- paste0(temp_options, " -minhsp ", dimsum_meta[["usearchMinovlen"]])}
   if( dimsum_meta[["usearchMinovlen"]] < 16 ){temp_options <- paste0(temp_options, " -band ", dimsum_meta[["usearchMinovlen"]])}
   if( dimsum_meta[["usearchMinovlen"]] < 5 ){temp_options <- paste0(temp_options, " -hspw ", dimsum_meta[["usearchMinovlen"]])}
+
   #Run USEARCH on all fastq file pairs
-  message("Aligning paired-end FASTQ files with USEARCH:")
-  all_fastq <- file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
-  print(all_fastq)
-  message("Processing...")
+  dimsum__status_message("Aligning paired-end FASTQ files with USEARCH:\n")
+  dimsum__status_message(paste0(all_fastq, "\n"))
+  dimsum__status_message("Processing...\n")
   #Trans library mode?
   if(dimsum_meta[["transLibrary"]]){
-    for(i in 1:length(sample_names)){message(paste0("\t", dimsum_meta[["exp_design"]][i,c('pair1', 'pair2')]))}
+    for(i in 1:length(sample_names)){dimsum__status_message(paste0("\t", paste0(unlist(dimsum_meta[["exp_design"]][i,c('pair1', 'pair2')]), collapse = "\t"), "\n"))}
     if(execute){
-      dimsum_stage_usearch_trans_library_helper <- function(
-        i
-        ){
-        temp_out <- dimsum__concatenate_reads(
-          input_FASTQ1 = file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair1"]),
-          input_FASTQ2 = file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair2"]),
-          output_FASTQ = file.path(usearch_outpath, paste0(sample_names[i], '.usearch')),
-          output_REPORT = file.path(usearch_outpath, paste0(sample_names[i], '.report')),
-          min_qual = dimsum_meta[["usearchMinQual"]],
-          max_ee = dimsum_meta[["usearchMaxee"]],
-          min_len = dimsum_meta[["usearchMinlen"]],
-          reverse_complement_second_read = dimsum_meta[["transLibraryReverseComplement"]])
-      }
       # Setup cluster
       clust <- parallel::makeCluster(dimsum_meta[['numCores']])
       # make variables available to each core's workspace
       parallel::clusterExport(clust, list("dimsum_meta","usearch_outpath","sample_names","dimsum__concatenate_reads"), envir = environment())
-      parallel::parSapply(clust,X = 1:length(sample_names), dimsum_stage_usearch_trans_library_helper)
+      parallel::parSapply(clust,X = 1:length(sample_names), dimsum__usearch_trans_library_helper)
       parallel::stopCluster(clust)
     }
   #Single-end mode?
   }else if(!dimsum_meta[["paired"]]){
-    for(i in 1:length(sample_names)){message(paste0("\t", unique(unlist(dimsum_meta[["exp_design"]][i,c('pair1', 'pair2')]))))}
+    for(i in 1:length(sample_names)){dimsum__status_message(paste0("\t", paste0(unique(unlist(dimsum_meta[["exp_design"]][i,c('pair1', 'pair2')])), collapse = "\t"), "\n"))}
     if(execute){
-      dimsum_stage_usearch_single_end_library_helper <- function(
-        i
-        ){
-        temp_out <- dimsum__filter_single_end_reads(
-          input_FASTQ = file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair1"]),
-          output_FASTQ = file.path(usearch_outpath, paste0(sample_names[i], '.usearch')),
-          output_REPORT = file.path(usearch_outpath, paste0(sample_names[i], '.report')),
-          min_qual = dimsum_meta[["usearchMinQual"]],
-          max_ee = dimsum_meta[["usearchMaxee"]],
-          min_len = dimsum_meta[["usearchMinlen"]])
-      }
       # Setup cluster
       clust <- parallel::makeCluster(dimsum_meta[['numCores']])
       # make variables available to each core's workspace
@@ -94,7 +88,7 @@ dimsum_stage_usearch <- function(
   #Classic paired-end mode
   }else{
     for(i in 1:length(sample_names)){
-      message(paste0("\t", dimsum_meta[["exp_design"]][i,c('pair1', 'pair2')]))
+      dimsum__status_message(paste0("\t", paste0(unlist(dimsum_meta[["exp_design"]][i,c('pair1', 'pair2')]), collapse = "\t"), "\n"))
       #Check if this system command should be executed
       if(execute){
         temp_out <- system(paste0(
@@ -130,15 +124,21 @@ dimsum_stage_usearch <- function(
   #Delete files when last stage complete
   if(!dimsum_meta_new[["retainIntermediateFiles"]]){
     if(dimsum_meta_new[["stopStage"]]==this_stage){
-      temp_out <- mapply(system, dimsum_meta_new[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+      temp_out <- mapply(file.remove, dimsum_meta_new[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+      temp_out <- mapply(file.create, dimsum_meta_new[["touchIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
     }else{
       dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], 
-        paste0("rm ", file.path(usearch_outpath, "*.usearch")))
+        file.path(usearch_outpath, dir(usearch_outpath, "*.usearch$")))
     }
   }
   #Generate usearch report
   if(report){
-    dimsum_meta_new_report <- dimsum_stage_usearch_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
+    tryCatch({
+      dimsum_meta_new_report <- dimsum__usearch_report(dimsum_meta = dimsum_meta_new, report_outpath = report_outpath)
+      }, error=function(e){
+        dimsum__status_message("There were problems while running 'dimsum__usearch_report'\n")
+        dimsum_meta_new_report <- dimsum_meta_new
+        })
     return(dimsum_meta_new_report)
   }
   return(dimsum_meta_new)

@@ -1,7 +1,7 @@
 
 #' dimsum__process_merged_variants
 #'
-#' Process nucleotide variants to remove indels, internal constant region variants, not permitted sequences and variants with too many substitions.
+#' Process nucleotide variants to remove indels, internal constant region variants, not permitted sequences and variants with too many substitutions.
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param input_dt output path for plots and saved objects (required)
@@ -14,7 +14,7 @@ dimsum__process_merged_variants <- function(
   input_dt
   ){
 
-  message("Processing merged variants...")
+  dimsum__status_message("Processing merged variants...\n")
 
   variant_dt <- input_dt
 
@@ -73,6 +73,12 @@ dimsum__process_merged_variants <- function(
   #Define indel variants as those with length different from WT
   variant_dt[, indel := F]
   variant_dt[nchar(nt_seq)!=nchar(wt_ntseq), indel := T]
+
+  #Check if substitution variants exist
+  if(variant_dt[indel==F,.N]==0){
+    stop(paste0("Cannot proceed with variant processing: No substitution variants found"), call. = FALSE)
+  }
+
   #Calculate nucleotide hamming distance
   variant_dt[indel==F, Nham_nt := mapply(dimsum__hamming_distance, nt_seq, wt_ntseq)]
 
@@ -115,7 +121,7 @@ dimsum__process_merged_variants <- function(
   if(variant_dt[WT==T,.N]==0){
     variant_dt[, all_reads := rowSums(.SD > 0) == length(grep("_count$", names(variant_dt))),,.SDcols = grep("_count$", names(variant_dt))]
     variant_dt[, mean_count := rowMeans(.SD),,.SDcols = grep(paste0("_s[0].*_count$"), names(variant_dt))]
-    message(paste0("WT variant not found. Did you mean to specify one of the following?"))
+    dimsum__status_message(paste0("WT variant not found. Did you mean to specify one of the following?\n"))
     print(variant_dt[all_reads == T,][order(mean_count, decreasing = T)[1:5],.(nt_seq = toupper(nt_seq), all_reads, mean_count)])
     stop(paste0("Cannot proceed with variant processing: WT variant not found"), call. = FALSE)
   }
@@ -204,14 +210,46 @@ dimsum__process_merged_variants <- function(
     names(variant_dt)[grepl("_count$", names(variant_dt))],
     "barcode_valid", "indel", "constant_region", "permitted", "too_many_substitutions")]), fill = T)
 
+  ### Update remaining variants
+  ###########################
+
+  #Remaining variants without too many substitutions
+  variant_dt <- variant_dt[too_many_substitutions==F,]
+
+  ### Rejected variants (mixed substitutions)
+  ###########################
+
+  #Add number of codons affected by mutations
+  wt_ntseq <- variant_dt[WT==T,nt_seq]
+  wt_ntseq_split <- strsplit(wt_ntseq,"")[[1]]
+  variant_dt[, Nmut_codons := length(unique(ceiling(which(strsplit(nt_seq,"")[[1]] != wt_ntseq_split)/3))),nt_seq]
+
+  #Identify mixed substitutions
+  variant_dt <- variant_dt[, mixed_substitutions := FALSE]
+  if(dimsum_meta[["sequenceType"]]=="coding" & !dimsum_meta[["mixedSubstitutions"]]){
+    variant_dt <- variant_dt[(Nmut_codons-Nham_aa) != 0 & Nham_aa != 0, mixed_substitutions := TRUE]
+  }
+
+  #Mixed substitution variant count statistics
+  nuc_mxsub_dict <- as.list(apply(
+    variant_dt[mixed_substitutions==T,.SD,,.SDcols = names(variant_dt)[grepl("_count$", names(variant_dt))]], 
+    2, sum))
+
+  #Mixed substitution variants
+  rejected_variant_dt <- rbind(rejected_variant_dt, 
+    data.table::copy(variant_dt[mixed_substitutions==T,.SD,,.SDcols = c(
+    "nt_seq", "aa_seq",
+    names(variant_dt)[grepl("_count$", names(variant_dt))],
+    "barcode_valid", "indel", "constant_region", "permitted", "too_many_substitutions", "mixed_substitutions")]), fill = T)
+
   ### Remaining variants
   ###########################
 
-  #Remaining variants without too many substition variants
-  variant_dt <- variant_dt[too_many_substitutions==F,.SD,,.SDcols = c(
-    "nt_seq", "aa_seq", "WT", "STOP", "STOP_readthrough", "Nham_nt", "Nham_aa",
+  #Remaining variants without mixed substitutions
+  variant_dt <- variant_dt[mixed_substitutions==F,.SD,,.SDcols = c(
+    "nt_seq", "aa_seq", "WT", "STOP", "STOP_readthrough", "Nham_nt", "Nham_aa", "Nmut_codons",
     names(variant_dt)[grepl("_count$", names(variant_dt))],
-    "barcode_valid", "indel", "constant_region", "permitted", "too_many_substitutions")]
+    "barcode_valid", "indel", "constant_region", "permitted", "too_many_substitutions", "mixed_substitutions")]
 
   #Filtered variant nucleotide distributions
   for(count_column in names(variant_dt)[grepl("_count$", names(variant_dt))]){
@@ -236,6 +274,7 @@ dimsum__process_merged_variants <- function(
   mutation_stats_dicts <- list(
     "aa_subst_dict" = aa_subst_dict,
     "nuc_subst_dict" = nuc_subst_dict, 
+    "nuc_mxsub_dict" = nuc_mxsub_dict,
     "nuc_tmsub_dict" = nuc_tmsub_dict,
     "nuc_frbdn_dict" = nuc_frbdn_dict, 
     "nuc_const_dict" = nuc_const_dict, 
@@ -245,7 +284,7 @@ dimsum__process_merged_variants <- function(
     file = file.path(dimsum_meta[["tmp_path"]], "mutation_stats_dicts.RData"),
     version = 2)
 
-  message("Done")
+  dimsum__status_message("Done\n")
 
   return(list(
     "nobarcode_variants" = nobarcode_variant_dt,

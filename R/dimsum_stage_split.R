@@ -14,43 +14,45 @@ dimsum_stage_split <- function(
   split_outpath,
   save_workspace = TRUE
   ){
+
   #Whether or not to execute the system command
-  this_stage <- 2
-  execute <- (dimsum_meta[["startStage"]] <= this_stage & (dimsum_meta[["stopStage"]] == 0 | dimsum_meta[["stopStage"]] >= this_stage))
+  this_stage <- 1
+  execute <- (dimsum_meta[["startStage"]] <= this_stage & dimsum_meta[["stopStage"]] >= this_stage)
+
+  #WRAP not run
+  if(!is.null(dimsum_meta[["countPath"]])){
+    return(dimsum_meta)
+  }
+
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
+
   #Create/overwrite split directory (if executed)
   split_outpath <- gsub("/$", "", split_outpath)
   dimsum__create_dir(split_outpath, execute = execute, message = "SPLIT FASTQ FILES")  
+
+  #Input files
   fastq_pair_list <- unique(dimsum_meta[['exp_design']][,c('pair1', 'pair2')])
   rownames(fastq_pair_list) <- 1:dim(fastq_pair_list)[1]
-  #Split FASTQ files
-  message("Splitting FASTQ files:")
   all_fastq <- file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
-  print(all_fastq)
-  message("Processing...")
-  message(paste0("\t", basename(all_fastq), "\n"))
+  #Check if all input files exist
+  dimsum__check_files_exist(
+    required_files = all_fastq,
+    stage_number = this_stage,
+    execute = execute)
+
+  #Split FASTQ files
+  dimsum__status_message("Splitting FASTQ files:\n")
+  dimsum__status_message(paste0(all_fastq, "\n"))
+  dimsum__status_message("Processing...\n")
+  dimsum__status_message(paste0("\t", basename(all_fastq), "\n"))
   #Check if this system command should be executed
   if(execute){
-    dimsum_stage_split_helper <- function(
-      i
-      ){
-      num_records <- dimsum__fastq_splitter(
-        inputFile = file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[i,][1]),
-        outputFilePrefix = file.path(split_outpath, paste0(fastq_pair_list[i,][1], ".split")),
-        chunkSize = dimsum_meta[["splitChunkSize"]])
-      if(dimsum_meta[["paired"]]){
-        num_records <- dimsum__fastq_splitter(
-          inputFile = file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], fastq_pair_list[i,][2]),
-          outputFilePrefix = file.path(split_outpath, paste0(fastq_pair_list[i,][2], ".split")),
-          numRecords = num_records)
-      }
-    }
     # Setup cluster
     clust <- parallel::makeCluster(dimsum_meta[['numCores']])
     # make variables available to each core's workspace
     parallel::clusterExport(clust, list("dimsum_meta","fastq_pair_list","split_outpath","dimsum__fastq_splitter","dimsum__writeFastq"), envir = environment())
-    parallel::parSapply(clust,X = 1:nrow(fastq_pair_list), dimsum_stage_split_helper)
+    parallel::parSapply(clust,X = 1:nrow(fastq_pair_list), dimsum__split_helper)
     parallel::stopCluster(clust)
   }
   #New experiment metadata
@@ -73,10 +75,10 @@ dimsum_stage_split <- function(
   #Delete file contents when last stage complete
   if(!dimsum_meta_new[["retainIntermediateFiles"]]){
     if(dimsum_meta_new[["stopStage"]]==this_stage){
-      temp_out <- mapply(system, dimsum_meta_new[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+      temp_out <- mapply(file.remove, dimsum_meta_new[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+      temp_out <- mapply(file.create, dimsum_meta_new[["touchIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
     }else{
-      dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], 
-        paste0("> ", file.path(dimsum_meta_new[['exp_design']][,"pair_directory"], c(dimsum_meta_new[['exp_design']][,"pair1"], dimsum_meta_new[['exp_design']][,"pair2"]))))
+      dimsum_meta_new[["touchIntermediateFiles"]] <- file.path(dimsum_meta_new[['exp_design']][,"pair_directory"], c(dimsum_meta_new[['exp_design']][,"pair1"], dimsum_meta_new[['exp_design']][,"pair2"]))
     }
   }
   return(dimsum_meta_new)

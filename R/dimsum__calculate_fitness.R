@@ -22,7 +22,7 @@ dimsum__calculate_fitness <- function(
   verbose = T
   ){
 
-  if(verbose){message("Calculating fitness and error...")}
+  if(verbose){dimsum__status_message("Calculating fitness and error...\n")}
 
   #Number of input and output replicates
   all_reps_str <- paste0(all_reps, collapse="")
@@ -55,7 +55,7 @@ dimsum__calculate_fitness <- function(
     }
   }
 
-  #Use error model parameters to calculate replicate-specific errors per variant
+  #Use error model parameters (or count-based error only) to calculate replicate-specific errors per variant
   for(j in all_reps){
     if(dimsum_meta[["fitnessNormalise"]]){
       Corr <- matrix(unlist(norm_model_dt[,.SD,.SDcols = paste0("scale_", j)]), ncol = 1, nrow = nrow(input_dt))
@@ -63,11 +63,22 @@ dimsum__calculate_fitness <- function(
       Corr <- matrix(1, ncol = 1, nrow = nrow(input_dt))
     }
 
-    input_dt[, paste0("sigma", j, "_uncorr") := sqrt(Corr * rowSums(matrix(unlist(error_model_dt[parameter %in% c("input", "output") & rep == j, mean_value]), nrow = .N, ncol = 2, byrow = T)/.SD) + 
-      matrix(error_model_dt[parameter %in% c("reperror") & rep == j, mean_value], nrow = .N, ncol = 1, byrow = T)),,
-      .SDcols = c(
-        grep(paste0("count_e", j, "_s0"), names(input_dt)), 
-        grep(paste0("count_e", j, "_s1"), names(input_dt)))]
+    #Error model was fit
+    if(dimsum_meta[["fitnessErrorModel"]]){
+      input_dt[, paste0("sigma", j, "_uncorr") := sqrt(Corr * rowSums(matrix(unlist(error_model_dt[parameter %in% c("input", "output") & rep == j, mean_value]), nrow = .N, ncol = 2, byrow = T)/.SD) + 
+        matrix(error_model_dt[parameter %in% c("reperror") & rep == j, mean_value], nrow = .N, ncol = 1, byrow = T)),,
+        .SDcols = c(
+          grep(paste0("count_e", j, "_s0"), names(input_dt)), 
+          grep(paste0("count_e", j, "_s1"), names(input_dt)))]
+    }else{
+      #Calculate count-based error per replicate
+      wt_corr = as.numeric(input_dt[WT==T,1/.SD[,2] + 1/.SD[,1],,
+        .SDcols = c(grep(paste0("count_e", j, "_s0"),names(input_dt)),grep(paste0("count_e", j, "_s1"),names(input_dt)))])
+
+      input_dt[,paste0("sigma", j, "_uncorr") := sqrt(1/.SD[,2] + 1/.SD[,1] + wt_corr),,
+        .SDcols = c(grep(paste0("count_e", j, "_s0"),names(input_dt)),grep(paste0("count_e", j, "_s1"),names(input_dt)))]
+    }
+
     #Set error of NA fitness values to NA
     input_dt[is.na(get(paste0("fitness", j, "_uncorr"))),paste0("sigma", j, "_uncorr") := NA]
   }
@@ -90,7 +101,7 @@ dimsum__calculate_fitness <- function(
     file = file.path(dimsum_meta[["fitness_path"]], paste0(dimsum_meta[["projectName"]], '_fitness_intermediate.RData')),
     version = 2)
 
-  if(verbose){message("Done")}
+  if(verbose){dimsum__status_message("Done\n")}
 
   return(output_dt)
 

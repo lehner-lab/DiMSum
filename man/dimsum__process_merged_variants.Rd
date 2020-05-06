@@ -15,5 +15,5 @@ dimsum__process_merged_variants(dimsum_meta, input_dt)
 A list of data.tables containing indel variants, rejected variants (internal constant region variants, not permitted sequences and variants with too many substititions) and retained variants
 }
 \description{
-Process nucleotide variants to remove indels, internal constant region variants, not permitted sequences and variants with too many substitions.
+Process nucleotide variants to remove indels, internal constant region variants, not permitted sequences and variants with too many substitutions.
 }

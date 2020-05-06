@@ -15,6 +15,15 @@ dimsum__get_experiment_design <- function(
     stop(paste0("Invalid '", "experimentDesignPath", "' argument (file not found)"), call. = FALSE)
   }
   exp_design <- read.table(dimsum_meta[["experimentDesignPath"]], header = T, stringsAsFactors = F, sep="\t")
+  #Remove rows with missing sample_name
+  exp_design <- exp_design[exp_design[,"sample_name"]!="",]
+
+  #Clear pair1, pair2 and technical_replicate columns if count file provided
+  if(!is.null(dimsum_meta[["countPath"]])){
+    exp_design[,"technical_replicate"] <- NA
+    exp_design[,"pair1"] <- NA
+    exp_design[,"pair2"] <- NA
+  }
 
   #Set pair2 column equal to pair1 column if single-end library (contents of existing pair2 column will be ignored)
   if(!dimsum_meta[["paired"]]){
@@ -56,7 +65,11 @@ dimsum__get_experiment_design <- function(
   if("biological_replicate" %in% colnames(exp_design)){exp_design[,"selection_replicate"] <- exp_design[,"biological_replicate"]}
 
   #Check whether experiment design is valid
-  dimsum__check_experiment_design(dimsum_meta, exp_design)
+  if(!is.null(dimsum_meta[["countPath"]])){
+    dimsum__check_experiment_design_countfile(dimsum_meta, exp_design)
+  }else{
+    dimsum__check_experiment_design(dimsum_meta, exp_design)
+  }
 
   #Indicate for which samples cutadapt should be run
   num_cutadapt_options <- apply(!is.na(exp_design[,c("cutadapt5First", "cutadapt5Second", "cutadapt3First", "cutadapt3Second")]), 1, sum)
@@ -77,8 +90,8 @@ dimsum__get_experiment_design <- function(
     }
   }
 
-  #Check FASTQ files exist (if demultiplexed FASTQ files supplied i.e. no barcodeDesignPath supplied)
-  if(is.null(dimsum_meta[["barcodeDesignPath"]])){
+  #Check FASTQ files exist (if no count file provided and demultiplexed FASTQ files supplied i.e. no barcodeDesignPath supplied)
+  if(is.null(dimsum_meta[["barcodeDesignPath"]]) & is.null(dimsum_meta[["countPath"]])){
     #Pair1 files
     for(i in unlist(exp_design[,c("pair1")])){
       if(!file.exists(file.path(dimsum_meta[["fastqFileDir"]], i))){

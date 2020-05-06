@@ -1,5 +1,5 @@
 
-#' dimsum_stage_merge_report
+#' dimsum__merge_report
 #'
 #' Generate final summary plots for all samples.
 #'
@@ -8,13 +8,23 @@
 #'
 #' @return a single data.frame where empty rows are filled with NAs
 #' @export
-dimsum_stage_merge_report <- function(
+dimsum__merge_report <- function(
   dimsum_meta,
   report_outpath
   ){
+
   #Create report directory (if doesn't already exist)
   report_outpath <- gsub("/$", "", report_outpath)
   suppressWarnings(dir.create(report_outpath))
+
+  #Add 'aligned_pair' column if user-specified count file supplied
+  if(!is.null(dimsum_meta[["countPath"]])){
+    dimsum_meta[['exp_design']][,'aligned_pair'] <- paste0(
+      dimsum_meta[["exp_design"]][,"sample_name"], '_e', 
+      dimsum_meta[["exp_design"]][,"experiment"], '_s', 
+      dimsum_meta[["exp_design"]][,"selection_id"], '_b', 
+      dimsum_meta[["exp_design"]][,"biological_replicate"], '_tNA', sep = "")
+  }
 
   #Variant processing statistics - nucleotide substitutions
   merge_df <- dimsum_meta[['exp_design']]
@@ -24,6 +34,7 @@ dimsum_stage_merge_report <- function(
     'nuc_subst_1'=sapply(dimsum_meta[['nuc_subst_counts']], '[', '1'),
     'nuc_subst_2'=sapply(dimsum_meta[['nuc_subst_counts']], '[', '2'),
     'nuc_subst_sum'=sapply(dimsum_meta[['nuc_subst_counts']], sum),
+    'nuc_mxsub_sum'=sapply(dimsum_meta[['nuc_mxsub_counts']], sum),
     'nuc_tmsub_sum'=sapply(dimsum_meta[['nuc_tmsub_counts']], sum),
     'nuc_frbdn_sum'=sapply(dimsum_meta[['nuc_frbdn_counts']], sum),
     'nuc_const_sum'=sapply(dimsum_meta[['nuc_const_counts']], sum),    
@@ -36,6 +47,7 @@ dimsum_stage_merge_report <- function(
     nuc_subst_1 = sum(nuc_subst_1), 
     nuc_subst_2 = sum(nuc_subst_2),
     nuc_subst_sum = sum(nuc_subst_sum),
+    nuc_mxsub_sum = sum(nuc_mxsub_sum),
     nuc_tmsub_sum = sum(nuc_tmsub_sum),
     nuc_frbdn_sum = sum(nuc_frbdn_sum),
     nuc_const_sum = sum(nuc_const_sum),
@@ -45,6 +57,7 @@ dimsum_stage_merge_report <- function(
   nuc_subst_df_collapse_perc <- nuc_subst_df_collapse
   nuc_subst_df_collapse_perc[,colnames(nuc_subst_df_collapse_perc)[-1]] <- nuc_subst_df_collapse_perc[,colnames(nuc_subst_df_collapse_perc)[-1]]/(
     nuc_subst_df_collapse_perc[,'nuc_subst_sum'] + 
+    nuc_subst_df_collapse_perc[,'nuc_mxsub_sum'] + 
     nuc_subst_df_collapse_perc[,'nuc_tmsub_sum'] + 
     nuc_subst_df_collapse_perc[,'nuc_frbdn_sum'] + 
     nuc_subst_df_collapse_perc[,'nuc_const_sum'] + 
@@ -55,6 +68,7 @@ dimsum_stage_merge_report <- function(
     "0 hamming dist.",
     "1 hamming dist.",
     "2 hamming dist.",
+    "mixed",
     "too many",
     "not permitted",
     "internal constant region",
@@ -72,6 +86,7 @@ dimsum_stage_merge_report <- function(
     "1 hamming dist.",
     "2 hamming dist.",
     "3+ hamming dist.",
+    "mixed",
     "too many",
     "not permitted",
     "internal constant region",
@@ -81,8 +96,8 @@ dimsum_stage_merge_report <- function(
     ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
-    ggplot2::labs(x = "Sample names", y = "Total reads with mutation", title = paste0("Read nucleotide mutation statistics"))
-  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_nucmutationcounts.png')), d, width=12, height=8)
+    ggplot2::labs(x = "Sample names", y = "Total reads with mutation")#, title = paste0("Read nucleotide mutation statistics"))
+  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__merge_report_nucmutationcounts.png')), d, width=12, height=8)
   
   #Plot 2: Nucleotide mutation percentages
   plot_df <- reshape2::melt(nuc_subst_df_collapse_perc, id="pairname")
@@ -91,6 +106,7 @@ dimsum_stage_merge_report <- function(
     "1 hamming dist.",
     "2 hamming dist.",
     "3+ hamming dist.",
+    "mixed",
     "too many",
     "not permitted",
     "internal constant region",
@@ -100,8 +116,8 @@ dimsum_stage_merge_report <- function(
     ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
-    ggplot2::labs(x = "Sample names", y = "Percentage of reads with mutation", title = paste0("Read nucleotide mutation statistics (percentage)"))
-  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_nucmutationpercentages.png')), d, width=12, height=8)
+    ggplot2::labs(x = "Sample names", y = "Percentage of reads with mutation")#, title = paste0("Read nucleotide mutation statistics (percentage)"))
+  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__merge_report_nucmutationpercentages.png')), d, width=12, height=8)
 
   #Variant processing statistics - amino acid substitutions
   merge_df <- dimsum_meta[['exp_design']]
@@ -111,6 +127,7 @@ dimsum_stage_merge_report <- function(
     'aa_subst_1'=sapply(dimsum_meta[['aa_subst_counts']], '[', '1'),
     'aa_subst_2'=sapply(dimsum_meta[['aa_subst_counts']], '[', '2'),
     'aa_subst_sum'=sapply(dimsum_meta[['aa_subst_counts']], sum),
+    'nuc_mxsub_sum'=sapply(dimsum_meta[['nuc_mxsub_counts']], sum),
     'nuc_tmsub_sum'=sapply(dimsum_meta[['nuc_tmsub_counts']], sum),
     'nuc_frbdn_sum'=sapply(dimsum_meta[['nuc_frbdn_counts']], sum),
     'nuc_const_sum'=sapply(dimsum_meta[['nuc_const_counts']], sum),    
@@ -123,6 +140,7 @@ dimsum_stage_merge_report <- function(
     aa_subst_1 = sum(aa_subst_1), 
     aa_subst_2 = sum(aa_subst_2),
     aa_subst_sum = sum(aa_subst_sum),
+    nuc_mxsub_sum = sum(nuc_mxsub_sum),
     nuc_tmsub_sum = sum(nuc_tmsub_sum),
     nuc_frbdn_sum = sum(nuc_frbdn_sum),
     nuc_const_sum = sum(nuc_const_sum),
@@ -132,6 +150,7 @@ dimsum_stage_merge_report <- function(
   aa_subst_df_collapse_perc <- aa_subst_df_collapse
   aa_subst_df_collapse_perc[,colnames(aa_subst_df_collapse_perc)[-1]] <- aa_subst_df_collapse_perc[,colnames(aa_subst_df_collapse_perc)[-1]]/(
     aa_subst_df_collapse_perc[,'aa_subst_sum'] + 
+    aa_subst_df_collapse_perc[,'nuc_mxsub_sum'] + 
     aa_subst_df_collapse_perc[,'nuc_tmsub_sum'] + 
     aa_subst_df_collapse_perc[,'nuc_frbdn_sum'] + 
     aa_subst_df_collapse_perc[,'nuc_const_sum'] + 
@@ -142,6 +161,7 @@ dimsum_stage_merge_report <- function(
     "0 hamming dist.",
     "1 hamming dist.",
     "2 hamming dist.",
+    "mixed",
     "too many",
     "not permitted",
     "internal constant region",
@@ -159,6 +179,7 @@ dimsum_stage_merge_report <- function(
     "1 hamming dist.",
     "2 hamming dist.",
     "3+ hamming dist.",
+    "mixed",
     "too many",
     "not permitted",
     "internal constant region",
@@ -168,8 +189,8 @@ dimsum_stage_merge_report <- function(
     ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
-    ggplot2::labs(x = "Sample names", y = "Total reads with mutation", title = paste0("Read amino acid mutation statistics"))
-  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_aamutationcounts.png')), d, width=12, height=8)
+    ggplot2::labs(x = "Sample names", y = "Total reads with mutation")#, title = paste0("Read amino acid mutation statistics"))
+  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__merge_report_aamutationcounts.png')), d, width=12, height=8)
   
   #Plot 4: Nucleotide mutation percentages
   plot_df <- reshape2::melt(aa_subst_df_collapse_perc, id="pairname")
@@ -178,6 +199,7 @@ dimsum_stage_merge_report <- function(
     "1 hamming dist.",
     "2 hamming dist.",
     "3+ hamming dist.",
+    "mixed",
     "too many",
     "not permitted",
     "internal constant region",
@@ -187,8 +209,11 @@ dimsum_stage_merge_report <- function(
     ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
-    ggplot2::labs(x = "Sample names", y = "Percentage of reads with mutation", title = paste0("Read amino acid mutation statistics (percentage)"))
-  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum_stage_merge_report_aamutationpercentages.png')), d, width=12, height=8)
+    ggplot2::labs(x = "Sample names", y = "Percentage of reads with mutation")#, title = paste0("Read amino acid mutation statistics (percentage)"))
+  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__merge_report_aamutationpercentages.png')), d, width=12, height=8)
+
+  #Render report
+  dimsum__render_report(dimsum_meta = dimsum_meta)
 
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
