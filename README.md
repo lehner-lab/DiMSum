@@ -87,7 +87,7 @@ Calculate fitness and error estimates for a user-specified subset of substitutio
 * **5.1** Low count variants are removed according to user-specified soft ('fitnessMinInputCountAny', 'fitnessMinOutputCountAny') and hard ('fitnessMinInputCountAll', 'fitnessMinOutputCountAll') thresholds to minimise the impact of fake variants from sequencing errors.
 * **5.2** An error model is fit to a high confidence subset of variants to determine count-based (Poisson), replicate and over-sequencing error terms.
 * **5.3** Variants are aggregated at the amino acid level if the target molecule is a protein ('sequenceType'=coding).
-* **5.4** Fitness and estimates of the associated error are then calculated with respect to the corresponding wild-type sequence score using the model derived in **7.3** above.
+* **5.4** Fitness and estimates of the associated error are then calculated with respect to the corresponding wild-type sequence score using the model derived in **5.3** above.
 * **5.5** (*Coming soon: still in development*) Optionally improve double mutant fitness estimates for low frequency variants using a Bayesian approach that incorporates priors based on observed single mutant counts ('bayesianDoubleFitness', 'bayesianDoubleFitnessLamD', 'fitnessHighConfidenceCount', 'fitnessDoubleHighConfidenceCount').
 * **5.6** In the case of a growth-rate based assay, a 'generations' column can be supplied in the experimental design file in order to normalize fitness and error estimates accordingly (see below).
 * **5.7** Fitness scores are merged between replicates in a weighted manner that takes into account their respective errors.
@@ -110,7 +110,7 @@ Below is a schematic of a generic deep mutational scanning experiment indicating
   <img src="./DMS_experiment.png" width="600">
 </p>
 
-In addition to these mandatory columns, additional columns may be included to specify stage 3-specific options i.e. those prefixed by 'cutadapt...', which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments. In the case of a growth-rate based assay, a 'generations' column can be supplied (for all output samples) in order to normalize fitness and error estimates accordingly.
+In addition to these mandatory columns, additional columns may be included to specify stage 2-specific options i.e. those prefixed by 'cutadapt...', which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments. In the case of a growth-rate based assay, a 'generations' column can be supplied (for all output samples) in order to normalize fitness and error estimates accordingly.
 
 # Barcode design file
 
