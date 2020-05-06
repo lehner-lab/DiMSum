@@ -14,6 +14,7 @@ To run the DiMSum pipeline you will need the following software and associated p
 * **[FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) v0.11.3**
 * **[cutadapt](https://cutadapt.readthedocs.io/en/stable/) v2.4**
 * **[USEARCH 32-bit](https://drive5.com/usearch/download.html) v10.0**
+* **[Pandoc](https://pandoc.org/installing.html) >=v1.17.2**
 * **[starcode](https://github.com/gui11aume/starcode) v1.3**
 
 # Installation and loading
