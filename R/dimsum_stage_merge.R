@@ -24,6 +24,11 @@ dimsum_stage_merge <- function(
   this_stage <- 4
   execute <- (dimsum_meta[["startStage"]] <= this_stage & dimsum_meta[["stopStage"]] >= this_stage)
 
+  #This stage after stopStage
+  if(dimsum_meta[["stopStage"]] < this_stage){
+    return(dimsum_meta)
+  }
+
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
 
@@ -135,8 +140,8 @@ dimsum_stage_merge <- function(
   #Delete files when last stage complete
   if(!dimsum_meta_new[["retainIntermediateFiles"]]){
     if(dimsum_meta_new[["stopStage"]]==this_stage){
-      temp_out <- mapply(file.remove, dimsum_meta_new[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
-      temp_out <- mapply(file.create, dimsum_meta_new[["touchIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+      suppressWarnings(temp_out <- file.remove(dimsum_meta_new[["deleteIntermediateFiles"]]))
+      suppressWarnings(temp_out <- file.create(dimsum_meta_new[["touchIntermediateFiles"]]))
     }
   }
   #Generate merge report

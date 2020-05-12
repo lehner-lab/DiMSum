@@ -204,17 +204,30 @@ knitr::include_graphics("dimsum__merge_report_aamutationcounts.png")
 <!-- PROCESS (image5) -->
 
 ```{r process5, echo=FALSE, results='asis', eval=doc_settings[["show_process1"]]}
-cat("### 4.1 Input count distributions
+cat("### 4.1 Input count distributions")
+```
 
-The **diagnostic plot** below shows marginal variant count distributions separately for all Input samples and stratified by the number of nucleotide substitutions (Hamming distance to the wild-type sequence). Distributions corresponding to Hamming distances greater than 12 are not shown. Wild-type sequence counts are indicated by the black vertical dashed line. 
-
-Expected counts from 'fake' variants (due to base-call errors at a rate corresponding to the 'usearchMinQual' option) are indicated by coloured dashed lines. Bimodal distributions (or unimodal distributions not surpassing the indicated thresholds) indicate variants originating from sequencing errors likely due to a library 'bottleneck'. A minimum input count threshold should be chosen to remove such variants (see 'fitnessMinInputCountAll' option applied in Stage 5 and [DiMSum documentation](https://github.com/lehner-lab/DiMSum) for more details.).
-
+```{r process5_1, echo=FALSE, results='asis', eval=!doc_settings[["show_processC"]]}
+cat("The **diagnostic plot** below shows marginal variant count distributions separately for all Input samples and stratified by the number of nucleotide substitutions (Hamming distance to the wild-type sequence). Distributions corresponding to Hamming distances greater than 12 are not shown. Wild-type sequence counts are indicated by the black vertical dashed line.
 ")
 ```
 
-```{r process5_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_process1"]]}
+```{r process5_1C, echo=FALSE, results='asis', eval=doc_settings[["show_processC"]]}
+cat("The **diagnostic plot** below shows marginal variant count distributions separately for all Input samples, first stratified by the number of amino acid substitutions and then stratified by the number of nucleotide substitutions (Hamming distance to the wild-type sequence). Distributions corresponding to Hamming distances greater than 6 are not shown. Wild-type sequence counts are indicated by the black vertical dashed line.
+")
+```
+
+```{r process5_2, echo=FALSE, results='asis', eval=doc_settings[["show_process1"]]}
+cat("Expected counts from 'fake' variants (due to base-call errors at a rate corresponding to the 'usearchMinQual' option) are indicated by coloured dashed lines. Bimodal distributions (or unimodal distributions not surpassing the indicated thresholds) indicate variants originating from sequencing errors likely due to a library 'bottleneck'. A minimum input count threshold should be chosen to remove such variants (see 'fitnessMinInputCountAll' option applied in Stage 5 and [DiMSum documentation](https://github.com/lehner-lab/DiMSum) for more details.).
+")
+```
+
+```{r process5_image, echo=FALSE, fig.cap="", out.width = '100%', eval=!doc_settings[["show_processC"]]}
 knitr::include_graphics("dimsum__diagnostics_report_count_hist_input_nt.png")
+```
+
+```{r process5_imageC, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_processC"]]}
+knitr::include_graphics("dimsum__diagnostics_report_count_hist_input_aa.png")
 ```
 
 <!-- PROCESS (image6) -->
@@ -313,10 +326,11 @@ cat("### 5.4 Fitness error model
 
 The upper panels in the plot below indicate multiplicative (upper left panel) and additive (upper right panel) error terms estimated by the DiMSum error model. Dots give mean and error bars indicate the standard deviation of parameters over 100 bootstraps.
 
-The lower panel in the plot below shows variance of fitness scores between replicates as a function of sequencing count-based (Poisson) variance expectation (average across replicates). The DiMSum error model (red line) describes deviations from expectation in the observed variance of fitness scores (black dashed line). The diagonal green dashed line indicates the multiplicative error term contribution. The horizontal green dashed line indicates the additive error term contribution and blue dots show mean variance per bin.
+The lower left panel in the plot below shows variance of fitness scores between replicates as a function of sequencing count-based (Poisson) variance expectation (average across replicates). The black dashed line indicates perfect correspondence (i.e. Y=X).
 
-A good fit of the DiMSum error model (red line) to the binned observations (blue points) indicates that the estimated parameters (upper panels) accurately describe the variation in fitness between replicates.
+The full DiMSum error model (red line) describes deviations from the null expectation (black dashed line) in the observed variance of fitness scores. A good fit of the DiMSum error model (red line) to the mean empiricial variance per bin (blue points) indicates that the estimated parameters (upper panels) accurately describe the variation in fitness between replicates.
 
+The lower right panel in the plot below compares the full DiMSum error model (red line) to variance contributions using either Input multiplicative error terms (cyan line), Output multiplicative error terms (magenta line) or additive error terms (green line) only. Additionally, dashed cyan and magenta lines indicate purely sequencing count-based variance expectation corresponding to Input and Output samples respectively (i.e. corresponding multiplicative error terms set to 1).
 ")
 ```
 

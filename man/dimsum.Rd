@@ -14,11 +14,12 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   cutadaptOverlap = 3, usearchMinQual = 30, usearchMaxee = 0.5,
   usearchMinlen = 64, usearchMinovlen = 16, outputPath, projectName,
   wildtypeSequence, permittedSequences, reverseComplement = F,
-  sequenceType = "auto", transLibrary = F,
-  transLibraryReverseComplement = F, bayesianDoubleFitness = F,
-  bayesianDoubleFitnessLamD = 0.025, fitnessMinInputCountAll = 0,
-  fitnessMinInputCountAny = 0, fitnessMinOutputCountAll = 0,
-  fitnessMinOutputCountAny = 0, fitnessHighConfidenceCount = 10,
+  sequenceType = "auto", mutagenesisType = "random",
+  transLibrary = F, transLibraryReverseComplement = F,
+  bayesianDoubleFitness = F, bayesianDoubleFitnessLamD = 0.025,
+  fitnessMinInputCountAll = 0, fitnessMinInputCountAny = 0,
+  fitnessMinOutputCountAll = 0, fitnessMinOutputCountAny = 0,
+  fitnessHighConfidenceCount = 10,
   fitnessDoubleHighConfidenceCount = 50, fitnessNormalise = T,
   fitnessErrorModel = T, maxSubstitutions = 2,
   mixedSubstitutions = F, retainIntermediateFiles = F,
@@ -89,6 +90,8 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 \item{reverseComplement}{Reverse complement variant sequences before processing? (default:F)}
 
 \item{sequenceType}{Coding potential of sequence; either noncoding/coding/auto (default:auto)}
+
+\item{mutagenesisType}{Whether mutagenesis was performed at the nucleotide or codon/amino acid level; either random/codon (default:random)}
 
 \item{transLibrary}{Trans library design i.e. read pairs correspond to distinct peptides with no overlap (default:F)}
 

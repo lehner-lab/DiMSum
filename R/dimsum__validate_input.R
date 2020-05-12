@@ -176,6 +176,11 @@ dimsum__validate_input <- function(
     dimsum_meta[["sequenceType"]] <- dimsum__detect_sequence_type(dimsum_meta[["wildtypeSequence"]])
   }
 
+  #Check mutagenesisType one of noncoding/coding/auto
+  if(!dimsum_meta[["mutagenesisType"]] %in% c("random", "codon")){
+    stop("Invalid 'mutagenesisType' argument. Only random/codon allowed.", call. = FALSE)
+  }
+
   #Check retainedReplicates comma-separated list of integers or "all"
   if(dimsum_meta[["retainedReplicates"]] != "all"){
     if(sum(!strsplit(dimsum_meta[["retainedReplicates"]], ",")[[1]] %in% strsplit("0123456789", "")[[1]])!=0){

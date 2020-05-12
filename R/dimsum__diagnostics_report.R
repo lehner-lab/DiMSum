@@ -59,7 +59,7 @@ dimsum__diagnostics_report <- function(
   }
 
   #Plot 2: Histogram of input counts split by number of nucleotide mutations and number of amino acid mutations
-  max_nsubs <- dimsum_meta[["maxSubstitutions"]]
+  max_nsubs <- min(dimsum_meta[["maxSubstitutions"]], 2)
   if(dimsum_meta[["sequenceType"]]=="coding" & max_nsubs<=2){
     max_nsubs <- max_nsubs*3
     if(length(input_samples)!=0){

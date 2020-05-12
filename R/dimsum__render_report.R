@@ -29,6 +29,7 @@ dimsum__render_report <- function(
       "dimsum__merge_report_aamutationpercentages.png",
       "dimsum__merge_report_aamutationcounts.png",
       "dimsum__diagnostics_report_count_hist_input_nt.png",
+      "dimsum__diagnostics_report_count_hist_input_aa.png",
       "dimsum__diagnostics_report_scatterplotmatrix_all.png",
       "dimsum_stage_fitness_report_1_errormodel_fitness_inputcounts.png",
       "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density.png",
@@ -59,6 +60,7 @@ dimsum__render_report <- function(
   doc_settings[["show_align1"]] <- TRUE
   doc_settings[["show_process1"]] <- TRUE
   doc_settings[["show_processA"]] <- TRUE
+  doc_settings[["show_processC"]] <- TRUE
   doc_settings[["show_analyse1"]] <- TRUE
   doc_settings[["show_analyseN"]] <- TRUE
 
@@ -66,6 +68,11 @@ dimsum__render_report <- function(
   #Noncoding sequence
   if(dimsum_meta[["sequenceType"]]!="coding"){
     doc_settings[["show_processA"]] <- FALSE
+    doc_settings[["show_processC"]] <- FALSE
+  }
+  #Random mutagenesis
+  if(dimsum_meta[["mutagenesisType"]]=="random"){
+    doc_settings[["show_processC"]] <- FALSE
   }
   #Single-end sequencing
   if(!dimsum_meta[["paired"]]){

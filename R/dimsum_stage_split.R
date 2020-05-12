@@ -19,8 +19,8 @@ dimsum_stage_split <- function(
   this_stage <- 1
   execute <- (dimsum_meta[["startStage"]] <= this_stage & dimsum_meta[["stopStage"]] >= this_stage)
 
-  #WRAP not run
-  if(!is.null(dimsum_meta[["countPath"]])){
+  #WRAP not run or this stage after stopStage
+  if(!is.null(dimsum_meta[["countPath"]]) | dimsum_meta[["stopStage"]] < this_stage){
     return(dimsum_meta)
   }
 
@@ -75,8 +75,8 @@ dimsum_stage_split <- function(
   #Delete file contents when last stage complete
   if(!dimsum_meta_new[["retainIntermediateFiles"]]){
     if(dimsum_meta_new[["stopStage"]]==this_stage){
-      temp_out <- mapply(file.remove, dimsum_meta_new[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
-      temp_out <- mapply(file.create, dimsum_meta_new[["touchIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+      suppressWarnings(temp_out <- file.remove(dimsum_meta_new[["deleteIntermediateFiles"]]))
+      suppressWarnings(temp_out <- file.create(dimsum_meta_new[["touchIntermediateFiles"]]))
     }else{
       dimsum_meta_new[["touchIntermediateFiles"]] <- file.path(dimsum_meta_new[['exp_design']][,"pair_directory"], c(dimsum_meta_new[['exp_design']][,"pair1"], dimsum_meta_new[['exp_design']][,"pair2"]))
     }

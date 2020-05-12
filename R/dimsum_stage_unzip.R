@@ -19,8 +19,8 @@ dimsum_stage_unzip <- function(
   this_stage <- 1
   execute <- (dimsum_meta[["startStage"]] <= this_stage & dimsum_meta[["stopStage"]] >= this_stage)
 
-  #WRAP not run
-  if(!is.null(dimsum_meta[["countPath"]])){
+  #WRAP not run or this stage after stopStage
+  if(!is.null(dimsum_meta[["countPath"]]) | dimsum_meta[["stopStage"]] < this_stage){
     return(dimsum_meta)
   }
 

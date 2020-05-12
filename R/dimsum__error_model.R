@@ -271,11 +271,36 @@ dimsum__error_model <- function(
       Corr <- matrix(1, ncol = 1, nrow = nrow(work_data))
     }
 
+    #Full model
     work_data[,paste0("error", j) := sqrt(Corr * rowSums(matrix(unlist(error_model[parameter %in% c("input", "output") & rep == j, mean_value]), nrow = .N, ncol = 2, byrow = T)/.SD) + 
       matrix(error_model[parameter %in% c("reperror") & rep == j, mean_value], nrow = .N, ncol = 1, byrow = T)),,
       .SDcols = c(
         grep(paste0("count_e", j, "_s0"), names(work_data)), 
         grep(paste0("count_e", j, "_s1"), names(work_data)))]
+
+    #Just replicate error
+    work_data[,paste0("error_reponly", j) := sqrt(matrix(error_model[parameter %in% c("reperror") & rep == j, mean_value], nrow = .N, ncol = 1, byrow = T))]
+
+    #Just input over-sequencing factor
+    work_data[,paste0("error_inputosf", j) := sqrt(Corr * rowSums(matrix(unlist(error_model[parameter %in% c("input") & rep == j, mean_value]), nrow = .N, ncol = 1, byrow = T)/.SD)),,
+      .SDcols = c(
+        grep(paste0("count_e", j, "_s0"), names(work_data)))]
+
+    #Just input (over-sequencing factor==1)
+    work_data[,paste0("error_inputonly", j) := sqrt(Corr * rowSums(matrix(1, nrow = .N, ncol = 1, byrow = T)/.SD)),,
+      .SDcols = c(
+        grep(paste0("count_e", j, "_s0"), names(work_data)))]
+
+    #Just output over-sequencing factor
+    work_data[,paste0("error_outputosf", j) := sqrt(Corr * rowSums(matrix(unlist(error_model[parameter %in% c("output") & rep == j, mean_value]), nrow = .N, ncol = 1, byrow = T)/.SD)),,
+      .SDcols = c(
+        grep(paste0("count_e", j, "_s1"), names(work_data)))]
+
+    #Just output (over-sequencing factor==1)
+    work_data[,paste0("error_outputonly", j) := sqrt(Corr * rowSums(matrix(1, nrow = .N, ncol = 1, byrow = T)/.SD)),,
+      .SDcols = c(
+        grep(paste0("count_e", j, "_s1"), names(work_data)))]
+
   }
 
   ### Plot model parameters and fit
@@ -301,17 +326,30 @@ dimsum__error_model <- function(
     bs_data[,bin_mean_error := mean(mean_cbe^2), bin_error]
     #Average merged error per bin
     bs_data[,bin_pred_error := mean(rowMeans(.SD^2, na.rm = T)), bin_error, .SDcols = paste0("error", all_reps)]
-    melt_bs_data <- unique(data.table::melt(bs_data[,.SD,.SDcols = c("bin_pred_error","bin_error","bin_mean_error")], id.vars = c("bin_error","bin_mean_error")))
+    bs_data[,bin_pred_error_reponly := mean(rowMeans(.SD^2, na.rm = T)), bin_error, .SDcols = paste0("error_reponly", all_reps)]
+    bs_data[,bin_pred_error_inputosf := mean(rowMeans(.SD^2, na.rm = T)), bin_error, .SDcols = paste0("error_inputosf", all_reps)]
+    bs_data[,bin_pred_error_inputonly := mean(rowMeans(.SD^2, na.rm = T)), bin_error, .SDcols = paste0("error_inputonly", all_reps)]
+    bs_data[,bin_pred_error_outputosf := mean(rowMeans(.SD^2, na.rm = T)), bin_error, .SDcols = paste0("error_outputosf", all_reps)]
+    bs_data[,bin_pred_error_outputonly := mean(rowMeans(.SD^2, na.rm = T)), bin_error, .SDcols = paste0("error_outputonly", all_reps)]
+    melt_bs_data <- unique(data.table::melt(bs_data[,.SD,.SDcols = c(
+      "bin_pred_error",
+      "bin_pred_error_reponly",
+      "bin_pred_error_inputosf",
+      "bin_pred_error_inputonly",
+      "bin_pred_error_outputosf",
+      "bin_pred_error_outputonly",
+      "bin_error",
+      "bin_mean_error")], id.vars = c("bin_error","bin_mean_error")))
     
     #Plot1: input and output over-sequencing factor parameters +- sd
     a <- ggplot2::ggplot(plot_error_model[parameter %in% c("input","output")],
-      ggplot2::aes(x=interaction(parameter, rep), mean_value, ymin = lower, ymax = upper, color = factor(rep), lty = parameter, shape = parameter)) +
+      ggplot2::aes(x=interaction(parameter, rep), mean_value, ymin = lower, ymax = upper, color = factor(rep))) +
       ggplot2::geom_pointrange(show.legend = F) +
       # ggplot2::scale_y_log10(limits = c(min(c(1, plot_error_model[parameter %in% c("input","output"), mean_value], plot_error_model[parameter %in% c("input", "output"), lower])),
       #   max(c(2.5, plot_error_model[parameter %in% c("input","output"), mean_value], plot_error_model[parameter %in% c("input", "output"), upper])))) +
       ggplot2::scale_y_log10() + ggplot2::theme_bw() + 
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
-      ggplot2::labs(y = "Over-sequencing factor", x = "Replicate (input or output)")
+      ggplot2::labs(y = "Multiplicative\nerror terms", x = "Replicate (input or output)")
 
     #Plot2: replicate error parameters +- sd
     b <- ggplot2::ggplot(plot_error_model[parameter == "reperror"], ggplot2::aes(x = factor(rep), y = sqrt(mean_value), ymin = sqrt(lower), ymax = sqrt(upper), color = factor(rep))) +
@@ -319,10 +357,10 @@ dimsum__error_model <- function(
       # ggplot2::scale_y_log10(limits = c(min(plot_error_model[parameter == "reperror", sqrt(lower)]),
       #   max(c(0.1, plot_error_model[parameter == "reperror", sqrt(upper)])))) +
       ggplot2::scale_y_log10() + ggplot2::theme_bw() + 
-      ggplot2::labs(y = "Replicate error", x = "Replicate")
+      ggplot2::labs(y = "Additive\nerror terms", x = "Replicate")
 
     #Plot3: count based error against variance of fitness + fit
-    plot_cols <- dimsum__gg_color_hue(3)
+    plot_cols <- dimsum__gg_color_hue(6)
     temp_mean_error <- unique(bs_data[,.(bin_mean_error, bin_mean_var, bin_N)])
     temp_mean_error[, ymin := bin_mean_var * (1-2/bin_N)]
     temp_mean_error[, ymax := bin_mean_var * (1+2/bin_N)]
@@ -331,25 +369,85 @@ dimsum__error_model <- function(
     c <- ggplot2::ggplot(bs_data[v>=bs_data[,quantile(v, 0.001)] & v<=bs_data[,quantile(v, 0.999)],]) +
       ggplot2::stat_binhex(ggplot2::aes(mean_cbe^2, v), bins = 100, size = 0.2, color = "lightgrey") +
       ggplot2::geom_abline(linetype = 2, size = 1) +
-      ggplot2::geom_abline(intercept = log10(mult_error_slope), linetype = 2, size = 1, color = plot_cols[2]) +
-      ggplot2::geom_hline(yintercept = rep_error_intercept, linetype = 2, size = 1, color = plot_cols[2]) +
+      # ggplot2::geom_abline(intercept = log10(mult_error_slope), linetype = 2, size = 1, color = plot_cols[2]) +
+      # ggplot2::geom_hline(yintercept = rep_error_intercept, linetype = 2, size = 1, color = plot_cols[2]) +
       ggplot2::geom_pointrange(inherit.aes = F, data = temp_mean_error,
-        ggplot2::aes(x = bin_mean_error, y = bin_mean_var, ymin = ymin, ymax = ymax), color = plot_cols[3]) +
-      ggplot2::geom_line(inherit.aes = F, data = melt_bs_data,
+        ggplot2::aes(x = bin_mean_error, y = bin_mean_var, ymin = ymin, ymax = ymax), color = plot_cols[5]) +
+      ggplot2::geom_line(inherit.aes = F, data = melt_bs_data[variable=="bin_pred_error",],
         ggplot2::aes(bin_mean_error, value), size = 1, color = plot_cols[1]) +
       ggplot2::scale_y_log10(limits = c(bs_data[,quantile(v, 0.001)], bs_data[,quantile(v, 0.999)])) +
       ggplot2::scale_x_log10() +
       ggplot2::scale_fill_gradientn(colours = c("white", "black"), trans = "log10") +
       ggplot2::coord_cartesian(xlim = c(min((bs_data[,mean_cbe])^2), 10^max(error_range))) +
       ggplot2::theme_bw() + ggplot2::theme(panel.grid.minor = ggplot2::element_blank()) +
-      ggplot2::labs(x = "Average count-based (Poisson) fitness error", y = "Variance of fitness values between replicates")
+      ggplot2::labs(x = "Count-based error estimate", y = "Variance of replicate fitness scores")
+
+    #Plot4: error model decomposition
+    d <- ggplot2::ggplot(melt_bs_data[variable=="bin_pred_error",]) +
+      ggplot2::geom_line(inherit.aes = F,
+        ggplot2::aes(bin_mean_error, value), size = 1, color = plot_cols[1]) +
+      ggplot2::geom_line(inherit.aes = F, data = melt_bs_data[variable=="bin_pred_error_reponly",],
+        ggplot2::aes(bin_mean_error, value), size = 1, color = plot_cols[3]) +
+      ggplot2::geom_line(inherit.aes = F, data = melt_bs_data[variable=="bin_pred_error_inputosf",],
+        ggplot2::aes(bin_mean_error, value), size = 1, color = plot_cols[4]) +
+      ggplot2::geom_line(inherit.aes = F, data = melt_bs_data[variable=="bin_pred_error_inputonly",],
+        ggplot2::aes(bin_mean_error, value), size = 0.3, color = plot_cols[4], linetype = 2) +
+      ggplot2::geom_line(inherit.aes = F, data = melt_bs_data[variable=="bin_pred_error_outputosf",],
+        ggplot2::aes(bin_mean_error, value), size = 1, color = plot_cols[6]) +
+      ggplot2::geom_line(inherit.aes = F, data = melt_bs_data[variable=="bin_pred_error_outputonly",],
+        ggplot2::aes(bin_mean_error, value), size = 0.3, color = plot_cols[6], linetype = 2) +
+      ggplot2::scale_y_log10(limits = c(bs_data[,quantile(v, 0.001)], bs_data[,quantile(v, 0.999)])) +
+      ggplot2::scale_x_log10() +
+      ggplot2::coord_cartesian(xlim = c(min((bs_data[,mean_cbe])^2), 10^max(error_range))) +
+      ggplot2::theme_bw() + 
+      ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
+        axis.title.x = ggplot2::element_text(size = 8),
+        axis.title.y = ggplot2::element_text(size = 8),
+        axis.text.x = ggplot2::element_text(size = 7),
+        axis.text.y = ggplot2::element_text(size = 7)) +
+      ggplot2::labs(x = "Count-based error estimate", y = "Variance of replicate fitness scores")
+
+    #Plot5: legend
+    legend_names <- c(
+        "Empirical variance (average per bin)", 
+        "Poisson variance (null expectation)", 
+        "Full model variance",
+        "Input multiplicative terms only\n(and null expectation)",
+        "Output multiplicative terms only\n(and null expectation)",
+        "Additive terms only")
+    legend_data <- data.frame(
+      x = rep(1:10, times = 6),
+      y = rep(1:10, times = 6), 
+      variance_type = rep(legend_names, each = 10))
+    legend_data[, "variance_type"] <- factor(legend_data[, "variance_type"], levels = legend_names)
+    legend_cols <- c(
+      plot_cols[5],
+      "black",
+      plot_cols[1],
+      plot_cols[4],
+      plot_cols[6],
+      plot_cols[3])
+    names(legend_cols) <- legend_names
+    e <- ggplot2::ggplot(data = legend_data, ggplot2::aes(x,y)) + 
+      ggplot2::geom_point(ggplot2::aes(color=variance_type)) +
+      ggplot2::geom_line(ggplot2::aes(color=variance_type)) +
+      ggplot2::scale_colour_manual(name=c("Legend"), values=legend_cols, guide='legend') +
+      ggplot2::guides(
+        colour = ggplot2::guide_legend(override.aes = list(
+          linetype=c(NA,2,1,1,1,1), 
+          size=c(2,0.75,0.75,0.75,0.75,0.75), 
+          shape=c(19, NA, NA, NA, NA, NA)))) +
+      ggplot2::theme_void() +
+      ggplot2::theme(
+        legend.text = ggplot2::element_text(size = 9))
+    e <- cowplot::get_legend(e)
 
     #Combine plots
-    p <- gridExtra::grid.arrange(a, b, c, nrow = 2,
-      layout_matrix = rbind(c(1, 2), c(3, 3)), heights = c(1, 2), widths = c(2, 1))
+    p <- gridExtra::grid.arrange(a, b, c, d, e, nrow = 3,
+      layout_matrix = rbind(c(1, 2), c(3, 4), c(3, 5)), heights = c(1, 1, 1), widths = c(2, 0.8))
     #Save
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_repspec.pdf"), p, width = 9, height = 9)
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_repspec.png"), p, width = 9, height = 9)
+    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_repspec.pdf"), p, width = 9, height = 7)
+    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_repspec.png"), p, width = 9, height = 7)
   }
 
   dimsum__status_message("Done\n")

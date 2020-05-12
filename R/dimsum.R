@@ -35,6 +35,7 @@
 #' @param permittedSequences A sequence of nucleotide codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions i.e upper-case letters in wild-type nucleotide sequence (default:any base at mutated positions)
 #' @param reverseComplement Reverse complement variant sequences before processing? (default:F)
 #' @param sequenceType Coding potential of sequence; either noncoding/coding/auto (default:auto)
+#' @param mutagenesisType Whether mutagenesis was performed at the nucleotide or codon/amino acid level; either random/codon (default:random)
 #' @param transLibrary Trans library design i.e. read pairs correspond to distinct peptides with no overlap (default:F)
 #' @param transLibraryReverseComplement Reverse complement second read in pair before concatenating (default:F)
 #' @param bayesianDoubleFitness Improve double mutant fitness estimates using Bayesian framework (DISABLED: still in development)
@@ -91,6 +92,7 @@ dimsum <- function(
   permittedSequences,
   reverseComplement=F,
   sequenceType="auto",
+  mutagenesisType="random",
   transLibrary=F,
   transLibraryReverseComplement=F,
   bayesianDoubleFitness=F,
@@ -186,6 +188,7 @@ dimsum <- function(
     "permittedSequences" = list(permittedSequences, c("character", "NULL")), #ACGTRYSWKMBDHVN character string -- checked in dimsum__validate_input
     "reverseComplement" = list(reverseComplement, c("logical")), #logical -- checked in dimsum__validate_input
     "sequenceType" = list(sequenceType, c("character")), #character string; either noncoding/coding/auto -- checked in dimsum__validate_input
+    "mutagenesisType" = list(mutagenesisType, c("character")), #character string; either random/codon -- checked in dimsum__validate_input
     "transLibrary" = list(transLibrary, c("logical")), #logical -- checked in dimsum__validate_input
     "transLibraryReverseComplement" = list(transLibraryReverseComplement, c("logical")), #logical -- checked in dimsum__validate_input
     "bayesianDoubleFitness" = list(bayesianDoubleFitness, c("logical")), #logical -- checked in dimsum__validate_input

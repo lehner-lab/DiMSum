@@ -24,6 +24,11 @@ dimsum_stage_counts_to_fitness <- function(
   this_stage <- 5
   execute <- (dimsum_meta[["startStage"]] <= this_stage & dimsum_meta[["stopStage"]] >= this_stage)
 
+  #This stage after stopStage
+  if(dimsum_meta[["stopStage"]] < this_stage){
+    return(dimsum_meta)
+  }
+  
   #Save current workspace for debugging purposes
   if(save_workspace){dimsum__save_metadata(dimsum_meta = dimsum_meta, n = 2)}
 
@@ -264,8 +269,8 @@ dimsum_stage_counts_to_fitness <- function(
   #Delete files when last stage complete
   if(!dimsum_meta[["retainIntermediateFiles"]]){
     if(dimsum_meta[["stopStage"]]==this_stage){
-      temp_out <- mapply(file.remove, dimsum_meta[["deleteIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
-      temp_out <- mapply(file.create, dimsum_meta[["touchIntermediateFiles"]], MoreArgs = list(ignore.stdout = T, ignore.stderr = T))
+      suppressWarnings(temp_out <- file.remove(dimsum_meta[["deleteIntermediateFiles"]]))
+      suppressWarnings(temp_out <- file.create(dimsum_meta[["touchIntermediateFiles"]]))
     }
   }
 
