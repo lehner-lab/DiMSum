@@ -4,25 +4,26 @@
 \alias{dimsum}
 \title{Run DiMSum pipeline}
 \usage{
-dimsum(demo = F, fastqFileDir = NULL, fastqFileExtension = ".fastq",
-  gzipped = T, stranded = T, paired = T, barcodeDesignPath = NULL,
-  barcodeErrorRate = 0.25, experimentDesignPath = NULL,
-  experimentDesignPairDuplicates = F, barcodeIdentityPath = NULL,
-  countPath = NULL, cutadaptCut5First = NULL,
-  cutadaptCut5Second = NULL, cutadaptCut3First = NULL,
-  cutadaptCut3Second = NULL, cutadapt5First = NULL,
-  cutadapt5Second = NULL, cutadapt3First = NULL,
-  cutadapt3Second = NULL, cutadaptMinLength = 50,
-  cutadaptErrorRate = 0.2, cutadaptOverlap = 3, usearchMinQual = 30,
-  usearchMaxee = 0.5, usearchMinlen = 64, usearchMinovlen = 16,
-  outputPath = "./", projectName = "DiMSum_Project",
-  wildtypeSequence = NULL, permittedSequences = NULL,
-  reverseComplement = F, sequenceType = "auto",
-  mutagenesisType = "random", transLibrary = F,
-  transLibraryReverseComplement = F, bayesianDoubleFitness = F,
-  bayesianDoubleFitnessLamD = 0.025, fitnessMinInputCountAll = 0,
-  fitnessMinInputCountAny = 0, fitnessMinOutputCountAll = 0,
-  fitnessMinOutputCountAny = 0, fitnessHighConfidenceCount = 10,
+dimsum(runDemo = F, fastqFileDir = NULL,
+  fastqFileExtension = ".fastq", gzipped = T, stranded = T,
+  paired = T, barcodeDesignPath = NULL, barcodeErrorRate = 0.25,
+  experimentDesignPath = NULL, experimentDesignPairDuplicates = F,
+  barcodeIdentityPath = NULL, countPath = NULL,
+  cutadaptCut5First = NULL, cutadaptCut5Second = NULL,
+  cutadaptCut3First = NULL, cutadaptCut3Second = NULL,
+  cutadapt5First = NULL, cutadapt5Second = NULL,
+  cutadapt3First = NULL, cutadapt3Second = NULL,
+  cutadaptMinLength = 50, cutadaptErrorRate = 0.2,
+  cutadaptOverlap = 3, usearchMinQual = 30, usearchMaxee = 0.5,
+  usearchMinlen = 64, usearchMinovlen = 16, outputPath = "./",
+  projectName = "DiMSum_Project", wildtypeSequence = NULL,
+  permittedSequences = NULL, reverseComplement = F,
+  sequenceType = "auto", mutagenesisType = "random",
+  transLibrary = F, transLibraryReverseComplement = F,
+  bayesianDoubleFitness = F, bayesianDoubleFitnessLamD = 0.025,
+  fitnessMinInputCountAll = 0, fitnessMinInputCountAny = 0,
+  fitnessMinOutputCountAll = 0, fitnessMinOutputCountAny = 0,
+  fitnessHighConfidenceCount = 10,
   fitnessDoubleHighConfidenceCount = 50, fitnessNormalise = T,
   fitnessErrorModel = T, maxSubstitutions = 2,
   mixedSubstitutions = F, retainIntermediateFiles = F,
@@ -30,7 +31,7 @@ dimsum(demo = F, fastqFileDir = NULL, fastqFileExtension = ".fastq",
   startStage = 0, stopStage = 5, numCores = 1)
 }
 \arguments{
-\item{demo}{Run the DiMSum demo (default:F)}
+\item{runDemo}{Run the DiMSum demo (default:F)}
 
 \item{fastqFileDir}{Path to directory with input FASTQ files (required for WRAP)}
 

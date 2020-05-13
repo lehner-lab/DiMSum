@@ -3,7 +3,7 @@
 #'
 #' This function runs the DiMSum pipeline.
 #'
-#' @param demo Run the DiMSum demo (default:F)
+#' @param runDemo Run the DiMSum demo (default:F)
 #' @param fastqFileDir Path to directory with input FASTQ files (required for WRAP)
 #' @param fastqFileExtension FASTQ file extension (default:'.fastq')
 #' @param gzipped Are FASTQ files are gzipped? (default:T)
@@ -61,7 +61,7 @@
 #' @return Nothing
 #' @export
 dimsum <- function(
-  demo=F,
+  runDemo=F,
   fastqFileDir=NULL,
   fastqFileExtension=".fastq",
   gzipped=T,
@@ -126,7 +126,7 @@ dimsum <- function(
   ### Demo
   ###########################
 
-  if(demo){
+  if(runDemo){
     wildtypeSequence <- "GGTAATAGCAGAGGGGGTGGAGCTGGTTTGGGAAACAATCAAGGTAGTAATATGGGTGGTGGGATGAACTTTGGTGCGTTCAGCATTAATCCAGCCATGATGGCTGCCGCCCAGGCAGCACTACAG"
     cutadapt5First="TGGCTTTGGGAATCAGGGTGGATTT"
     cutadapt5Second="ACATGCCCATCATACCCCAACTGCT"
@@ -192,7 +192,7 @@ dimsum <- function(
   ###########################
 
   dimsum_arg_list <- list(
-    "demo" = list(demo, c("logical")), #logical -- checked in dimsum__validate_input
+    "runDemo" = list(runDemo, c("logical")), #logical -- checked in dimsum__validate_input
     "fastqFileDir" = list(fastqFileDir, c("character", "NULL")), #directory exists if running WRAP stages -- checked in dimsum__validate_input
     "fastqFileExtension" = list(fastqFileExtension, c("character")), #alphanumeric character string starting with '.' -- checked in dimsum__validate_input
     "gzipped" = list(gzipped, c("logical")), #logical -- checked in dimsum__validate_input

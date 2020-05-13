@@ -23,7 +23,7 @@ status_message <- function(...){cat(sprintf(...), sep='', file=stdout())}
 ###########################
 
 option_list <- list(
-  optparse::make_option(opt_str=c("--demo"), type="logical", default=F, help = "Run the DiMSum demo (default:F)"),
+  optparse::make_option(opt_str=c("--runDemo"), type="logical", default=F, help = "Run the DiMSum demo (default:F)"),
   optparse::make_option(opt_str=c("--fastqFileDir", "-i"), help = "Path to directory with input FASTQ files (required for WRAP)"),
   optparse::make_option(opt_str=c("--fastqFileExtension", "-l"), default='.fastq', help = "FASTQ file extension (default:'.fastq')"),
   optparse::make_option(opt_str=c("--gzipped", "-g"), type="logical", default=T, help = "Are FASTQ files are gzipped? (default:T)"),
@@ -95,7 +95,7 @@ library(DiMSum)
 ###########################
 
 dimsum(
-  demo=arg_list[["demo"]],
+  runDemo=arg_list[["runDemo"]],
   fastqFileDir=arg_list[["fastqFileDir"]],
   fastqFileExtension=arg_list[["fastqFileExtension"]],
   gzipped=arg_list[["gzipped"]],
