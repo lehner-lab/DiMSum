@@ -17,30 +17,15 @@ To run the DiMSum pipeline you will need the following software and associated p
 * **[Pandoc](https://pandoc.org/installing.html) >=v1.17.2**
 * **[starcode](https://github.com/gui11aume/starcode) v1.3**
 
-# Installation and loading
+# Installation
 
-Open R and enter:
-
-```
-# Install
-if(!require(devtools)) install.packages("devtools")
-devtools::install_github("lehner-lab/DiMSum")
-
-# Load
-library(DiMSum)
-
-# Help
-?dimsum
-```
-
-# DiMSum command-line tool
-
-Clone the DiMSum repository and install the R package locally. The * must be replaced by what is actually downloaded and built.
-
+Clone the DiMSum repository:
 ```
 git clone https://github.com/lehner-lab/DiMSum.git
-R CMD build DiMSum
-R CMD INSTALL DiMSum_*.tar.gz
+```
+Install DiMSum and R package dependencies:
+```
+DiMSum/DiMSum_install.R
 ```
 Add the cloned DiMSum repository base directory to your path. You can do this by adding the following line at the bottom of your ~/.bashrc file:
 ```
