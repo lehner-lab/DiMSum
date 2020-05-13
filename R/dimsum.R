@@ -3,6 +3,7 @@
 #'
 #' This function runs the DiMSum pipeline.
 #'
+#' @param demo Run the DiMSum demo (default:F)
 #' @param fastqFileDir Path to directory with input FASTQ files (required for WRAP)
 #' @param fastqFileExtension FASTQ file extension (default:'.fastq')
 #' @param gzipped Are FASTQ files are gzipped? (default:T)
@@ -29,8 +30,8 @@
 #' @param usearchMaxee USEARCH: maximum number of expected errors to retain read pair (default:0.5)
 #' @param usearchMinlen USEARCH: Discard pair if either read is shorter than this (default:64)
 #' @param usearchMinovlen USEARCH: discard pair if alignment is shorter than given value (default:16)
-#' @param outputPath Path to directory to use for output files
-#' @param projectName Project name
+#' @param outputPath Path to directory to use for output files (default:'./' i.e. current working directory)
+#' @param projectName Project name (default:'DiMSum_Project')
 #' @param wildtypeSequence Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed during WRAP.
 #' @param permittedSequences A sequence of nucleotide codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions i.e upper-case letters in wild-type nucleotide sequence (default:any base at mutated positions)
 #' @param reverseComplement Reverse complement variant sequences before processing? (default:F)
@@ -60,6 +61,7 @@
 #' @return Nothing
 #' @export
 dimsum <- function(
+  demo=F,
   fastqFileDir,
   fastqFileExtension=".fastq",
   gzipped=T,
@@ -86,8 +88,8 @@ dimsum <- function(
   usearchMaxee=0.5,
   usearchMinlen=64,
   usearchMinovlen=16,
-  outputPath,
-  projectName,
+  outputPath="./",
+  projectName="DiMSum_Project",
   wildtypeSequence,
   permittedSequences,
   reverseComplement=F,
@@ -121,10 +123,23 @@ dimsum <- function(
     "Package version" = as.character(packageVersion("DiMSum")),
     "R version" = version$version.string))), collapse = "\n"))
 
+  ### Demo
+  ###########################
+
+  if(demo){
+    wildtypeSequence <- "GGTAATAGCAGAGGGGGTGGAGCTGGTTTGGGAAACAATCAAGGTAGTAATATGGGTGGTGGGATGAACTTTGGTGCGTTCAGCATTAATCCAGCCATGATGGCTGCCGCCCAGGCAGCACTACAG"
+    cutadapt5First="TGGCTTTGGGAATCAGGGTGGATTT"
+    cutadapt5Second="ACATGCCCATCATACCCCAACTGCT"
+    experimentDesignPath <- system.file("demo", "experimentDesign_Toy.txt", package = "DiMSum")
+    if(is.null(fastqFileDir)){
+      countPath <- system.file("demo", "countFile_Toy.txt", package = "DiMSum")
+    }
+  }
+
   ### Basic checks
   ###########################
 
-  #Only necessary if WRAP will be run
+  #If WRAP will be run
   if(is.null(countPath)){
     #Required binaries
     required_binaries <- c(
@@ -144,8 +159,29 @@ dimsum <- function(
     suppressMessages(suppressWarnings(binary_versions <- list(
       cutadapt = rev(system("cutadapt --version", intern = TRUE))[1],
       FastQC = rev(system("fastqc --version", intern = TRUE))[1],
+      Pandoc = system("pandoc -v", intern = TRUE)[1],      
       USEARCH = rev(system("usearch --version", intern = TRUE))[1],
       starcode = system("starcode --version 2>&1", intern = TRUE))))
+
+    #Display binary versions
+    dimsum__status_message(paste("\n\n\n*******", "Binary dependency versions", "*******\n\n\n"))
+    dimsum__status_message(paste(formatDL(unlist(binary_versions)), collapse = "\n"))
+  }
+
+  #If WRAP will NOT be run
+  if(!is.null(countPath)){
+    #Required binaries
+    required_binaries <- c(
+      "pandoc")
+    which_binaries <- Sys.which(required_binaries)
+    missing_binaries <- names(which_binaries)[which_binaries==""]
+    if(length(missing_binaries)!=0){
+      stop(paste0("Required executables not installed. Please install the following software: ", paste(missing_binaries, sep = ", ")), call. = FALSE)
+    }
+
+    #Binary versions
+    suppressMessages(suppressWarnings(binary_versions <- list(
+      Pandoc = system("pandoc -v", intern = TRUE)[1])))
 
     #Display binary versions
     dimsum__status_message(paste("\n\n\n*******", "Binary dependency versions", "*******\n\n\n"))
@@ -156,6 +192,7 @@ dimsum <- function(
   ###########################
 
   dimsum_arg_list <- list(
+    "demo" = list(demo, c("logical")), #logical -- checked in dimsum__validate_input
     "fastqFileDir" = list(fastqFileDir, c("character", "NULL")), #directory exists if running WRAP stages -- checked in dimsum__validate_input
     "fastqFileExtension" = list(fastqFileExtension, c("character")), #alphanumeric character string starting with '.' -- checked in dimsum__validate_input
     "gzipped" = list(gzipped, c("logical")), #logical -- checked in dimsum__validate_input

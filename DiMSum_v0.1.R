@@ -23,6 +23,7 @@ status_message <- function(...){cat(sprintf(...), sep='', file=stdout())}
 ###########################
 
 option_list <- list(
+  optparse::make_option(opt_str=c("--demo"), type="logical", default=F, help = "Run the DiMSum demo (default:F)"),
   optparse::make_option(opt_str=c("--fastqFileDir", "-i"), help = "Path to directory with input FASTQ files (required for WRAP)"),
   optparse::make_option(opt_str=c("--fastqFileExtension", "-l"), default='.fastq', help = "FASTQ file extension (default:'.fastq')"),
   optparse::make_option(opt_str=c("--gzipped", "-g"), type="logical", default=T, help = "Are FASTQ files are gzipped? (default:T)"),
@@ -49,8 +50,8 @@ option_list <- list(
   optparse::make_option(opt_str=c("--usearchMaxee", "-m"), type="double", default=0.5, help = "USEARCH: maximum number of expected errors to retain read pair (default:0.5)"),
   optparse::make_option(opt_str=c("--usearchMinlen"), type="integer", default=64, help = "USEARCH: Discard pair if either read is shorter than this (default:64)"),
   optparse::make_option(opt_str=c("--usearchMinovlen"), type="integer", default=16, help = "USEARCH: discard pair if alignment is shorter than given value (default:16)"),
-  optparse::make_option(opt_str=c("--outputPath", "-o"), help = "Path to directory to use for output files"),
-  optparse::make_option(opt_str=c("--projectName", "-p"), help = "Project name"),
+  optparse::make_option(opt_str=c("--outputPath", "-o"), default='./', help = "Path to directory to use for output files (default:'./' i.e. current working directory)"),
+  optparse::make_option(opt_str=c("--projectName", "-p"), default='DiMSum_Project', help = "Project name (default:'DiMSum_Project')"),
   optparse::make_option(opt_str=c("--wildtypeSequence", "-w"), help = "Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed during WRAP"),
   optparse::make_option(opt_str=c("--permittedSequences"), help = "A sequence of nucleotide codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions i.e upper-case letters in wild-type nucleotide sequence (default:any base at mutated positions)"),
   optparse::make_option(opt_str=c("--reverseComplement"), type="logical", default=F, help = "Reverse complement variant sequences before processing? (default:F)"),
@@ -94,6 +95,7 @@ library(DiMSum)
 ###########################
 
 dimsum(
+  demo=arg_list[["demo"]],
   fastqFileDir=arg_list[["fastqFileDir"]],
   fastqFileExtension=arg_list[["fastqFileExtension"]],
   gzipped=arg_list[["gzipped"]],

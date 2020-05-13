@@ -4,22 +4,22 @@
 \alias{dimsum}
 \title{Run DiMSum pipeline}
 \usage{
-dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
-  stranded = T, paired = T, barcodeDesignPath,
+dimsum(demo = F, fastqFileDir, fastqFileExtension = ".fastq",
+  gzipped = T, stranded = T, paired = T, barcodeDesignPath,
   barcodeErrorRate = 0.25, experimentDesignPath,
   experimentDesignPairDuplicates = F, barcodeIdentityPath, countPath,
   cutadaptCut5First, cutadaptCut5Second, cutadaptCut3First,
   cutadaptCut3Second, cutadapt5First, cutadapt5Second, cutadapt3First,
   cutadapt3Second, cutadaptMinLength = 50, cutadaptErrorRate = 0.2,
   cutadaptOverlap = 3, usearchMinQual = 30, usearchMaxee = 0.5,
-  usearchMinlen = 64, usearchMinovlen = 16, outputPath, projectName,
-  wildtypeSequence, permittedSequences, reverseComplement = F,
-  sequenceType = "auto", mutagenesisType = "random",
-  transLibrary = F, transLibraryReverseComplement = F,
-  bayesianDoubleFitness = F, bayesianDoubleFitnessLamD = 0.025,
-  fitnessMinInputCountAll = 0, fitnessMinInputCountAny = 0,
-  fitnessMinOutputCountAll = 0, fitnessMinOutputCountAny = 0,
-  fitnessHighConfidenceCount = 10,
+  usearchMinlen = 64, usearchMinovlen = 16, outputPath = "./",
+  projectName = "DiMSum_Project", wildtypeSequence, permittedSequences,
+  reverseComplement = F, sequenceType = "auto",
+  mutagenesisType = "random", transLibrary = F,
+  transLibraryReverseComplement = F, bayesianDoubleFitness = F,
+  bayesianDoubleFitnessLamD = 0.025, fitnessMinInputCountAll = 0,
+  fitnessMinInputCountAny = 0, fitnessMinOutputCountAll = 0,
+  fitnessMinOutputCountAny = 0, fitnessHighConfidenceCount = 10,
   fitnessDoubleHighConfidenceCount = 50, fitnessNormalise = T,
   fitnessErrorModel = T, maxSubstitutions = 2,
   mixedSubstitutions = F, retainIntermediateFiles = F,
@@ -27,6 +27,8 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
   startStage = 0, stopStage = 5, numCores = 1)
 }
 \arguments{
+\item{demo}{Run the DiMSum demo (default:F)}
+
 \item{fastqFileDir}{Path to directory with input FASTQ files (required for WRAP)}
 
 \item{fastqFileExtension}{FASTQ file extension (default:'.fastq')}
@@ -79,9 +81,9 @@ dimsum(fastqFileDir, fastqFileExtension = ".fastq", gzipped = T,
 
 \item{usearchMinovlen}{USEARCH: discard pair if alignment is shorter than given value (default:16)}
 
-\item{outputPath}{Path to directory to use for output files}
+\item{outputPath}{Path to directory to use for output files (default:'./' i.e. current working directory)}
 
-\item{projectName}{Project name}
+\item{projectName}{Project name (default:'DiMSum_Project')}
 
 \item{wildtypeSequence}{Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed during WRAP.}
 

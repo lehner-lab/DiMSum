@@ -84,25 +84,25 @@ dimsum_stage_cutadapt <- function(
       if(!dimsum_meta[['exp_design']][i,"run_cutadapt"]){
         #Copy files  
         file.copy(
-          from = file.path(dimsum_meta[["exp_design"]][,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
+          from = file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
           to = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt")))
         if(dimsum_meta[["paired"]]){
           file.copy(
-            from = file.path(dimsum_meta[["exp_design"]][,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
+            from = file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
             to = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt")))
           #Total number of FASTQ records
           temp_out <- system(paste0(
             "wc -l ",
-            file.path(dimsum_meta[["exp_design"]][,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
+            file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
             " ",
-            file.path(dimsum_meta[["exp_design"]][,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
+            file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
             " > ",
             file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.stdout")))) 
         }else{
           #Total number of FASTQ records
           temp_out <- system(paste0(
             "wc -l ",
-            file.path(dimsum_meta[["exp_design"]][,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
+            file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
             " > ",
             file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.stdout")))) 
         }
@@ -152,9 +152,9 @@ dimsum_stage_cutadapt <- function(
             " -p ",
             file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt")),
             " ",
-            file.path(dimsum_meta[["exp_design"]][,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
+            file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
             " ",
-            file.path(dimsum_meta[["exp_design"]][,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
+            file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
             " > ",
             file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.stdout")),
             " 2> ",
@@ -175,7 +175,7 @@ dimsum_stage_cutadapt <- function(
             " -o ",
             file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt")),
             " ",
-            file.path(dimsum_meta[["exp_design"]][,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
+            file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
             " > ",
             file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.stdout")),
             " 2> ",
@@ -194,8 +194,8 @@ dimsum_stage_cutadapt <- function(
   #Delete files when last stage complete
   if(!dimsum_meta_new[["retainIntermediateFiles"]]){
     if(dimsum_meta_new[["stopStage"]]==this_stage){
-      suppressWarnings(temp_out <- file.remove(dimsum_meta_new[["deleteIntermediateFiles"]]))
-      suppressWarnings(temp_out <- file.create(dimsum_meta_new[["touchIntermediateFiles"]]))
+      if(!is.null(dimsum_meta_new[["deleteIntermediateFiles"]])){suppressWarnings(temp_out <- file.remove(dimsum_meta_new[["deleteIntermediateFiles"]]))}
+      if(!is.null(dimsum_meta_new[["touchIntermediateFiles"]])){suppressWarnings(temp_out <- file.create(dimsum_meta_new[["touchIntermediateFiles"]]))}
     }else{
       dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], 
         file.path(cutadapt_outpath, dir(cutadapt_outpath, "*.fastq$")),

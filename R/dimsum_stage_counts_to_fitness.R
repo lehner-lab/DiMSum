@@ -269,8 +269,8 @@ dimsum_stage_counts_to_fitness <- function(
   #Delete files when last stage complete
   if(!dimsum_meta[["retainIntermediateFiles"]]){
     if(dimsum_meta[["stopStage"]]==this_stage){
-      suppressWarnings(temp_out <- file.remove(dimsum_meta[["deleteIntermediateFiles"]]))
-      suppressWarnings(temp_out <- file.create(dimsum_meta[["touchIntermediateFiles"]]))
+      if(!is.null(dimsum_meta[["deleteIntermediateFiles"]])){suppressWarnings(temp_out <- file.remove(dimsum_meta[["deleteIntermediateFiles"]]))}
+      if(!is.null(dimsum_meta[["touchIntermediateFiles"]])){suppressWarnings(temp_out <- file.create(dimsum_meta[["touchIntermediateFiles"]]))}
     }
   }
 
