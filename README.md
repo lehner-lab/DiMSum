@@ -19,9 +19,12 @@ To run the DiMSum pipeline you will need the following software and associated p
 
 # Installation
 
-Clone the DiMSum repository and install the R package locally:
+Clone the DiMSum repository:
 ```
 git clone https://github.com/lehner-lab/DiMSum.git
+```
+Install DiMSum and R package dependencies:
+```
 DiMSum/DiMSum_install.R
 ```
 Add the cloned DiMSum repository base directory to your path. You can do this by adding the following line at the bottom of your ~/.bashrc file:
