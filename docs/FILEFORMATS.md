@@ -6,7 +6,7 @@
 
 ## Experimental design file
 
-To run this pipeline, you will first need to describe your experimental design (e.g. in MSExcel) and save this as a tab-separated plain text file. You can download [this](../example_experimentDesign.txt) file to use as a template.
+**REQUIRED:** DiMSum requires a table (e.g. using Microsoft Excel) describing the experimental design that has been saved as tab-separated plain text file (*.tsv*). You can download [this](../example_experimentDesign.txt) file to use as a template.
 
 Your file must have the following columns:
 * **sample_name** A sensible sample name e.g. 'input1' (alphanumeric characters only).
@@ -24,9 +24,17 @@ Below is a schematic of a generic deep mutational scanning experiment indicating
 
 In addition to these mandatory columns, additional columns may be included to specify [Stage 2](https://github.com/lehner-lab/DiMSum#stage-2-trim-constant-regions-wrap)-specific options i.e. those prefixed by 'cutadapt...', which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments. In the case of a growth-rate based assay, a 'generations' column can be supplied (for all output samples) in order to normalize fitness and error estimates accordingly.
 
+## FASTQ files
+
+**OPTIONAL:** If processing of raw sequencing reads is required (with DiMSum *WRAP*), DiMSum requires FASTQ formatted files saved in the same directory ('fastqFileDir') and formatted consistently ('fastqFileExtension', 'gzipped').
+
+## Variant count file
+
+**OPTIONAL:** If raw sequencing reads have already been processed independently of DiMSum, processing and analysis of variant counts (with DiMSum *STEAM*) requires a table (e.g. using Microsoft Excel) with variant sequences and counts for all samples.
+
 ## Barcode design file
 
-If your raw FASTQ sequencing files contain multiplexed samples you will need to provide a tab-separated plain text file describing how index tags map to samples. You can download [this](../example_barcodeDesign.txt) file to use as a template.
+**OPTIONAL:** If the raw FASTQ sequencing files contain multiplexed samples, DiMSum requires a table (e.g. using Microsoft Excel) describing how index tags map to samples that has been saved as tab-separated plain text file (*.tsv*). You can download [this](../example_barcodeDesign.txt) file to use as a template.
 
 Your file must have the following columns:
 * **pair1** FASTQ file name of the first read in a given pair.
@@ -38,8 +46,9 @@ When including a barcode design file, ensure that all 'new_pair_prefix' column e
 
 ## Variant identity file
 
-If your raw FASTQ sequencing files contain variant barcodes you will need to provide a tab-separated plain text file describing how barcodes map to variants. You can download [this](../example_variantIdentity.txt) file to use as a template. 
+**OPTIONAL:** If the supplied sequences (supplied in [FASTQ files](#) or a [Variant count file](#)) contain variant barcodes, DiMSum requires a table (e.g. using Microsoft Excel) describing how barcodes map to variants that has been saved as tab-separated plain text file (*.tsv*). You can download [this](../example_variantIdentity.txt) file to use as a template. 
 
 Your file must have the following columns:
 * **barcode** DNA barcode (A/C/G/T characters only).
 * **variant** Associated DNA variant (A/C/G/T characters only).
+
