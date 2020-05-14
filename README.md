@@ -4,11 +4,12 @@
 
 Welcome to the GitHub repository for DiMSum: A pipeline for analyzing deep mutational scanning (DMS) data and diagnosing common experimental pathologies.
 
+
 # Table Of Contents
 
-**1. [Installation Instructions](docs/INSTALLATION.md)**
-**2. [Pipeline Overview]()**
-**3. [Input File Formats]()**
+* **1. [Installation Instructions](docs/INSTALLATION.md)**
+* **2. [Pipeline Overview]()**
+* **3. [Input File Formats]()**
 
 # Pipeline Overview
 
