@@ -41,15 +41,17 @@ Firstly, clone the DiMSum repository:
 ```
 git clone https://github.com/lehner-lab/DiMSum.git
 ```
-Then, install DiMSum and all R package dependencies:
+Then, from the same location run R and enter:
 ```
-DiMSum/DiMSum_install.R
+if(!require(devtools)) install.packages("devtools")
+devtools::install_deps('DiMSum')
+devtools::install('DiMSum')
 ```
 Finally, add the cloned DiMSum repository base directory to your path. You can do this by adding the following line at the bottom of your *~/.bashrc* file:
 ```
 export PATH=CLONED_DIMSUM_REPOSITORY:$PATH
 ```
-Get a description of DiMSum command-line arguments with the following:
+Display the DiMSum usage information by typing the following on the command-line:
 ```
 DiMSum -h
 ```
