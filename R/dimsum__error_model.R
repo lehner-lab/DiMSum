@@ -246,7 +246,7 @@ dimsum__error_model <- function(
   }
 
   #weight variants according to how many other variants with same # of mutations are around
-  work_data[, error_model_weighting := sqrt(max(.N, sqrt(nrow(work_data)))), Nmut]
+  work_data[, error_model_weighting := sqrt(max(.N, sqrt(nrow(work_data)))), Nham_nt]
 
   #Fit and write error model to file
   error_model <- dimsum__fit_error_model(
