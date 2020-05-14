@@ -1,5 +1,5 @@
 <p align="left">
-  <img src="./Dumpling.png" width="100">
+  <img src="../Dumpling.png" width="100">
 </p>
 
 # Installation Instructions
