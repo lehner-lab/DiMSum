@@ -20,9 +20,9 @@ Pandoc comes bundled with [RStudio](https://rstudio.com/products/rstudio/downloa
 **OPTIONAL:** Additionally, if raw FASTQ files will be processed (with DiMSum *WRAP*), the following software needs to be installed:
 
 * **[FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) v0.11.3**
-* **[cutadapt](https://cutadapt.readthedocs.io/en/stable/) v2.4**
+* **[Cutadapt](https://cutadapt.readthedocs.io/en/stable/) v2.4**
 * **[USEARCH 32-bit](https://drive5.com/usearch/download.html) v10.0**
-* **[starcode](https://github.com/gui11aume/starcode) v1.3**
+* **[Starcode](https://github.com/gui11aume/starcode) v1.3**
 
 **NOTE:** Please ensure that these external binaries are available on the command-line prompt under their lower-case names i.e. *fastqc*, *cutadapt*, *usearch*, *pandoc* and *starcode*. You can rename a binary from its default by creating a symbolic link if necessary, for example:
 ```
