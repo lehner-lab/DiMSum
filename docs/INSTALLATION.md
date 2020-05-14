@@ -10,7 +10,7 @@ DiMSum is expected to work on all Unix-like operating systems.
 
 ## Installing DiMSum dependencies
 
-**REQUIRED:** Before installing the DiMSum package, please ensure that the following required software is installed:
+**REQUIRED:** Before [installing the DiMSum package](#installing-dimsum), please ensure that the following required software is installed:
 
 * **[R](https://www.r-project.org/) >=v3.5.2**
 * **[Pandoc](https://pandoc.org/installing.html) >=v1.17.2**
