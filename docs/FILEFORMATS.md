@@ -1,8 +1,12 @@
+<p align="left">
+  <img src="../Dumpling.png" width="100">
+</p>
+
 # Input File Formats
 
 ## Experimental design file
 
-To run this pipeline, you will first need to describe your experimental design (e.g. in MSExcel) and save this as a tab-separated plain text file. You can download [this](./example_experimentDesign.txt) file to use as a template.
+To run this pipeline, you will first need to describe your experimental design (e.g. in MSExcel) and save this as a tab-separated plain text file. You can download [this](../example_experimentDesign.txt) file to use as a template.
 
 Your file must have the following columns:
 * **sample_name** A sensible sample name e.g. 'input1' (alphanumeric characters only).
@@ -15,14 +19,14 @@ Your file must have the following columns:
 
 Below is a schematic of a generic deep mutational scanning experiment indicating the corresponding entries which should be made in the experimental design file (red text). 
 <p align="left">
-  <img src="./DMS_experiment.png" width="600">
+  <img src="../DMS_experiment.png" width="600">
 </p>
 
-In addition to these mandatory columns, additional columns may be included to specify stage 2-specific options i.e. those prefixed by 'cutadapt...', which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments. In the case of a growth-rate based assay, a 'generations' column can be supplied (for all output samples) in order to normalize fitness and error estimates accordingly.
+In addition to these mandatory columns, additional columns may be included to specify [Stage 2](https://github.com/lehner-lab/DiMSum#stage-2-trim-constant-regions-wrap)-specific options i.e. those prefixed by 'cutadapt...', which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments. In the case of a growth-rate based assay, a 'generations' column can be supplied (for all output samples) in order to normalize fitness and error estimates accordingly.
 
 ## Barcode design file
 
-If your raw FASTQ sequencing files contain multiplexed samples you will need to provide a tab-separated plain text file describing how index tags map to samples. You can download [this](./example_barcodeDesign.txt) file to use as a template.
+If your raw FASTQ sequencing files contain multiplexed samples you will need to provide a tab-separated plain text file describing how index tags map to samples. You can download [this](../example_barcodeDesign.txt) file to use as a template.
 
 Your file must have the following columns:
 * **pair1** FASTQ file name of the first read in a given pair.
@@ -34,7 +38,7 @@ When including a barcode design file, ensure that all 'new_pair_prefix' column e
 
 ## Variant identity file
 
-If your raw FASTQ sequencing files contain variant barcodes you will need to provide a tab-separated plain text file describing how barcodes map to variants. You can download [this](./example_variantIdentity.txt) file to use as a template. 
+If your raw FASTQ sequencing files contain variant barcodes you will need to provide a tab-separated plain text file describing how barcodes map to variants. You can download [this](../example_variantIdentity.txt) file to use as a template. 
 
 Your file must have the following columns:
 * **barcode** DNA barcode (A/C/G/T characters only).
