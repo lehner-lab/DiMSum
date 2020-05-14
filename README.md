@@ -60,13 +60,13 @@ Calculate fitness and error estimates for a user-specified subset of substitutio
 
 ## Output Files
 
-* **PROJECT_DIR/PROJECT_NAME_fitness_replicates.RData** R data object with replicate (and merged) variant fitness scores and associated errors ('all_variants' data.table).
-* **PROJECT_DIR/PROJECT_NAME_variant_data_merge.RData** R data object with variant counts and statistics ('variant_data_merge' data.table).
-* **PROJECT_DIR/PROJECT_NAME_variant_data_merge.tsv** Tab-separated plain text file with variant counts and statistics.
-* **PROJECT_DIR/PROJECT_NAME_nobarcode_variant_data_merge.tsv** Tab-separated plain text file with sequenced barcodes that were not found in the variant identity file.
-* **PROJECT_DIR/PROJECT_NAME_indel_variant_data_merge.tsv** Tab-separated plain text file with indel variants.
-* **PROJECT_DIR/PROJECT_NAME_rejected_variant_data_merge.tsv** Tab-separated plain text file with rejected variants (internal constant region mutants, mutations inconsistent with the library design or variants with too many substitutions).
-* **PROJECT_DIR/report.html** DiMSum pipeline summary report and diagnostic plots in html format.
+* **DiMSum_Project_fitness_replicates.RData** R data object with replicate (and merged) variant fitness scores and associated errors ('all_variants' data.table).
+* **DiMSum_Project_variant_data_merge.RData** R data object with variant counts and statistics ('variant_data_merge' data.table).
+* **DiMSum_Project_variant_data_merge.tsv** Tab-separated plain text file with variant counts and statistics.
+* **DiMSum_Project_nobarcode_variant_data_merge.tsv** Tab-separated plain text file with sequenced barcodes that were not found in the variant identity file.
+* **DiMSum_Project_indel_variant_data_merge.tsv** Tab-separated plain text file with indel variants.
+* **DiMSum_Project_rejected_variant_data_merge.tsv** Tab-separated plain text file with rejected variants (internal constant region mutants, mutations inconsistent with the library design or variants with too many substitutions).
+* **report.html** DiMSum pipeline summary report and diagnostic plots in html format.
 
 
 
