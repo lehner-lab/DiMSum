@@ -245,15 +245,8 @@ dimsum__error_model <- function(
     work_data[is.na(get(paste0("fitness",j))),paste0("cbe",j) := NA]
   }
 
-  #Then calculate density of data along mean count based error (for density dependent weighting)
-  bins <- 50
-  work_data[,mean_cbe := rowMeans(.SD),.SDcols = grep(paste0("^cbe[",all_reps_str,"]$"), names(work_data))]
-  error_range <- seq(work_data[input_above_threshold == T & all_reads == T, log10(quantile(mean_cbe^2, probs=0.001))], 0, length.out = bins)
-  D <- density(x = work_data[input_above_threshold == T & all_reads == T, log10(mean_cbe^2)],
-    from = work_data[,log10(quantile(mean_cbe^2, probs = 0.001, na.rm = T))], to = 0, n = bins)
-  work_data[,bin_error := findInterval(mean_cbe^2,vec = 10^error_range)]
-  work_data[,bin_error_density := D$y[bin_error],bin_error]
-  work_data[bin_error == 0, bin_error_density := work_data[bin_error > 0][which.min(bin_error), unique(bin_error_density)]]
+  #weight variants according to how many other variants with same # of mutations are around
+  work_data[, error_model_weighting := sqrt(max(.N, sqrt(nrow(work_data)))), Nham_nt]
 
   #Fit and write error model to file
   error_model <- dimsum__fit_error_model(
@@ -309,9 +302,6 @@ dimsum__error_model <- function(
   if(report){
     #Add columns for upper/lower bounds of parameter estimates (for plotting)
     plot_error_model <- data.table::copy(error_model)
-    plot_error_model[,upper := mean_value + sd_value]
-    plot_error_model[,lower := mean_value - sd_value]
-    plot_error_model[lower < 0,lower := mean_value]
     # print(plot_error_model)
 
     #Error model limits
@@ -343,19 +333,19 @@ dimsum__error_model <- function(
     
     #Plot1: input and output over-sequencing factor parameters +- sd
     a <- ggplot2::ggplot(plot_error_model[parameter %in% c("input","output")],
-      ggplot2::aes(x=interaction(parameter, rep), mean_value, ymin = lower, ymax = upper, color = factor(rep))) +
+      ggplot2::aes(x=interaction(parameter, rep), mean_value, ymin = CI90_lower, ymax = CI90_upper, color = factor(rep))) +
       ggplot2::geom_pointrange(show.legend = F) +
-      # ggplot2::scale_y_log10(limits = c(min(c(1, plot_error_model[parameter %in% c("input","output"), mean_value], plot_error_model[parameter %in% c("input", "output"), lower])),
-      #   max(c(2.5, plot_error_model[parameter %in% c("input","output"), mean_value], plot_error_model[parameter %in% c("input", "output"), upper])))) +
+      # ggplot2::scale_y_log10(limits = c(min(c(1, plot_error_model[parameter %in% c("input","output"), mean_value], plot_error_model[parameter %in% c("input", "output"), CI90_lower])),
+      #   max(c(2.5, plot_error_model[parameter %in% c("input","output"), mean_value], plot_error_model[parameter %in% c("input", "output"), CI90_upper])))) +
       ggplot2::scale_y_log10() + ggplot2::theme_bw() + 
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
       ggplot2::labs(y = "Multiplicative\nerror terms", x = "Replicate (input or output)")
 
     #Plot2: replicate error parameters +- sd
-    b <- ggplot2::ggplot(plot_error_model[parameter == "reperror"], ggplot2::aes(x = factor(rep), y = sqrt(mean_value), ymin = sqrt(lower), ymax = sqrt(upper), color = factor(rep))) +
+    b <- ggplot2::ggplot(plot_error_model[parameter == "reperror"], ggplot2::aes(x = factor(rep), y = sqrt(mean_value), ymin = sqrt(CI90_lower), ymax = sqrt(CI90_upper), color = factor(rep))) +
       ggplot2::geom_pointrange(show.legend = F) +
-      # ggplot2::scale_y_log10(limits = c(min(plot_error_model[parameter == "reperror", sqrt(lower)]),
-      #   max(c(0.1, plot_error_model[parameter == "reperror", sqrt(upper)])))) +
+      # ggplot2::scale_y_log10(limits = c(min(plot_error_model[parameter == "reperror", sqrt(CI90_lower)]),
+      #   max(c(0.1, plot_error_model[parameter == "reperror", sqrt(CI90_upper)])))) +
       ggplot2::scale_y_log10() + ggplot2::theme_bw() + 
       ggplot2::labs(y = "Additive\nerror terms", x = "Replicate")
 

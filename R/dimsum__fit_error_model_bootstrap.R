@@ -36,7 +36,7 @@ dimsum__fit_error_model_bootstrap <- function(
       bs_data <- input_dt[input_above_threshold == T & all_reads == T & Nham_nt > 0][sample(.N,min(.N,maxN),replace = T)]
       F_data_list <- list() #fitness data
       E_data_list <- list() #count based error data (for weighting of datapoints)
-      C_data_list <- list() #count data
+      C_data_list <- list() #inverse count data
       NR <- list() # simple counter for how many replicates are in each data row
       for(i in 1:length(idx)){
         F_data_list[[i]] <- bs_data[,.SD,.SDcols = grep(paste0("^fitness[", paste0(all_reps[idx[[i]]], collapse = ""), "]$"), names(input_dt))]
@@ -44,23 +44,28 @@ dimsum__fit_error_model_bootstrap <- function(
         C_data_list[[i]] <- bs_data[,1/.SD,.SDcols = grep(paste0("count_e[", paste0(all_reps[idx[[i]]], collapse = ""), "]_s"), names(input_dt))]
         NR[[i]] <- data.table(rep(length(idx[[i]]),nrow(bs_data)))
       }
-      F_data <- as.matrix(rbindlist(F_data_list, fill = T)) #make matrices with #replicates = #columns
-      E_data <- as.matrix(rbindlist(E_data_list, fill = T))
-      C_data <- as.matrix(rbindlist(C_data_list, fill = T))
-      NRT <- as.matrix(rbindlist(NR))
 
+      #make matrices with #replicates = #columns
+      F_data <- as.matrix(rbindlist(F_data_list, fill = T)) 
+      #Calculate variance from fitness data
+      V_data <- apply(F_data,1,var,na.rm = T)
+
+      #count based error weighting of data points (needed because deviation is proportional to expcectation)
+      E_data <- as.matrix(rbindlist(E_data_list, fill = T))
+      Ew <- rowMeans(E_data, na.rm = T)^2
+
+      C_data <- as.matrix(rbindlist(C_data_list, fill = T))
       #Avoid NA for fitting
       C_data[is.na(C_data)] <- 0
-
       #Correct count terms for fitness normalization factors
       if(!is.null(Fcorr)){
         C_data = C_data * matrix(rep(Fcorr, 2), nrow = nrow(C_data), ncol = Nreps*2, byrow = T)
       }
 
-      #Calculate variance from fitness data
-      V_data <- apply(F_data,1,var,na.rm = T)
-      Dw <- (bs_data[,bin_error_density] + quantile(bs_data[,bin_error_density], na.rm = T, probs = 0.001)) #density based weighting of data points
-      Ew <- rowMeans(E_data, na.rm = T)^2 #count based error weighting of data points (needed because deviation is proportional to expcectation)
+      #weighting according to #variants with same mutation
+      Dw <- bs_data$error_model_weighting
+      #how many replicates are in the replicate combinations
+      NRT <- as.matrix(rbindlist(NR))
       
       #Binary variable to avoid replicate error fitting for replicates that are not present in a data row
       BV <- F_data
