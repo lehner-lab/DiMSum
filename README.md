@@ -2,59 +2,15 @@
   <img src="./Dumpling.png" width="100">
 </p>
 
-# Overview
-
 Welcome to the GitHub repository for DiMSum: A pipeline for analyzing deep mutational scanning (DMS) data and diagnosing common experimental pathologies.
 
-# System requirements
+# Table Of Contents
 
-DiMSum is expected to work on all Unix-like operating systems.
+**1. [Installation Instructions](docs/INSTALLATION.md)
+**2. [Pipeline Overview]()
+**3. [Input File Formats]()
 
-# Installing DiMSum dependencies
-
-**REQUIRED:** Before installing the DiMSum package, please ensure that the following required software is installed:
-
-* **[R](https://www.r-project.org/) >=v3.5.2**
-* **[Pandoc](https://pandoc.org/installing.html) >=v1.17.2**
-
-**OPTIONAL:** Additionally, if raw FASTQ files will be processed (with WRAP), the following software needs to be installed:
-
-* **[FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) v0.11.3**
-* **[cutadapt](https://cutadapt.readthedocs.io/en/stable/) v2.4**
-* **[USEARCH 32-bit](https://drive5.com/usearch/download.html) v10.0**
-* **[starcode](https://github.com/gui11aume/starcode) v1.3**
-
-**NOTE:** Please ensure that these external binaries are available under their lower-case names i.e. "fastqc", "cutadapt", "usearch", "pandoc" and "starcode". You can rename a binary from its default by creating a symbolic link if necessary, for example:
-```
-ln -s usearch10.0.240_i86linux32 usearch 
-```
-Also please ensure that the $PATH vairable is set so that they are available under their names from the command-line prompt. You can add a directory (containing an external binary or symblic link) to your path by adding the following line at the bottom of your ~/.bashrc file:
-```
-export PATH=EXTERNAL_BINARY_DIRECTORY:$PATH
-```
-
-# Installing DiMSum
-
-Before installing DiMSum, please ensure that the required software dependencies are available.
-
-Firstly, clone the DiMSum repository:
-```
-git clone https://github.com/lehner-lab/DiMSum.git
-```
-Then, install DiMSum and all R package dependencies:
-```
-DiMSum/DiMSum_install.R
-```
-Finally, add the cloned DiMSum repository base directory to your path. You can do this by adding the following line at the bottom of your ~/.bashrc file:
-```
-export PATH=CLONED_DIMSUM_REPOSITORY:$PATH
-```
-Get a description of DiMSum command-line arguments with the following:
-```
-DiMSum -h
-```
-
-# Pipeline
+# Pipeline Overview
 
 The DiMSum pipeline processes raw sequencing reads (in FASTQ format) from deep mutational scanning (DMS) experiments to produce variant counts, fitness and error estimates. These estimates are suitable for use in downstream analyses of epistasis and [protein structure determination](https://github.com/lehner-lab/DMS2structure).
 
@@ -95,47 +51,7 @@ Calculate fitness and error estimates for a user-specified subset of substitutio
 * **5.6** In the case of a growth-rate based assay, a 'generations' column can be supplied in the experimental design file in order to normalize fitness and error estimates accordingly (see below).
 * **5.7** Fitness scores are merged between replicates in a weighted manner that takes into account their respective errors.
 
-# Experimental design file
-
-To run this pipeline, you will first need to describe your experimental design (e.g. in MSExcel) and save this as a tab-separated plain text file. You can download [this](./example_experimentDesign.txt) file to use as a template.
-
-Your file must have the following columns:
-* **sample_name** A sensible sample name e.g. 'input1' (alphanumeric characters only).
-* **experiment_replicate** An integer identifier denoting distinct experiments (e.g. distinct plasmid library transformations) i.e. a set of input and output replicates originating from the same input biological replicate (strictly positive integer).
-* **selection_id** An integer inidicating whether samples were sequenced before (0) or after (1) selection. Subsequent (serial) rounds of selection are indicated by higher numbers i.e. 2, 3, etc. (positive integer, zero included).
-* **selection_replicate** An integer denoting distinct replicate selections (or biological output replicates) each derived from the same input sample (strictly positive integer). Entries should be blank (empty string) for all input samples (each input sample corresponds to a unique experiment).
-* **technical_replicate** An integer denoting technical replicates (a strictly positive integer) corresponding to sample re-sequencing i.e. extracted DNA originating from the same sample split between separate sequencing lanes or files. Leave this column blank (empty string) when no technical replicates are present.
-* **pair1** FASTQ file name of the first read in a given pair.
-* **pair2** FASTQ file name of the second read in a given pair (omit for single-end library designs i.e. 'paired'=F).
-
-Below is a schematic of a generic deep mutational scanning experiment indicating the corresponding entries which should be made in the experimental design file (red text). 
-<p align="left">
-  <img src="./DMS_experiment.png" width="600">
-</p>
-
-In addition to these mandatory columns, additional columns may be included to specify stage 2-specific options i.e. those prefixed by 'cutadapt...', which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments. In the case of a growth-rate based assay, a 'generations' column can be supplied (for all output samples) in order to normalize fitness and error estimates accordingly.
-
-# Barcode design file
-
-If your raw FASTQ sequencing files contain multiplexed samples you will need to provide a tab-separated plain text file describing how index tags map to samples. You can download [this](./example_barcodeDesign.txt) file to use as a template.
-
-Your file must have the following columns:
-* **pair1** FASTQ file name of the first read in a given pair.
-* **pair2** FASTQ file name of the second read in a given pair (omit for single-end library designs i.e. 'paired'=F).
-* **barcode** Sample index tag (A/C/G/T characters only).
-* **new_pair_prefix** FASTQ file prefix of demultiplexed sample reads i.e. excluding file extension (alphanumeric and underscore characters only).
-
-When including a barcode design file, ensure that all 'new_pair_prefix' column entries correspond to 'pair1' and 'pair2' column entries in the experiment design file by appending '1.fastq' and '2.fastq' to the prefix for the first and second read respectively.
-
-# Variant identity file
-
-If your raw FASTQ sequencing files contain variant barcodes you will need to provide a tab-separated plain text file describing how barcodes map to variants. You can download [this](./example_variantIdentity.txt) file to use as a template. 
-
-Your file must have the following columns:
-* **barcode** DNA barcode (A/C/G/T characters only).
-* **variant** Associated DNA variant (A/C/G/T characters only).
-
-# Output
+## Output Files
 
 * **PROJECT_DIR/PROJECT_NAME_fitness_replicates.RData** R data object with replicate (and merged) variant fitness scores and associated errors ('all_variants' data.table).
 * **PROJECT_DIR/PROJECT_NAME_variant_data_merge.RData** R data object with variant counts and statistics ('variant_data_merge' data.table).
