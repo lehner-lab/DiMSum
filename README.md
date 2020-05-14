@@ -12,7 +12,14 @@ Welcome to the GitHub repository for DiMSum: A pipeline for analyzing deep mutat
 
 # Pipeline Overview
 
-The DiMSum pipeline processes raw sequencing reads (in FASTQ format) from deep mutational scanning (DMS) experiments to produce variant counts, fitness and error estimates. These estimates are suitable for use in downstream analyses of epistasis and [protein structure determination](https://github.com/lehner-lab/DMS2structure).
+The DiMSum pipeline processes raw sequencing reads (in FASTQ format) or variant counts from deep mutational scanning (DMS) experiments to calculate estimates of variant fitness (and assocated error). These estimates are suitable for use in downstream analyses of epistasis and [protein structure determination](https://github.com/lehner-lab/DMS2structure).
+
+The DiMSum pipeline consists of five stages grouped into two modules that can be run independently:
+
+* **WRAP** (DiMSum stages 1-3) processes raw FastQ files generating a table of variant counts
+* **STEAM** (DiMSum stages 4-5) analyses variant counts generating variant fitness and error estimates
+
+A description of each DiMSum stage is given below.
 
 ## Stage 0: **DEMULTIPLEX** raw reads (WRAP)
 
