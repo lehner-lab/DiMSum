@@ -35,7 +35,7 @@ export PATH=EXTERNAL_BINARY_DIRECTORY:$PATH
 
 ## Installing DiMSum
 
-Before installing DiMSum, please ensure that the required software dependencies are available.
+Before installing DiMSum, please ensure that the required [software dependencies](#installing-dimsum-dependencies) are available.
 
 Firstly, clone the DiMSum repository:
 ```
