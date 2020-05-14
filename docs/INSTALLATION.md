@@ -22,7 +22,7 @@ DiMSum is expected to work on all Unix-like operating systems.
 * **[USEARCH 32-bit](https://drive5.com/usearch/download.html) v10.0**
 * **[starcode](https://github.com/gui11aume/starcode) v1.3**
 
-**NOTE:** Please ensure that these external binaries are available under their lower-case names i.e. "fastqc", "cutadapt", "usearch", "pandoc" and "starcode". You can rename a binary from its default by creating a symbolic link if necessary, for example:
+**NOTE:** Please ensure that these external binaries are available on the command-line prompt under their lower-case names i.e. "fastqc", "cutadapt", "usearch", "pandoc" and "starcode". You can rename a binary from its default by creating a symbolic link if necessary, for example:
 ```
 ln -s usearch10.0.240_i86linux32 usearch 
 ```
