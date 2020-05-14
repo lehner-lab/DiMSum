@@ -15,6 +15,8 @@ DiMSum is expected to work on all Unix-like operating systems.
 * **[R](https://www.r-project.org/) >=v3.5.2**
 * **[Pandoc](https://pandoc.org/installing.html) >=v1.17.2**
 
+Pandoc comes bundled with [RStudio](https://rstudio.com/products/rstudio/download/) and the pandoc binary can be found in the RStudio bin/pandoc directory.
+
 **OPTIONAL:** Additionally, if raw FASTQ files will be processed (with WRAP), the following software needs to be installed:
 
 * **[FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) v0.11.3**
