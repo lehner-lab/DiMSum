@@ -7,8 +7,8 @@ Welcome to the GitHub repository for DiMSum: A pipeline for analyzing deep mutat
 # Table Of Contents
 
 * **1. [Installation Instructions](docs/INSTALLATION.md)**
-* **2. [Pipeline Overview]()**
-* **3. [Input File Formats]()**
+* **2. [Pipeline Overview](https://github.com/lehner-lab/DiMSum/blob/master/README.md#pipeline-overview)**
+* **3. [Input File Formats](docs/FILEFORMATS.md)**
 
 # Pipeline Overview
 
