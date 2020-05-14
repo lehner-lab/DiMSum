@@ -16,7 +16,7 @@ The DiMSum pipeline processes raw sequencing reads (in FASTQ format) or variant 
 
 The DiMSum pipeline consists of five stages grouped into two modules that can be run independently:
 
-* **_WRAP_** (DiMSum stages 1-3) processes raw FastQ files generating a table of variant counts
+* **_WRAP_** (DiMSum stages 1-3) processes raw FASTQ files generating a table of variant counts
 * **_STEAM_** (DiMSum stages 4-5) analyses variant counts generating variant fitness and error estimates
 
 A description of each DiMSum stage is given below.
