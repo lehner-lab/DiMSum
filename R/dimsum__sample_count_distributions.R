@@ -33,6 +33,7 @@ dimsum__sample_count_distributions <- function(
   fcols <- names(input_dt)[!grepl("_count|WT", names(input_dt))]
 
   #Add 1 + jitter
+  set.seed(1)
   count_cols <- names(input_dt)[grepl("_count", names(input_dt))]
   for(i in count_cols){
     input_dt[, paste0(i) := as.numeric(.SD[[1]]+1),,.SDcols = i]
@@ -54,15 +55,20 @@ dimsum__sample_count_distributions <- function(
   # #Most abundant variant frequency
   # plot_dt_ma <- plot_dt[,.(value=max(value)),variable]
 
-  #Fake single expected frequency
+  #Fake single expected frequency: fake_single_counts = WT_count*error_rate/4
   plot_dt_fsingles <- data.table::copy(plot_dt_wt)
-  plot_dt_fsingles[, value := (round((value - 1)*error_rate/4) + 1)]
+  plot_dt_fsingles[, value := ((value - 1)*error_rate/4 + 1)]
   plot_dt_fsingles[, Hamming_distance := factor(1)]
 
-  #Fake double expected frequency distribution
+  #Fake double expected frequency distribution: fake_double_counts = real_single_counts*error_rate*2/4
   plot_dt_fdoubles <- plot_dt[get(fcols[1]) == 1]
   for(i in unique(plot_dt_fdoubles[,variable])){
-    plot_dt_fdoubles[variable==i,value := (round(((value - 1)*(1 + seq_length*error_rate) - plot_dt_fsingles[variable==i,value - 1])*error_rate/4) + 1)]
+    #Adjust observed single counts for outflow to doubles
+    plot_dt_fdoubles[variable==i,real_value := value - 1 + (value - 1 - plot_dt_fsingles[variable==i,value - 1])*seq_length*error_rate]
+    #Adjust observed single counts for inflow from WT
+    plot_dt_fdoubles[variable==i,real_value := real_value - plot_dt_fsingles[variable==i,value - 1]]
+    #Fake doubles
+    plot_dt_fdoubles[variable==i,value := real_value*error_rate*2/4 + 1]
   }
   plot_dt_fdoubles <- plot_dt_fdoubles[,.(value = median(value)),variable]
   plot_dt_fdoubles[, Hamming_distance := factor(2)]
