@@ -28,7 +28,7 @@ Pandoc comes bundled with [RStudio](https://rstudio.com/products/rstudio/downloa
 ```
 ln -s usearch10.0.240_i86linux32 usearch 
 ```
-Also please ensure that the *$PATH* vairable is set so that they are available under their names from the command-line prompt. You can add a directory (containing an external binary or symblic link) to your path by adding the following line at the bottom of your *~/.bashrc* file:
+Also please ensure that the *$PATH* vairable is set so that these external binaries are available from the command-line prompt. You can add a directory (containing an external binary or symblic link) to your path by adding the following line at the bottom of your *~/.bashrc* file:
 ```
 export PATH=EXTERNAL_BINARY_DIRECTORY:$PATH
 ```
