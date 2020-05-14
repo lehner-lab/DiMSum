@@ -20,7 +20,7 @@ dimsum__fit_error_model <- function(
   all_reps,
   norm_dt,
   Nbootstraps = 100,
-  maxN = 5000,
+  maxN = 10000,
   max_tries_per_fit = 20,
   lower_rep = 1e-4
   ){
@@ -66,7 +66,8 @@ dimsum__fit_error_model <- function(
     parameter = rep(c("input", "output", "reperror"), each = Nreps),
     rep = rep(all_reps, 3),
     mean_value = colMeans(parameters, na.rm = T),
-    sd_value = apply(parameters, 2, sd, na.rm = T),
+    CI90_lower = apply(parameters, 2, quantile, na.rm = T, probs = 0.1),
+    CI90_upper = apply(parameters, 2, quantile, na.rm = T, probs = 0.9),
     ensemble = sum(!is.na(parameters[,1])))
   return(error_model)
 }
