@@ -15,23 +15,23 @@ Welcome to the GitHub repository for DiMSum: A pipeline for analyzing deep mutat
 
 The DiMSum pipeline processes raw sequencing reads (in FASTQ format) from deep mutational scanning (DMS) experiments to produce variant counts, fitness and error estimates. These estimates are suitable for use in downstream analyses of epistasis and [protein structure determination](https://github.com/lehner-lab/DMS2structure).
 
-## Stage 0: DEMULTIPLEX READS
+## Stage 0: **DEMULTIPLEX** raw reads (WRAP)
 
 Demultiplex samples and trim read barcodes using cutadapt (optional). This stage is run if a barcode design file is supplied (see 'barcodeDesignPath' argument). Stage-specific arguments: 'barcodeDesignPath' and 'barcodeErrorRate'.
 
-## Stage 1: ASSESS READ QUALITY
+## Stage 1: **QC** raw reads (WRAP)
 
 Produce raw read quality reports using FastQC (and unzip and split FASTQ files if necessary).
 
-## Stage 2: TRIM CONSTANT REGIONS
+## Stage 2: **TRIM** constant regions (WRAP)
 
 Remove constant region sequences from read 5’ and 3’ ends using cutadapt. By default the sequences of 3' constant regions are assumed to be the reverse complement of 5' constant region sequences. Stage-specific arguments: 'cutadaptCut5First', 'cutadaptCut5Second', 'cutadaptCut3First', 'cutadaptCut3Second', 'cutadapt5First', 'cutadapt5Second', 'cutadapt3First', 'cutadapt3Second', 'cutadaptMinLength', 'cutadaptErrorRate'.
 
-## Stage 3: ALIGN PAIRED-END READS
+## Stage 3: **ALIGN** paired-end reads (WRAP)
 
 Align overlapping read pairs using USEARCH (paired-end cis libraries only i.e. 'paired'=T, 'transLibrary'=F) or alternatively concatenate read pairs (paired-end trans libraries only i.e. 'transLibrary'=T), and filter resulting variants according to base quality, expected number of errors and constituent read length (including those from single-end libraries i.e. 'paired'=F). Stage-specific arguments: 'usearchMinQual', 'usearchMaxee', 'usearchMinlen', 'usearchMinovlen'. Unique variant sequences are then tallied using [starcode](https://github.com/gui11aume/starcode).
 
-## Stage 4: MERGE SAMPLE STATISTICS AND FILTER VARIANTS
+## Stage 4: **PROCESS** variants (STEAM)
 
 Combine sample-wise variant counts and statistics to produce a unified results data.table. After aggregating counts across technical replicates, variants are processed and filtered according to user specifications:
 * **4.1** For barcoded libraries, read counts are aggregated at the variant level for barcode/variant mappings specified in the variant identity file (see below). Undefined/misread barcodes are ignored.
@@ -41,7 +41,7 @@ Combine sample-wise variant counts and statistics to produce a unified results d
 * **4.5** Variants with more substitions than specified with 'maxSubstitutions' are also removed.
 * **4.6** Finally, nonsynonymous variants with synonymous substitutions in other codons are removed (if 'mixedSubstitutions'=F).
 
-## Stage 5: CALCULATE FITNESS
+## Stage 5: **ANALYSE** counts (STEAM)
 
 Calculate fitness and error estimates for a user-specified subset of substitution variants:
 * **5.1** Low count variants are removed according to user-specified soft ('fitnessMinInputCountAny', 'fitnessMinOutputCountAny') and hard ('fitnessMinInputCountAll', 'fitnessMinOutputCountAll') thresholds to minimise the impact of fake variants from sequencing errors.
