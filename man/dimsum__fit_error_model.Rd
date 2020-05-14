@@ -5,7 +5,7 @@
 \title{dimsum__fit_error_model}
 \usage{
 dimsum__fit_error_model(dimsum_meta, input_dt, all_reps, norm_dt,
-  Nbootstraps = 100, maxN = 5000, max_tries_per_fit = 20,
+  Nbootstraps = 100, maxN = 10000, max_tries_per_fit = 20,
   lower_rep = 1e-04)
 }
 \arguments{

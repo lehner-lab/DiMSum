@@ -245,6 +245,11 @@ dimsum__error_model <- function(
     work_data[is.na(get(paste0("fitness",j))),paste0("cbe",j) := NA]
   }
 
+  #Calculate density of data along mean count based error
+  bins <- 50
+  work_data[,mean_cbe := rowMeans(.SD),.SDcols = grep(paste0("^cbe[",all_reps_str,"]$"), names(work_data))]
+  error_range <- seq(work_data[input_above_threshold == T & all_reads == T, log10(quantile(mean_cbe^2, probs=0.001))], 0, length.out = bins)
+  work_data[,bin_error := findInterval(mean_cbe^2,vec = 10^error_range)]
   #weight variants according to how many other variants with same # of mutations are around
   work_data[, error_model_weighting := sqrt(max(.N, sqrt(nrow(work_data)))), Nham_nt]
 
