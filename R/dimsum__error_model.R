@@ -340,18 +340,20 @@ dimsum__error_model <- function(
     a <- ggplot2::ggplot(plot_error_model[parameter %in% c("input","output")],
       ggplot2::aes(x=interaction(parameter, rep), mean_value, ymin = CI90_lower, ymax = CI90_upper, color = factor(rep))) +
       ggplot2::geom_pointrange(show.legend = F) +
-      # ggplot2::scale_y_log10(limits = c(min(c(1, plot_error_model[parameter %in% c("input","output"), mean_value], plot_error_model[parameter %in% c("input", "output"), CI90_lower])),
-      #   max(c(2.5, plot_error_model[parameter %in% c("input","output"), mean_value], plot_error_model[parameter %in% c("input", "output"), CI90_upper])))) +
-      ggplot2::scale_y_log10() + ggplot2::theme_bw() + 
+      ggplot2::scale_y_log10(limits = c(min(1, plot_error_model[parameter %in% c("input","output"), mean_value], plot_error_model[parameter %in% c("input", "output"), CI90_lower]),
+        max(3, plot_error_model[parameter %in% c("input","output"), mean_value], plot_error_model[parameter %in% c("input", "output"), CI90_upper]))) +
+      # ggplot2::scale_y_log10() + 
+      ggplot2::theme_bw() + 
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
       ggplot2::labs(y = "Multiplicative\nerror terms", x = "Replicate (input or output)")
 
     #Plot2: replicate error parameters +- sd
     b <- ggplot2::ggplot(plot_error_model[parameter == "reperror"], ggplot2::aes(x = factor(rep), y = sqrt(mean_value), ymin = sqrt(CI90_lower), ymax = sqrt(CI90_upper), color = factor(rep))) +
       ggplot2::geom_pointrange(show.legend = F) +
-      # ggplot2::scale_y_log10(limits = c(min(plot_error_model[parameter == "reperror", sqrt(CI90_lower)]),
-      #   max(c(0.1, plot_error_model[parameter == "reperror", sqrt(CI90_upper)])))) +
-      ggplot2::scale_y_log10() + ggplot2::theme_bw() + 
+      ggplot2::scale_y_log10(limits = c(min(0.01, plot_error_model[parameter == "reperror", sqrt(CI90_lower)]),
+        max(c(0.1, plot_error_model[parameter == "reperror", sqrt(CI90_upper)])))) +
+      # ggplot2::scale_y_log10() + 
+      ggplot2::theme_bw() + 
       ggplot2::labs(y = "Additive\nerror terms", x = "Replicate")
 
     #Plot3: count based error against variance of fitness + fit

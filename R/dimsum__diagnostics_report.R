@@ -42,19 +42,22 @@ dimsum__diagnostics_report <- function(
   #Set maximum limit of 12 substitutions to display
   max_nsubs <- min(c(max_nsubs, 12))
 
+  #Error rate
+  error_rate <- 10^min(-dimsum_meta[["usearchMinQual"]]/10, log10(dimsum_meta[["usearchMaxee"]] / nchar(dimsum_meta[["wildtypeSequence"]])))
+
   #Plot 1: Histogram of input counts split by number of nucleotide mutations
   if(length(input_samples)!=0){
     dimsum__sample_count_distributions(
       input_dt = variant_data_merge[data.table::between(Nham_nt,0,max_nsubs),.SD,.SDcols=c(input_samples, "Nham_nt", "WT")],
       output_file = file.path(report_outpath, "dimsum__diagnostics_report_count_hist_input_nt.png"),
       #title = paste0("Nucleotide substitution variant count distributions (input samples)"),
-      error_rate = 10^(-dimsum_meta[["usearchMinQual"]]/10),
+      error_rate = error_rate,
       seq_length = nchar(dimsum_meta[["wildtypeSequence"]]))
     dimsum__sample_count_distributions(
       input_dt = variant_data_merge[data.table::between(Nham_nt,0,max_nsubs),.SD,.SDcols=c(input_samples, "Nham_nt", "WT")],
       output_file = file.path(report_outpath, "dimsum__diagnostics_report_count_hist_input_nt.pdf"),
       #title = paste0("Nucleotide substitution variant count distributions (input samples)"),
-      error_rate = 10^(-dimsum_meta[["usearchMinQual"]]/10),
+      error_rate = error_rate,
       seq_length = nchar(dimsum_meta[["wildtypeSequence"]]))
   }
 
@@ -67,13 +70,13 @@ dimsum__diagnostics_report <- function(
         input_dt = variant_data_merge[data.table::between(Nham_nt,0,max_nsubs),.SD,.SDcols=c(input_samples, "Nham_nt", "Nham_aa", "WT")],
         output_file = file.path(report_outpath, "dimsum__diagnostics_report_count_hist_input_aa.png"),
         #title = paste0("Nucleotide substitution variant count distributions (input samples)"),
-        error_rate = 10^(-dimsum_meta[["usearchMinQual"]]/10),
+        error_rate = error_rate,
         seq_length = nchar(dimsum_meta[["wildtypeSequence"]]), height = 12)
       dimsum__sample_count_distributions(
         input_dt = variant_data_merge[data.table::between(Nham_nt,0,max_nsubs),.SD,.SDcols=c(input_samples, "Nham_nt", "Nham_aa", "WT")],
         output_file = file.path(report_outpath, "dimsum__diagnostics_report_count_hist_input_aa.pdf"),
         #title = paste0("Nucleotide substitution variant count distributions (input samples)"),
-        error_rate = 10^(-dimsum_meta[["usearchMinQual"]]/10),
+        error_rate = error_rate,
         seq_length = nchar(dimsum_meta[["wildtypeSequence"]]), height = 12)
     }
   }
