@@ -1,4 +1,4 @@
-**<[BACK](https://github.com/lehner-lab/DiMSum)**
+**[Table Of Contents](https://github.com/lehner-lab/DiMSum#table-of-contents)**
 <p align="left">
   <img src="../Dumpling.png" width="100">
 </p>
