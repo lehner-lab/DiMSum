@@ -58,4 +58,4 @@ DiMSum -h
 
 ## Demo DiMSum
 
-In order to test that you have a working installation of the DiMSum pipeline and all necessary software dependencies, run the [Demo](docs/DEMO.md).
+In order to test that you have a working installation of the DiMSum pipeline and all necessary software dependencies, run the [Demo](DEMO.md).
