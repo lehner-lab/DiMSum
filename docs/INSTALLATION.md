@@ -1,4 +1,4 @@
-[BACK](https://github.com/lehner-lab/DiMSum)
+**<[BACK](https://github.com/lehner-lab/DiMSum)**
 <p align="left">
   <img src="../Dumpling.png" width="100">
 </p>
