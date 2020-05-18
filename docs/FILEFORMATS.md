@@ -27,11 +27,11 @@ In addition to these mandatory columns, additional columns may be included to sp
 
 ## FASTQ Files
 
-**OPTIONAL:** If processing of raw sequencing reads is required (with *WRAP*), DiMSum requires FASTQ formatted files saved in a common directory ('_--fastqFileDir_') and formatted consistently ('_--fastqFileExtension_', '_--gzipped_').
+**OPTIONAL:** If processing of raw sequencing reads is required (with *WRAP*), DiMSum requires FASTQ formatted files saved in a common directory ('_--fastqFileDir_') and formatted consistently ('_--fastqFileExtension_', '_--gzipped_'). Either FASTQ Files or a [Variant Count File](#variant-count-file) can be supplied (not both).
 
 ## Variant Count File
 
-**OPTIONAL:** If raw sequencing reads have already been processed independently of DiMSum, processing and analysis of variant counts (with DiMSum *STEAM*) requires a table (e.g. using Microsoft Excel) with variant sequences and counts for all samples ('_--countPath_').
+**OPTIONAL:** If raw sequencing reads have already been processed independently of DiMSum, processing and analysis of variant counts (with DiMSum *STEAM*) requires a table (e.g. using Microsoft Excel) with variant sequences and counts for all samples ('_--countPath_'). You can download [this](../example_variantCounts.txt) file to use as a template. Either [FASTQ Files](#fastq-files) or a Variant Count File can be supplied (not both).
 
 ## Barcode Design File
 
