@@ -7,7 +7,7 @@
 
 ## General
 
-* **_--runDemo_** Run the DiMSum [Demo](#DEMO.md) (default:F)
+* **_--runDemo_** Run the DiMSum [Demo](DEMO.md) (default:F)
 * **_--projectName_** Project name and directory where results are to be saved (default:'DiMSum_Project')
 * **_--experimentDesignPath_** Path to [Experimental Design File](FILEFORMATS.md#experimental-design-file) (required, if '_--runDemo_'=F)
 
