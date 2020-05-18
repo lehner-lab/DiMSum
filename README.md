@@ -8,8 +8,9 @@ Welcome to the GitHub repository for DiMSum: A pipeline for analyzing deep mutat
 
 * **1. [Pipeline Overview](#pipeline-overview)**
 * **2. [Installation Instructions](docs/INSTALLATION.md)**
-* **3. [Input File Formats](docs/FILEFORMATS.md)**
-* **4. [Demo](docs/DEMO.md)**
+* **3. [Command-line Arguments](docs/ARGUMENTS.md)**
+* **4. [Input File Formats](docs/FILEFORMATS.md)**
+* **5. [Demo](docs/DEMO.md)**
 
 # Pipeline Overview
 
