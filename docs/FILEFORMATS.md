@@ -27,7 +27,7 @@ In addition to these mandatory columns, additional columns may be included to sp
 
 ## FASTQ Files
 
-**OPTIONAL:** If processing of raw sequencing reads is required (with DiMSum *WRAP*), DiMSum requires FASTQ formatted files saved in a common directory ('_--fastqFileDir_') and formatted consistently ('_--fastqFileExtension_', '_--gzipped_').
+**OPTIONAL:** If processing of raw sequencing reads is required (with *WRAP*), DiMSum requires FASTQ formatted files saved in a common directory ('_--fastqFileDir_') and formatted consistently ('_--fastqFileExtension_', '_--gzipped_').
 
 ## Variant Count File
 
