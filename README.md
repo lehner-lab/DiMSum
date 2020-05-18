@@ -6,9 +6,10 @@ Welcome to the GitHub repository for DiMSum: A pipeline for analyzing deep mutat
 
 # Table Of Contents
 
-* **1. [Installation Instructions](docs/INSTALLATION.md)**
-* **2. [Pipeline Overview](#pipeline-overview)**
+* **1. [Pipeline Overview](#pipeline-overview)**
+* **2. [Installation Instructions](docs/INSTALLATION.md)**
 * **3. [Input File Formats](docs/FILEFORMATS.md)**
+* **4. [Demo](docs/DEMO.md)**
 
 # Pipeline Overview
 
@@ -23,7 +24,7 @@ A description of each DiMSum stage is given below.
 
 ## Stage 0: **DEMULTIPLEX** raw reads (_WRAP_)
 
-Demultiplex samples and trim read barcodes using *[Cutadapt](docs/INSTALLATION.md)* (optional). This stage is run if a barcode design file is supplied (see 'barcodeDesignPath' argument). Stage-specific arguments: 'barcodeDesignPath' and 'barcodeErrorRate'.
+Demultiplex samples and trim read barcodes using *[Cutadapt](docs/INSTALLATION.md)* (optional). This stage is run if a barcode design file is supplied (see '_barcodeDesignPath_' argument). Stage-specific arguments: '_barcodeDesignPath_' and '_barcodeErrorRate_'.
 
 ## Stage 1: **QC** raw reads (_WRAP_)
 
@@ -31,37 +32,37 @@ Produce raw read quality reports using *[FastQC](docs/INSTALLATION.md)* (and unz
 
 ## Stage 2: **TRIM** constant regions (_WRAP_)
 
-Remove constant region sequences from read 5’ and 3’ ends using *[Cutadapt](docs/INSTALLATION.md)*. By default the sequences of 3' constant regions are assumed to be the reverse complement of 5' constant region sequences. Stage-specific arguments: 'cutadaptCut5First', 'cutadaptCut5Second', 'cutadaptCut3First', 'cutadaptCut3Second', 'cutadapt5First', 'cutadapt5Second', 'cutadapt3First', 'cutadapt3Second', 'cutadaptMinLength', 'cutadaptErrorRate'.
+Remove constant region sequences from read 5’ and 3’ ends using *[Cutadapt](docs/INSTALLATION.md)*. By default the sequences of 3' constant regions are assumed to be the reverse complement of 5' constant region sequences. Stage-specific arguments: '_cutadaptCut5First_', '_cutadaptCut5Second_', '_cutadaptCut3First_', '_cutadaptCut3Second_', '_cutadapt5First_', '_cutadapt5Second_', '_cutadapt3First_', '_cutadapt3Second_', '_cutadaptMinLength_', '_cutadaptErrorRate_'.
 
 ## Stage 3: **ALIGN** paired-end reads (_WRAP_)
 
-Align overlapping read pairs using *[USEARCH](docs/INSTALLATION.md)* (paired-end cis libraries only i.e. 'paired'=T, 'transLibrary'=F) or alternatively concatenate read pairs (paired-end trans libraries only i.e. 'transLibrary'=T), and filter resulting variants according to base quality, expected number of errors and constituent read length (including those from single-end libraries i.e. 'paired'=F). Stage-specific arguments: 'usearchMinQual', 'usearchMaxee', 'usearchMinlen', 'usearchMinovlen'. Unique variant sequences are then tallied using *[Starcode](docs/INSTALLATION.md)*.
+Align overlapping read pairs using *[USEARCH](docs/INSTALLATION.md)* (paired-end cis libraries only i.e. '_paired_'=T, '_transLibrary_'=F) or alternatively concatenate read pairs (paired-end trans libraries only i.e. '_transLibrary_'=T), and filter resulting variants according to base quality, expected number of errors and constituent read length (including those from single-end libraries i.e. '_paired_'=F). Stage-specific arguments: '_usearchMinQual_', '_usearchMaxee_', '_usearchMinlen_', '_usearchMinovlen_'. Unique variant sequences are then tallied using *[Starcode](docs/INSTALLATION.md)*.
 
 ## Stage 4: **PROCESS** variants (_STEAM_)
 
 Combine sample-wise variant counts and statistics to produce a unified results data.table. After aggregating counts across technical replicates, variants are processed and filtered according to user specifications:
 * **4.1** For barcoded libraries, read counts are aggregated at the variant level for barcode/variant mappings specified in the variant identity file (see below). Undefined/misread barcodes are ignored.
 * **4.2** Indel variants (defined as those not matching the wild-type nucleotide sequence length) are removed.
-* **4.3** If internal constant region(s) are specified (lower-case letter in 'wildtypeSequence' argument), these are excised from all variants if a perfect match is found.
-* **4.4** Variants with mutations inconsistent with the library design are removed (specified with 'permittedSequences' argument).
-* **4.5** Variants with more substitions than specified with 'maxSubstitutions' are also removed.
-* **4.6** Finally, nonsynonymous variants with synonymous substitutions in other codons are removed (if 'mixedSubstitutions'=F).
+* **4.3** If internal constant region(s) are specified (lower-case letter in '_wildtypeSequence_' argument), these are excised from all variants if a perfect match is found.
+* **4.4** Variants with mutations inconsistent with the library design are removed (specified with '_permittedSequences_' argument).
+* **4.5** Variants with more substitions than specified with '_maxSubstitutions_' are also removed.
+* **4.6** Finally, nonsynonymous variants with synonymous substitutions in other codons are removed (if '_mixedSubstitutions_'=F).
 
 ## Stage 5: **ANALYSE** counts (_STEAM_)
 
 Calculate fitness and error estimates for a user-specified subset of substitution variants:
-* **5.1** Low count variants are removed according to user-specified soft ('fitnessMinInputCountAny', 'fitnessMinOutputCountAny') and hard ('fitnessMinInputCountAll', 'fitnessMinOutputCountAll') thresholds to minimise the impact of fake variants from sequencing errors.
+* **5.1** Low count variants are removed according to user-specified soft ('_fitnessMinInputCountAny_', '_fitnessMinOutputCountAny_') and hard ('_fitnessMinInputCountAll_', '_fitnessMinOutputCountAll_') thresholds to minimise the impact of fake variants from sequencing errors.
 * **5.2** An error model is fit to a high confidence subset of variants to determine count-based (Poisson), replicate and over-sequencing error terms.
-* **5.3** Variants are aggregated at the amino acid level if the target molecule is a protein ('sequenceType'=coding).
+* **5.3** Variants are aggregated at the amino acid level if the target molecule is a protein ('_sequenceType_'=coding).
 * **5.4** Fitness and estimates of the associated error are then calculated with respect to the corresponding wild-type sequence score using the model derived in **5.3** above.
-* **5.5** (*Coming soon: still in development*) Optionally improve double mutant fitness estimates for low frequency variants using a Bayesian approach that incorporates priors based on observed single mutant counts ('bayesianDoubleFitness', 'bayesianDoubleFitnessLamD', 'fitnessHighConfidenceCount', 'fitnessDoubleHighConfidenceCount').
-* **5.6** In the case of a growth-rate based assay, a 'generations' column can be supplied in the experimental design file in order to normalize fitness and error estimates accordingly (see below).
+* **5.5** (*Coming soon: still in development*) Optionally improve double mutant fitness estimates for low frequency variants using a Bayesian approach that incorporates priors based on observed single mutant counts ('_bayesianDoubleFitness_', '_bayesianDoubleFitnessLamD_', '_fitnessHighConfidenceCount_', '_fitnessDoubleHighConfidenceCount_').
+* **5.6** In the case of a growth-rate based assay, a '_generations_' column can be supplied in the experimental design file in order to normalize fitness and error estimates accordingly (see below).
 * **5.7** Fitness scores are merged between replicates in a weighted manner that takes into account their respective errors.
 
 ## Output Files
 
-* **DiMSum_Project_fitness_replicates.RData** R data object with replicate (and merged) variant fitness scores and associated errors ('all_variants' data.table).
-* **DiMSum_Project_variant_data_merge.RData** R data object with variant counts and statistics ('variant_data_merge' data.table).
+* **DiMSum_Project_fitness_replicates.RData** R data object with replicate (and merged) variant fitness scores and associated errors ('_all_variants_' data.table).
+* **DiMSum_Project_variant_data_merge.RData** R data object with variant counts and statistics ('_variant_data_merge_' data.table).
 * **DiMSum_Project_variant_data_merge.tsv** Tab-separated plain text file with variant counts and statistics.
 * **DiMSum_Project_nobarcode_variant_data_merge.tsv** Tab-separated plain text file with sequenced barcodes that were not found in the variant identity file.
 * **DiMSum_Project_indel_variant_data_merge.tsv** Tab-separated plain text file with indel variants.
