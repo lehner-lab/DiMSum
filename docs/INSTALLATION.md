@@ -56,6 +56,6 @@ Display the DiMSum usage information by typing the following on the command-line
 DiMSum -h
 ```
 
-## Demo DiMSum
+## DiMSum Demo
 
-In order to test that you have a working installation of the DiMSum pipeline and all necessary software dependencies, run the [Demo](docs/DEMO.md).
+In order to test that you have a working installation of the DiMSum pipeline and all necessary software dependencies, run the DiMSum [Demo](docs/DEMO.md).
