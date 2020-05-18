@@ -47,7 +47,7 @@ When including a barcode design file, ensure that all 'new_pair_prefix' column e
 
 ## Variant Identity File
 
-**OPTIONAL:** If the supplied sequences (supplied in [FASTQ files](#) or a [Variant count file](#)) contain variant barcodes, DiMSum requires a table (e.g. using Microsoft Excel) describing how barcodes map to variants that has been saved as tab-separated plain text file ('_--barcodeIdentityPath_'). You can download [this](../example_variantIdentity.txt) file to use as a template. 
+**OPTIONAL:** If the supplied sequences (supplied in the [FASTQ files](#) or [Variant count file](#)) contain variant barcodes, DiMSum requires a table (e.g. using Microsoft Excel) describing how barcodes map to variants that has been saved as tab-separated plain text file ('_--barcodeIdentityPath_'). You can download [this](../example_variantIdentity.txt) file to use as a template. 
 
 Your file must have the following columns:
 * **barcode** DNA barcode (A/C/G/T characters only).
