@@ -47,8 +47,6 @@
 * **_--maxSubstitutions_** Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)
 * **_--mixedSubstitutions_** For coding sequences, are nonsynonymous variants with silent/synonymous substitutions in other codons allowed? (default:F)
 
-
-
 ## ANALYSE Arguments
 
 
