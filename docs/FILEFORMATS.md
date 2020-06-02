@@ -5,6 +5,12 @@
 
 # Input File Formats
 
+* **[Experimental Design File](#experiment-design-file)**
+* **[FASTQ Files](#fastq-files)**
+* **[Variant Count File](#variant-count-file)**
+* **[Barcode Design File](#barcode-design-file)**
+* **[Variant Identity File](#variant-identity-file)**
+
 ## Experimental Design File 
 
 **REQUIRED:** DiMSum requires a table (e.g. using Microsoft Excel) describing the experimental design that has been saved as tab-separated plain text file (see [arguments](ARGUMENTS.md#general)). You can download [this](../example_experimentDesign.txt) file to use as a template.
