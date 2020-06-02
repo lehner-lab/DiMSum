@@ -49,13 +49,7 @@ dimsum__diagnostics_report <- function(
   if(length(input_samples)!=0){
     dimsum__sample_count_distributions(
       input_dt = variant_data_merge[data.table::between(Nham_nt,0,max_nsubs),.SD,.SDcols=c(input_samples, "Nham_nt", "WT")],
-      output_file = file.path(report_outpath, "dimsum__diagnostics_report_count_hist_input_nt.png"),
-      #title = paste0("Nucleotide substitution variant count distributions (input samples)"),
-      error_rate = error_rate,
-      seq_length = nchar(dimsum_meta[["wildtypeSequence"]]))
-    dimsum__sample_count_distributions(
-      input_dt = variant_data_merge[data.table::between(Nham_nt,0,max_nsubs),.SD,.SDcols=c(input_samples, "Nham_nt", "WT")],
-      output_file = file.path(report_outpath, "dimsum__diagnostics_report_count_hist_input_nt.pdf"),
+      output_file_prefix = file.path(report_outpath, "dimsum__diagnostics_report_count_hist_input_nt"),
       #title = paste0("Nucleotide substitution variant count distributions (input samples)"),
       error_rate = error_rate,
       seq_length = nchar(dimsum_meta[["wildtypeSequence"]]))
@@ -68,13 +62,7 @@ dimsum__diagnostics_report <- function(
     if(length(input_samples)!=0){
       dimsum__sample_count_distributions(
         input_dt = variant_data_merge[data.table::between(Nham_nt,0,max_nsubs),.SD,.SDcols=c(input_samples, "Nham_nt", "Nham_aa", "WT")],
-        output_file = file.path(report_outpath, "dimsum__diagnostics_report_count_hist_input_aa.png"),
-        #title = paste0("Nucleotide substitution variant count distributions (input samples)"),
-        error_rate = error_rate,
-        seq_length = nchar(dimsum_meta[["wildtypeSequence"]]), height = 12)
-      dimsum__sample_count_distributions(
-        input_dt = variant_data_merge[data.table::between(Nham_nt,0,max_nsubs),.SD,.SDcols=c(input_samples, "Nham_nt", "Nham_aa", "WT")],
-        output_file = file.path(report_outpath, "dimsum__diagnostics_report_count_hist_input_aa.pdf"),
+        output_file_prefix = file.path(report_outpath, "dimsum__diagnostics_report_count_hist_input_aa"),
         #title = paste0("Nucleotide substitution variant count distributions (input samples)"),
         error_rate = error_rate,
         seq_length = nchar(dimsum_meta[["wildtypeSequence"]]), height = 12)
@@ -87,17 +75,7 @@ dimsum__diagnostics_report <- function(
     names(temp_dt)[grep("_count", names(temp_dt))] <- dimsum__plot_samplename(names(temp_dt)[grep("_count", names(temp_dt))])
     dimsum__ggpairs_binhex(
       input_dt = log10(temp_dt[,.SD,.SDcols = dimsum__plot_samplename(c(input_samples, output_samples))]+1), 
-      output_file = file.path(report_outpath, "dimsum__diagnostics_report_scatterplotmatrix_all.png"),
-      xlab = "log10(variant count + 1)",
-      ylab = "log10(variant count + 1)",
-      #title = "Substitution variant inter-sample count correlations (all samples)",
-      size = 0.1,
-      thresholds = list(
-        "dotted" = log10(dimsum_meta[["fitnessMinInputCountAny"]] + 1), 
-        "dashed" = log10(dimsum_meta[["fitnessMinInputCountAll"]] + 1)))
-    dimsum__ggpairs_binhex(
-      input_dt = log10(temp_dt[,.SD,.SDcols = dimsum__plot_samplename(c(input_samples, output_samples))]+1), 
-      output_file = file.path(report_outpath, "dimsum__diagnostics_report_scatterplotmatrix_all.pdf"),
+      output_file_prefix = file.path(report_outpath, "dimsum__diagnostics_report_scatterplotmatrix_all"),
       xlab = "log10(variant count + 1)",
       ylab = "log10(variant count + 1)",
       #title = "Substitution variant inter-sample count correlations (all samples)",
@@ -113,18 +91,7 @@ dimsum__diagnostics_report <- function(
     names(temp_dt)[grep("_count", names(temp_dt))] <- dimsum__plot_samplename(names(temp_dt)[grep("_count", names(temp_dt))])
     dimsum__ggpairs_binhex(
       input_dt = log10(temp_dt[data.table::between(Nham_nt,1,2),.SD,.SDcols = dimsum__plot_samplename(c(input_samples, output_samples))]+1), 
-      output_file = file.path(report_outpath, "dimsum__diagnostics_report_scatterplotmatrix_singles_doubles.png"),
-      xlab = "log10(variant count + 1)",
-      ylab = "log10(variant count + 1)",
-      #title = "Single and double substitution variant inter-sample count correlations (all samples)",
-      cut = as.factor(temp_dt[data.table::between(Nham_nt,1,2),Nham_nt]),
-      size = 0.1,
-      thresholds = list(
-        "dotted" = log10(dimsum_meta[["fitnessMinInputCountAny"]] + 1), 
-        "dashed" = log10(dimsum_meta[["fitnessMinInputCountAll"]] + 1)))
-    dimsum__ggpairs_binhex(
-      input_dt = log10(temp_dt[data.table::between(Nham_nt,1,2),.SD,.SDcols = dimsum__plot_samplename(c(input_samples, output_samples))]+1), 
-      output_file = file.path(report_outpath, "dimsum__diagnostics_report_scatterplotmatrix_singles_doubles.pdf"),
+      output_file_prefix = file.path(report_outpath, "dimsum__diagnostics_report_scatterplotmatrix_singles_doubles"),
       xlab = "log10(variant count + 1)",
       ylab = "log10(variant count + 1)",
       #title = "Single and double substitution variant inter-sample count correlations (all samples)",

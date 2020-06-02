@@ -32,7 +32,7 @@
 #' @param usearchMinovlen USEARCH: discard pair if alignment is shorter than given value (default:16)
 #' @param outputPath Path to directory to use for output files (default:'./' i.e. current working directory)
 #' @param projectName Project name (default:'DiMSum_Project')
-#' @param wildtypeSequence Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed during WRAP.
+#' @param wildtypeSequence Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed during STEAM
 #' @param permittedSequences A sequence of nucleotide codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions i.e upper-case letters in wild-type nucleotide sequence (default:any base at mutated positions)
 #' @param reverseComplement Reverse complement variant sequences before processing? (default:F)
 #' @param sequenceType Coding potential of sequence; either noncoding/coding/auto (default:auto)

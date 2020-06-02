@@ -338,3 +338,15 @@ The lower right panel in the plot below compares the full DiMSum error model (re
 knitr::include_graphics("dimsum_stage_fitness_report_1_errormodel_repspec.png")
 ```
 
+<!-- ANALYSE (image7) -->
+
+```{r analyse7, echo=FALSE, results='asis', eval=doc_settings[["show_analyse1"]]}
+cat("The **Q-Q plot** below shows...
+
+Affected replicates should be excluded from error model fitting (see 'retainedReplicates' option).")
+```
+
+```{r analyse7_image, echo=FALSE, fig.cap="", out.width = '60%', eval=doc_settings[["show_analyse1"]]}
+knitr::include_graphics("dimsum_stage_fitness_report_1_errormodel_leaveoneout_qqplot.png")
+```
+

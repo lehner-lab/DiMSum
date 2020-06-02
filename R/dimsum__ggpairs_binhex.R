@@ -4,7 +4,7 @@
 #' GGpairs plot for all variables in input data table with correlation in upper triangle and 2d binned hexagons in lower triangle.
 #'
 #' @param input_dt input data table (required)
-#' @param output_file plot output path (required)
+#' @param output_file_prefix plot output path prefix (required)
 #' @param width plot width (default: 12)
 #' @param height plot height (default: 12)
 #' @param bins number of hexagon bins (default: 50)
@@ -19,7 +19,7 @@
 #' @export
 dimsum__ggpairs_binhex <- function(
   input_dt, 
-  output_file, 
+  output_file_prefix, 
   width = 12, 
   height = 12, 
   bins = 50,
@@ -65,5 +65,6 @@ dimsum__ggpairs_binhex <- function(
     }
   }
   d <- d + ggplot2::theme_bw() + ggplot2::theme(panel.grid.minor = ggplot2::element_blank())
-  suppressWarnings(suppressMessages(ggplot2::ggsave(output_file, d, width = width, height = height)))
+  suppressWarnings(suppressMessages(ggplot2::ggsave(paste0(output_file_prefix, ".png"), d, width = width, height = height)))
+  suppressWarnings(suppressMessages(ggplot2::ggsave(paste0(output_file_prefix, ".pdf"), d, width = width, height = height)))
 }

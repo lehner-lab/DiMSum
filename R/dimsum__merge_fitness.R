@@ -28,6 +28,10 @@ dimsum__merge_fitness <- function(
 
   dimsum__status_message("Merging fitness estimates from biological replicates...\n")
 
+  aa_obj <- Biostrings::AAString("GAVLMIFYWKRHDESTCNQP")
+  aa_list <- Biostrings::AMINO_ACID_CODE[strsplit(as.character(aa_obj), NULL)[[1]]]
+  aa_list["*"] <- "*"
+
   #Number of input and output replicates
   all_reps_str <- paste0(all_reps, collapse="")
 
@@ -128,8 +132,12 @@ dimsum__merge_fitness <- function(
   if(dimsum_meta[["sequenceType"]]=="coding"){
     silent <- singles_dt[Nham_aa==0,.(Pos,WT_AA,Mut,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
     singles <- singles_dt[Nham_aa==1,.(Pos,WT_AA,Mut,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
+    singles_mavedb <- singles[,.(hgvs_pro = NA, score = fitness, se = sigma)]
+    singles_mavedb[, hgvs_pro := paste0("p.", aa_list[singles[,WT_AA]], singles[,Pos], aa_list[singles[,Mut]])]
   }else{
     singles <- singles_dt[,.(Pos,WT_nt,Mut,Nham_nt,mean_count,fitness,sigma)]
+    singles_mavedb <- singles[,.(hgvs_nt = NA, score = fitness, se = sigma)]
+    singles_mavedb[, hgvs_nt := paste0("n.", singles[,Pos], toupper(singles[,WT_nt]), ">", toupper(singles[,Mut]))]
   }
 
   #for doubles #add single mutant fitness/sigma values to double mutant table
@@ -156,6 +164,7 @@ dimsum__merge_fitness <- function(
                 quote = F,row.names = F, col.names = T)
     write.table(x = doubles, file = file.path(fitness_outpath, "fitness_doubles.txt"),
                 quote = F,row.names = F, col.names = T)
+
   }else{
     retained_cols <- c("Pos1","Pos2","WT_nt1","WT_nt2","Mut1","Mut2","Nham_nt","mean_count",
       "fitness1","sigma1","fitness2","sigma2",
@@ -171,6 +180,10 @@ dimsum__merge_fitness <- function(
     write.table(x = doubles, file = file.path(fitness_outpath, "fitness_doubles.txt"),
                 quote = F,row.names = F, col.names = T)
   }
+
+  #Write MaveDB formatted singles
+  write.table(x = singles_mavedb, file = file.path(fitness_outpath, "fitness_singles_MaveDB.csv"),
+              quote = F,row.names = F, col.names = T, sep = ",")
 
   dimsum__status_message("Done\n")
 

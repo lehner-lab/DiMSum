@@ -130,13 +130,7 @@ dimsum__error_model <- function(
     #Fitness correlations (all replicates)
     dimsum__ggpairs_binhex(
       input_dt = work_data[all_reads == T,.SD,,.SDcols = paste0("fitness", all_reps)], 
-      output_file = file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter.pdf"),
-      xlab = "Fitness",
-      ylab = "Fitness")#, title = "Before inter-replicate normalisation")
-    #Fitness correlations (all replicates)
-    dimsum__ggpairs_binhex(
-      input_dt = work_data[all_reads == T,.SD,,.SDcols = paste0("fitness", all_reps)], 
-      output_file = file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter.png"),
+      output_file_prefix = file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter"),
       xlab = "Fitness",
       ylab = "Fitness")#, title = "Before inter-replicate normalisation")
   }
@@ -189,13 +183,7 @@ dimsum__error_model <- function(
     #Fitness correlations (all replicates)
     dimsum__ggpairs_binhex(
       input_dt = work_data[all_reads == T,.SD,,.SDcols = paste0("fitness", all_reps, "_norm")], 
-      output_file = file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter_norm.pdf"),
-      xlab = "Fitness",
-      ylab = "Fitness")#, title = "After inter-replicate normalisation")
-    #Fitness correlations (all replicates)
-    dimsum__ggpairs_binhex(
-      input_dt = work_data[all_reads == T,.SD,,.SDcols = paste0("fitness", all_reps, "_norm")], 
-      output_file = file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter_norm.png"),
+      output_file_prefix = file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter_norm"),
       xlab = "Fitness",
       ylab = "Fitness")#, title = "After inter-replicate normalisation")
 
@@ -260,7 +248,18 @@ dimsum__error_model <- function(
     all_reps = all_reps,
     norm_dt = fitness_norm_model)
   write.table(error_model, file = file.path(dimsum_meta[["tmp_path"]], "errormodel.txt"), row.names = F, quote = F)
-  
+
+  #Perform leave one out cross validation on replicates and generate QQ plot
+  if(report){
+    dimsum__error_model_qqplot(
+      dimsum_meta = dimsum_meta,
+      input_dt = work_data,
+      all_reps = all_reps,
+      norm_dt = fitness_norm_model,
+      error_dt = error_model,
+      report_outpath = report_outpath)
+  }
+
   #Use error model parameters to calculate replicate-specific errors per variant
   for(j in all_reps){
     if(dimsum_meta[["fitnessNormalise"]]){

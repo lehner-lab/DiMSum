@@ -89,7 +89,7 @@ dimsum(runDemo = F, fastqFileDir = NULL,
 
 \item{projectName}{Project name (default:'DiMSum_Project')}
 
-\item{wildtypeSequence}{Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed during WRAP.}
+\item{wildtypeSequence}{Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed during STEAM}
 
 \item{permittedSequences}{A sequence of nucleotide codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions i.e upper-case letters in wild-type nucleotide sequence (default:any base at mutated positions)}
 

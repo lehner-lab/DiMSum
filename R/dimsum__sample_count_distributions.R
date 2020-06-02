@@ -4,7 +4,7 @@
 #' Plot sample nucleotide count distributions split by hamming distance (Nham_nt)
 #'
 #' @param input_dt input data table with count, WT and remaning column used for facetting (required)
-#' @param output_file plot output path (required)
+#' @param output_file_prefix plot output path prefix (required)
 #' @param width plot width (default: 12)
 #' @param height plot height (default: 8)
 #' @param title plot title (default: "")
@@ -16,7 +16,7 @@
 #' @import data.table
 dimsum__sample_count_distributions <- function(
   input_dt,
-  output_file,
+  output_file_prefix,
   width = 12,
   height = 8,
   title = "",
@@ -87,7 +87,8 @@ dimsum__sample_count_distributions <- function(
       ggplot2::geom_vline(data = plot_dt_fsingles, ggplot2::aes(xintercept = value, color = Hamming_distance), linetype = 2) +
       ggplot2::geom_vline(data = plot_dt_fdoubles, ggplot2::aes(xintercept = value, color = Hamming_distance), linetype = 2) +
       ggplot2::facet_grid(Hamming_distance ~ variable, scales = "free")
-    ggplot2::ggsave(output_file, width = width, height = height)
+    ggplot2::ggsave(paste0(output_file_prefix, ".png"), width = width, height = height)
+    ggplot2::ggsave(paste0(output_file_prefix, ".pdf"), width = width, height = height)
   }else{
     #Plot with subplot stratification (using second facet column, Nham_aa)
     plot_list <- list()
@@ -107,7 +108,8 @@ dimsum__sample_count_distributions <- function(
     #Combine plots
     temp_grid.arrange <- gridExtra::grid.arrange
     p <- do.call("temp_grid.arrange", c(plot_list, nrow = length(plot_indices)))
-    ggplot2::ggsave(output_file, plot = p, width = width, height = height)
+    ggplot2::ggsave(paste0(output_file_prefix, ".png"), plot = p, width = width, height = height)
+    ggplot2::ggsave(paste0(output_file_prefix, ".pdf"), plot = p, width = width, height = height)
   }
 }
 

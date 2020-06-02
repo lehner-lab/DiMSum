@@ -4,13 +4,14 @@
 \alias{dimsum__sample_count_distributions}
 \title{dimsum__sample_count_distributions}
 \usage{
-dimsum__sample_count_distributions(input_dt, output_file, width = 12,
-  height = 8, title = "", error_rate = 0.001, seq_length)
+dimsum__sample_count_distributions(input_dt, output_file_prefix,
+  width = 12, height = 8, title = "", error_rate = 0.001,
+  seq_length)
 }
 \arguments{
 \item{input_dt}{input data table with count, WT and remaning column used for facetting (required)}
 
-\item{output_file}{plot output path (required)}
+\item{output_file_prefix}{plot output path prefix (required)}
 
 \item{width}{plot width (default: 12)}
 

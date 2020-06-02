@@ -36,7 +36,8 @@ dimsum__render_report <- function(
       "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density_norm.png",
       "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter.png",
       "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter_norm.png",
-      "dimsum_stage_fitness_report_1_errormodel_repspec.png")
+      "dimsum_stage_fitness_report_1_errormodel_repspec.png",
+      "dimsum_stage_fitness_report_1_errormodel_leaveoneout_qqplot.png")
     lapply(all_files, function(x){write(NULL, file = file.path(dimsum_meta[["project_path"]], "reports", x))})
   }
 
