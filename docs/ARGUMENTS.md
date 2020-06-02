@@ -5,6 +5,17 @@
 
 # Command-line Arguments
 
+* **[General](#general)**
+* **[TRIM Arguments](#trim-arguments)**
+* **[ALIGN Arguments](#align-arguments)**
+* **[PROCESS Arguments](#process-arguments)**
+* **[ANALYSE Arguments](#analyse-arguments)**
+* **[FASTQ Files](#fastq-files)**
+* **[Multiplexed FASTQ Files](#multiplexed-fastq-files)**
+* **[Custom Variant Count File](#custom-variant-count-file)**
+* **[Barcoded Library Design](#barcoded-library-design)**
+* **[Trans Library Design](#trans-library-design)**
+
 ## General
 
 * **_--runDemo_** Run the DiMSum [Demo](DEMO.md) (default:F)
