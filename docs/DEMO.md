@@ -7,7 +7,7 @@
 
 ## DiMSum _STEAM_ Demo
 
-In order to run the DiMSum _STEAM_ demo (variant counts to fitness and error), no optional software is required (see [Installation Instructions](docs/INSTALLATION.md) for details).
+In order to run the DiMSum _STEAM_ demo (variant counts to fitness and error), no optional software is required (see [Installation Instructions](INSTALLATION.md) for details).
 
 Simply type the following on the command-line:
 ```
@@ -17,7 +17,7 @@ A table of variant counts included in the DiMSum R package is processed and resu
 
 ## Full DiMSum Demo (_WRAP+STEAM_)
 
-**REQUIRED:** In order to run the full DiMSum demo (FASTQ files to variant fitness and error), _FastQC_, _Cutadapt_, _USEARCH_ and _Starcode_ need to be installed (see [Installation Instructions](docs/INSTALLATION.md) for details). The full demo also requires demo FASTQ files, which can be downloaded from [here](https://www.dropbox.com/s/633skyevl49i0ts/FASTQ.zip?dl=0) and saved locally.
+**REQUIRED:** In order to run the full DiMSum demo (FASTQ files to variant fitness and error), _FastQC_, _Cutadapt_, _USEARCH_ and _Starcode_ need to be installed (see [Installation Instructions](INSTALLATION.md) for details). The full demo also requires demo FASTQ files, which can be downloaded from [here](https://www.dropbox.com/s/633skyevl49i0ts/FASTQ.zip?dl=0).
 
 Then, unzip the FASTQ folder and run the full demo from the command-line as follows:
 ```
