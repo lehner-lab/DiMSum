@@ -25,7 +25,7 @@ A description of each DiMSum stage is given below.
 
 ## Stage 0: **DEMULTIPLEX** raw reads (_WRAP_)
 
-Demultiplex samples and trim read barcodes using *[Cutadapt](docs/INSTALLATION.md)* (optional). This stage is run if a barcode design file is supplied (see '_--barcodeDesignPath_' argument). Stage-specific arguments: '_--barcodeDesignPath_' and '_--barcodeErrorRate_'.
+Demultiplex samples and trim read barcodes using *[Cutadapt](docs/INSTALLATION.md)* (optional). This stage is run if a [Barcode Design File](FILEFORMATS.md#barcode-design-file) is supplied (see '_--barcodeDesignPath_' argument). Stage-specific arguments: '_--barcodeDesignPath_' and '_--barcodeErrorRate_'.
 
 ## Stage 1: **QC** raw reads (_WRAP_)
 
