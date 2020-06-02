@@ -5,7 +5,7 @@
 
 # Input File Formats
 
-* **[Experimental Design File](#experiment-design-file)**
+* **[Experimental Design File](#experimental-design-file)**
 * **[FASTQ Files](#fastq-files)**
 * **[Variant Count File](#variant-count-file)**
 * **[Barcode Design File](#barcode-design-file)**
