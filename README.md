@@ -42,7 +42,7 @@ Align overlapping read pairs using *[USEARCH](docs/INSTALLATION.md)* and filter 
 ## Stage 4: **PROCESS** variants (_STEAM_)
 
 Combine sample-wise variant counts and statistics to produce a unified results data.table. After aggregating counts across technical replicates, variants are processed and filtered according to user specifications (see [stage-specific arguments](docs/ARGUMENTS.md#process-arguments)):
-* **4.1** For [Barcoded library designs](docs/ARGUMENTS.md#barcoded-library-design), read counts are aggregated at the variant level for barcode/variant mappings specified in the [Variant Identity File](FILEFORMATS.md#variant-identity-file). Undefined/misread barcodes are ignored.
+* **4.1** For [Barcoded library designs](docs/ARGUMENTS.md#barcoded-library-design), read counts are aggregated at the variant level for barcode/variant mappings specified in the [Variant Identity File](docs/FILEFORMATS.md#variant-identity-file). Undefined/misread barcodes are ignored.
 * **4.2** Indel variants (defined as those not matching the wild-type nucleotide sequence length) are removed.
 * **4.3** If internal constant region(s) are specified, these are excised from all variants if a perfect match is found (see ['_--wildtypeSequence_' argument](docs/ARGUMENTS.md#process-arguments)).
 * **4.4** Variants with mutations inconsistent with the library design are removed (see ['_--permittedSequences_' argument](docs/ARGUMENTS.md#process-arguments)).
