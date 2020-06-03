@@ -51,26 +51,19 @@ Combine sample-wise variant counts and statistics to produce a unified results d
 
 ## Stage 5: **ANALYSE** counts (_STEAM_)
 
-Calculate fitness and error estimates for a user-specified subset of substitution variants:
-* **5.1** Low count variants are removed according to user-specified soft ('_--fitnessMinInputCountAny_', '_--fitnessMinOutputCountAny_') and hard ('_--fitnessMinInputCountAll_', '_--fitnessMinOutputCountAll_') thresholds to minimise the impact of fake variants from sequencing errors.
-* **5.2** An error model is fit to a high confidence subset of variants to determine count-based (Poisson), replicate and over-sequencing error terms.
-* **5.3** Variants are aggregated at the amino acid level if the target molecule is a protein ('_--sequenceType_'=coding).
-* **5.4** Fitness and estimates of the associated error are then calculated with respect to the corresponding wild-type sequence score using the model derived in **5.3** above.
-* **5.5** (*Coming soon: still in development*) Optionally improve double mutant fitness estimates for low frequency variants using a Bayesian approach that incorporates priors based on observed single mutant counts ('_--bayesianDoubleFitness_', '_--bayesianDoubleFitnessLamD_', '_--fitnessHighConfidenceCount_', '_--fitnessDoubleHighConfidenceCount_').
-* **5.6** In the case of a growth-rate based assay, a 'generations' column can be supplied in the experimental design file in order to normalize fitness and error estimates accordingly (see below).
-* **5.7** Fitness scores are merged between replicates in a weighted manner that takes into account their respective errors.
+Calculate fitness and error estimates for a user-specified subset of substitution variants (see [stage-specific arguments](docs/ARGUMENTS.md#analyse-arguments)):
+* **5.1** Optionally remove low count variants according to user-specified soft/hard thresholds to minimise the impact of "fictional" variants from sequencing errors.
+* **5.2** Calculate replicate normalisation parameters (scale and shift) to minimise inter-replicate fitness differences.
+* **5.3** Fit the error model to a high confidence subset of variants to determine additive and multiplicative error terms.
+* **5.4** Aggregate variant fitness and error at the amino acid level if the target molecule is a coding sequence.
+* **5.5** Optionally normalise fitness and error estimates by the number of generations in the case of a growth-rate based assay (see [Experiment Design File](docs/FILEFORMATS.md#experimental-design-file)).
+* **5.6** Merge fitness scores between replicates in a weighted manner that takes into account their respective errors.
 
 ## Output Files
 
-* **DiMSum_Project_fitness_replicates.RData** R data object with replicate (and merged) variant fitness scores and associated errors ('all_variants' data.table).
-* **DiMSum_Project_variant_data_merge.RData** R data object with variant counts and statistics ('variant_data_merge' data.table).
-* **DiMSum_Project_variant_data_merge.tsv** Tab-separated plain text file with variant counts and statistics.
-* **DiMSum_Project_nobarcode_variant_data_merge.tsv** Tab-separated plain text file with sequenced barcodes that were not found in the variant identity file.
-* **DiMSum_Project_indel_variant_data_merge.tsv** Tab-separated plain text file with indel variants.
-* **DiMSum_Project_rejected_variant_data_merge.tsv** Tab-separated plain text file with rejected variants (internal constant region mutants, mutations inconsistent with the library design or variants with too many substitutions).
 * **report.html** DiMSum pipeline summary report and diagnostic plots in html format.
-
-
+* **DiMSum_Project_fitness_replicates.RData** R data object with replicate (and merged) fitness scores and associated errors.
+* **DiMSum_Project_variant_data_merge.RData** R data object with variant counts and statistics.
 
 
 (Vector illustration credit: <a href="https://www.vecteezy.com">Vecteezy!</a>)
