@@ -44,7 +44,7 @@ Align overlapping read pairs using *[USEARCH](docs/INSTALLATION.md)* and filter 
 Combine sample-wise variant counts and statistics to produce a unified results data.table. After aggregating counts across technical replicates, variants are processed and filtered according to user specifications (see [stage-specific arguments](docs/ARGUMENTS.md#process-arguments)):
 * **4.1** For barcoded libraries, read counts are aggregated at the variant level for barcode/variant mappings specified in the variant identity file (see below). Undefined/misread barcodes are ignored.
 * **4.2** Indel variants (defined as those not matching the wild-type nucleotide sequence length) are removed.
-* **4.3** If internal constant region(s) are specified (see ['_--wildtypeSequence_' argument](docs/ARGUMENTS.md#process-arguments)), these are excised from all variants if a perfect match is found.
+* **4.3** If internal constant region(s) are specified, these are excised from all variants if a perfect match is found (see ['_--wildtypeSequence_' argument](docs/ARGUMENTS.md#process-arguments)).
 * **4.4** Variants with mutations inconsistent with the library design are removed (see ['_--permittedSequences_' argument](docs/ARGUMENTS.md#process-arguments)).
 * **4.5** Variants with more substitutions than desired are also removed (see ['_--maxSubstitutions_' argument](docs/ARGUMENTS.md#process-arguments)).
 * **4.6** Finally, nonsynonymous variants with synonymous substitutions in other codons are removed if necessary (see ['_--mixedSubstitutions_' argument](docs/ARGUMENTS.md#process-arguments)).
