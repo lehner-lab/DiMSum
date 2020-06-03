@@ -25,7 +25,7 @@ A description of each DiMSum stage is given below.
 
 ## Stage 0: **DEMULTIPLEX** raw reads (_WRAP_)
 
-Demultiplex samples and trim read barcodes using *[Cutadapt](docs/INSTALLATION.md)* (optional). This stage is run if a [Barcode Design File](FILEFORMATS.md#barcode-design-file) is supplied (see '_--barcodeDesignPath_' argument). Stage-specific arguments: '_--barcodeDesignPath_' and '_--barcodeErrorRate_'.
+Demultiplex samples and trim read barcodes using *[Cutadapt](docs/INSTALLATION.md)* (optional). This stage is run if a [Barcode Design File](docs/FILEFORMATS.md#barcode-design-file) is supplied (see [arguments](docs/ARGUMENTS.md#multiplexed-fastq-files)).
 
 ## Stage 1: **QC** raw reads (_WRAP_)
 
@@ -33,11 +33,11 @@ Produce raw read quality reports using *[FastQC](docs/INSTALLATION.md)* (and unz
 
 ## Stage 2: **TRIM** constant regions (_WRAP_)
 
-Remove constant region sequences from read 5’ and 3’ ends using *[Cutadapt](docs/INSTALLATION.md)*. By default the sequences of 3' constant regions are assumed to be the reverse complement of 5' constant region sequences. Stage-specific arguments: '_--cutadaptCut5First_', '_--cutadaptCut5Second_', '_--cutadaptCut3First_', '_--cutadaptCut3Second_', '_--cutadapt5First_', '_--cutadapt5Second_', '_--cutadapt3First_', '_--cutadapt3Second_', '_--cutadaptMinLength_', '_--cutadaptErrorRate_'.
+Remove constant region sequences from read 5’ and 3’ ends using *[Cutadapt](docs/INSTALLATION.md)*. By default the sequences of 3' constant regions are assumed to be the reverse complement of 5' constant region sequences (see [stage-specific arguments](docs/ARGUMENTS.md#trim-arguments)).
 
 ## Stage 3: **ALIGN** paired-end reads (_WRAP_)
 
-Align overlapping read pairs using *[USEARCH](docs/INSTALLATION.md)* (paired-end cis libraries only i.e. '_--paired_'=T, '_--transLibrary_'=F) or alternatively concatenate read pairs (paired-end trans libraries only i.e. '_--transLibrary_'=T), and filter resulting variants according to base quality, expected number of errors and constituent read length (including those from single-end libraries i.e. '_--paired_'=F). Stage-specific arguments: '_--usearchMinQual_', '_--usearchMaxee_', '_--usearchMinlen_', '_--usearchMinovlen_'. Unique variant sequences are then tallied using *[Starcode](docs/INSTALLATION.md)*.
+Align overlapping read pairs using *[USEARCH](docs/INSTALLATION.md)* and filter resulting variants according to base quality, expected number of errors and constituent read length (see [stage-specific arguments](docs/ARGUMENTS.md#align-arguments)). Unique variant sequences are then tallied using *[Starcode](docs/INSTALLATION.md)*. For [Trans library designs](docs/ARGUMENTS.md#trans-library-design), read pairs are simply concatenated. For single-end libraries, reads are only filtered.
 
 ## Stage 4: **PROCESS** variants (_STEAM_)
 
