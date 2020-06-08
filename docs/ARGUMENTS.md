@@ -5,6 +5,17 @@
 
 # Command-line Arguments
 
+* **[General](#general)**
+* **[TRIM Arguments](#trim-arguments)**
+* **[ALIGN Arguments](#align-arguments)**
+* **[PROCESS Arguments](#process-arguments)**
+* **[ANALYSE Arguments](#analyse-arguments)**
+* **[FASTQ Files](#fastq-files)**
+* **[Multiplexed FASTQ Files](#multiplexed-fastq-files)**
+* **[Custom Variant Count File](#custom-variant-count-file)**
+* **[Barcoded Library Design](#barcoded-library-design)**
+* **[Trans Library Design](#trans-library-design)**
+
 ## General
 
 * **_--runDemo_** Run the DiMSum [Demo](DEMO.md) (default:F)
@@ -49,4 +60,38 @@
 
 ## ANALYSE Arguments
 
+* **_--fitnessMinInputCountAll_** Minimum input read count (in all replicates) to be retained during fitness calculations (default:0)
+* **_--fitnessMinInputCountAny_** Minimum input read count (in any replicate) to be retained during fitness calculations (default:0)
+* **_--fitnessMinOutputCountAll_** Minimum output read count (in all replicates) to be retained during fitness calculations (default:0)
+* **_--fitnessMinOutputCountAny_** Minimum output read count (in any replicates) to be retained during fitness calculations (default:0)
+* **_--fitnessNormalise_** Normalise fitness values to minimise inter-replicate differences (default:T)
+* **_--fitnessErrorModel_** Fit fitness error model (default:T)
+* **_--retainedReplicates_** Comma-separated list of (integer) experiment replicates to retain or 'all' (default:'all')
+
+## [FASTQ files](FILEFORMATS.md#fastq-files)
+
+* **_--fastqFileDir_** Path to directory containing input [FASTQ files](FILEFORMATS.md#fastq-files) (required for WRAP)
+* **_--fastqFileExtension_** FASTQ file extension (default:'.fastq')
+* **_--gzipped_** Are [FASTQ files](FILEFORMATS.md#fastq-files) gzipped? (default:T)
+* **_--stranded_** Is the library design stranded? (default:T)
+* **_--paired_** Is the library design paired-end? (default:T)
+* **_--experimentDesignPairDuplicates_** Are multiple instances of [FASTQ files](FILEFORMATS.md#fastq-files) in the [Experimental Design File](FILEFORMATS.md#experimental-design-file) permitted? (default:F)
+
+## Multiplexed [FASTQ Files](FILEFORMATS.md#fastq-files)
+
+* **_--barcodeDesignPath_** Path to [Barcode Design File](FILEFORMATS.md#barcode-design-file) (tab-separated plain text file with barcode design)
+* **_--barcodeErrorRate_** Maximum allowed error rate for barcode to be matched (default:0.25)
+
+## Custom [Variant Count File](FILEFORMATS.md#variant-count-file)
+
+* **_--countPath_** Path to [Variant Count File](FILEFORMATS.md#variant-count-file) for analysis with STEAM only (tab-separated plain text file with sample counts for all variants)
+
+## Barcoded Library Design
+
+* **_--barcodeIdentityPath_** Path to [Variant Identity File](FILEFORMATS.md#variant-identity-file) (tab-separated plain text file mapping barcodes to variants)
+
+## Trans Library Design
+
+* **_--transLibrary_** Paired-end reads correspond to distinct molecules? (default:F)
+* **_--transLibraryReverseComplement_** Reverse complement second read in pair (default:F)
 

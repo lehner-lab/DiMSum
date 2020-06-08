@@ -13,14 +13,14 @@ DiMSum is expected to work on all Unix-like operating systems.
 
 **REQUIRED:** Before [installing the DiMSum package](#installing-dimsum), please ensure that the following required software is installed:
 
-* **[_R_](https://www.r-project.org/) >=v3.5.2**
+* **[_R_](https://www.r-project.org/) >=v3.6**
 * **[_Pandoc_](https://pandoc.org/installing.html) >=v1.17.2**
 
 Pandoc comes bundled with [RStudio](https://rstudio.com/products/rstudio/download/) and the *pandoc* binary can be found in the RStudio *bin/pandoc* directory.
 
 **OPTIONAL:** Additionally, if raw FASTQ files will be processed (with DiMSum *WRAP*), the following software needs to be installed:
 
-* **[_FastQC_](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) v0.11.3**
+* **[_FastQC_](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) >=v0.11.3**
 * **[_Cutadapt_](https://cutadapt.readthedocs.io/en/stable/) v2.4**
 * **[_USEARCH 32-bit_](https://drive5.com/usearch/download.html) v10.0**
 * **[_Starcode_](https://github.com/gui11aume/starcode) v1.3**
