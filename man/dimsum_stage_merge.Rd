@@ -4,8 +4,13 @@
 \alias{dimsum_stage_merge}
 \title{dimsum_stage_merge}
 \usage{
-dimsum_stage_merge(dimsum_meta, merge_outpath, report = TRUE,
-  report_outpath = NULL, save_workspace = TRUE)
+dimsum_stage_merge(
+  dimsum_meta,
+  merge_outpath,
+  report = TRUE,
+  report_outpath = NULL,
+  save_workspace = TRUE
+)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}

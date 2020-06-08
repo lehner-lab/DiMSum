@@ -4,8 +4,7 @@
 \alias{dimsum__render_report}
 \title{dimsum__render_report}
 \usage{
-dimsum__render_report(dimsum_meta, initialise = FALSE,
-  finalise = FALSE)
+dimsum__render_report(dimsum_meta, initialise = FALSE, finalise = FALSE)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}

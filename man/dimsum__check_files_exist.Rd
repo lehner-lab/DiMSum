@@ -4,8 +4,12 @@
 \alias{dimsum__check_files_exist}
 \title{dimsum__check_files_exist}
 \usage{
-dimsum__check_files_exist(required_files, stage_number = NULL,
-  execute = TRUE, exit = TRUE)
+dimsum__check_files_exist(
+  required_files,
+  stage_number = NULL,
+  execute = TRUE,
+  exit = TRUE
+)
 }
 \arguments{
 \item{required_files}{character vector of file paths (required)}

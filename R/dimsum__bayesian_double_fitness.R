@@ -37,14 +37,14 @@ dimsum__bayesian_double_fitness <- function(
   if(report){
     d <- ggplot2::ggplot(doubles_dt[between(bin_count,2,8) & !is.infinite(fitness_for_bins)],ggplot2::aes(fitness_for_bins,..density..,color=factor(bin_count))) +
       ggplot2::geom_density(adjust=1)
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_4_doubles_bayesian_framework1.png"), d, width = 7, height = 5)
+    dimsum__save_png(file.path(report_outpath, "dimsum_stage_fitness_report_4_doubles_bayesian_framework1.png"), d, width = 7, height = 5)
   }
 
   #Plot fitness densities for mean counts greater/less than 50 (replicate 1)
   if(report){
     d <- ggplot2::ggplot(doubles_dt[!is.infinite(fitness_for_bins) & !is.na(fitness_for_bins)],ggplot2::aes(fitness_for_bins,..density..,color=counts_for_bins >= dimsum_meta[["fitnessDoubleHighConfidenceCount"]])) +
       ggplot2::geom_density(adjust=1)
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_4_doubles_bayesian_framework2.png"), d, width = 7, height = 5)
+    dimsum__save_png(file.path(report_outpath, "dimsum_stage_fitness_report_4_doubles_bayesian_framework2.png"), d, width = 7, height = 5)
   }
   #>> try to estimate what fitness scores are for variants with low sequence coverage
   # use double mutants with variants >= dimsum_meta[["fitnessDoubleHighConfidenceCount"]] counts 
@@ -118,21 +118,21 @@ dimsum__bayesian_double_fitness <- function(
         grep(names(singles_dt),pattern="fitness"),with=F],
         upper=list(continuous = "cor"))
     }
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_4_doubles_bayesian_framework_scattermatrix_singles.png"), d, width = 10, height = 10)
+    dimsum__save_png(file.path(report_outpath, "dimsum_stage_fitness_report_4_doubles_bayesian_framework_scattermatrix_singles.png"), d, width = 10, height = 10)
 
     #Scatterplot matrix - doubles, uncorrected
     set.seed(1)
     d <- GGally::ggpairs(doubles_dt[apply(abs(doubles_dt[,.SD,,.SDcols = paste0("fitness",all_reps,"_uncorr")])==Inf, 1, sum)==0
       ][sample(x = .N,min(c(.N,1000))),grep(names(doubles_dt),pattern=paste0("fitness[", all_reps_str, "]_uncorr")),with=F],
       upper=list(continuous = "cor"))
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_4_doubles_bayesian_framework_scattermatrix_doubles_uncorr.png"), d, width = 10, height = 10)
+    dimsum__save_png(file.path(report_outpath, "dimsum_stage_fitness_report_4_doubles_bayesian_framework_scattermatrix_doubles_uncorr.png"), d, width = 10, height = 10)
 
     #Scatterplot matrix - doubles, conditional
     set.seed(1)
     d <- GGally::ggpairs(doubles_dt[apply(abs(doubles_dt[,.SD,,.SDcols = paste0("fitness",all_reps,"_cond")])==Inf, 1, sum)==0
       ][sample(x = .N,min(c(.N,1000))),grep(names(doubles_dt),pattern=paste0("fitness[", all_reps_str, "]_cond")),with=F],
       upper=list(continuous = "cor"))
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_4_doubles_bayesian_framework_scattermatrix_doubles_cond.png"), d, width = 10, height = 10)
+    dimsum__save_png(file.path(report_outpath, "dimsum_stage_fitness_report_4_doubles_bayesian_framework_scattermatrix_doubles_cond.png"), d, width = 10, height = 10)
   }
   
   dimsum__status_message("Done\n")

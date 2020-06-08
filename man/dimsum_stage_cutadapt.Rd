@@ -4,8 +4,13 @@
 \alias{dimsum_stage_cutadapt}
 \title{dimsum_stage_cutadapt}
 \usage{
-dimsum_stage_cutadapt(dimsum_meta, cutadapt_outpath, report = TRUE,
-  report_outpath = NULL, save_workspace = TRUE)
+dimsum_stage_cutadapt(
+  dimsum_meta,
+  cutadapt_outpath,
+  report = TRUE,
+  report_outpath = NULL,
+  save_workspace = TRUE
+)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}

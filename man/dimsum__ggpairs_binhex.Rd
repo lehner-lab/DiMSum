@@ -4,9 +4,19 @@
 \alias{dimsum__ggpairs_binhex}
 \title{dimsum__ggpairs_binhex}
 \usage{
-dimsum__ggpairs_binhex(input_dt, output_file_prefix, width = 12,
-  height = 12, bins = 50, xlab = "x", ylab = "y", title = "",
-  cut = NULL, size = 0.5, thresholds = NULL)
+dimsum__ggpairs_binhex(
+  input_dt,
+  output_file_prefix,
+  width = 12,
+  height = 12,
+  bins = 50,
+  xlab = "x",
+  ylab = "y",
+  title = "",
+  cut = NULL,
+  size = 0.5,
+  thresholds = NULL
+)
 }
 \arguments{
 \item{input_dt}{input data table (required)}

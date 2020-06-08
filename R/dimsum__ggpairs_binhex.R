@@ -65,6 +65,6 @@ dimsum__ggpairs_binhex <- function(
     }
   }
   d <- d + ggplot2::theme_bw() + ggplot2::theme(panel.grid.minor = ggplot2::element_blank())
-  suppressWarnings(suppressMessages(ggplot2::ggsave(paste0(output_file_prefix, ".png"), d, width = width, height = height)))
+  suppressWarnings(suppressMessages(dimsum__save_png(paste0(output_file_prefix, ".png"), d, width = width, height = height)))
   suppressWarnings(suppressMessages(ggplot2::ggsave(paste0(output_file_prefix, ".pdf"), d, width = width, height = height)))
 }

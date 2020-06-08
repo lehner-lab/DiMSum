@@ -4,8 +4,15 @@
 \alias{dimsum__bayesian_double_fitness}
 \title{dimsum__bayesian_double_fitness}
 \usage{
-dimsum__bayesian_double_fitness(dimsum_meta, doubles_dt, singles_dt, wt_dt,
-  all_reps, report = TRUE, report_outpath = NULL)
+dimsum__bayesian_double_fitness(
+  dimsum_meta,
+  doubles_dt,
+  singles_dt,
+  wt_dt,
+  all_reps,
+  report = TRUE,
+  report_outpath = NULL
+)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}

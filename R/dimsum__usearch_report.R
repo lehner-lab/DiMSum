@@ -78,7 +78,7 @@ dimsum__usearch_report <- function(
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
     ggplot2::labs(x = "Sample names", y = "Read pairs (percentage)")#, title = paste0("Read pair alignment statistics"))
-  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__usearch_report_paircounts.png')), d, width=12, height=8)
+  dimsum__save_png(file.path(report_outpath, paste0('dimsum__usearch_report_paircounts.png')), d, width=12, height=8)
   #Plot2: read pair merge length statistics
   plot_df <- reshape2::melt(usearch_df[,grep('pairname|usearch_merge_', colnames(usearch_df))], id="pairname")
   plot_df[,'Length_quantile'] <- factor(plot_df[,'variable'])
@@ -88,7 +88,7 @@ dimsum__usearch_report <- function(
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
     # ggplot2::coord_cartesian(ylim = c(0, max(plot_df[,'value'], na.rm = T))) +
     ggplot2::labs(x = "Sample names", y = "Aligned length (bp)")#, title = paste0("Aligned length distributions (all splits)"))
-  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__usearch_report_mergedlength.png')), d, width=12, height=6)
+  dimsum__save_png(file.path(report_outpath, paste0('dimsum__usearch_report_mergedlength.png')), d, width=12, height=6)
 
   #Render report
   dimsum__render_report(dimsum_meta = dimsum_meta)

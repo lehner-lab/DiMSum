@@ -4,8 +4,11 @@
 \alias{dimsum__parse_cutadapt_output_single_end}
 \title{dimsum__parse_cutadapt_output_single_end}
 \usage{
-dimsum__parse_cutadapt_output_single_end(file_path, ran_cutadapt = T,
-  ran_cutadapt_cutonly = F)
+dimsum__parse_cutadapt_output_single_end(
+  file_path,
+  ran_cutadapt = T,
+  ran_cutadapt_cutonly = F
+)
 }
 \arguments{
 \item{file_path}{path to cutadapt output file (required)}

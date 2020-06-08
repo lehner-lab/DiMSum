@@ -103,8 +103,8 @@ dimsum__error_model_qqplot <- function(
     ggplot2::geom_qq(geom = "line") +
     ggplot2::scale_colour_manual(name=c("Replicate"), values=plot_cols, guide='legend') +
     ggplot2::coord_cartesian(xlim = c(-zrange, zrange), ylim = c(-zrange, zrange)) +
-    ggplot2::labs(x = 'Expected (Normal) theoretical quantiles', y = 'Observed data quantiles') +
+    ggplot2::labs(x = 'Theoretical quantiles (Normal)', y = 'Observed z-score quantiles') +
     ggplot2::theme_bw()
   ggplot2::ggsave(file.path(report_outpath,"dimsum_stage_fitness_report_1_errormodel_leaveoneout_qqplot.pdf"), p, width = 6, height = 5)
-  ggplot2::ggsave(file.path(report_outpath,"dimsum_stage_fitness_report_1_errormodel_leaveoneout_qqplot.png"), p, width = 6, height = 5)
+  dimsum__save_png(file.path(report_outpath,"dimsum_stage_fitness_report_1_errormodel_leaveoneout_qqplot.png"), p, width = 6, height = 5)
 }

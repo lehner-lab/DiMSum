@@ -10,8 +10,9 @@ output:
 
 <!-- SETUP -->
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, dev="CairoPNG"}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(dev="CairoPNG")
 load("report_settings.RData")
 ```
 
@@ -341,9 +342,11 @@ knitr::include_graphics("dimsum_stage_fitness_report_1_errormodel_repspec.png")
 <!-- ANALYSE (image7) -->
 
 ```{r analyse7, echo=FALSE, results='asis', eval=doc_settings[["show_analyse1"]]}
-cat("The **Q-Q plot** below shows...
+cat("The quantile-quantile (Q-Q) plots below assesses the performance of the fitness error model using leave-one-out cross-validation.
 
-Affected replicates should be excluded from error model fitting (see 'retainedReplicates' option).")
+Error models are trained on all but one replicate and z-scores of the differences in fitness scores between the training set and the remaining test replicate are calculated (i.e. fitness score differences normalised by estimated error in training set and test replicate). Because fitness scores from replicate experiments should only differ by random chance, if the error models estimate the error magnitude correctly, z-scores should be normally distributed (i.e. Y=X). 
+
+Differences between replicate z-score distributions can indicate systematic errors. Consider excluding (outlier) replicates from error model fitting (see 'retainedReplicates' option).")
 ```
 
 ```{r analyse7_image, echo=FALSE, fig.cap="", out.width = '60%', eval=doc_settings[["show_analyse1"]]}

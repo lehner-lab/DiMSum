@@ -87,8 +87,8 @@ dimsum__sample_count_distributions <- function(
       ggplot2::geom_vline(data = plot_dt_fsingles, ggplot2::aes(xintercept = value, color = Hamming_distance), linetype = 2) +
       ggplot2::geom_vline(data = plot_dt_fdoubles, ggplot2::aes(xintercept = value, color = Hamming_distance), linetype = 2) +
       ggplot2::facet_grid(Hamming_distance ~ variable, scales = "free")
-    ggplot2::ggsave(paste0(output_file_prefix, ".png"), width = width, height = height)
-    ggplot2::ggsave(paste0(output_file_prefix, ".pdf"), width = width, height = height)
+    dimsum__save_png(paste0(output_file_prefix, ".png"), d, width = width, height = height)
+    ggplot2::ggsave(paste0(output_file_prefix, ".pdf"), d, width = width, height = height)
   }else{
     #Plot with subplot stratification (using second facet column, Nham_aa)
     plot_list <- list()
@@ -106,10 +106,10 @@ dimsum__sample_count_distributions <- function(
         ggplot2::facet_grid(Hamming_distance ~ variable, scales = "free")
     }
     #Combine plots
-    temp_grid.arrange <- gridExtra::grid.arrange
+    temp_grid.arrange <- gridExtra::arrangeGrob
     p <- do.call("temp_grid.arrange", c(plot_list, nrow = length(plot_indices)))
-    ggplot2::ggsave(paste0(output_file_prefix, ".png"), plot = p, width = width, height = height)
-    ggplot2::ggsave(paste0(output_file_prefix, ".pdf"), plot = p, width = width, height = height)
+    dimsum__save_png(paste0(output_file_prefix, ".png"), p, width = width, height = height)
+    ggplot2::ggsave(paste0(output_file_prefix, ".pdf"), p, width = width, height = height)
   }
 }
 

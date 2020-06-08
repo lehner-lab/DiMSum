@@ -4,8 +4,11 @@
 \alias{dimsum__get_cutadapt_options}
 \title{dimsum__get_cutadapt_options}
 \usage{
-dimsum__get_cutadapt_options(dimsum_meta, exp_design_row,
-  option_type = "default")
+dimsum__get_cutadapt_options(
+  dimsum_meta,
+  exp_design_row,
+  option_type = "default"
+)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}

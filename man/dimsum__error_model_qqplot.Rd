@@ -4,8 +4,14 @@
 \alias{dimsum__error_model_qqplot}
 \title{dimsum__error_model_qqplot}
 \usage{
-dimsum__error_model_qqplot(dimsum_meta, input_dt, all_reps, norm_dt,
-  error_dt, report_outpath = NULL)
+dimsum__error_model_qqplot(
+  dimsum_meta,
+  input_dt,
+  all_reps,
+  norm_dt,
+  error_dt,
+  report_outpath = NULL
+)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}

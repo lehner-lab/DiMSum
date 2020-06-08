@@ -4,9 +4,16 @@
 \alias{dimsum__fit_error_model}
 \title{dimsum__fit_error_model}
 \usage{
-dimsum__fit_error_model(dimsum_meta, input_dt, all_reps, norm_dt,
-  Nbootstraps = 100, maxN = 10000, max_tries_per_fit = 20,
-  lower_rep = 1e-04)
+dimsum__fit_error_model(
+  dimsum_meta,
+  input_dt,
+  all_reps,
+  norm_dt,
+  Nbootstraps = 100,
+  maxN = 10000,
+  max_tries_per_fit = 20,
+  lower_rep = 1e-04
+)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}

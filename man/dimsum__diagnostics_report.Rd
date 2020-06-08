@@ -4,8 +4,12 @@
 \alias{dimsum__diagnostics_report}
 \title{dimsum__diagnostics_report}
 \usage{
-dimsum__diagnostics_report(dimsum_meta, report_outpath,
-  input_samples_pattern = "_s0_", output_samples_pattern = "_s1_")
+dimsum__diagnostics_report(
+  dimsum_meta,
+  report_outpath,
+  input_samples_pattern = "_s0_",
+  output_samples_pattern = "_s1_"
+)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}

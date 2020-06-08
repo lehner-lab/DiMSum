@@ -4,8 +4,13 @@
 \alias{dimsum_stage_fastqc}
 \title{dimsum_stage_fastqc}
 \usage{
-dimsum_stage_fastqc(dimsum_meta, fastqc_outpath, report = TRUE,
-  report_outpath = NULL, save_workspace = TRUE)
+dimsum_stage_fastqc(
+  dimsum_meta,
+  fastqc_outpath,
+  report = TRUE,
+  report_outpath = NULL,
+  save_workspace = TRUE
+)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}

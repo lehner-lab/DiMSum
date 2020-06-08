@@ -4,8 +4,7 @@
 \alias{dimsum__normalise_fitness}
 \title{dimsum__normalise_fitness}
 \usage{
-dimsum__normalise_fitness(dimsum_meta, input_dt, all_reps,
-  fitness_suffix = "")
+dimsum__normalise_fitness(dimsum_meta, input_dt, all_reps, fitness_suffix = "")
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}

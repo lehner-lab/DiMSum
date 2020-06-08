@@ -79,7 +79,7 @@ dimsum__cutadapt_report <- function(
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
     ggplot2::labs(x = "FASTQ files", y = "Reads trimmed (percentage)")#, title = paste0("Read 1 percentage constant region identified and trimmed"))
-  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__cutadapt_report_pair1.png')), d, width=12, height=8)
+  dimsum__save_png(file.path(report_outpath, paste0('dimsum__cutadapt_report_pair1.png')), d, width=12, height=8)
   #Second read (if paired design)
   if(dimsum_meta[["paired"]]){
     cutadapt_read2_df <- as.data.frame(do.call('rbind', cutadapt_read2_list))
@@ -101,7 +101,7 @@ dimsum__cutadapt_report <- function(
       ggplot2::theme_bw() +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
       ggplot2::labs(x = "FASTQ files", y = "Reads trimmed (percentage)")#, title = paste0("Read 2 percentage constant region identified and trimmed"))
-    ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__cutadapt_report_pair2.png')), d, width=12, height=8)
+    dimsum__save_png(file.path(report_outpath, paste0('dimsum__cutadapt_report_pair2.png')), d, width=12, height=8)
   }
 
   #Render report

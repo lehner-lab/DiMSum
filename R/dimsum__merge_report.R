@@ -97,7 +97,7 @@ dimsum__merge_report <- function(
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
     ggplot2::labs(x = "Sample names", y = "Total reads with mutation")#, title = paste0("Read nucleotide mutation statistics"))
-  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__merge_report_nucmutationcounts.png')), d, width=12, height=8)
+  dimsum__save_png(file.path(report_outpath, paste0('dimsum__merge_report_nucmutationcounts.png')), d, width=12, height=8)
   
   #Plot 2: Nucleotide mutation percentages
   plot_df <- reshape2::melt(nuc_subst_df_collapse_perc, id="pairname")
@@ -117,7 +117,7 @@ dimsum__merge_report <- function(
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
     ggplot2::labs(x = "Sample names", y = "Percentage of reads with mutation")#, title = paste0("Read nucleotide mutation statistics (percentage)"))
-  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__merge_report_nucmutationpercentages.png')), d, width=12, height=8)
+  dimsum__save_png(file.path(report_outpath, paste0('dimsum__merge_report_nucmutationpercentages.png')), d, width=12, height=8)
 
   #Variant processing statistics - amino acid substitutions
   merge_df <- dimsum_meta[['exp_design']]
@@ -190,7 +190,7 @@ dimsum__merge_report <- function(
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
     ggplot2::labs(x = "Sample names", y = "Total reads with mutation")#, title = paste0("Read amino acid mutation statistics"))
-  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__merge_report_aamutationcounts.png')), d, width=12, height=8)
+  dimsum__save_png(file.path(report_outpath, paste0('dimsum__merge_report_aamutationcounts.png')), d, width=12, height=8)
   
   #Plot 4: Nucleotide mutation percentages
   plot_df <- reshape2::melt(aa_subst_df_collapse_perc, id="pairname")
@@ -210,7 +210,7 @@ dimsum__merge_report <- function(
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
     ggplot2::labs(x = "Sample names", y = "Percentage of reads with mutation")#, title = paste0("Read amino acid mutation statistics (percentage)"))
-  ggplot2::ggsave(file.path(report_outpath, paste0('dimsum__merge_report_aamutationpercentages.png')), d, width=12, height=8)
+  dimsum__save_png(file.path(report_outpath, paste0('dimsum__merge_report_aamutationpercentages.png')), d, width=12, height=8)
 
   #Render report
   dimsum__render_report(dimsum_meta = dimsum_meta)

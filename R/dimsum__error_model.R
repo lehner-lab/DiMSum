@@ -102,7 +102,7 @@ dimsum__error_model <- function(
       ggplot2::facet_wrap(rep ~ .) + ggplot2::theme_bw() +
       ggplot2::labs(x = "Input variant count (log scale)", y = "Fitness")#, title = "Replicate fitness versus input variant counts")
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_inputcounts.pdf"), d, width = 6, height = 6)
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_inputcounts.png"), d, width = 6, height = 6)
+    dimsum__save_png(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_inputcounts.png"), d, width = 6, height = 6)
   }
 
   #Check if sufficient data remains above input read threshold (and data present in all input/output replicates)
@@ -125,7 +125,7 @@ dimsum__error_model <- function(
       ggplot2::geom_vline(xintercept = 0, lty = 2, color = "darkgrey") +
       ggplot2::theme_bw()
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density.pdf"), d, width = 6, height = 4)
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density.png"), d, width = 6, height = 4)
+    dimsum__save_png(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density.png"), d, width = 6, height = 4)
 
     #Fitness correlations (all replicates)
     dimsum__ggpairs_binhex(
@@ -178,7 +178,7 @@ dimsum__error_model <- function(
       ggplot2::geom_vline(xintercept = 0, lty = 2, color = "darkgrey") +
       ggplot2::theme_bw()
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density_norm.pdf"), d, width = 6, height = 4)
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density_norm.png"), d, width = 6, height = 4)
+    dimsum__save_png(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicates_density_norm.png"), d, width = 6, height = 4)
 
     #Fitness correlations (all replicates)
     dimsum__ggpairs_binhex(
@@ -202,7 +202,7 @@ dimsum__error_model <- function(
       ggplot2::theme_bw() +
       ggplot2::facet_wrap(. ~ replicate)
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicate_deviation_scatter.pdf"), d, width = 6, height = 6)
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicate_deviation_scatter.png"), d, width = 6, height = 6)  
+    dimsum__save_png(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_fitness_replicate_deviation_scatter.png"), d, width = 6, height = 6)  
   }
 
   #Replace fitness with normalised fitness
@@ -433,17 +433,29 @@ dimsum__error_model <- function(
           linetype=c(NA,2,1,1,1,1), 
           size=c(2,0.75,0.75,0.75,0.75,0.75), 
           shape=c(19, NA, NA, NA, NA, NA)))) +
-      ggplot2::theme_void() +
+      ggplot2::theme_bw() +
       ggplot2::theme(
+        panel.background = ggplot2::element_rect(
+          fill = "white", 
+          colour = "white", 
+          color = "white"),
+        plot.background=ggplot2::element_rect(
+          fill = "white", 
+          colour = "white",
+          color = "white"), 
+        rect = ggplot2::element_rect(
+          fill = "white", 
+          colour = "white",
+          color = "white"),
         legend.text = ggplot2::element_text(size = 9))
     e <- cowplot::get_legend(e)
 
     #Combine plots
-    p <- gridExtra::grid.arrange(a, b, c, d, e, nrow = 3,
+    p <- gridExtra::arrangeGrob(a, b, c, d, e, nrow = 3,
       layout_matrix = rbind(c(1, 2), c(3, 4), c(3, 5)), heights = c(1, 1, 1), widths = c(2, 0.8))
     #Save
     ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_repspec.pdf"), p, width = 9, height = 7)
-    ggplot2::ggsave(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_repspec.png"), p, width = 9, height = 7)
+    dimsum__save_png(file.path(report_outpath, "dimsum_stage_fitness_report_1_errormodel_repspec.png"), p, width = 9, height = 7)
   }
 
   dimsum__status_message("Done\n")

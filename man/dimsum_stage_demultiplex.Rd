@@ -4,8 +4,11 @@
 \alias{dimsum_stage_demultiplex}
 \title{dimsum_stage_demultiplex}
 \usage{
-dimsum_stage_demultiplex(dimsum_meta, demultiplex_outpath,
-  save_workspace = TRUE)
+dimsum_stage_demultiplex(
+  dimsum_meta,
+  demultiplex_outpath,
+  save_workspace = TRUE
+)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}

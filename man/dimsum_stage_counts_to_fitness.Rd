@@ -4,8 +4,13 @@
 \alias{dimsum_stage_counts_to_fitness}
 \title{dimsum_stage_counts_to_fitness}
 \usage{
-dimsum_stage_counts_to_fitness(dimsum_meta, fitness_outpath,
-  report = TRUE, report_outpath = NULL, save_workspace = TRUE)
+dimsum_stage_counts_to_fitness(
+  dimsum_meta,
+  fitness_outpath,
+  report = TRUE,
+  report_outpath = NULL,
+  save_workspace = TRUE
+)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}

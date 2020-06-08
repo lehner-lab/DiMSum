@@ -4,8 +4,11 @@
 \alias{dimsum__parse_cutadapt_output}
 \title{dimsum__parse_cutadapt_output}
 \usage{
-dimsum__parse_cutadapt_output(file_path, ran_cutadapt = T,
-  ran_cutadapt_cutonly = F)
+dimsum__parse_cutadapt_output(
+  file_path,
+  ran_cutadapt = T,
+  ran_cutadapt_cutonly = F
+)
 }
 \arguments{
 \item{file_path}{path to cutadapt output file (required)}

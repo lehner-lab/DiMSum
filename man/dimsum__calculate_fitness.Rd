@@ -4,8 +4,14 @@
 \alias{dimsum__calculate_fitness}
 \title{dimsum__calculate_fitness}
 \usage{
-dimsum__calculate_fitness(dimsum_meta, input_dt, all_reps, error_model_dt,
-  norm_model_dt, verbose = T)
+dimsum__calculate_fitness(
+  dimsum_meta,
+  input_dt,
+  all_reps,
+  error_model_dt,
+  norm_model_dt,
+  verbose = T
+)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}

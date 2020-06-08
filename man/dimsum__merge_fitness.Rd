@@ -4,8 +4,16 @@
 \alias{dimsum__merge_fitness}
 \title{dimsum__merge_fitness}
 \usage{
-dimsum__merge_fitness(dimsum_meta, input_dt, doubles_dt, singles_dt,
-  all_reps, fitness_outpath, report = TRUE, report_outpath = NULL)
+dimsum__merge_fitness(
+  dimsum_meta,
+  input_dt,
+  doubles_dt,
+  singles_dt,
+  all_reps,
+  fitness_outpath,
+  report = TRUE,
+  report_outpath = NULL
+)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}

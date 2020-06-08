@@ -4,8 +4,16 @@
 \alias{dimsum__fit_error_model_bootstrap}
 \title{dimsum__fit_error_model_bootstrap}
 \usage{
-dimsum__fit_error_model_bootstrap(m, input_dt, all_reps, idx, maxN,
-  max_tries_per_fit, lower_rep, Fcorr = NULL)
+dimsum__fit_error_model_bootstrap(
+  m,
+  input_dt,
+  all_reps,
+  idx,
+  maxN,
+  max_tries_per_fit,
+  lower_rep,
+  Fcorr = NULL
+)
 }
 \arguments{
 \item{m}{bootstrap number; dummy variable (required)}

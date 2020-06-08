@@ -4,9 +4,16 @@
 \alias{dimsum__concatenate_reads}
 \title{dimsum__concatenate_reads}
 \usage{
-dimsum__concatenate_reads(input_FASTQ1, input_FASTQ2, output_FASTQ,
-  output_REPORT, min_qual, max_ee, min_len,
-  reverse_complement_second_read = FALSE)
+dimsum__concatenate_reads(
+  input_FASTQ1,
+  input_FASTQ2,
+  output_FASTQ,
+  output_REPORT,
+  min_qual,
+  max_ee,
+  min_len,
+  reverse_complement_second_read = FALSE
+)
 }
 \arguments{
 \item{input_FASTQ1}{Path to first read FASTQ file (required)}

@@ -4,8 +4,12 @@
 \alias{dimsum__fastq_splitter}
 \title{dimsum__fastq_splitter}
 \usage{
-dimsum__fastq_splitter(inputFile, outputFilePrefix, chunkSize = NULL,
-  numRecords = NULL)
+dimsum__fastq_splitter(
+  inputFile,
+  outputFilePrefix,
+  chunkSize = NULL,
+  numRecords = NULL
+)
 }
 \arguments{
 \item{inputFile}{Path to FASTQ file (required)}

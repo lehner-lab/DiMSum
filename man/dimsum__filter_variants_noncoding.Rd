@@ -4,8 +4,7 @@
 \alias{dimsum__filter_variants_noncoding}
 \title{dimsum__filter_variants_noncoding}
 \usage{
-dimsum__filter_variants_noncoding(dimsum_meta, input_dt, wt_ntseq,
-  all_reps)
+dimsum__filter_variants_noncoding(dimsum_meta, input_dt, wt_ntseq, all_reps)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}

@@ -4,8 +4,14 @@
 \alias{dimsum__filter_single_end_reads}
 \title{dimsum__filter_single_end_reads}
 \usage{
-dimsum__filter_single_end_reads(input_FASTQ, output_FASTQ, output_REPORT,
-  min_qual, max_ee, min_len)
+dimsum__filter_single_end_reads(
+  input_FASTQ,
+  output_FASTQ,
+  output_REPORT,
+  min_qual,
+  max_ee,
+  min_len
+)
 }
 \arguments{
 \item{input_FASTQ}{Path to first read FASTQ file (required)}

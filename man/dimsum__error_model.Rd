@@ -4,8 +4,13 @@
 \alias{dimsum__error_model}
 \title{dimsum__error_model}
 \usage{
-dimsum__error_model(dimsum_meta, input_dt, all_reps, report = TRUE,
-  report_outpath = NULL)
+dimsum__error_model(
+  dimsum_meta,
+  input_dt,
+  all_reps,
+  report = TRUE,
+  report_outpath = NULL
+)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
