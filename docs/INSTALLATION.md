@@ -25,7 +25,7 @@ Pandoc comes bundled with [RStudio](https://rstudio.com/products/rstudio/downloa
 * **[_VSEARCH_](https://github.com/torognes/vsearch) v2.14.2**
 * **[_Starcode_](https://github.com/gui11aume/starcode) v1.3**
 
-The easiest way to install these dependencies is with the [Conda](https://docs.conda.io/en/latest/) package management system:
+**TIP:** The easiest way to install these dependencies is with the [Conda](https://docs.conda.io/en/latest/) package management system:
 ```
 conda install -c conda-forge pandoc=1.17.2
 conda install -c bioconda fastqc=0.11.9
