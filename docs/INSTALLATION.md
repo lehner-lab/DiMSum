@@ -22,14 +22,19 @@ Pandoc comes bundled with [RStudio](https://rstudio.com/products/rstudio/downloa
 
 * **[_FastQC_](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) >=v0.11.3**
 * **[_Cutadapt_](https://cutadapt.readthedocs.io/en/stable/) v2.4**
-* **[_USEARCH 32-bit_](https://drive5.com/usearch/download.html) v10.0**
+* **[_VSEARCH_](https://github.com/torognes/vsearch) v2.14.2**
 * **[_Starcode_](https://github.com/gui11aume/starcode) v1.3**
 
-**NOTE:** Please ensure that these external binaries are available on the command-line prompt under their lower-case names i.e. *fastqc*, *cutadapt*, *usearch*, *pandoc* and *starcode*. You can rename a binary from its default by creating a symbolic link if necessary, for example:
+The easiest way to install these dependencies is with the [Conda](https://docs.conda.io/en/latest/) package management system:
 ```
-ln -s usearch10.0.240_i86linux32 usearch 
+conda install -c conda-forge pandoc=1.17.2
+conda install -c bioconda fastqc=0.11.9
+conda install -c bioconda cutadapt=2.4
+conda install -c bioconda vsearch=2.14.2
+conda install -c bioconda starcode=1.3
 ```
-Also please ensure that the *$PATH* vairable is set so that these external binaries are available from the command-line prompt. You can add a directory (containing an external binary or symblic link) to your path by adding the following line at the bottom of your *~/.bashrc* file:
+
+**NOTE:** Please ensure that the *$PATH* vairable is set so that these external binaries are available from the command-line prompt. You can add a directory (containing an external binary or symblic link) to your path by adding the following line at the bottom of your *~/.bashrc* file:
 ```
 export PATH=EXTERNAL_BINARY_DIRECTORY:$PATH
 ```
