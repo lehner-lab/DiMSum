@@ -46,7 +46,7 @@
 * **_--vsearchMinQual_** Minimum Phred base quality score required to retain read or read pair (default:30)
 * **_--vsearchMaxee_** Maximum number of expected errors tolerated to retain read or read pair (default:0.5)
 * **_--vsearchMinlen_** Discard read (or read pair) if its length is shorter than this (default:64)
-* **_--vsearchMinovlen_** Discard read pair if the alignment length is shorter than this (default:16)
+* **_--vsearchMinovlen_** Discard read pair if the alignment length is shorter than this (default:10)
 
 ## PROCESS Arguments
 
