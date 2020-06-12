@@ -37,7 +37,7 @@ Remove constant region sequences from read 5’ and 3’ ends using *[Cutadapt](
 
 ## Stage 3: **ALIGN** paired-end reads (_WRAP_)
 
-Align overlapping read pairs using *[USEARCH](docs/INSTALLATION.md)* and filter resulting variants according to base quality, expected number of errors and constituent read length (see [stage-specific arguments](docs/ARGUMENTS.md#align-arguments)). Unique variant sequences are then tallied using *[Starcode](docs/INSTALLATION.md)*. For [Trans library designs](docs/ARGUMENTS.md#trans-library-design), read pairs are simply concatenated. For single-end libraries, reads are only filtered.
+Align overlapping read pairs using *[VSEARCH](docs/INSTALLATION.md)* and filter resulting variants according to base quality, expected number of errors and constituent read length (see [stage-specific arguments](docs/ARGUMENTS.md#align-arguments)). Unique variant sequences are then tallied using *[Starcode](docs/INSTALLATION.md)*. For [Trans library designs](docs/ARGUMENTS.md#trans-library-design), read pairs are simply concatenated. For single-end libraries, reads are only filtered.
 
 ## Stage 4: **PROCESS** variants (_STEAM_)
 
