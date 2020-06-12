@@ -26,10 +26,10 @@
 #' @param cutadaptMinLength cutadapt: Discard reads shorter than LENGTH after trimming (default:50)
 #' @param cutadaptErrorRate cutadapt: Maximum allowed error rate for trimming (default:0.2)
 #' @param cutadaptOverlap cutadapt: Minimum overlap between read and constant region for trimming (default:3)
-#' @param usearchMinQual USEARCH: minimum observed base quality to retain read pair (default:30)
-#' @param usearchMaxee USEARCH: maximum number of expected errors to retain read pair (default:0.5)
-#' @param usearchMinlen USEARCH: Discard pair if either read is shorter than this (default:64)
-#' @param usearchMinovlen USEARCH: discard pair if alignment is shorter than given value (default:16)
+#' @param vsearchMinQual VSEARCH: minimum observed base quality to retain read pair (default:30)
+#' @param vsearchMaxee VSEARCH: maximum number of expected errors to retain read pair (default:0.5)
+#' @param vsearchMinlen VSEARCH: Discard pair if either read is shorter than this (default:64)
+#' @param vsearchMinovlen VSEARCH: discard pair if alignment is shorter than given value (default:10)
 #' @param outputPath Path to directory to use for output files (default:'./' i.e. current working directory)
 #' @param projectName Project name (default:'DiMSum_Project')
 #' @param wildtypeSequence Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed during STEAM
@@ -84,10 +84,10 @@ dimsum <- function(
   cutadaptMinLength=50,
   cutadaptErrorRate=0.2,
   cutadaptOverlap=3,
-  usearchMinQual=30,
-  usearchMaxee=0.5,
-  usearchMinlen=64,
-  usearchMinovlen=16,
+  vsearchMinQual=30,
+  vsearchMaxee=0.5,
+  vsearchMinlen=64,
+  vsearchMinovlen=10,
   outputPath="./",
   projectName="DiMSum_Project",
   wildtypeSequence=NULL,
@@ -121,7 +121,7 @@ dimsum <- function(
   dimsum__status_message(paste("\n\n\n*******", "Running DiMSum pipeline", "*******\n\n\n"))
   dimsum__status_message(paste(formatDL(unlist(list(
     "Package version" = as.character(packageVersion("DiMSum")),
-    "R version" = version$version.string))), collapse = "\n"))
+    "R version" = version$version.string))), collapse = "\n"), newline = T)
 
   ### Demo
   ###########################
@@ -147,7 +147,7 @@ dimsum <- function(
       "fastqc", 
       "gunzip", 
       "pandoc",
-      "usearch",
+      "vsearch",
       "starcode")
     which_binaries <- Sys.which(required_binaries)
     missing_binaries <- names(which_binaries)[which_binaries==""]
@@ -160,12 +160,12 @@ dimsum <- function(
       cutadapt = rev(system("cutadapt --version", intern = TRUE))[1],
       FastQC = rev(system("fastqc --version", intern = TRUE))[1],
       Pandoc = system("pandoc -v", intern = TRUE)[1],      
-      USEARCH = rev(system("usearch --version", intern = TRUE))[1],
+      VSEARCH = unlist(strsplit(system("vsearch --version 2>&1", intern = TRUE), ","))[1],
       starcode = system("starcode --version 2>&1", intern = TRUE))))
 
     #Display binary versions
     dimsum__status_message(paste("\n\n\n*******", "Binary dependency versions", "*******\n\n\n"))
-    dimsum__status_message(paste(formatDL(unlist(binary_versions)), collapse = "\n"))
+    dimsum__status_message(paste(formatDL(unlist(binary_versions)), collapse = "\n"), newline = T)
   }
 
   #If WRAP will NOT be run
@@ -185,7 +185,7 @@ dimsum <- function(
 
     #Display binary versions
     dimsum__status_message(paste("\n\n\n*******", "Binary dependency versions", "*******\n\n\n"))
-    dimsum__status_message(paste(formatDL(unlist(binary_versions)), collapse = "\n"))
+    dimsum__status_message(paste(formatDL(unlist(binary_versions)), collapse = "\n"), newline = T)
   }
 
   ### Setup
@@ -215,10 +215,10 @@ dimsum <- function(
     "cutadaptMinLength" = list(cutadaptMinLength, c("integer")), #strictly positive integer -- checked in dimsum__check_experiment_design
     "cutadaptErrorRate" = list(cutadaptErrorRate, c("double")), #positive double less than 1 (zero inclusive) -- checked in dimsum__check_experiment_design
     "cutadaptOverlap" = list(cutadaptOverlap, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__check_experiment_design
-    "usearchMinQual" = list(usearchMinQual, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
-    "usearchMaxee" = list(usearchMaxee, c("double")), #strictly positive double -- checked in dimsum__validate_input
-    "usearchMinlen" = list(usearchMinlen, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
-    "usearchMinovlen" = list(usearchMinovlen, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
+    "vsearchMinQual" = list(vsearchMinQual, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
+    "vsearchMaxee" = list(vsearchMaxee, c("double")), #strictly positive double -- checked in dimsum__validate_input
+    "vsearchMinlen" = list(vsearchMinlen, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
+    "vsearchMinovlen" = list(vsearchMinovlen, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
     "outputPath" = list(outputPath, c("character")), #directory exists -- checked in dimsum__validate_input
     "projectName" = list(projectName, c("character")), #character string -- checked in dimsum__validate_input
     "wildtypeSequence" = list(wildtypeSequence, c("character")), #AaGgCcTt character string -- checked in dimsum__validate_input
@@ -293,8 +293,8 @@ dimsum <- function(
   pipeline[['2_trim']] <- dimsum_stage_cutadapt(dimsum_meta = pipeline[['1_split']], cutadapt_outpath = file.path(pipeline[['1_split']][["tmp_path"]], "2_trim"), 
     report_outpath = file.path(pipeline[['1_split']][["project_path"]], "reports"))
 
-  ### Stage 3.1 (WRAP): Merge paired-end reads with USEARCH
-  pipeline[['3_align']] <- dimsum_stage_usearch(dimsum_meta = pipeline[['2_trim']], usearch_outpath = file.path(pipeline[['2_trim']][["tmp_path"]], "3_align"), 
+  ### Stage 3.1 (WRAP): Merge paired-end reads with VSEARCH
+  pipeline[['3_align']] <- dimsum_stage_vsearch(dimsum_meta = pipeline[['2_trim']], vsearch_outpath = file.path(pipeline[['2_trim']][["tmp_path"]], "3_align"), 
     report_outpath = file.path(pipeline[['2_trim']][["project_path"]], "reports"))
 
   ### Stage 3.2 (WRAP): Tally unique read counts with FASTX-Toolkit

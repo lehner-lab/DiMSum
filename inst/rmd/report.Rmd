@@ -62,7 +62,7 @@ DiMSum Stage 1 (QC) summarises base qualities from each raw FastQ file using [Fa
 
 The plot below shows 10th percentile (upper) and mean (lower) Phred quality scores at the indicated positions in the forward reads (Read 1) in all FastQ files (see legend). Vertical dashed lines separate constant region sequences (5') from variable region sequences (3') as specified by Stage 2-specific arguments (see TRIM below).
 
-If mean read qualities are low (Phred score<30) in the constant region sequence, it might be necessary to increase the maximum allowable number of mismatches during trimming i.e. Stage 2 ('cutadaptErrorRate'). If qualities are low in the variable region sequence, it may be necessary to adjust Stage 3 (ALIGN) options ('usearchMinQual', 'usearchMaxee'). Be aware that changing these options from their defaults can severely impact the number of 'fake' (spurious) variants due to sequencing errors. See [DiMSum documentation](https://github.com/lehner-lab/DiMSum) for details.")
+If mean read qualities are low (Phred score<30) in the constant region sequence, it might be necessary to increase the maximum allowable number of mismatches during trimming i.e. Stage 2 ('cutadaptErrorRate'). If qualities are low in the variable region sequence, it may be necessary to adjust Stage 3 (ALIGN) options ('vsearchMinQual', 'vsearchMaxee'). Be aware that changing these options from their defaults can severely impact the number of 'fake' (spurious) variants due to sequencing errors. See [DiMSum documentation](https://github.com/lehner-lab/DiMSum) for details.")
 ```
 
 ```{r qualitycontrol1_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_qualitycontrol1"]]}
@@ -110,18 +110,17 @@ knitr::include_graphics("dimsum__cutadapt_report_pair2.png")
 ```{r align1, echo=FALSE, results='asis', eval=doc_settings[["show_align1"]]}
 cat("## 3. **ALIGN** PE reads (WRAP)
 
-DiMSum Stage 3 (ALIGN) aligns paired-end reads using [USEARCH](http://www.drive5.com/usearch/). This stage also filters the resulting variant sequences based on minimum base quality, total number of expected base calling errors and sequence length. If reads are the result of **single-end** sequencing, these same filters are applied.
+DiMSum Stage 3 (ALIGN) aligns paired-end reads using [VSEARCH](https://github.com/torognes/vsearch). This stage also filters the resulting variant sequences based on minimum base quality, total number of expected base calling errors and sequence length. If reads are the result of **single-end** sequencing, these same filters are applied.
 
-The plot below shows the total percentage of reads (or read pairs) retained for downstream analysis ('usearch_aligned'), shown separately for each FastQ file. Remaining reads are discarded. Details of each category are as follows:
+The plot below shows the total percentage of reads (or read pairs) retained for downstream analysis ('vsearch_aligned'), shown separately for each FastQ file. Remaining reads are discarded. Details of each category are as follows:
 
- - **'usearch_aligned'** (retained)
- - **'usearch_too_many_diffs'** (discarded: >5 mismatches in the alignment)
- - **'usearch_fwd_too_short'** (discarded: forward read too short, see 'usearchMinlen' option)
- - **'usearch_rev_too_short'** (discarded: reverse read too short, see 'usearchMinlen' option)
- - **'usearch_no_alignment_found'** (discarded: no alignment found)
- - **'usearch_alignment_too_short'** (discarded: alignment too short, see 'usearchMinovlen' option)
- - **'usearch_exp_errs_too_high'** (discarded: total number of expected base calling errors too high, see 'usearchMaxee' option)
- - **'usearch_min_Q_too_low'** (discarded: minimum base quality too low, see 'usearchMinQual' option)
+ - **'vsearch_aligned'** (retained)
+ - **'vsearch_too_short'** (discarded: reads too short, see 'vsearchMinlen' option)
+ - **'vsearch_no_alignment_found'** (discarded: no alignment found)
+ - **'vsearch_too_many_diffs'** (discarded: >10 mismatches in the alignment)
+ - **'vsearch_overlap_too_short'** (discarded: alignment is too short, see 'vsearchMinovlen' option)
+ - **'vsearch_exp_errs_too_high'** (discarded: total number of expected base calling errors too high, see 'vsearchMaxee' option)
+ - **'vsearch_min_Q_too_low'** (discarded: minimum base quality too low, see 'vsearchMinQual' option)
  - **'cutadapt_not_written'** (discarded: read discarded in Stage 2)
 
 If the percentage of reads retained is low (<<50%), the above options may need to be adjsted. See [DiMSum documentation](https://github.com/lehner-lab/DiMSum) for details.
@@ -130,7 +129,7 @@ If the percentage of reads retained is low (<<50%), the above options may need t
 ```
 
 ```{r align1_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_align1"]]}
-knitr::include_graphics("dimsum__usearch_report_paircounts.png")
+knitr::include_graphics("dimsum__vsearch_report_paircounts.png")
 ```
 
 <!-- ALIGN (image2) -->
@@ -140,7 +139,7 @@ cat("The plot below shows variant sequence length distributions after alignment,
 ```
 
 ```{r align2_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_align1"]]}
-knitr::include_graphics("dimsum__usearch_report_mergedlength.png")
+knitr::include_graphics("dimsum__vsearch_report_mergedlength.png")
 ```
 
 <!-- PROCESS -->
@@ -219,7 +218,7 @@ cat("The **diagnostic plot** below shows marginal variant count distributions se
 ```
 
 ```{r process5_2, echo=FALSE, results='asis', eval=doc_settings[["show_process1"]]}
-cat("Expected counts from 'fake' variants (due to base-call errors at a rate corresponding to the 'usearchMinQual' option) are indicated by coloured dashed lines. Bimodal distributions (or unimodal distributions not surpassing the indicated thresholds) indicate variants originating from sequencing errors likely due to a library 'bottleneck'. A minimum input count threshold should be chosen to remove such variants (see 'fitnessMinInputCountAll' option applied in Stage 5 and [DiMSum documentation](https://github.com/lehner-lab/DiMSum) for more details.).
+cat("Expected counts from 'fake' variants (due to base-call errors at a rate corresponding to the 'vsearchMinQual' option) are indicated by coloured dashed lines. Bimodal distributions (or unimodal distributions not surpassing the indicated thresholds) indicate variants originating from sequencing errors likely due to a library 'bottleneck'. A minimum input count threshold should be chosen to remove such variants (see 'fitnessMinInputCountAll' option applied in Stage 5 and [DiMSum documentation](https://github.com/lehner-lab/DiMSum) for more details.).
 ")
 ```
 
@@ -296,7 +295,7 @@ knitr::include_graphics("dimsum_stage_fitness_report_1_errormodel_fitness_replic
 cat("### 5.3 Replicate fitness correlations")
 ```
 
-```{r analyse4_1, echo=FALSE, results='asis', eval=!doc_settings[["show_analyseN"]]}
+```{r analyse4_1, echo=FALSE, results='asis', eval=doc_settings[["show_analyse1"]] & !doc_settings[["show_analyseN"]]}
 cat("The **diagnostic plot** below is a scatterplot matrix depicting correlations between fitness estimates from all replicates. Matrix cells in the upper triangle show Pearson correlation coefficients. Matrix cells in the lower triangle show scatterplot equivalents (hexagonal heatmaps of 2d bin fitness). Matrix diagonal cells indicate fitness densities. Only variants retained during error model fitting are depicted (see Section 5.1 above).
 
 Poor correlations indicate systematic errors between replicates. Affected replicates should be excluded from error model fitting (see 'retainedReplicates' option).
@@ -304,7 +303,7 @@ Poor correlations indicate systematic errors between replicates. Affected replic
 ")
 ```
 
-```{r analyse4_image, echo=FALSE, fig.cap="", out.width = '100%', eval=!doc_settings[["show_analyseN"]]}
+```{r analyse4_image, echo=FALSE, fig.cap="", out.width = '100%', eval=doc_settings[["show_analyse1"]] & !doc_settings[["show_analyseN"]]}
 knitr::include_graphics("dimsum_stage_fitness_report_1_errormodel_fitness_replicates_scatter.png")
 ```
 

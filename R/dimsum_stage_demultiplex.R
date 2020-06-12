@@ -33,7 +33,7 @@ dimsum_stage_demultiplex <- function(
 
   #Demultiplex parameters specified?
   if( !'barcode_design' %in% names(dimsum_meta) ){
-    dimsum__status_message("Skipping this stage (assuming all fastq files already demultiplexed)")
+    dimsum__status_message("Skipping this stage (assuming all fastq files already demultiplexed)\n")
     return(dimsum_meta)
   }
 

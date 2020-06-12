@@ -13,7 +13,7 @@ dimsum__unique_helper <- function(
   this_sample_code <- unique(dimsum_meta[["exp_design"]][,"sample_code"])[i]
   read_pairs <- dimsum_meta[["exp_design"]][dimsum_meta[["exp_design"]][,"sample_code"]==this_sample_code,"aligned_pair"]
   #Concatenate FASTQ files
-  output_file1 <- gsub("_split1.usearch$", ".usearch", read_pairs[1])
+  output_file1 <- gsub("_split1.vsearch$", ".vsearch", read_pairs[1])
   file.copy(
     from = file.path(dimsum_meta[["exp_design"]][,"aligned_pair_directory"][1], read_pairs[1]),
     to = file.path(unique_outpath, output_file1))

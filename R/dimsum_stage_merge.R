@@ -73,7 +73,7 @@ dimsum_stage_merge <- function(
       }
 
       #load variant data from dimsum variant count files
-      file_id <- gsub('.usearch.unique', '', basename(count_file))
+      file_id <- gsub('.vsearch.unique', '', basename(count_file))
       #Initialise count table
       count_dt <- data.table(
         nt_seq = character(),

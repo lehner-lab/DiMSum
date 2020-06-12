@@ -106,9 +106,9 @@ dimsum__validate_input <- function(
     stop("Invalid 'permittedSequences' argument. Only valid nucleotide codes allowed (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N).", call. = FALSE)
   }
 
-  #Check strictly positive integer usearch... arguments
-  if(sum(unlist(dimsum_meta[c("usearchMinQual", "usearchMinlen", "usearchMinovlen")])<=0)!=0){
-    stop("Invalid 'usearch...' arguments. Only positive integers allowed (zero exclusive).", call. = FALSE)
+  #Check strictly positive integer vsearch... arguments
+  if(sum(unlist(dimsum_meta[c("vsearchMinQual", "vsearchMinlen", "vsearchMinovlen")])<=0)!=0){
+    stop("Invalid 'vsearch...' arguments. Only positive integers allowed (zero exclusive).", call. = FALSE)
   }
 
   #Check positive integer fitness... arguments
@@ -131,9 +131,9 @@ dimsum__validate_input <- function(
     stop("Invalid 'barcodeErrorRate' argument. Only positive doubles less than 1 allowed (zero inclusive).", call. = FALSE)
   }
 
-  #Check usearchMaxee argument
-  if(dimsum_meta[["usearchMaxee"]]<=0){
-    stop("Invalid 'usearchMaxee' argument. Only positive doubles allowed (zero exclusive).", call. = FALSE)
+  #Check vsearchMaxee argument
+  if(dimsum_meta[["vsearchMaxee"]]<=0){
+    stop("Invalid 'vsearchMaxee' argument. Only positive doubles allowed (zero exclusive).", call. = FALSE)
   }
 
   #Disable bayesianDoubleFitness option (TEMPORARY FIX: still in development)

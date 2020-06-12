@@ -43,7 +43,7 @@ dimsum__diagnostics_report <- function(
   max_nsubs <- min(c(max_nsubs, 12))
 
   #Error rate
-  error_rate <- 10^min(-dimsum_meta[["usearchMinQual"]]/10, log10(dimsum_meta[["usearchMaxee"]] / nchar(dimsum_meta[["wildtypeSequence"]])))
+  error_rate <- 10^min(-dimsum_meta[["vsearchMinQual"]]/10, log10(dimsum_meta[["vsearchMaxee"]] / nchar(dimsum_meta[["wildtypeSequence"]])))
 
   #Plot 1: Histogram of input counts split by number of nucleotide mutations
   if(length(input_samples)!=0){

@@ -1,97 +1,68 @@
 
-#' dimsum__filter_single_end_reads
+#' dimsum__filter_reads
 #'
-#' Concatentate reads (without reverse complementing second read in pair).
+#' Concatenate reads (with or without reverse complementing second read in pair).
 #'
-#' @param input_FASTQ Path to first read FASTQ file (required)
+#' @param input_FASTQ Path to input FASTQ file (required)
+#' @param input_REPORT Path to input report file (required)
 #' @param output_FASTQ Path to output FASTQ file (required)
-#' @param output_REPORT Path to report file (required)
+#' @param output_REPORT Path to output report file (required)
 #' @param min_qual Minimum observed base quality to retain read pair (required)
-#' @param max_ee Maximum number of expected errors to retain read pair (required)
-#' @param min_len Discard pair if either read is shorter than this (required)
 #'
 #' @return Nothing
 #' @export
-dimsum__filter_single_end_reads <- function(
+dimsum__filter_reads <- function(
   input_FASTQ,
+  input_REPORT,
   output_FASTQ,
   output_REPORT,
-  min_qual,
-  max_ee,
-  min_len
+  min_qual
   ){
   #Alignment statistics
   a_stats <- list()
-  a_stats[['Pairs']] <- 0
+  a_stats[['Pairs']] <- 0 #from vsearch report
   a_stats[['Merged']] <- 0
-  a_stats[['Too_short']] <- 0
-  a_stats[['No_alignment_found']] <- 0 #NA
-  a_stats[['Too_many_diffs']] <- 0 #NA
-  a_stats[['Overlap_too_short']] <- 0 #NA
-  a_stats[['Exp.errs._too_high']] <- 0
+  a_stats[['Too_short']] <- 0 #from vsearch report
+  a_stats[['No_alignment_found']] <- 0 #from vsearch report
+  a_stats[['Too_many_diffs']] <- 0 #from vsearch report
+  a_stats[['Overlap_too_short']] <- 0 #from vsearch report
+  a_stats[['Exp.errs._too_high']] <- 0 #from vsearch report
   a_stats[['Min_Q_too_low']] <- 0
-  a_stats[['merged_lengths']] <- c()
+  a_stats[['merged_lengths']] <- c() 
+
+  #Get vsearch results
+  temp_out <- readLines(input_REPORT)
+  a_stats[['Pairs']] <- sum(as.integer(rev(unlist(strsplit(temp_out[grep('Pairs$', temp_out)], ' ')))[3]), na.rm = T)
+  a_stats[['Too_short']] <- sum(as.integer(rev(unlist(strsplit(temp_out[grep('reads too short', temp_out)], ' ')))[7]), na.rm = T)
+  too_few_kmers <- sum(as.integer(rev(unlist(strsplit(temp_out[grep('too few kmers found on same diagonal', temp_out)], ' ')))[9]), na.rm = T)
+  multiple_potential <- sum(as.integer(rev(unlist(strsplit(temp_out[grep('multiple potential alignments', temp_out)], ' ')))[5]), na.rm = T)
+  score_too_low <- sum(as.integer(rev(unlist(strsplit(temp_out[grep('alignment score too low', temp_out)], ' ')))[11]), na.rm = T)
+  a_stats[['No_alignment_found']] <- sum(too_few_kmers, multiple_potential, score_too_low, na.rm = T)
+  a_stats[['Too_many_diffs']] <- sum(as.integer(rev(unlist(strsplit(temp_out[grep('too many differences', temp_out)], ' ')))[5]), na.rm = T)
+  a_stats[['Overlap_too_short']] <- sum(as.integer(rev(unlist(strsplit(temp_out[grep('overlap too short', temp_out)], ' ')))[5]), na.rm = T)
+  a_stats[['Exp.errs._too_high']] <- sum(as.integer(rev(unlist(strsplit(temp_out[grep('expected error too high', temp_out)], ' ')))[6]), na.rm = T)
 
   #Process FASTQ files
   initial_write <- TRUE #records written to output file already?
   yield_size <- 1e6
-  f <- ShortRead::FastqStreamer(input_FASTQ, n=yield_size)
+  f1 <- ShortRead::FastqStreamer(input_FASTQ, n=yield_size)
   #Read input FASTQ files in chunks
-  while(length(fq <- ShortRead::yield(f))){
-    #Update statistics
-    a_stats[['Pairs']] <- a_stats[['Pairs']] + length(fq)
-    #Read lengths
-    fq_lengths <- IRanges::width(ShortRead::sread(fq))
-    #Update statistics
-    a_stats[['Too_short']] <- a_stats[['Too_short']] + sum(fq_lengths<min_len)
-    #Subset to sequences at least 64 bp long
-    fq <- fq[fq_lengths>=min_len]
+  while(length(fq1 <- ShortRead::yield(f1))){
     #Read quality matrices
-    qmat <- as(Biostrings::quality(fq), "matrix")
-
-    #Go to next iteration if empty matrix
-    if(sum(fq_lengths>=min_len)==0){next}
+    qmat1 <- as(Biostrings::quality(fq1), "matrix")
     #Number of bases with qualities less than minimum specified?
-    if(sum(fq_lengths>=min_len)==1){
-      non_merge_num_bases_too_low_qual <- sum(qmat<min_qual, na.rm = T)
-    }else{
-      non_merge_num_bases_too_low_qual <- apply(qmat<min_qual, 1, sum, na.rm = T)
-    }
+    non_merge_num_bases_too_low_qual <- apply(qmat1<min_qual, 1, sum, na.rm = T)
     #Update statistics
     a_stats[['Min_Q_too_low']] <- a_stats[['Min_Q_too_low']] + sum(non_merge_num_bases_too_low_qual!=0)
     #Subset to sequences with all base qualities not less than specified
-    fq <- fq[non_merge_num_bases_too_low_qual==0]
-    #Read error probability matrices
-    emat <- 10^(qmat[non_merge_num_bases_too_low_qual==0,]/(-10))
-
-    #Go to next iteration if empty matrix
-    if(sum(non_merge_num_bases_too_low_qual==0)==0){next}
-    #Expected number of read errors
-    if(sum(non_merge_num_bases_too_low_qual==0)==1){
-      exp_num_read_errors <- sum(emat, na.rm = T)
-    }else{
-      exp_num_read_errors <- apply(emat, 1, sum, na.rm = T)
-    }
-    #Update statistics
-    a_stats[['Exp.errs._too_high']] <- a_stats[['Exp.errs._too_high']] + sum(exp_num_read_errors>max_ee)
-    #Subset to sequences with less than specified expected number of read errors
-    fq <- fq[exp_num_read_errors<=max_ee]
-
-    #Go to next iteration if no fastq records remain
-    if(sum(exp_num_read_errors<=max_ee)==0){next}
+    fq1 <- fq1[non_merge_num_bases_too_low_qual==0]
     #Write to file
-    dimsum__writeFastq(shortreads = fq, outputFile = output_FASTQ, initial_write = initial_write)
+    dimsum__writeFastq(shortreads = fq1, outputFile = output_FASTQ, initial_write = initial_write)
     initial_write <- FALSE
     #Update statistics
-    a_stats[['Merged']] <- a_stats[['Merged']] + length(fq)
-    a_stats[['merged_lengths']] <- c(a_stats[['merged_lengths']], IRanges::width(ShortRead::sread(fq)))
+    a_stats[['Merged']] <- a_stats[['Merged']] + length(fq1)
+    a_stats[['merged_lengths']] <- c(a_stats[['merged_lengths']], IRanges::width(ShortRead::sread(fq1)))
   }
-  
-  #Write empty FASTQ file if no records written thus far
-  if(initial_write){
-    dimsum__writeFastq(shortreads = ShortRead::ShortReadQ(), outputFile = output_FASTQ, initial_write = initial_write)
-  }
-
   #Update length statistics
   if(a_stats[['Merged']]!=0){
     a_stats[['Merged_length_min']] <- min(a_stats[['merged_lengths']])

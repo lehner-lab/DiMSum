@@ -28,12 +28,12 @@ dimsum__concatenate_reads <- function(
   a_stats <- list()
   a_stats[['Pairs']] <- 0
   a_stats[['Merged']] <- 0
-  a_stats[['Alignments_zero_diffs']] <- 0
-  a_stats[['Too_many_diffs']] <- 0
+  a_stats[['Too_short']] <- 0
+  a_stats[['No_alignment_found']] <- 0 #NA
+  a_stats[['Too_many_diffs']] <- 0 #NA
+  a_stats[['Overlap_too_short']] <- 0 #NA
   a_stats[['Exp.errs._too_high']] <- 0
   a_stats[['Min_Q_too_low']] <- 0
-  a_stats[['Fwd_too_short']] <- 0
-  a_stats[['Rev_too_short']] <- 0
   a_stats[['merged_lengths']] <- c()
 
   #Process FASTQ files
@@ -50,13 +50,11 @@ dimsum__concatenate_reads <- function(
     fq1_lengths <- IRanges::width(ShortRead::sread(fq1))
     fq2_lengths <- IRanges::width(ShortRead::sread(fq2))
     #Update statistics
-    a_stats[['Fwd_too_short']] <- a_stats[['Fwd_too_short']] + sum(fq1_lengths<min_len)
-    a_stats[['Rev_too_short']] <- a_stats[['Rev_too_short']] + sum(fq2_lengths<min_len)
+    a_stats[['Too_short']] <- a_stats[['Too_short']] + sum(fq1_lengths<min_len | fq2_lengths<min_len)
     #Subset to sequences at least 64 bp long
     fq1 <- fq1[fq1_lengths>=min_len & fq2_lengths>=min_len]
     fq2 <- fq2[fq1_lengths>=min_len & fq2_lengths>=min_len]
-    #Update statistics
-    a_stats[['Alignments_zero_diffs']] <- a_stats[['Alignments_zero_diffs']] + sum(fq1_lengths>=min_len & fq2_lengths>=min_len)
+
     #Read quality matrices
     qmat1 <- as(Biostrings::quality(fq1), "matrix")
     qmat2 <- as(Biostrings::quality(fq2), "matrix")
@@ -108,34 +106,20 @@ dimsum__concatenate_reads <- function(
 
   #Report
   report_list <- list()
-  report_list <- append(report_list, paste0(
-    '\nMerge\n\tFwd ', 
-    input_FASTQ1, 
-    '\n\tRev ', 
-    input_FASTQ2, 
-    '\n\tKeep read labels\n\t', 
-    as.character(a_stats['Merged']), 
-    ' / ', 
-    as.character(a_stats['Pairs']), 
-    ' pairs merged\n\n'))
   report_list <- append(report_list, 'Merged length distribution:\n')
   report_list <- append(report_list, paste0('\t ', a_stats[['Merged_length_min']], '  Min\n'))
   report_list <- append(report_list, paste0('\t ', a_stats[['Merged_length_low']], '  Low quartile\n'))
   report_list <- append(report_list, paste0('\t ', a_stats[['Merged_length_median']], '  Median\n'))
   report_list <- append(report_list, paste0('\t ', a_stats[['Merged_length_high']], '  High quartile\n'))
   report_list <- append(report_list, paste0('\t ', a_stats[['Merged_length_max']], '  Max\n\nTotals:\n'))
-  report_list <- append(report_list, paste0('\t ', a_stats[['Pairs']], '  Pairs ()\n'))
-  report_list <- append(report_list, paste0('\t ', a_stats[['Merged']], '  Merged (, )\n'))
-  report_list <- append(report_list, paste0('\t ', a_stats[['Alignments_zero_diffs']], '  Alignments with zero diffs ()\n'))
-  report_list <- append(report_list, paste0('\t ', a_stats[['Too_many_diffs']], '  Too many diffs (> 1) ()\n'))
-  report_list <- append(report_list, paste0('\t ', 0, '  Fwd tails Q <= 2 trimmed ()\n'))
-  report_list <- append(report_list, paste0('\t ', 0, '  Rev tails Q <= 2 trimmed ()\n'))
-  report_list <- append(report_list, paste0('\t ', a_stats[['Fwd_too_short']], '  Fwd too short (< ', min_len, ') after tail trimming ()\n'))
-  report_list <- append(report_list, paste0('\t ', a_stats[['Rev_too_short']], '  Rev too short (< ', min_len, ') after tail trimming ()\n'))
-  report_list <- append(report_list, paste0('\t ', 0, '  No alignment found ()\n'))
-  report_list <- append(report_list, paste0('\t ', 0, '  Alignment too short ( ) ()\n'))
-  report_list <- append(report_list, paste0('\t ', a_stats[['Exp.errs._too_high']], '  Exp.errs. too high (max=', max_ee, ') ()\n'))
-  report_list <- append(report_list, paste0('\t ', a_stats[['Min_Q_too_low']], '  Min Q too low (<', min_qual, ') ()\n'))
+  report_list <- append(report_list, paste0('\t ', a_stats[['Pairs']], '  Pairs\n'))
+  report_list <- append(report_list, paste0('\t ', a_stats[['Merged']], '  Merged\n'))
+  report_list <- append(report_list, paste0('\t ', a_stats[['Too_short']], '  Too short\n'))
+  report_list <- append(report_list, paste0('\t ', a_stats[['No_alignment_found']], '  No alignment found\n'))
+  report_list <- append(report_list, paste0('\t ', a_stats[['Too_many_diffs']], '  Too many diffs\n'))
+  report_list <- append(report_list, paste0('\t ', a_stats[['Overlap_too_short']], '  Overlap too short\n'))
+  report_list <- append(report_list, paste0('\t ', a_stats[['Exp.errs._too_high']], '  Exp.errs. too high\n'))
+  report_list <- append(report_list, paste0('\t ', a_stats[['Min_Q_too_low']], '  Min Q too low\n'))
   write(paste0(unlist(report_list), collapse = ""), file = output_REPORT, sep = "")
 }
 

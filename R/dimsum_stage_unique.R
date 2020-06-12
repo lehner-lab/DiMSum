@@ -58,8 +58,8 @@ dimsum_stage_unique <- function(
     #Run starcode to count unique variants
     for(this_sample_code in unique(dimsum_meta[["exp_design"]][,"sample_code"])){
       read_pairs <- dimsum_meta[["exp_design"]][dimsum_meta[["exp_design"]][,"sample_code"]==this_sample_code,"aligned_pair"]
-      output_file1 <- gsub("_split1.usearch$", ".usearch", read_pairs[1])
-      output_file2 <- gsub("_split1.usearch$", ".usearch.unique", read_pairs[1])
+      output_file1 <- gsub("_split1.vsearch$", ".vsearch", read_pairs[1])
+      output_file2 <- gsub("_split1.vsearch$", ".vsearch.unique", read_pairs[1])
       temp_out <- system(paste0(
         "starcode -d 0 -s -t ",
         dimsum_meta[['numCores']],
@@ -75,7 +75,7 @@ dimsum_stage_unique <- function(
   }
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
-  dimsum_meta_new[["exp_design"]][,"aligned_pair_unique"] <- gsub("_split.*.usearch$", ".usearch.unique", dimsum_meta_new[["exp_design"]][,"aligned_pair"])
+  dimsum_meta_new[["exp_design"]][,"aligned_pair_unique"] <- gsub("_split.*.vsearch$", ".vsearch.unique", dimsum_meta_new[["exp_design"]][,"aligned_pair"])
   dimsum_meta_new[['exp_design']][,"aligned_pair_unique_directory"] <- unique_outpath
   #Delete files when last stage complete
   if(!dimsum_meta_new[["retainIntermediateFiles"]]){
@@ -84,7 +84,7 @@ dimsum_stage_unique <- function(
       if(!is.null(dimsum_meta_new[["touchIntermediateFiles"]])){suppressWarnings(temp_out <- file.create(dimsum_meta_new[["touchIntermediateFiles"]]))}
     }else{
       dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], 
-        file.path(unique_outpath, dir(unique_outpath, "*.usearch$")),
+        file.path(unique_outpath, dir(unique_outpath, "*.vsearch$")),
         file.path(unique_outpath, dir(unique_outpath, "*.unique$")))
     }
   }

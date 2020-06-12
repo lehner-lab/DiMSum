@@ -4,10 +4,12 @@
 \alias{dimsum__status_message}
 \title{dimsum__status_message}
 \usage{
-dimsum__status_message(...)
+dimsum__status_message(..., newline = F)
 }
 \arguments{
 \item{...}{objects to be output as character vector (required)}
+
+\item{newline}{print newline after status message (default:F)}
 }
 \value{
 Nothing

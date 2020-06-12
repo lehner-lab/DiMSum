@@ -28,10 +28,10 @@ dimsum(
   cutadaptMinLength = 50,
   cutadaptErrorRate = 0.2,
   cutadaptOverlap = 3,
-  usearchMinQual = 30,
-  usearchMaxee = 0.5,
-  usearchMinlen = 64,
-  usearchMinovlen = 16,
+  vsearchMinQual = 30,
+  vsearchMaxee = 0.5,
+  vsearchMinlen = 64,
+  vsearchMinovlen = 10,
   outputPath = "./",
   projectName = "DiMSum_Project",
   wildtypeSequence = NULL,
@@ -108,13 +108,13 @@ dimsum(
 
 \item{cutadaptOverlap}{cutadapt: Minimum overlap between read and constant region for trimming (default:3)}
 
-\item{usearchMinQual}{USEARCH: minimum observed base quality to retain read pair (default:30)}
+\item{vsearchMinQual}{VSEARCH: minimum observed base quality to retain read pair (default:30)}
 
-\item{usearchMaxee}{USEARCH: maximum number of expected errors to retain read pair (default:0.5)}
+\item{vsearchMaxee}{VSEARCH: maximum number of expected errors to retain read pair (default:0.5)}
 
-\item{usearchMinlen}{USEARCH: Discard pair if either read is shorter than this (default:64)}
+\item{vsearchMinlen}{VSEARCH: Discard pair if either read is shorter than this (default:64)}
 
-\item{usearchMinovlen}{USEARCH: discard pair if alignment is shorter than given value (default:16)}
+\item{vsearchMinovlen}{VSEARCH: discard pair if alignment is shorter than given value (default:10)}
 
 \item{outputPath}{Path to directory to use for output files (default:'./' i.e. current working directory)}
 
