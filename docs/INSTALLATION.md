@@ -26,7 +26,14 @@ curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 sh Miniconda3-latest-Linux-x86_64.sh
 ```
 
-Then, optionally, create a dedicated environment for DiMSum and it's dependencies. This is recommended if you already have _R_ and/or _Python_ installations that you need to maintain separately.
+After installing conda you will need to add the bioconda channel as well as the other channels bioconda depends on. Open a new console window/tab and run the following:
+```
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+```
+
+Next, optionally, create a dedicated environment for DiMSum and it's dependencies. This is recommended if you already have _R_ and/or _Python_ installations that you need to maintain separately.
 ```
 conda create --name dimsum
 conda activate dimsum
