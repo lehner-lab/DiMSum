@@ -26,7 +26,7 @@ curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 sh Miniconda3-latest-Linux-x86_64.sh
 ```
 
-**NOTE:** If in doubt, answer "yes" when prompted during installation.
+**IMPORTANT:** If in doubt, respond with "yes" when prompted during installation.
 
 After installing Conda you will need to add the bioconda channel as well as the other channels bioconda depends on. Open a new console window/tab and run the following:
 ```
@@ -40,6 +40,7 @@ Next, optionally, create a dedicated environment for DiMSum and it's dependencie
 conda create --name dimsum
 conda activate dimsum
 ```
+**TIP:** See [here](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) for more information about managing conda environments.
 
 Finally, install the [DiMSum bioconda package](https://anaconda.org/bioconda/r-dimsum):
 ```
