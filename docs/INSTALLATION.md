@@ -26,6 +26,8 @@ curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 sh Miniconda3-latest-Linux-x86_64.sh
 ```
 
+**NOTE:** If in doubt, answer "yes" when prompted during installation.
+
 After installing Conda you will need to add the bioconda channel as well as the other channels bioconda depends on. Open a new console window/tab and run the following:
 ```
 conda config --add channels defaults
