@@ -57,7 +57,7 @@ Pandoc comes bundled with [RStudio](https://rstudio.com/products/rstudio/downloa
 * **[_VSEARCH_](https://github.com/torognes/vsearch) v2.14.2**
 * **[_Starcode_](https://github.com/gui11aume/starcode) v1.3**
 
-**NOTE:** Please ensure that the *$PATH* vairable is set so that these external binaries are available from the command-line prompt. You can add a directory (containing an external binary or symblic link) to your path by adding the following line at the bottom of your *~/.bashrc* file:
+**NOTE:** Please ensure that the *$PATH* vairable is set so that these external binaries are available from the command-line prompt. You can add a directory (containing an external binary or symblic link) to your path by adding the following line at the bottom of your *~/.bashrc* or *~/.bash_profile* file:
 ```
 export PATH=EXTERNAL_BINARY_DIRECTORY:$PATH
 ```
@@ -78,7 +78,7 @@ if(!require(devtools)) install.packages("devtools")
 devtools::install_deps('DiMSum')
 devtools::install('DiMSum')
 ```
-Finally, add the cloned DiMSum repository base directory to your path. You can do this by adding the following line at the bottom of your *~/.bashrc* file:
+Finally, add the cloned DiMSum repository base directory to your path. You can do this by adding the following line at the bottom of your *~/.bashrc* or *~/.bash_profile* file:
 ```
 export PATH=CLONED_DIMSUM_REPOSITORY:$PATH
 ```
