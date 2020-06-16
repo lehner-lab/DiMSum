@@ -11,7 +11,7 @@ DiMSum is expected to work on all Unix-like operating systems.
 
 ## Installing DiMSum using Conda (recommended)
 
-The easiest way to install DiMSum is using the [bioconda package](https://anaconda.org/bioconda/r-dimsum).
+The easiest way to install DiMSum is by using the [bioconda package](https://anaconda.org/bioconda/r-dimsum).
 
 Firstly, install the Conda package manager (if you don't already have it).
 
