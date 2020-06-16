@@ -41,7 +41,7 @@ To check that you have a working installation of DiMSum, run the [Demo](DEMO.md)
 
 ## Installing DiMSum dependencies
 
-Installing DiMSum dependencies manually is not recommended. The easiest way to install DiMSum (and its dependencies) is by using the [bioconda package](https://anaconda.org/bioconda/r-dimsum). See [Installing DiMSum using Conda]().
+Installing DiMSum dependencies manually is not recommended. The easiest way to install DiMSum (and its dependencies) is by using the [bioconda package](https://anaconda.org/bioconda/r-dimsum). See [Installing DiMSum using Conda](installing-dimsum-using-conda-reccommended).
 
 **REQUIRED:** Before [installing DiMSum from GitHub](#installing-dimsum-from-github), please ensure that the following required software is installed:
 
@@ -64,7 +64,7 @@ export PATH=EXTERNAL_BINARY_DIRECTORY:$PATH
 
 ## Installing DiMSum from GitHub
 
-Installing DiMSum from GiHub is not recommended. The easiest way to install DiMSum (and its dependencies) is by using the [bioconda package](https://anaconda.org/bioconda/r-dimsum). See [Installing DiMSum using Conda]().
+Installing DiMSum from GiHub is not recommended. The easiest way to install DiMSum (and its dependencies) is by using the [bioconda package](https://anaconda.org/bioconda/r-dimsum). See [Installing DiMSum using Conda](installing-dimsum-using-conda-reccommended).
 
 Before installing DiMSum from GitHub, please ensure that the required [software dependencies](#installing-dimsum-dependencies) are available.
 
