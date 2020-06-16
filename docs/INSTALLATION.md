@@ -39,9 +39,9 @@ conda install -c bioconda starcode=1.3
 export PATH=EXTERNAL_BINARY_DIRECTORY:$PATH
 ```
 
-## Installing DiMSum
+## Installing DiMSum from GitHub
 
-Before installing DiMSum, please ensure that the required [software dependencies](#installing-dimsum-dependencies) are available.
+Before installing DiMSum from GitHub, please ensure that the required [software dependencies](#installing-dimsum-dependencies) are available.
 
 Firstly, clone the DiMSum repository:
 ```
