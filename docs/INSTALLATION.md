@@ -9,9 +9,51 @@
 
 DiMSum is expected to work on all Unix-like operating systems.
 
+## Installing DiMSum using Conda (recommended)
+
+The easiest way to install DiMSum is by using the [bioconda package](https://anaconda.org/bioconda/r-dimsum).
+
+Firstly, install the [Conda](https://docs.conda.io/) package/environment management system (if you don't already have it).
+
+On MacOS, run:
+```
+curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+sh Miniconda3-latest-MacOSX-x86_64.sh
+```
+On Linux, run:
+```
+curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+sh Miniconda3-latest-Linux-x86_64.sh
+```
+
+**IMPORTANT:** If in doubt, respond with "yes" when prompted during installation.
+
+After installing Conda you will need to add the bioconda channel as well as the other channels bioconda depends on. Open a new console window/tab and run the following:
+```
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+```
+
+Next, optionally, create a dedicated environment for DiMSum and it's dependencies. This is recommended if you already have _R_ and/or _Python_ installations that you need to maintain separately.
+```
+conda create --name dimsum
+conda activate dimsum
+```
+**TIP:** See [here](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) for more information about managing conda environments.
+
+Finally, install the [DiMSum bioconda package](https://anaconda.org/bioconda/r-dimsum):
+```
+conda install -c bioconda r-dimsum
+```
+
+To check that you have a working installation of DiMSum, run the [Demo](DEMO.md)
+
 ## Installing DiMSum dependencies
 
-**REQUIRED:** Before [installing the DiMSum package](#installing-dimsum), please ensure that the following required software is installed:
+Installing DiMSum dependencies manually is not recommended. The easiest way to install DiMSum (and its dependencies) is by using the [DiMSum bioconda package](https://anaconda.org/bioconda/r-dimsum). See [Installing DiMSum using Conda](installing-dimsum-using-conda-recommended).
+
+**REQUIRED:** Before [installing DiMSum from GitHub](#installing-dimsum-from-github), please ensure that the following required software is installed:
 
 * **[_R_](https://www.r-project.org/) >=v3.6**
 * **[_Pandoc_](https://pandoc.org/installing.html) >=v1.17.2**
@@ -22,21 +64,19 @@ Pandoc comes bundled with [RStudio](https://rstudio.com/products/rstudio/downloa
 
 * **[_FastQC_](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) >=v0.11.3**
 * **[_Cutadapt_](https://cutadapt.readthedocs.io/en/stable/) v2.4**
-* **[_USEARCH 32-bit_](https://drive5.com/usearch/download.html) v10.0**
+* **[_VSEARCH_](https://github.com/torognes/vsearch) v2.14.2**
 * **[_Starcode_](https://github.com/gui11aume/starcode) v1.3**
 
-**NOTE:** Please ensure that these external binaries are available on the command-line prompt under their lower-case names i.e. *fastqc*, *cutadapt*, *usearch*, *pandoc* and *starcode*. You can rename a binary from its default by creating a symbolic link if necessary, for example:
-```
-ln -s usearch10.0.240_i86linux32 usearch 
-```
-Also please ensure that the *$PATH* vairable is set so that these external binaries are available from the command-line prompt. You can add a directory (containing an external binary or symblic link) to your path by adding the following line at the bottom of your *~/.bashrc* file:
+**NOTE:** Please ensure that the *$PATH* vairable is set so that these external binaries are available from the command-line prompt. You can add a directory (containing an external binary or symblic link) to your path by adding the following line at the bottom of your *~/.bashrc* or *~/.bash_profile* file:
 ```
 export PATH=EXTERNAL_BINARY_DIRECTORY:$PATH
 ```
 
-## Installing DiMSum
+## Installing DiMSum from GitHub
 
-Before installing DiMSum, please ensure that the required [software dependencies](#installing-dimsum-dependencies) are available.
+Installing DiMSum from GiHub is not recommended. The easiest way to install DiMSum (and its dependencies) is by using the [DiMSum bioconda package](https://anaconda.org/bioconda/r-dimsum). See [Installing DiMSum using Conda](installing-dimsum-using-conda-recommended).
+
+Before installing DiMSum from GitHub, please ensure that the required [software dependencies](#installing-dimsum-dependencies) are available.
 
 Firstly, clone the DiMSum repository:
 ```
@@ -48,13 +88,9 @@ if(!require(devtools)) install.packages("devtools")
 devtools::install_deps('DiMSum')
 devtools::install('DiMSum')
 ```
-Finally, add the cloned DiMSum repository base directory to your path. You can do this by adding the following line at the bottom of your *~/.bashrc* file:
+Finally, add the cloned DiMSum repository base directory to your path. You can do this by adding the following line at the bottom of your *~/.bashrc* or *~/.bash_profile* file:
 ```
 export PATH=CLONED_DIMSUM_REPOSITORY:$PATH
-```
-Display the DiMSum usage information by typing the following on the command-line:
-```
-DiMSum -h
 ```
 
 ## Demo DiMSum
