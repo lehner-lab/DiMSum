@@ -2,6 +2,8 @@
   <img src="./Dumpling.png" width="100">
 </p>
 
+# DiMSum
+
 Welcome to the GitHub repository for DiMSum: An error model and pipeline for analyzing deep mutational scanning (DMS) data and diagnosing common experimental pathologies.
 
 # Table Of Contents
