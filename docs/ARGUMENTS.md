@@ -20,7 +20,7 @@
 
 * **_--runDemo_** Run the DiMSum [Demo](DEMO.md) (default:F)
 * **_--projectName_** Project name and directory where results are to be saved (default:'DiMSum_Project')
-* **_--experimentDesignPath_** Path to [Experimental Design File](FILEFORMATS.md#experimental-design-file) (required, if '_--runDemo_'=F)
+* **_--experimentDesignPath_** Path to [Experimental Design File](FILEFORMATS.md#experimental-design-file) (required if '_--runDemo_'=F)
 * **_--outputPath_** Path to directory to use for output files (default:'./' i.e. current working directory)
 * **_--retainIntermediateFiles_** Should intermediate files be retained? Intermediate files can be many gigabytes, but are required to rerun DiMSum starting at intermediate pipeline stages (default:F)
 * **_--startStage_** (Re-)Start DiMSum at a specific pipeline stage (default:0)
@@ -51,7 +51,7 @@
 ## PROCESS Arguments
 
 * **_--reverseComplement_** Reverse complement variant sequences before processing? (default:F)
-* **_--wildtypeSequence_** Wild-type nucleotide sequence (A/C/G/T). Lower-case bases (a/c/g/t) indicate internal constant regions to be removed (required)
+* **_--wildtypeSequence_** Wild-type nucleotide sequence (A/C/G/T). Lower-case bases (a/c/g/t) indicate internal constant regions to be removed (required if '_--runDemo_'=F)
 * **_--permittedSequences_** Nucleotide sequence of IUPAC ambiguity codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions (i.e upper-case letters) in '_--wildtypeSequence_' (default:N i.e. any substitution mutation allowed)
 * **_--sequenceType_** Coding potential of sequence: either 'noncoding', 'coding' or 'auto'. If the specified wild-type nucleotide sequence ('_--wildtypeSequence_') has a valid translation without a premature STOP codon, it is assumed to be 'coding' (default:auto)
 * **_--mutagenesisType_** Whether mutagenesis was performed at the nucleotide or codon/amino acid level; either 'random' or 'codon' (default:random)
