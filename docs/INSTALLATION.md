@@ -28,9 +28,7 @@ sh Miniconda3-latest-Linux-x86_64.sh
 
 **IMPORTANT:** If in doubt, respond with "yes" when prompted during installation.
 
-After installing Conda you will need to add the bioconda channel as well as the other channels bioconda depends on.
-
-Start a new console session (e.g. by closing the current window and opening a new one) and run the following:
+After installing Conda you will need to add the bioconda channel as well as the other channels bioconda depends on. Start a new console session (e.g. by closing the current window and opening a new one) and run the following:
 ```
 conda config --add channels defaults
 conda config --add channels bioconda
