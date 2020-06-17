@@ -3,13 +3,14 @@
   <img src="../Dumpling.png" width="100">
 </p>
 
-# Input File Formats
+# File Formats
 
 * **[Experimental Design File](#experimental-design-file)**
 * **[FASTQ Files](#fastq-files)**
 * **[Variant Count File](#variant-count-file)**
 * **[Barcode Design File](#barcode-design-file)**
 * **[Variant Identity File](#variant-identity-file)**
+* **[Output Files](#output-files)**
 
 ## Experimental Design File 
 
@@ -29,7 +30,7 @@ Below is a schematic of a generic deep mutational scanning experiment indicating
   <img src="../DMS_experiment.png" width="600">
 </p>
 
-In addition to these mandatory columns, additional columns may be included to specify [Stage 2](https://github.com/lehner-lab/DiMSum#stage-2-trim-constant-regions-wrap)-specific options (see [arguments](ARGUMENTS.md#trim-arguments)), which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments provided on the command-line. In the case of a growth-rate based assay, a 'generations' column can be supplied (for all output samples) in order to normalize fitness and error estimates accordingly.
+In addition to these mandatory columns, additional columns may be included to specify [Stage 2](PIPELINE.md#stage-2-trim-constant-regions-wrap)-specific options (see [arguments](ARGUMENTS.md#trim-arguments)), which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments provided on the command-line. In the case of a growth-rate based assay, a 'generations' column can be supplied (for all output samples) in order to normalize fitness and error estimates accordingly.
 
 ## FASTQ Files
 
@@ -59,3 +60,22 @@ Your file must have the following columns:
 * **barcode** DNA barcode (A/C/G/T characters only).
 * **variant** Associated DNA variant (A/C/G/T characters only).
 
+## Output Files
+
+Primary output files:
+
+* **report.html** DiMSum pipeline summary report and diagnostic plots in html format.
+* **DiMSum_Project_fitness_replicates.RData** R data object with replicate (and merged) fitness scores and associated errors.
+* **DiMSum_Project_variant_data_merge.RData** R data object with variant counts and statistics.
+
+Additional output files:
+
+* **fitness_wildtype.txt** Wild-type fitness score and associated error.
+* **fitness_singles.txt** Single amino acid or nucleotide variant fitness scores and associated errors.
+* **fitness_doubles.txt** Double amino acid or nucleotide variant fitness scores and associated errors.
+* **fitness_silent.txt** Silent (synonymous) variant fitness scores and associated errors (for coding sequences only).
+* **fitness_singles_MaveDB.csv** [MaveDB](https://www.mavedb.org/) compatible .csv file with single amino acid or nucleotide variant fitness scores and associated errors.
+* **DiMSum_Project_variant_data_merge.tsv** Tab-separated plain text file with variant counts and statistics.
+* **DiMSum_Project_nobarcode_variant_data_merge.tsv** Tab-separated plain text file with sequenced barcodes that were not found in the variant identity file.
+* **DiMSum_Project_indel_variant_data_merge.tsv** Tab-separated plain text file with indel variants.
+* **DiMSum_Project_rejected_variant_data_merge.tsv** Tab-separated plain text file with rejected variants (internal constant region mutants, mutations inconsistent with the library design or variants with too many substitutions).
