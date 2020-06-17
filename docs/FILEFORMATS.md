@@ -13,7 +13,7 @@
 
 ## Experimental Design File 
 
-**REQUIRED:** DiMSum requires a table (e.g. using Microsoft Excel) describing the experimental design that has been saved as tab-separated plain text file (see [arguments](ARGUMENTS.md#general)). You can download [this](../example_experimentDesign.txt) file to use as a template.
+**REQUIRED:** DiMSum requires a table (e.g. using Microsoft Excel) describing the experimental design that has been saved as tab-separated plain text file (see [arguments](ARGUMENTS.md#general)). You can download [this](../examples/example_experimentDesign.txt) file to use as a template.
 
 Your file must have the following columns:
 * **sample_name** A sensible sample name e.g. 'input1' (alphanumeric characters only).
@@ -37,11 +37,11 @@ In addition to these mandatory columns, additional columns may be included to sp
 
 ## Variant Count File
 
-**OPTIONAL:** If raw sequencing reads have already been processed independently of DiMSum, processing and analysis of variant counts (with DiMSum *STEAM*) requires a table (e.g. using Microsoft Excel) with variant sequences and counts for all samples (see [arguments](ARGUMENTS.md#custom-variant-count-file)). You can download [this](../example_variantCounts.txt) file to use as a template. Either [FASTQ Files](#fastq-files) or a Variant Count File can be supplied (not both).
+**OPTIONAL:** If raw sequencing reads have already been processed independently of DiMSum, processing and analysis of variant counts (with DiMSum *STEAM*) requires a table (e.g. using Microsoft Excel) with variant sequences and counts for all samples (see [arguments](ARGUMENTS.md#custom-variant-count-file)). You can download [this](../examples/example_variantCounts.txt) file to use as a template. Either [FASTQ Files](#fastq-files) or a Variant Count File can be supplied (not both).
 
 ## Barcode Design File
 
-**OPTIONAL:** If [FASTQ files](#fastq-files) contain multiplexed samples, DiMSum requires a table (e.g. using Microsoft Excel) describing how index tags map to samples that has been saved as tab-separated plain text file (see [arguments](ARGUMENTS.md#barcoded-library-design)). You can download [this](../example_barcodeDesign.txt) file to use as a template.
+**OPTIONAL:** If [FASTQ files](#fastq-files) contain multiplexed samples, DiMSum requires a table (e.g. using Microsoft Excel) describing how index tags map to samples that has been saved as tab-separated plain text file (see [arguments](ARGUMENTS.md#barcoded-library-design)). You can download [this](../examples/example_barcodeDesign.txt) file to use as a template.
 
 Your file must have the following columns:
 * **pair1** [FASTQ file](#fastq-files) name of the first read in a given pair.
@@ -53,7 +53,7 @@ When including a Barcode Design File, ensure that all 'new_pair_prefix' column e
 
 ## Variant Identity File
 
-**OPTIONAL:** If the supplied sequences (supplied in the [FASTQ Files](#fastq-files) or [Variant Count File](#variant-count-file)) contain variant barcodes, DiMSum requires a table (e.g. using Microsoft Excel) describing how barcodes map to variants that has been saved as tab-separated plain text file (see [arguments](ARGUMENTS.md#barcoded-library-design)). You can download [this](../example_variantIdentity.txt) file to use as a template. 
+**OPTIONAL:** If the supplied sequences (supplied in the [FASTQ Files](#fastq-files) or [Variant Count File](#variant-count-file)) contain variant barcodes, DiMSum requires a table (e.g. using Microsoft Excel) describing how barcodes map to variants that has been saved as tab-separated plain text file (see [arguments](ARGUMENTS.md#barcoded-library-design)). You can download [this](../examples/example_variantIdentity.txt) file to use as a template. 
 
 Your file must have the following columns:
 * **barcode** DNA barcode (A/C/G/T characters only).
