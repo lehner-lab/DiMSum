@@ -17,7 +17,8 @@ Welcome to the GitHub repository for DiMSum: An error model and pipeline for ana
    1. **[Command-line Arguments](docs/ARGUMENTS.md)**
    1. **[File Formats](docs/FILEFORMATS.md)**
    1. **[Demo](docs/DEMO.md)**
-1. **[Bugs](docs/ARGUMENTS.md)**
+1. **[Bugs](#bugs)**
+1. **[Citing DiMSum](#citing-dimsum)**
 
 # Overview
 
@@ -53,6 +54,11 @@ See instructions regarding [Command-line Arguments](docs/ARGUMENTS.md), [File Fo
 
 All bug reports are highly appreciated. You may submit a bug report here on GitHub as an issue or you could send an email to ajfaure@gmail.com.
 
+# Citing DiMSum
+
+Please cite the following publication if you use DiMSum:
+
+Faure AJ, Schmiedel JM, Baeza-Centurion P, Lehner B. (2020) DiMSum: an error model and pipeline for analyzing deep mutational scanning data and diagnosing common experimental pathologies. BioRxiv. doi: [10.1146/annurev-genom-083118-014845](http://dx.doi.org/10.1146/annurev-genom-083118-014845)
 
 
 (Vector illustration credit: <a href="https://www.vecteezy.com">Vecteezy!</a>)
