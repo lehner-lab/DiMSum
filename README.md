@@ -58,7 +58,7 @@ All bug reports are highly appreciated. You may submit a bug report here on GitH
 
 Please cite the following publication if you use DiMSum:
 
-Faure AJ, Schmiedel JM, Baeza-Centurion P, Lehner B. (2020) DiMSum: an error model and pipeline for analyzing deep mutational scanning data and diagnosing common experimental pathologies. BioRxiv. doi: [10.1146/annurev-genom-083118-014845](http://dx.doi.org/10.1146/annurev-genom-083118-014845)
+Faure AJ, Schmiedel JM, Baeza-Centurion P, Lehner B. (2020) DiMSum: an error model and pipeline for analyzing deep mutational scanning data and diagnosing common experimental pathologies. BioRxiv. doi: [10.1101/2020.06.25.171421](https://doi.org/10.1101/2020.06.25.171421)
 
 
 (Vector illustration credit: <a href="https://www.vecteezy.com">Vecteezy!</a>)
