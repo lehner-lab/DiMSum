@@ -64,7 +64,7 @@ dimsum(
 \arguments{
 \item{runDemo}{Run the DiMSum demo (default:F)}
 
-\item{fastqFileDir}{Path to directory with input FASTQ files (required for WRAP)}
+\item{fastqFileDir}{Path to directory containing input FASTQ files (required for WRAP)}
 
 \item{fastqFileExtension}{FASTQ file extension (default:'.fastq')}
 
@@ -76,79 +76,79 @@ dimsum(
 
 \item{barcodeDesignPath}{Path to barcode design file (tab-separated plain text file with barcode design)}
 
-\item{barcodeErrorRate}{Maximum allowed error rate for the barcode (default:0.25)}
+\item{barcodeErrorRate}{Maximum allowed error rate for barcode to be matched (default:0.25)}
 
-\item{experimentDesignPath}{Path to experimental design file (tab-separated plain text file with replicate structure)}
+\item{experimentDesignPath}{Path to Experimental Design File (required if '--runDemo'=F)}
 
-\item{experimentDesignPairDuplicates}{Are duplicate FASTQ files permitted in experimental design file? (default:F)}
+\item{experimentDesignPairDuplicates}{Are multiple instances of FASTQ files in the Experimental Design File permitted? (default:F)}
 
-\item{barcodeIdentityPath}{Path to barcode identity file (tab-separated plain text file mapping barcodes to variants)}
+\item{barcodeIdentityPath}{Path to Variant Identity File (tab-separated plain text file mapping barcodes to variants)}
 
-\item{countPath}{Path to variant count file for analysis with STEAM only (tab-separated plain text file with sample counts for all variants)}
+\item{countPath}{Path to Variant Count File for analysis with STEAM only (tab-separated plain text file with sample counts for all variants)}
 
-\item{cutadaptCut5First}{cutadapt: remove bases from start of first read (before constant region trimming)}
+\item{cutadaptCut5First}{Remove fixed number of bases from start (5') of first (or only) read before constant region trimming (optional)}
 
-\item{cutadaptCut5Second}{cutadapt: remove bases from start of second read (before constant region trimming)}
+\item{cutadaptCut5Second}{Remove fixed number of bases from start (5') of second read in pair before constant region trimming (optional)}
 
-\item{cutadaptCut3First}{cutadapt: remove bases from end of first read (before constant region trimming)}
+\item{cutadaptCut3First}{Remove fixed number of bases from end (3') of first (or only) read before constant region trimming (optional)}
 
-\item{cutadaptCut3Second}{cutadapt: remove bases from end of second read (before constant region trimming)}
+\item{cutadaptCut3Second}{Remove fixed number of bases from end (3') of second read in pair before constant region trimming (optional)}
 
-\item{cutadapt5First}{cutadapt: sequence of 5' constant region to be trimmed (of the first read)}
+\item{cutadapt5First}{Sequence of 5' constant region to be trimmed from first (or only) read (optional)}
 
-\item{cutadapt5Second}{cutadapt: sequence of 5' constant region to be trimmed (of the second read)}
+\item{cutadapt5Second}{Sequence of 5' constant region to be trimmed from second read in pair (optional)}
 
-\item{cutadapt3First}{cutadapt: sequence of 3' constant region to be trimmed (of the first read; default: reverse complement of cutadapt5Second if not linked)}
+\item{cutadapt3First}{Sequence of 3' constant region to be trimmed from first (or only) read (default: reverse complement of '--cutadapt5Second')}
 
-\item{cutadapt3Second}{cutadapt: sequence of 3' constant region to be trimmed (of the second read; default: reverse complement of cutadapt5First if not linked)}
+\item{cutadapt3Second}{Sequence of 3' constant region to be trimmed from second read in pair (default: reverse complement of '--cutadapt5First')}
 
-\item{cutadaptMinLength}{cutadapt: Discard reads shorter than LENGTH after trimming (default:50)}
+\item{cutadaptMinLength}{Discard reads shorter than LENGTH after trimming (default:50)}
 
-\item{cutadaptErrorRate}{cutadapt: Maximum allowed error rate for trimming (default:0.2)}
+\item{cutadaptErrorRate}{Maximum allowed error rate for trimming constant regions (default:0.2)}
 
-\item{cutadaptOverlap}{cutadapt: Minimum overlap between read and constant region for trimming (default:3)}
+\item{cutadaptOverlap}{Minimum overlap between read and constant region for trimming (default:3)}
 
-\item{vsearchMinQual}{VSEARCH: minimum observed base quality to retain read pair (default:30)}
+\item{vsearchMinQual}{Minimum Phred base quality score required to retain read or read pair (default:30)}
 
-\item{vsearchMaxee}{VSEARCH: maximum number of expected errors to retain read pair (default:0.5)}
+\item{vsearchMaxee}{Maximum number of expected errors tolerated to retain read or read pair (default:0.5)}
 
-\item{vsearchMinlen}{VSEARCH: Discard pair if either read is shorter than this (default:64)}
+\item{vsearchMinlen}{Discard read (or read pair) if its length is shorter than this (default:64)}
 
-\item{vsearchMinovlen}{VSEARCH: discard pair if alignment is shorter than given value (default:10)}
+\item{vsearchMinovlen}{Discard read pair if the alignment length is shorter than this (default:10)}
 
 \item{outputPath}{Path to directory to use for output files (default:'./' i.e. current working directory)}
 
-\item{projectName}{Project name (default:'DiMSum_Project')}
+\item{projectName}{Project name and directory where results are to be saved (default:'DiMSum_Project')}
 
-\item{wildtypeSequence}{Wild-type nucleotide sequence (A/C/G/T). Lower-case letters (a/c/g/t) indicate internal constant regions to be removed during STEAM}
+\item{wildtypeSequence}{Wild-type nucleotide sequence (A/C/G/T). Lower-case bases (a/c/g/t) indicate internal constant regions to be removed (required if '--runDemo'=F)}
 
-\item{permittedSequences}{A sequence of nucleotide codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions i.e upper-case letters in wild-type nucleotide sequence (default:any base at mutated positions)}
+\item{permittedSequences}{Nucleotide sequence of IUPAC ambiguity codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions (i.e upper-case letters) in '--wildtypeSequence' (default:N i.e. any substitution mutation allowed)}
 
-\item{reverseComplement}{Reverse complement variant sequences before processing? (default:F)}
+\item{reverseComplement}{Reverse complement second read in pair (default:F)}
 
-\item{sequenceType}{Coding potential of sequence; either noncoding/coding/auto (default:auto)}
+\item{sequenceType}{Coding potential of sequence: either 'noncoding', 'coding' or 'auto'. If the specified wild-type nucleotide sequence ('--wildtypeSequence') has a valid translation without a premature STOP codon, it is assumed to be 'coding' (default:'auto')}
 
-\item{mutagenesisType}{Whether mutagenesis was performed at the nucleotide or codon/amino acid level; either random/codon (default:random)}
+\item{mutagenesisType}{Whether mutagenesis was performed at the nucleotide or codon/amino acid level; either 'random' or 'codon' (default:'random')}
 
-\item{transLibrary}{Trans library design i.e. read pairs correspond to distinct peptides with no overlap (default:F)}
+\item{transLibrary}{Paired-end reads correspond to distinct molecules? (default:F)}
 
-\item{transLibraryReverseComplement}{Reverse complement second read in pair before concatenating (default:F)}
+\item{transLibraryReverseComplement}{Reverse complement second read in pair (default:F)}
 
-\item{bayesianDoubleFitness}{Improve double mutant fitness estimates using Bayesian framework (DISABLED: still in development)}
+\item{bayesianDoubleFitness}{In development: improve double mutant fitness estimates using Bayesian framework (DISABLED: still in development)}
 
-\item{bayesianDoubleFitnessLamD}{Poisson distribution for score likelihood (default:0.025)}
+\item{bayesianDoubleFitnessLamD}{In development: Poisson distribution for score likelihood (default:0.025)}
 
-\item{fitnessMinInputCountAll}{Minimum input read count (in all replicate) to be retained during fitness calculations (default:0)}
+\item{fitnessMinInputCountAll}{Minimum input read count (in all replicates) to be retained during fitness calculations (default:0)}
 
 \item{fitnessMinInputCountAny}{Minimum input read count (in any replicate) to be retained during fitness calculations (default:0)}
 
-\item{fitnessMinOutputCountAll}{Minimum output read count (in all replicate) to be retained during fitness calculations (default:0)}
+\item{fitnessMinOutputCountAll}{Minimum output read count (in all replicates) to be retained during fitness calculations (default:0)}
 
-\item{fitnessMinOutputCountAny}{Minimum output read count (in any replicate) to be retained during fitness calculations (default:0)}
+\item{fitnessMinOutputCountAny}{Minimum output read count (in any replicates) to be retained during fitness calculations (default:0)}
 
-\item{fitnessHighConfidenceCount}{Minimum mean input read count for high confidence variants (default:10)}
+\item{fitnessHighConfidenceCount}{In development: minimum mean input read count for high confidence variants (default:10)}
 
-\item{fitnessDoubleHighConfidenceCount}{Minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)}
+\item{fitnessDoubleHighConfidenceCount}{In development: minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)}
 
 \item{fitnessNormalise}{Normalise fitness values to minimise inter-replicate differences (default:T)}
 
@@ -158,17 +158,17 @@ dimsum(
 
 \item{mixedSubstitutions}{For coding sequences, are nonsynonymous variants with silent/synonymous substitutions in other codons allowed? (default:F)}
 
-\item{retainIntermediateFiles}{Should intermediate files be retained? (default:F)}
+\item{retainIntermediateFiles}{Should intermediate files be retained? Intermediate files can be many gigabytes, but are required to rerun DiMSum starting at intermediate pipeline stages (default:F)}
 
-\item{splitChunkSize}{FASTQ file split chunk size in bytes (default:3758096384)}
+\item{splitChunkSize}{Internal: FASTQ file split chunk size in bytes (default:3758096384)}
 
-\item{retainedReplicates}{Comma-separated list of Input replicates (or experiment ids) to retain or 'all' (default:'all')}
+\item{retainedReplicates}{Comma-separated list of (integer) experiment replicates to retain or 'all' (default:'all')}
 
-\item{startStage}{Start at a specified pipeline stage (default:0)}
+\item{startStage}{(Re-)Start DiMSum at a specific pipeline stage (default:0)}
 
-\item{stopStage}{Stop at a specified pipeline stage (default:5)}
+\item{stopStage}{Stop DiMSum at a specific pipeline stage (default:5)}
 
-\item{numCores}{Number of available CPU cores (default:1)}
+\item{numCores}{Number of available CPU cores. All pipeline stages make use of parallel computing to decrease runtime if multiple cores are available (default:1)}
 }
 \value{
 Nothing
