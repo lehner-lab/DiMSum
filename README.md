@@ -14,7 +14,7 @@ Welcome to the GitHub repository for DiMSum: An error model and pipeline for ana
 1. **[Overview](#overview)**
    1. **[Pipeline Stages](docs/PIPELINE.md)**
 1. **[Installation](#installation)**
-1. **[Usage](docs/ARGUMENTS.md)**
+1. **[Usage](#usage)**
    1. **[Command-line Arguments](docs/ARGUMENTS.md)**
    1. **[File Formats](docs/FILEFORMATS.md)**
    1. **[Demo](docs/DEMO.md)**
