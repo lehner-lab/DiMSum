@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/58115412.svg)](https://zenodo.org/badge/latestdoi/58115412)
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/r-dimsum/README.html)
 
 <p align="left">
@@ -13,7 +14,7 @@ Welcome to the GitHub repository for DiMSum: An error model and pipeline for ana
 1. **[Overview](#overview)**
    1. **[Pipeline Stages](docs/PIPELINE.md)**
 1. **[Installation](#installation)**
-1. **[Usage](docs/ARGUMENTS.md)**
+1. **[Usage](#usage)**
    1. **[Command-line Arguments](docs/ARGUMENTS.md)**
    1. **[File Formats](docs/FILEFORMATS.md)**
    1. **[Demo](docs/DEMO.md)**
@@ -58,7 +59,6 @@ All bug reports are highly appreciated. You may submit a bug report here on GitH
 
 Please cite the following publication if you use DiMSum:
 
-Faure AJ, Schmiedel JM, Baeza-Centurion P, Lehner B. (2020) DiMSum: an error model and pipeline for analyzing deep mutational scanning data and diagnosing common experimental pathologies. BioRxiv. doi: [10.1101/2020.06.25.171421](https://doi.org/10.1101/2020.06.25.171421)
-
+Faure, A.J., Schmiedel, J.M., Baeza-Centurion, P., Lehner B. DiMSum: an error model and pipeline for analyzing deep mutational scanning data and diagnosing common experimental pathologies. Genome Biol 21, 207 (2020). [10.1186/s13059-020-02091-3](https://doi.org/10.1186/s13059-020-02091-3)
 
 (Vector illustration credit: <a href="https://www.vecteezy.com">Vecteezy!</a>)
