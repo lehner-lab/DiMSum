@@ -1,7 +1,7 @@
 
 #' dimsum__identify_permitted_mutations
 #'
-#' Identify variants with permitted mutations.
+#' Identify variants with permitted mutations (if same length as WT).
 #'
 #' @param dimsum_meta an experiment metadata object (required)
 #' @param input_dt input data.table (required)
@@ -33,9 +33,9 @@ dimsum__identify_permitted_mutations <- function(
     )
 
   #Loop over all nucleotide sequence positions and subset to permitted mutations
-  input_dt[, permitted := T]
+  input_dt[indel==F, permitted := T]
   for(i in 1:nchar(dimsum_meta[["permittedSequences"]])){
-    input_dt[!toupper(substr(nt_seq, i, i)) %in% nuc_codes[[substr(dimsum_meta[["permittedSequences"]], i, i)]], permitted := F]
+    input_dt[indel==F & !toupper(substr(nt_seq, i, i)) %in% nuc_codes[[substr(dimsum_meta[["permittedSequences"]], i, i)]], permitted := F]
   }
 
   return(input_dt)

@@ -30,7 +30,6 @@ dimsum(
   cutadaptOverlap = 3,
   vsearchMinQual = 30,
   vsearchMaxee = 0.5,
-  vsearchMinlen = 64,
   vsearchMinovlen = 10,
   outputPath = "./",
   projectName = "DiMSum_Project",
@@ -51,6 +50,7 @@ dimsum(
   fitnessDoubleHighConfidenceCount = 50,
   fitnessNormalise = T,
   fitnessErrorModel = T,
+  indels = "none",
   maxSubstitutions = 2,
   mixedSubstitutions = F,
   retainIntermediateFiles = F,
@@ -112,8 +112,6 @@ dimsum(
 
 \item{vsearchMaxee}{Maximum number of expected errors tolerated to retain read or read pair (default:0.5)}
 
-\item{vsearchMinlen}{Discard read (or read pair) if its length is shorter than this (default:64)}
-
 \item{vsearchMinovlen}{Discard read pair if the alignment length is shorter than this (default:10)}
 
 \item{outputPath}{Path to directory to use for output files (default:'./' i.e. current working directory)}
@@ -153,6 +151,8 @@ dimsum(
 \item{fitnessNormalise}{Normalise fitness values to minimise inter-replicate differences (default:T)}
 
 \item{fitnessErrorModel}{Fit fitness error model (default:T)}
+
+\item{indels}{Indel variants to be retained: either 'all', 'none' or a comma-separated list of sequence lengths (default:'none')}
 
 \item{maxSubstitutions}{Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)}
 

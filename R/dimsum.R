@@ -28,7 +28,6 @@
 #' @param cutadaptOverlap Minimum overlap between read and constant region for trimming (default:3)
 #' @param vsearchMinQual Minimum Phred base quality score required to retain read or read pair (default:30)
 #' @param vsearchMaxee Maximum number of expected errors tolerated to retain read or read pair (default:0.5)
-#' @param vsearchMinlen Discard read (or read pair) if its length is shorter than this (default:64)
 #' @param vsearchMinovlen Discard read pair if the alignment length is shorter than this (default:10)
 #' @param outputPath Path to directory to use for output files (default:'./' i.e. current working directory)
 #' @param projectName Project name and directory where results are to be saved (default:'DiMSum_Project')
@@ -49,6 +48,7 @@
 #' @param fitnessDoubleHighConfidenceCount In development: minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)
 #' @param fitnessNormalise Normalise fitness values to minimise inter-replicate differences (default:T)
 #' @param fitnessErrorModel Fit fitness error model (default:T)
+#' @param indels Indel variants to be retained: either 'all', 'none' or a comma-separated list of sequence lengths (default:'none')
 #' @param maxSubstitutions Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)
 #' @param mixedSubstitutions For coding sequences, are nonsynonymous variants with silent/synonymous substitutions in other codons allowed? (default:F)
 #' @param retainIntermediateFiles Should intermediate files be retained? Intermediate files can be many gigabytes, but are required to rerun DiMSum starting at intermediate pipeline stages (default:F)
@@ -86,7 +86,6 @@ dimsum <- function(
   cutadaptOverlap=3,
   vsearchMinQual=30,
   vsearchMaxee=0.5,
-  vsearchMinlen=64,
   vsearchMinovlen=10,
   outputPath="./",
   projectName="DiMSum_Project",
@@ -107,6 +106,7 @@ dimsum <- function(
   fitnessDoubleHighConfidenceCount=50,
   fitnessNormalise=T,
   fitnessErrorModel=T,
+  indels='none',
   maxSubstitutions=2,
   mixedSubstitutions=F,
   retainIntermediateFiles=F,
@@ -217,7 +217,6 @@ dimsum <- function(
     "cutadaptOverlap" = list(cutadaptOverlap, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__check_experiment_design
     "vsearchMinQual" = list(vsearchMinQual, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
     "vsearchMaxee" = list(vsearchMaxee, c("double")), #strictly positive double -- checked in dimsum__validate_input
-    "vsearchMinlen" = list(vsearchMinlen, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
     "vsearchMinovlen" = list(vsearchMinovlen, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
     "outputPath" = list(outputPath, c("character")), #directory exists -- checked in dimsum__validate_input
     "projectName" = list(projectName, c("character")), #character string -- checked in dimsum__validate_input
@@ -238,6 +237,7 @@ dimsum <- function(
     "fitnessDoubleHighConfidenceCount" = list(fitnessDoubleHighConfidenceCount, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "fitnessNormalise" = list(fitnessNormalise, c("logical")), #logical -- checked in dimsum__validate_input
     "fitnessErrorModel" = list(fitnessErrorModel, c("logical")), #logical -- checked in dimsum__validate_input
+    "indels" = list(indels, c("character")), #character string; either all/none or a comma-separated list of sequence lengths -- checked in dimsum__validate_input
     "maxSubstitutions" = list(maxSubstitutions, c("integer")), #positive integer (greater than 1) -- checked in dimsum__validate_input
     "mixedSubstitutions" = list(mixedSubstitutions, c("logical")), #logical -- checked in dimsum__validate_input
     "retainIntermediateFiles" = list(retainIntermediateFiles, c("logical")), #logical -- checked in dimsum__validate_input

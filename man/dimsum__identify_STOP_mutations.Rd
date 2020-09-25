@@ -10,8 +10,8 @@ dimsum__identify_STOP_mutations(input_dt)
 \item{input_dt}{input data.table (required)}
 }
 \value{
-data.table with single nucleotide variants
+data.table with STOP codon variants
 }
 \description{
-Identify and annotate single nucleotide substitutions.
+Identify and annotate STOP codon variants.
 }

@@ -17,6 +17,6 @@ dimsum__vsearch_trans_library_helper <- function(
     output_REPORT = file.path(vsearch_outpath, paste0(sample_names[i], '.report')),
     min_qual = dimsum_meta[["vsearchMinQual"]],
     max_ee = dimsum_meta[["vsearchMaxee"]],
-    min_len = dimsum_meta[["vsearchMinlen"]],
+    min_len = dimsum_meta[["cutadaptMinLength"]],
     reverse_complement_second_read = dimsum_meta[["transLibraryReverseComplement"]])
 }

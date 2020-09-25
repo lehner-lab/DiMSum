@@ -112,14 +112,14 @@ dimsum_stage_counts_to_fitness <- function(
   }
   nf_data <- nf_data[,.SD,,.SDcols = c(
     "merge_seq","nt_seq","aa_seq","Nham_nt","Nham_aa",
-    "Nmut_codons","WT","STOP","STOP_readthrough",names(nf_data)[grep(names(nf_data),pattern="^count")])]
+    "Nmut_codons","WT","indel","STOP","STOP_readthrough",names(nf_data)[grep(names(nf_data),pattern="^count")])]
 
   dimsum__status_message("Done\n")
 
   ### Fit error model
   ###########################
 
-  #Fit error model (using variants with less than specified number of mutations)
+  #Fit error model
   model_result <- dimsum__error_model(
     dimsum_meta = dimsum_meta,
     input_dt = data.table::copy(nf_data),
@@ -140,10 +140,9 @@ dimsum_stage_counts_to_fitness <- function(
   ### Merge fitness and error at the AA level (if coding sequence and "mixedSubstitutions"==F)
   ###########################
 
-  #For coding sequences remove nonsynonymous variants with silent/synonymous substitutions in other codons
+  #For coding sequences (without indels) remove nonsynonymous variants with silent/synonymous substitutions in other codons
   #and aggregate nonsynonymous variant fitness and error at the AA level
   if(dimsum_meta[["sequenceType"]]=="coding" & !dimsum_meta[["mixedSubstitutions"]]){
-    nff_data <- nff_data[(Nmut_codons-Nham_aa) == 0 | Nham_aa == 0,]
     nff_data <- dimsum__aggregate_AA_variants_fitness(
       dimsum_meta = dimsum_meta,      
       input_dt = nff_data,
@@ -152,7 +151,7 @@ dimsum_stage_counts_to_fitness <- function(
     if(dimsum_meta[["sequenceType"]]!="coding"){nff_data[,merge_seq := nt_seq,nt_seq]}
     nff_data <- nff_data[,.SD,merge_seq,.SDcols = c(
       "aa_seq","Nham_nt","Nham_aa",
-      "Nmut_codons","WT","STOP","STOP_readthrough",
+      "Nmut_codons","WT","indel","STOP","STOP_readthrough",
       names(nff_data)[grep(names(nff_data),pattern="^count")],
       "mean_count",
       names(nff_data)[grep(names(nff_data),pattern="^fitness|sigma")])]

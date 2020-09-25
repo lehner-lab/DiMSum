@@ -115,7 +115,6 @@ DiMSum Stage 3 (ALIGN) aligns paired-end reads using [VSEARCH](https://github.co
 The plot below shows the total percentage of reads (or read pairs) retained for downstream analysis ('vsearch_aligned'), shown separately for each FastQ file. Remaining reads are discarded. Details of each category are as follows:
 
  - **'vsearch_aligned'** (retained)
- - **'vsearch_too_short'** (discarded: reads too short, see 'vsearchMinlen' option)
  - **'vsearch_no_alignment_found'** (discarded: no alignment found)
  - **'vsearch_too_many_diffs'** (discarded: >10 mismatches in the alignment)
  - **'vsearch_overlap_too_short'** (discarded: alignment is too short, see 'vsearchMinovlen' option)
@@ -154,12 +153,13 @@ The plot below shows the **percentage of reads** retained or discarded in each s
  - **'0 hamming dist.'** (retained: wild-type sequence)
  - **'1 hamming dist.'** (retained: 1 nucleotide substitutions from wild-type sequence)
  - **'2 hamming dist.'** (retained: 2 nucleotide substitutions from wild-type sequence)
- - **'3 hamming dist.'** (retained: >3 nucleotide substitutions from wild-type sequence)
+ - **'3+ hamming dist.'** (retained: >3 nucleotide substitutions from wild-type sequence)
+ - **'indel'** (retained: insertion or deletion variant)
  - **'mixed'** (discarded: nonsynonymous variants have synonymous substitutions in other codons, see 'mixedSubstitutions' option)
  - **'too many'** (discarded: too many nucleotide or amino acid substitutions, see 'maxSubstitutions' option)
  - **'not permitted'** (discarded: nucleotide substitution not permitted, see 'wildtypeSequence' option)
  - **'internal constant region'** (discarded: nucleotide substitution within internal constant sequence, see 'wildtypeSequence' option)
- - **'indel'** (discarded: insertion or deletion variant)
+ - **'indel discarded'** (discarded: insertion or deletion variant)
  - **'invalid barcode'** (discarded: reads represent barcode sequences, but are not found in the user-supplied barcode identity file, see 'barcodeIdentityPath' option)
 
 See [DiMSum documentation](https://github.com/lehner-lab/DiMSum) for more details.

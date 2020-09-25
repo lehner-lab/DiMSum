@@ -12,8 +12,8 @@ dimsum__remove_internal_constant_region(input_dt, wt_ccntseq)
 \item{wt_ccntseq}{case-coded WT nucleotide sequence (required)}
 }
 \value{
-A data.table with internal constant regions removed from nucleotide sequences (if perfect match found)
+A data.table with internal constant regions removed from nucleotide sequences (if same length as WT and perfect match found)
 }
 \description{
-Remove internal constant region from nucleotide sequences (if perfect match found).
+Remove internal constant region from nucleotide sequences (if same length as WT and perfect match found).
 }

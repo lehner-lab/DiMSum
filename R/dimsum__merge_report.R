@@ -34,6 +34,7 @@ dimsum__merge_report <- function(
     'nuc_subst_1'=sapply(dimsum_meta[['nuc_subst_counts']], '[', '1'),
     'nuc_subst_2'=sapply(dimsum_meta[['nuc_subst_counts']], '[', '2'),
     'nuc_subst_sum'=sapply(dimsum_meta[['nuc_subst_counts']], sum),
+    'nuc_indrt_sum'=sapply(dimsum_meta[['nuc_indrt_counts']], sum),
     'nuc_mxsub_sum'=sapply(dimsum_meta[['nuc_mxsub_counts']], sum),
     'nuc_tmsub_sum'=sapply(dimsum_meta[['nuc_tmsub_counts']], sum),
     'nuc_frbdn_sum'=sapply(dimsum_meta[['nuc_frbdn_counts']], sum),
@@ -47,6 +48,7 @@ dimsum__merge_report <- function(
     nuc_subst_1 = sum(nuc_subst_1), 
     nuc_subst_2 = sum(nuc_subst_2),
     nuc_subst_sum = sum(nuc_subst_sum),
+    nuc_indrt_sum = sum(nuc_indrt_sum),
     nuc_mxsub_sum = sum(nuc_mxsub_sum),
     nuc_tmsub_sum = sum(nuc_tmsub_sum),
     nuc_frbdn_sum = sum(nuc_frbdn_sum),
@@ -57,6 +59,7 @@ dimsum__merge_report <- function(
   nuc_subst_df_collapse_perc <- nuc_subst_df_collapse
   nuc_subst_df_collapse_perc[,colnames(nuc_subst_df_collapse_perc)[-1]] <- nuc_subst_df_collapse_perc[,colnames(nuc_subst_df_collapse_perc)[-1]]/(
     nuc_subst_df_collapse_perc[,'nuc_subst_sum'] + 
+    nuc_subst_df_collapse_perc[,'nuc_indrt_sum'] + 
     nuc_subst_df_collapse_perc[,'nuc_mxsub_sum'] + 
     nuc_subst_df_collapse_perc[,'nuc_tmsub_sum'] + 
     nuc_subst_df_collapse_perc[,'nuc_frbdn_sum'] + 
@@ -68,11 +71,12 @@ dimsum__merge_report <- function(
     "0 hamming dist.",
     "1 hamming dist.",
     "2 hamming dist.",
+    "indel",
     "mixed",
     "too many",
     "not permitted",
     "internal constant region",
-    "indel",
+    "indel discarded",
     "invalid barcode",
     "3+ hamming dist.")
   colnames(nuc_subst_df_collapse_perc)[-1] <- temp_colnames
@@ -86,11 +90,12 @@ dimsum__merge_report <- function(
     "1 hamming dist.",
     "2 hamming dist.",
     "3+ hamming dist.",
+    "indel",
     "mixed",
     "too many",
     "not permitted",
     "internal constant region",
-    "indel",
+    "indel discarded",
     "invalid barcode"))
   d <- ggplot2::ggplot(plot_df, ggplot2::aes(pairname, value)) +
     ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +
@@ -106,11 +111,12 @@ dimsum__merge_report <- function(
     "1 hamming dist.",
     "2 hamming dist.",
     "3+ hamming dist.",
+    "indel",
     "mixed",
     "too many",
     "not permitted",
     "internal constant region",
-    "indel",
+    "indel discarded",
     "invalid barcode"))
   d <- ggplot2::ggplot(plot_df, ggplot2::aes(pairname, value)) +
     ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +
@@ -127,6 +133,7 @@ dimsum__merge_report <- function(
     'aa_subst_1'=sapply(dimsum_meta[['aa_subst_counts']], '[', '1'),
     'aa_subst_2'=sapply(dimsum_meta[['aa_subst_counts']], '[', '2'),
     'aa_subst_sum'=sapply(dimsum_meta[['aa_subst_counts']], sum),
+    'nuc_indrt_sum'=sapply(dimsum_meta[['nuc_indrt_counts']], sum),
     'nuc_mxsub_sum'=sapply(dimsum_meta[['nuc_mxsub_counts']], sum),
     'nuc_tmsub_sum'=sapply(dimsum_meta[['nuc_tmsub_counts']], sum),
     'nuc_frbdn_sum'=sapply(dimsum_meta[['nuc_frbdn_counts']], sum),
@@ -140,6 +147,7 @@ dimsum__merge_report <- function(
     aa_subst_1 = sum(aa_subst_1), 
     aa_subst_2 = sum(aa_subst_2),
     aa_subst_sum = sum(aa_subst_sum),
+    nuc_indrt_sum = sum(nuc_indrt_sum),
     nuc_mxsub_sum = sum(nuc_mxsub_sum),
     nuc_tmsub_sum = sum(nuc_tmsub_sum),
     nuc_frbdn_sum = sum(nuc_frbdn_sum),
@@ -150,6 +158,7 @@ dimsum__merge_report <- function(
   aa_subst_df_collapse_perc <- aa_subst_df_collapse
   aa_subst_df_collapse_perc[,colnames(aa_subst_df_collapse_perc)[-1]] <- aa_subst_df_collapse_perc[,colnames(aa_subst_df_collapse_perc)[-1]]/(
     aa_subst_df_collapse_perc[,'aa_subst_sum'] + 
+    aa_subst_df_collapse_perc[,'nuc_indrt_sum'] + 
     aa_subst_df_collapse_perc[,'nuc_mxsub_sum'] + 
     aa_subst_df_collapse_perc[,'nuc_tmsub_sum'] + 
     aa_subst_df_collapse_perc[,'nuc_frbdn_sum'] + 
@@ -161,11 +170,12 @@ dimsum__merge_report <- function(
     "0 hamming dist.",
     "1 hamming dist.",
     "2 hamming dist.",
+    "indel",
     "mixed",
     "too many",
     "not permitted",
     "internal constant region",
-    "indel",
+    "indel discarded",
     "invalid barcode",
     "3+ hamming dist.")
   colnames(aa_subst_df_collapse_perc)[-1] <- temp_colnames
@@ -179,11 +189,12 @@ dimsum__merge_report <- function(
     "1 hamming dist.",
     "2 hamming dist.",
     "3+ hamming dist.",
+    "indel",
     "mixed",
     "too many",
     "not permitted",
     "internal constant region",
-    "indel",
+    "indel discarded",
     "invalid barcode"))
   d <- ggplot2::ggplot(plot_df, ggplot2::aes(pairname, value)) +
     ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +
@@ -199,11 +210,12 @@ dimsum__merge_report <- function(
     "1 hamming dist.",
     "2 hamming dist.",
     "3+ hamming dist.",
+    "indel",
     "mixed",
     "too many",
     "not permitted",
     "internal constant region",
-    "indel",
+    "indel discarded",
     "invalid barcode"))
   d <- ggplot2::ggplot(plot_df, ggplot2::aes(pairname, value)) +
     ggplot2::geom_col(ggplot2::aes(fill = Mutation_type)) +

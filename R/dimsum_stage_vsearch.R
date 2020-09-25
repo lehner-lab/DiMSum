@@ -104,7 +104,7 @@ dimsum_stage_vsearch <- function(
           " -fastq_maxee ",
           as.character(dimsum_meta[["vsearchMaxee"]]),
           " -fastq_minlen ",
-          as.character(dimsum_meta[["vsearchMinlen"]]),
+          as.character(dimsum_meta[["cutadaptMinLength"]]),
           temp_options,
           " -threads ",
           dimsum_meta[['numCores']],

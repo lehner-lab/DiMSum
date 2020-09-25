@@ -38,17 +38,25 @@ dimsum__aggregate_AA_variants <- function(
   for(j in c(input_samples, output_samples)){
     #Aggregate counts accross identical AA variants
     input_dt[!is.na(get(j)),paste0(j,"_agg") := sum(.SD, na.rm = T),merge_seq,.SDcols = j]
+    #Set all synonyms to the same count
     input_dt[,paste0(j,"_agg") := unique(na.omit(.SD)),merge_seq,.SDcols = paste0(j,"_agg")]
   }
 
   #Retain only one row per AA variant
   output_dt <- input_dt[!duplicated(merge_seq),.SD,merge_seq,.SDcols = c(
     "nt_seq","aa_seq","Nham_nt","Nham_aa",
-    "Nmut_codons","WT","STOP","STOP_readthrough",
+    "Nmut_codons","WT","indel","STOP","STOP_readthrough",
     names(input_dt)[grep(names(input_dt),pattern="_agg$")])]
 
   #Revert to original names of aggregated count columns
   names(output_dt)[grep(names(output_dt),pattern="_agg$")] <- gsub("_agg$", "", names(output_dt)[grep(names(output_dt),pattern="_agg$")])
+
+  #Nham_nt and Nmut_codons columns are meaningless for nonsynonymous variants after aggregation
+  output_dt[Nham_aa!=0, Nham_nt := NA]
+  output_dt[Nham_aa!=0, Nmut_codons := NA]
+
+  #nt_seq column is meaningless after aggregation
+  output_dt[, nt_seq := NA]
 
   dimsum__status_message("Done\n")
 

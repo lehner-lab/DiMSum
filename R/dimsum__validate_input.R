@@ -107,7 +107,7 @@ dimsum__validate_input <- function(
   }
 
   #Check strictly positive integer vsearch... arguments
-  if(sum(unlist(dimsum_meta[c("vsearchMinQual", "vsearchMinlen", "vsearchMinovlen")])<=0)!=0){
+  if(sum(unlist(dimsum_meta[c("vsearchMinQual", "vsearchMinovlen")])<=0)!=0){
     stop("Invalid 'vsearch...' arguments. Only positive integers allowed (zero exclusive).", call. = FALSE)
   }
 
@@ -124,6 +124,24 @@ dimsum__validate_input <- function(
   #Check maxSubstitutions argument greater than 1
   if(dimsum_meta[["maxSubstitutions"]]<2){
     stop("Invalid 'maxSubstitutions' argument. Only integers greater than 1 allowed.", call. = FALSE)
+  }
+
+  #Check indels argument valid and set indelLengths
+  dimsum_meta[["indelLengths"]] <- NA
+  if(dimsum_meta[["indels"]]=="none"){
+    #All indels discarded
+    dimsum_meta[["indels"]] <- FALSE
+  }else if(dimsum_meta[["indels"]]=="all"){
+    #All indels retained (regardless of length)
+    dimsum_meta[["indels"]] <- TRUE
+  }else{
+    #List of indel lengths specified
+    dimsum_meta[["indelLengths"]] <- strtoi(unlist(strsplit(dimsum_meta[["indels"]], ",")))
+    dimsum_meta[["indelLengths"]] <- dimsum_meta[["indelLengths"]][!is.na(dimsum_meta[["indelLengths"]])]
+    if(length(dimsum_meta[["indelLengths"]])==0){
+      stop("Invalid 'indels' argument. Only integers greater than 1 allowed.", call. = FALSE)
+    }
+    dimsum_meta[["indels"]] <- TRUE
   }
 
   #Check barcodeErrorRate argument

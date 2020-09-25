@@ -48,18 +48,26 @@ dimsum__aggregate_AA_variants_fitness <- function(
   for (i in seq_along(idx)) {
     #Aggregate fitness accross identical AA variants
     input_dt[!is.na(get(idx[i])) & !is.na(get(gsub("fitness", "sigma", idx[i]))),paste0(idx[i],"_agg") := sum(.SD[[1]]/(.SD[[2]]^2), na.rm = T)/sum(1/(.SD[[2]]^2), na.rm = T),merge_seq,.SDcols = c(idx[i], gsub("fitness", "sigma", idx[i]))]
+    #Set all synonyms to the same fitness
+    input_dt[,paste0(idx[i],"_agg") := unique(na.omit(.SD)),merge_seq,.SDcols = paste0(idx[i],"_agg")]
+    #Aggregate fitness error accross identical AA variants
     input_dt[!is.na(get(gsub("fitness", "sigma", idx[i]))),paste0(gsub("fitness", "sigma", idx[i]),"_agg") := sqrt(1/sum(1/(.SD[[1]]^2), na.rm = T)),merge_seq,.SDcols = gsub("fitness", "sigma", idx[i])]
+    #Set all synonyms to the same fitness error
+    input_dt[,paste0(gsub("fitness", "sigma", idx[i]),"_agg") := unique(na.omit(.SD)),merge_seq,.SDcols = paste0(gsub("fitness", "sigma", idx[i]),"_agg")]
   }
 
   #Retain only one row per AA variant
   output_dt <- input_dt[!duplicated(merge_seq),.SD,merge_seq,.SDcols = c(
     "aa_seq","Nham_nt","Nham_aa",
-    "Nmut_codons","WT","STOP","STOP_readthrough",
+    "Nmut_codons","WT","indel","STOP","STOP_readthrough",
     "mean_count",
     names(input_dt)[grep(names(input_dt),pattern="_agg$")])]
 
   #Revert to original names of aggregated count columns
   names(output_dt)[grep(names(output_dt),pattern="_agg$")] <- gsub("_agg$", "", names(output_dt)[grep(names(output_dt),pattern="_agg$")])
+
+  #Nham_nt column is meaningless for nonsynonymous variants after aggregation
+  output_dt[Nham_aa!=0, Nham_nt := NA]
 
   dimsum__status_message("Done\n")
 

@@ -32,7 +32,7 @@ dimsum__error_model <- function(
   #Number of input and output replicates
   all_reps_str <- paste0(all_reps, collapse="")
   
-  work_data <- input_dt[,.SD,.SDcols = c("Nham_nt","WT",names(input_dt)[grep(names(input_dt),pattern="^count")])]
+  work_data <- input_dt[,.SD,.SDcols = c("Nham_nt","Nham_aa","WT",names(input_dt)[grep(names(input_dt),pattern="^count")])]
 
   ### Calculate fitness
   ###########################
@@ -108,7 +108,7 @@ dimsum__error_model <- function(
   #Check if sufficient data remains above input read threshold (and data present in all input/output replicates)
   #Define minimum #variants for fitting = 10 x number of fitted parameters (3 x #reps)
   min_n_variants <- 10 * 3 * length(all_reps)
-  if(work_data[input_above_threshold == T & all_reads == T & Nham_nt > 0,.N] < min_n_variants){
+  if(work_data[input_above_threshold == T & all_reads == T & is.na(WT),.N] < min_n_variants){
     stop(paste0("Cannot proceed with error modelling: insufficent number of variants satisfying full fitness range"), call. = FALSE)
   }
 
@@ -188,9 +188,9 @@ dimsum__error_model <- function(
       ylab = "Fitness")#, title = "After inter-replicate normalisation")
 
     #Fitness replicate deviations (all replicates)
-    X <- work_data[all_reads == T & input_above_threshold == T & Nham_nt > 0, cbind(.SD - rowMeans(.SD), M = rowMeans(.SD)),
+    X <- work_data[all_reads == T & input_above_threshold == T & is.na(WT), cbind(.SD - rowMeans(.SD), M = rowMeans(.SD)),
       .SDcols = grep(paste0("fitness[", all_reps_str, "]$"), names(work_data))]
-    Xnorm <- work_data[all_reads == T & input_above_threshold == T & Nham_nt > 0, cbind(.SD - rowMeans(.SD), M = rowMeans(.SD)),
+    Xnorm <- work_data[all_reads == T & input_above_threshold == T & is.na(WT), cbind(.SD - rowMeans(.SD), M = rowMeans(.SD)),
       .SDcols = grep(paste0("fitness[", all_reps_str, "]_norm$"), names(work_data))]
     Y <- rbind(reshape2::melt(X, id.vars = "M"), reshape2::melt(Xnorm, id.vars = "M"))
     Y[, replicate := strsplit(as.character(variable), "_")[[1]][1], variable]
@@ -239,7 +239,12 @@ dimsum__error_model <- function(
   error_range <- seq(work_data[input_above_threshold == T & all_reads == T, log10(quantile(mean_cbe^2, probs=0.001))], 0, length.out = bins)
   work_data[,bin_error := findInterval(mean_cbe^2,vec = 10^error_range)]
   #weight variants according to how many other variants with same # of mutations are around
-  work_data[, error_model_weighting := sqrt(max(.N, sqrt(nrow(work_data)))), Nham_nt]
+  if(dimsum_meta[["sequenceType"]]=="coding" & dimsum_meta[["mixedSubstitutions"]]){
+    #variant counts already aggregated at AA level
+    work_data[, error_model_weighting := sqrt(max(.N, sqrt(nrow(work_data)))), Nham_aa]
+  }else{
+    work_data[, error_model_weighting := sqrt(max(.N, sqrt(nrow(work_data)))), Nham_nt]
+  }
 
   #Fit and write error model to file
   error_model <- dimsum__fit_error_model(
@@ -251,13 +256,13 @@ dimsum__error_model <- function(
 
   #Perform leave one out cross validation on replicates and generate QQ plot
   if(report){
-    dimsum__error_model_qqplot(
+    suppressWarnings(dimsum__error_model_qqplot(
       dimsum_meta = dimsum_meta,
       input_dt = work_data,
       all_reps = all_reps,
       norm_dt = fitness_norm_model,
       error_dt = error_model,
-      report_outpath = report_outpath)
+      report_outpath = report_outpath))
   }
 
   #Use error model parameters to calculate replicate-specific errors per variant
@@ -313,7 +318,7 @@ dimsum__error_model <- function(
     mult_error_slope <- median(plot_error_model[parameter!="reperror",mean_value])
 
     #For plot, calculate average variance of fitness values per bin
-    bs_data <- work_data[Nham_nt > 0 & input_above_threshold == T & all_reads ==T]
+    bs_data <- work_data[is.na(WT) & input_above_threshold == T & all_reads ==T]
     bs_data[,v := apply(.SD,1,var),.SDcols = grep(paste0("^fitness[", all_reps_str, "]$"), names(bs_data))]
     bs_data[,bin_mean_var := mean(v), bin_error]
     bs_data[,bin_N := .N, bin_error]

@@ -73,8 +73,15 @@ dimsum__error_model_qqplot <- function(
       fitness_scale <- 1
     }
     
+    #Set sequence hamming distance
+    if(dimsum_meta[["sequenceType"]]=="coding" & dimsum_meta[["mixedSubstitutions"]]){
+      training_data[, Nham_dist := Nham_aa]
+    }else{
+      training_data[, Nham_dist := Nham_nt]
+    }
+
     dt_zscore <- training_data[test_rep_ok==T,
-        .(test_rep, Nham_nt,
+        .(test_rep, Nham_dist,
             MioA_full = (fitness-unlist(.SD[,1]))/sqrt(error^2 + fitness_scale*(Mi_full/unlist(.SD[,3]) + Mo_full/unlist(.SD[,4])) + A_full)),
        ,.SDcols = c(paste0("fitness",test_rep),
                     paste0("cbe",test_rep),
@@ -89,7 +96,7 @@ dimsum__error_model_qqplot <- function(
   }
 
   #Plot results for dataset
-  dt_zscore_melt <- data.table::melt(dt_zscore_all[sample(.N, min(1e4, .N))], id.vars = c("test_rep", "Nham_nt"))
+  dt_zscore_melt <- data.table::melt(dt_zscore_all[sample(.N, min(1e4, .N))], id.vars = c("test_rep", "Nham_dist"))
   #Repeat data for all replicates combined
   dt_zscore_melt_all <- data.table::copy(dt_zscore_melt)
   dt_zscore_melt_all[, test_rep := "All"]

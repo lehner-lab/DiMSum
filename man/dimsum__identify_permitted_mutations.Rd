@@ -15,5 +15,5 @@ dimsum__identify_permitted_mutations(dimsum_meta, input_dt)
 A data.table with permitted variants identified
 }
 \description{
-Identify variants with permitted mutations.
+Identify variants with permitted mutations (if same length as WT).
 }

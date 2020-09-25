@@ -69,26 +69,39 @@ dimsum__merge_fitness <- function(
 
   dimsum__status_message("Saving fitness estimates...\n")
 
+  #Rename columns
+  names(input_dt)[names(input_dt)=="merge_seq"] <- "nt_seq"
+  names(singles_dt)[names(singles_dt)=="merge_seq"] <- "nt_seq"
+  names(doubles_dt)[names(doubles_dt)=="merge_seq"] <- "nt_seq"
+
   #Reformat columns
   if(dimsum_meta[["sequenceType"]]=="coding"){
-    #Rename columns
+    #Set nucleotide sequence to NA when fitness and error aggregated at AA level
+    if(dimsum_meta[["mixedSubstitutions"]]){
+      input_dt[, nt_seq := NA]
+      singles_dt[, nt_seq := NA]
+    }else{
+      input_dt[Nham_aa>0 | indel==T, nt_seq := NA]
+      singles_dt[Nham_aa>0, nt_seq := NA]
+    }
+    doubles_dt[, nt_seq := NA]
     #Remove unnecessary columns
     unnecessary_cols <- c(
       "var_fitness",
       "avg_sigma",
       "isNA",
       "avg_sigma_fit",
+      "merge_seq",
       "counts_for_bins",
       "bin_count")
     input_dt <- input_dt[,.SD,,.SDcols = names(input_dt)[!names(input_dt) %in% unnecessary_cols]]
     singles_dt <- singles_dt[,.SD,,.SDcols = names(singles_dt)[!names(singles_dt) %in% unnecessary_cols]]
     doubles_dt <- doubles_dt[,.SD,,.SDcols = names(doubles_dt)[!names(doubles_dt) %in% unnecessary_cols]]
   }else{
-    #Rename columns
-    names(input_dt)[names(input_dt)=="merge_seq"] <- "nt_seq"
     #Remove unnecessary columns
     unnecessary_cols <- c(
       "aa_seq",
+      "Nham_aa",
       "Nmut_codons",
       "STOP",
       "STOP_readthrough",
@@ -112,30 +125,18 @@ dimsum__merge_fitness <- function(
   all_variants <- input_dt
   wildtype <- all_variants[WT==T,,,.SDcols = names(all_variants)[!grepl("^count_", names(all_variants))]]
   doubles <- doubles_dt
-  if(dimsum_meta[["sequenceType"]]=="coding"){
-    silent <- singles_dt[Nham_aa==0]
-    singles <- singles_dt[Nham_aa==1]
-    save(all_variants, wildtype, silent, singles, doubles, 
-      file = file.path(fitness_outpath, paste0(dimsum_meta[["projectName"]], '_fitness_replicates.RData')),
-      version = 2)
-  }else{
-    singles <- singles_dt
-    save(all_variants, wildtype, singles, doubles, 
-      file = file.path(fitness_outpath, paste0(dimsum_meta[["projectName"]], '_fitness_replicates.RData')),
-      version = 2)
-  }
 
   ### Output plain text files
   ###########################
 
   ##### finalize data.tables
   if(dimsum_meta[["sequenceType"]]=="coding"){
-    silent <- singles_dt[Nham_aa==0,.(Pos,WT_AA,Mut,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
-    singles <- singles_dt[Nham_aa==1,.(Pos,WT_AA,Mut,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
+    silent <- singles_dt[Nham_aa==0,.(Pos,WT_AA,Mut,nt_seq,aa_seq,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
+    singles <- singles_dt[Nham_aa==1,.(Pos,WT_AA,Mut,nt_seq,aa_seq,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
     singles_mavedb <- singles[,.(hgvs_pro = NA, score = fitness, se = sigma)]
     singles_mavedb[, hgvs_pro := paste0("p.", aa_list[singles[,WT_AA]], singles[,Pos], aa_list[singles[,Mut]])]
   }else{
-    singles <- singles_dt[,.(Pos,WT_nt,Mut,Nham_nt,mean_count,fitness,sigma)]
+    singles <- singles_dt[,.(Pos,WT_nt,Mut,nt_seq,Nham_nt,mean_count,fitness,sigma)]
     singles_mavedb <- singles[,.(hgvs_nt = NA, score = fitness, se = sigma)]
     singles_mavedb[, hgvs_nt := paste0("n.", singles[,Pos], toupper(singles[,WT_nt]), ">", toupper(singles[,Mut]))]
   }
@@ -149,11 +150,11 @@ dimsum__merge_fitness <- function(
   }
 
   if(dimsum_meta[["sequenceType"]]=="coding"){
-    retained_cols <- c("Pos1","Pos2","WT_AA1","WT_AA2","Mut1","Mut2","Nham_nt","Nham_aa","Nmut_codons","STOP","STOP_readthrough","mean_count",
+    retained_cols <- c("Pos1","Pos2","WT_AA1","WT_AA2","Mut1","Mut2","nt_seq","aa_seq","Nham_nt","Nham_aa","Nmut_codons","STOP","STOP_readthrough","mean_count",
       "fitness1","sigma1","fitness2","sigma2",
       "fitness_uncorr","sigma_uncorr",
       "fitness_cond","sigma_cond")
-    doubles <- doubles_dt[,.SD,,.SDcols = names(doubles_dt)[names(doubles_dt) %in% retained_cols]]
+    doubles <- doubles_dt[,.SD,,.SDcols = retained_cols[retained_cols %in% names(doubles_dt)]]
 
     #write data to files
     write.table(x = wildtype, file = file.path(fitness_outpath, "fitness_wildtype.txt"),
@@ -166,11 +167,11 @@ dimsum__merge_fitness <- function(
                 quote = F,row.names = F, col.names = T)
 
   }else{
-    retained_cols <- c("Pos1","Pos2","WT_nt1","WT_nt2","Mut1","Mut2","Nham_nt","mean_count",
+    retained_cols <- c("Pos1","Pos2","WT_nt1","WT_nt2","Mut1","Mut2","nt_seq","Nham_nt","mean_count",
       "fitness1","sigma1","fitness2","sigma2",
       "fitness_uncorr","sigma_uncorr",
       "fitness_cond","sigma_cond")
-    doubles <- doubles_dt[,.SD,,.SDcols = names(doubles_dt)[names(doubles_dt) %in% retained_cols]]
+    doubles <- doubles_dt[,.SD,,.SDcols = retained_cols[retained_cols %in% names(doubles_dt)]]
 
     #write data to files
     write.table(x = wildtype, file = file.path(fitness_outpath, "fitness_wildtype.txt"),
@@ -184,6 +185,19 @@ dimsum__merge_fitness <- function(
   #Write MaveDB formatted singles
   write.table(x = singles_mavedb, file = file.path(fitness_outpath, "fitness_singles_MaveDB.csv"),
               quote = F,row.names = F, col.names = T, sep = ",")
+
+  ### Output RData file
+  ###########################
+
+  if(dimsum_meta[["sequenceType"]]=="coding"){
+    save(all_variants, wildtype, silent, singles, doubles, 
+      file = file.path(fitness_outpath, paste0(dimsum_meta[["projectName"]], '_fitness_replicates.RData')),
+      version = 2)
+  }else{
+    save(all_variants, wildtype, singles, doubles, 
+      file = file.path(fitness_outpath, paste0(dimsum_meta[["projectName"]], '_fitness_replicates.RData')),
+      version = 2)
+  }
 
   dimsum__status_message("Done\n")
 

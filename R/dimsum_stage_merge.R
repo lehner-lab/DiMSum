@@ -131,6 +131,7 @@ dimsum_stage_merge <- function(
   #Add to metadata
   dimsum_meta_new[["aa_subst_counts"]] <- mutation_stats_dicts[["aa_subst_dict"]]
   dimsum_meta_new[["nuc_subst_counts"]] <- mutation_stats_dicts[["nuc_subst_dict"]]
+  dimsum_meta_new[["nuc_indrt_counts"]] <- mutation_stats_dicts[["nuc_indrt_dict"]]
   dimsum_meta_new[["nuc_mxsub_counts"]] <- mutation_stats_dicts[["nuc_mxsub_dict"]]
   dimsum_meta_new[["nuc_tmsub_counts"]] <- mutation_stats_dicts[["nuc_tmsub_dict"]]
   dimsum_meta_new[["nuc_frbdn_counts"]] <- mutation_stats_dicts[["nuc_frbdn_dict"]]
@@ -153,7 +154,7 @@ dimsum_stage_merge <- function(
         dimsum_meta_new_report <- dimsum_meta_new
         })
     tryCatch({
-      dimsum__diagnostics_report(dimsum_meta = dimsum_meta_new_report, report_outpath = report_outpath)
+      suppressWarnings(dimsum__diagnostics_report(dimsum_meta = dimsum_meta_new_report, report_outpath = report_outpath))
       }, error=function(e){
         dimsum__status_message("There were problems while running 'dimsum__diagnostics_report'\n")
         })
