@@ -77,5 +77,5 @@ Additional output files:
 * **fitness_singles_MaveDB.csv** [MaveDB](https://www.mavedb.org/) compatible .csv file with single amino acid or nucleotide variant fitness scores and associated errors.
 * **DiMSum_Project_variant_data_merge.tsv** Tab-separated plain text file with variant counts and statistics.
 * **DiMSum_Project_nobarcode_variant_data_merge.tsv** Tab-separated plain text file with sequenced barcodes that were not found in the variant identity file.
-* **DiMSum_Project_indel_variant_data_merge.tsv** Tab-separated plain text file with indel variants.
-* **DiMSum_Project_rejected_variant_data_merge.tsv** Tab-separated plain text file with rejected variants (internal constant region mutants, mutations inconsistent with the library design or variants with too many substitutions).
+* **DiMSum_Project_indel_variant_data_merge.tsv** Tab-separated plain text file with rejected indel variants.
+* **DiMSum_Project_rejected_variant_data_merge.tsv** Tab-separated plain text file with remaining rejected variants (internal constant region mutants, mutations inconsistent with the library design or variants with too many substitutions).
