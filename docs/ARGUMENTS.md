@@ -45,7 +45,6 @@
 
 * **_--vsearchMinQual_** Minimum Phred base quality score required to retain read or read pair (default:30)
 * **_--vsearchMaxee_** Maximum number of expected errors tolerated to retain read or read pair (default:0.5)
-* **_--vsearchMinlen_** Discard read (or read pair) if its length is shorter than this (default:64)
 * **_--vsearchMinovlen_** Discard read pair if the alignment length is shorter than this (default:10)
 
 ## PROCESS Arguments
@@ -55,6 +54,7 @@
 * **_--permittedSequences_** Nucleotide sequence of IUPAC ambiguity codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions (i.e upper-case letters) in '_--wildtypeSequence_' (default:N i.e. any substitution mutation allowed)
 * **_--sequenceType_** Coding potential of sequence: either 'noncoding', 'coding' or 'auto'. If the specified wild-type nucleotide sequence ('_--wildtypeSequence_') has a valid translation without a premature STOP codon, it is assumed to be 'coding' (default:'auto')
 * **_--mutagenesisType_** Whether mutagenesis was performed at the nucleotide or codon/amino acid level; either 'random' or 'codon' (default:'random')
+* **_--indels_** Indel variants to be retained: either 'all', 'none' or a comma-separated list of sequence lengths (default:'none')
 * **_--maxSubstitutions_** Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)
 * **_--mixedSubstitutions_** For coding sequences, are nonsynonymous variants with silent/synonymous substitutions in other codons allowed? (default:F)
 
