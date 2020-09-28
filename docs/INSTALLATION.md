@@ -35,7 +35,7 @@ conda config --add channels bioconda
 conda config --add channels conda-forge
 ```
 
-Next, optionally, create a dedicated environment for DiMSum and it's dependencies. This is recommended if you already have _R_ and/or _Python_ installations that you need to maintain separately.
+Next, optionally, create a dedicated environment for DiMSum and it's dependencies. This is recommended if you already have _R_ and/or _Python_ installations that you would like to maintain in a separate environment.
 ```
 conda create --name dimsum
 conda activate dimsum
