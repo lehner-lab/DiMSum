@@ -236,6 +236,15 @@ dimsum__process_merged_variants <- function(
   ### Rejected variants (mixed substitutions)
   ###########################
 
+  #Check if WT sequence exists
+  if(variant_dt[WT==T,.N]==0){
+    variant_dt[, all_reads := rowSums(.SD > 0) == length(grep("_count$", names(variant_dt))),,.SDcols = grep("_count$", names(variant_dt))]
+    variant_dt[, mean_count := rowMeans(.SD),,.SDcols = grep(paste0("_s[0].*_count$"), names(variant_dt))]
+    dimsum__status_message(paste0("WT variant not found. Did you mean to specify one of the following?\n"))
+    print(variant_dt[all_reads == T,][order(mean_count, decreasing = T)[1:5],.(nt_seq = toupper(nt_seq), all_reads, mean_count)])
+    stop(paste0("Cannot proceed with variant processing: WT variant not found"), call. = FALSE)
+  }
+
   #Add number of codons affected by mutations
   wt_ntseq <- variant_dt[WT==T,nt_seq]
   wt_ntseq_split <- strsplit(wt_ntseq,"")[[1]]

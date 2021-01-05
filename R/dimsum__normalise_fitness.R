@@ -18,6 +18,11 @@ dimsum__normalise_fitness <- function(
   fitness_suffix=""
   ){
 
+  #If input data.table empty, return empty data.table
+  if(nrow(input_dt)==0){
+    return(data.table())
+  }
+
   #Get generations data
   generations_unique <- unique(dimsum_meta[["exp_design"]][dimsum_meta[["exp_design"]][,"selection_id"]==1,c("sample_name", "experiment", "generations")])
   #Mean generations per biological replicate

@@ -42,10 +42,10 @@ dimsum(
   transLibraryReverseComplement = F,
   bayesianDoubleFitness = F,
   bayesianDoubleFitnessLamD = 0.025,
-  fitnessMinInputCountAll = 0,
-  fitnessMinInputCountAny = 0,
-  fitnessMinOutputCountAll = 0,
-  fitnessMinOutputCountAny = 0,
+  fitnessMinInputCountAll = "0",
+  fitnessMinInputCountAny = "0",
+  fitnessMinOutputCountAll = "0",
+  fitnessMinOutputCountAny = "0",
   fitnessHighConfidenceCount = 10,
   fitnessDoubleHighConfidenceCount = 50,
   fitnessNormalise = T,
@@ -122,7 +122,7 @@ dimsum(
 
 \item{permittedSequences}{Nucleotide sequence of IUPAC ambiguity codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions (i.e upper-case letters) in '--wildtypeSequence' (default:N i.e. any substitution mutation allowed)}
 
-\item{reverseComplement}{Reverse complement second read in pair (default:F)}
+\item{reverseComplement}{Reverse complement sequence (default:F)}
 
 \item{sequenceType}{Coding potential of sequence: either 'noncoding', 'coding' or 'auto'. If the specified wild-type nucleotide sequence ('--wildtypeSequence') has a valid translation without a premature STOP codon, it is assumed to be 'coding' (default:'auto')}
 

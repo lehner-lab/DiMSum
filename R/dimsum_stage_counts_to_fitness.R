@@ -194,8 +194,8 @@ dimsum_stage_counts_to_fitness <- function(
   ###########################
 
   #Bin mean counts for replicate 1
-  doubles[,counts_for_bins := .SD[[1]],,.SDcols = paste0("count_e",all_reps[1],"_s0")]
-  doubles[,bin_count := findInterval(log10(counts_for_bins),seq(0.5,4,0.25))]
+  # doubles[,counts_for_bins := .SD[[1]],,.SDcols = paste0("count_e",all_reps[1],"_s0")]
+  # doubles[,bin_count := findInterval(log10(counts_for_bins),seq(0.5,4,0.25))]
   # doubles[,.(.N,mean(counts_for_bins)),bin_count][order(bin_count)]
 
   if(!dimsum_meta[["bayesianDoubleFitness"]]){

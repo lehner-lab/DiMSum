@@ -22,6 +22,12 @@ dimsum__identify_single_nt_mutations <- function(
 
   #Single nucleotide mutants
   singles_silent <- input_dt[Nham_nt==1,]
+
+  #If no single nucleotide mutants, return empty data.table
+  if(nrow(singles_silent)==0){
+    return(data.table())
+  }
+
   #Add position, mutant nucleotide, WT nucleotide (WT_AA)
   singles_silent[,Pos := which(strsplit(merge_seq,"")[[1]] !=wt_ntseq_split),merge_seq]
   singles_silent[,Mut := strsplit(merge_seq,"")[[1]][Pos],merge_seq]

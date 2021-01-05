@@ -33,7 +33,7 @@
 #' @param projectName Project name and directory where results are to be saved (default:'DiMSum_Project')
 #' @param wildtypeSequence Wild-type nucleotide sequence (A/C/G/T). Lower-case bases (a/c/g/t) indicate internal constant regions to be removed (required if '--runDemo'=F)
 #' @param permittedSequences Nucleotide sequence of IUPAC ambiguity codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions (i.e upper-case letters) in '--wildtypeSequence' (default:N i.e. any substitution mutation allowed)
-#' @param reverseComplement Reverse complement second read in pair (default:F)
+#' @param reverseComplement Reverse complement sequence (default:F)
 #' @param sequenceType Coding potential of sequence: either 'noncoding', 'coding' or 'auto'. If the specified wild-type nucleotide sequence ('--wildtypeSequence') has a valid translation without a premature STOP codon, it is assumed to be 'coding' (default:'auto')
 #' @param mutagenesisType Whether mutagenesis was performed at the nucleotide or codon/amino acid level; either 'random' or 'codon' (default:'random')
 #' @param transLibrary Paired-end reads correspond to distinct molecules? (default:F)
@@ -98,10 +98,10 @@ dimsum <- function(
   transLibraryReverseComplement=F,
   bayesianDoubleFitness=F,
   bayesianDoubleFitnessLamD=0.025,
-  fitnessMinInputCountAll=0,
-  fitnessMinInputCountAny=0,
-  fitnessMinOutputCountAll=0,
-  fitnessMinOutputCountAny=0,
+  fitnessMinInputCountAll="0",
+  fitnessMinInputCountAny="0",
+  fitnessMinOutputCountAll="0",
+  fitnessMinOutputCountAny="0",
   fitnessHighConfidenceCount=10,
   fitnessDoubleHighConfidenceCount=50,
   fitnessNormalise=T,
@@ -229,10 +229,10 @@ dimsum <- function(
     "transLibraryReverseComplement" = list(transLibraryReverseComplement, c("logical")), #logical -- checked in dimsum__validate_input
     "bayesianDoubleFitness" = list(bayesianDoubleFitness, c("logical")), #logical -- checked in dimsum__validate_input
     "bayesianDoubleFitnessLamD" = list(bayesianDoubleFitnessLamD, c("double")), #strictly positive double -- checked in dimsum__validate_input
-    "fitnessMinInputCountAll" = list(fitnessMinInputCountAll, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
-    "fitnessMinInputCountAny" = list(fitnessMinInputCountAny, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
-    "fitnessMinOutputCountAll" = list(fitnessMinOutputCountAll, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
-    "fitnessMinOutputCountAny" = list(fitnessMinOutputCountAny, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
+    "fitnessMinInputCountAll" = list(fitnessMinInputCountAll, c("character")), #character string; positive integer (zero inclusive) -- checked in dimsum__validate_input
+    "fitnessMinInputCountAny" = list(fitnessMinInputCountAny, c("character")), #character string; positive integer (zero inclusive) -- checked in dimsum__validate_input
+    "fitnessMinOutputCountAll" = list(fitnessMinOutputCountAll, c("character")), #character string; positive integer (zero inclusive) -- checked in dimsum__validate_input
+    "fitnessMinOutputCountAny" = list(fitnessMinOutputCountAny, c("character")), #character string; positive integer (zero inclusive) -- checked in dimsum__validate_input
     "fitnessHighConfidenceCount" = list(fitnessHighConfidenceCount, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "fitnessDoubleHighConfidenceCount" = list(fitnessDoubleHighConfidenceCount, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "fitnessNormalise" = list(fitnessNormalise, c("logical")), #logical -- checked in dimsum__validate_input

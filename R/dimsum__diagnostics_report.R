@@ -69,6 +69,12 @@ dimsum__diagnostics_report <- function(
     }
   }
 
+  #Threshold lists
+  threshold_list_dotted <- lapply(dimsum_meta[["fitnessMinInputCountAny"]], function(x){log10(x + 1)})
+  names(threshold_list_dotted) <- rep("dotted", length(threshold_list_dotted))
+  threshold_list_dashed <- lapply(dimsum_meta[["fitnessMinInputCountAll"]], function(x){log10(x + 1)})
+  names(threshold_list_dashed) <- rep("dashed", length(threshold_list_dashed))
+
   #Plot 3a: all-vs-all sample count correlations - all variants
   if(length(input_samples)!=0 | length(output_samples)!=0){
     temp_dt <- variant_data_merge[,.SD,.SDcols = c(input_samples, output_samples, "Nham_nt")]
@@ -80,9 +86,7 @@ dimsum__diagnostics_report <- function(
       ylab = "log10(variant count + 1)",
       #title = "Substitution variant inter-sample count correlations (all samples)",
       size = 0.1,
-      thresholds = list(
-        "dotted" = log10(dimsum_meta[["fitnessMinInputCountAny"]] + 1), 
-        "dashed" = log10(dimsum_meta[["fitnessMinInputCountAll"]] + 1)))
+      thresholds = c(threshold_list_dotted, threshold_list_dashed))
   }
 
   #Plot 3b: all-vs-all sample count correlations - only singles and doubles
@@ -97,9 +101,7 @@ dimsum__diagnostics_report <- function(
       #title = "Single and double substitution variant inter-sample count correlations (all samples)",
       cut = as.factor(temp_dt[data.table::between(Nham_nt,1,2),Nham_nt]),
       size = 0.1,
-      thresholds = list(
-        "dotted" = log10(dimsum_meta[["fitnessMinInputCountAny"]] + 1), 
-        "dashed" = log10(dimsum_meta[["fitnessMinInputCountAll"]] + 1)))
+      thresholds = c(threshold_list_dotted, threshold_list_dashed))
   }
 
   #Render report

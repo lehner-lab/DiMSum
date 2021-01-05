@@ -42,20 +42,24 @@ dimsum__merge_fitness <- function(
   input_dt[,sigma := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
 
   #### singles
-  fitness_rx <- singles_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]"),colnames(singles_dt))]
-  sigma_rx <- singles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]"),colnames(singles_dt))]
-  singles_dt[,fitness := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
-  singles_dt[,sigma := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
+  if(nrow(singles_dt)!=0){
+    fitness_rx <- singles_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]"),colnames(singles_dt))]
+    sigma_rx <- singles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]"),colnames(singles_dt))]
+    singles_dt[,fitness := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
+    singles_dt[,sigma := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
+  }
 
   #### doubles
   #uncorrected fitness
-  fitness_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]_uncorr"),colnames(doubles_dt))]
-  sigma_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]_uncorr"),colnames(doubles_dt))]
-  doubles_dt[,fitness_uncorr := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
-  doubles_dt[,sigma_uncorr := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
+  if(nrow(doubles_dt)!=0){
+    fitness_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]_uncorr"),colnames(doubles_dt))]
+    sigma_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]_uncorr"),colnames(doubles_dt))]
+    doubles_dt[,fitness_uncorr := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
+    doubles_dt[,sigma_uncorr := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
+  }
 
   #conditioned fitness
-  if(dimsum_meta[["bayesianDoubleFitness"]]){
+  if(dimsum_meta[["bayesianDoubleFitness"]] & nrow(doubles_dt)!=0){
     fitness_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]_cond"),colnames(doubles_dt))]
     sigma_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]_cond"),colnames(doubles_dt))]
     doubles_dt[,fitness_cond := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
@@ -130,19 +134,24 @@ dimsum__merge_fitness <- function(
   ###########################
 
   ##### finalize data.tables
-  if(dimsum_meta[["sequenceType"]]=="coding"){
-    silent <- singles_dt[Nham_aa==0,.(Pos,WT_AA,Mut,nt_seq,aa_seq,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
-    singles <- singles_dt[Nham_aa==1,.(Pos,WT_AA,Mut,nt_seq,aa_seq,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
-    singles_mavedb <- singles[,.(hgvs_pro = NA, score = fitness, se = sigma)]
-    singles_mavedb[, hgvs_pro := paste0("p.", aa_list[singles[,WT_AA]], singles[,Pos], aa_list[singles[,Mut]])]
-  }else{
-    singles <- singles_dt[,.(Pos,WT_nt,Mut,nt_seq,Nham_nt,mean_count,fitness,sigma)]
-    singles_mavedb <- singles[,.(hgvs_nt = NA, score = fitness, se = sigma)]
-    singles_mavedb[, hgvs_nt := paste0("n.", singles[,Pos], toupper(singles[,WT_nt]), ">", toupper(singles[,Mut]))]
+  silent <- data.table()
+  singles <- data.table()
+  singles_mavedb <- data.table()
+  if(dim(singles_dt)[1]!=0){
+    if(dimsum_meta[["sequenceType"]]=="coding"){
+      silent <- singles_dt[Nham_aa==0,.(Pos,WT_AA,Mut,nt_seq,aa_seq,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
+      singles <- singles_dt[Nham_aa==1,.(Pos,WT_AA,Mut,nt_seq,aa_seq,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
+      singles_mavedb <- singles[,.(hgvs_pro = NA, score = fitness, se = sigma)]
+      singles_mavedb[, hgvs_pro := paste0("p.", aa_list[singles[,WT_AA]], singles[,Pos], aa_list[singles[,Mut]])]
+    }else{
+      singles <- singles_dt[,.(Pos,WT_nt,Mut,nt_seq,Nham_nt,mean_count,fitness,sigma)]
+      singles_mavedb <- singles[,.(hgvs_nt = NA, score = fitness, se = sigma)]
+      singles_mavedb[, hgvs_nt := paste0("n.", singles[,Pos], toupper(singles[,WT_nt]), ">", toupper(singles[,Mut]))]
+    }
   }
 
   #for doubles #add single mutant fitness/sigma values to double mutant table
-  if(dim(doubles_dt)[1]!=0){
+  if(dim(doubles_dt)[1]!=0 & dim(singles)[1]!=0){
     doubles_dt[,fitness1 := singles[Pos == Pos1 & Mut == Mut1,fitness],.(Pos1,Mut1)]
     doubles_dt[,sigma1 := singles[Pos == Pos1 & Mut == Mut1,sigma],.(Pos1,Mut1)]
     doubles_dt[,fitness2 := singles[Pos == Pos2 & Mut == Mut2,fitness],.(Pos2,Mut2)]

@@ -111,9 +111,21 @@ dimsum__validate_input <- function(
     stop("Invalid 'vsearch...' arguments. Only positive integers allowed (zero exclusive).", call. = FALSE)
   }
 
-  #Check positive integer fitness... arguments
-  if(sum(unlist(dimsum_meta[c("fitnessMinInputCountAll", "fitnessMinInputCountAny", "fitnessHighConfidenceCount", "fitnessDoubleHighConfidenceCount")])<0)!=0){
+  #Check positive integer fitnessHighConfidenceCount and fitnessDoubleHighConfidenceCount arguments
+  if(sum(unlist(dimsum_meta[c("fitnessHighConfidenceCount", "fitnessDoubleHighConfidenceCount")])<0)!=0){
+    stop("Invalid 'fitnessHighConfidenceCount' or 'fitnessDoubleHighConfidenceCount' argument. Only positive integers allowed (zero inclusive).", call. = FALSE)
+  }
+
+  #Check positive integer minimum read count arguments
+  all_counts <- unlist(dimsum_meta[c("fitnessMinInputCountAll", "fitnessMinOutputCountAll", "fitnessMinInputCountAny", "fitnessMinOutputCountAny")])
+  all_counts <- unlist(strsplit(all_counts, ",|:"))
+  if(sum(!unique(unlist(strsplit(all_counts, ""))) %in% as.character(0:9))!=0){
     stop("Invalid 'fitness...Count...' arguments. Only positive integers allowed (zero inclusive).", call. = FALSE)
+  }else{
+    #Parse minimum read count arguments
+    for(i in c("fitnessMinInputCountAll", "fitnessMinOutputCountAll", "fitnessMinInputCountAny", "fitnessMinOutputCountAny")){
+      dimsum_meta[[i]] <- suppressWarnings(dimsum__parse_minimum_read_count_arguments(dimsum_meta[[i]]))
+    }
   }
 
   #Check strictly positive double splitChunkSize argument

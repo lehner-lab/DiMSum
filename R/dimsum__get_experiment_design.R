@@ -71,6 +71,30 @@ dimsum__get_experiment_design <- function(
     dimsum__check_experiment_design(dimsum_meta, exp_design)
   }
 
+  #Linked adapters override non-linked adapters (and 5' linked adapter takes preference over 3' linked adapter if both specified)
+  exp_design[grepl("\\.\\.\\.", exp_design[,"cutadapt5First"]),"cutadapt3First"] <- exp_design[grepl("\\.\\.\\.", exp_design[,"cutadapt5First"]),"cutadapt5First"]
+  exp_design[grepl("\\.\\.\\.", exp_design[,"cutadapt3First"]),"cutadapt5First"] <- NA
+  exp_design[grepl("\\.\\.\\.", exp_design[,"cutadapt5Second"]),"cutadapt3Second"] <- exp_design[grepl("\\.\\.\\.", exp_design[,"cutadapt5Second"]),"cutadapt5Second"]
+  exp_design[grepl("\\.\\.\\.", exp_design[,"cutadapt3Second"]),"cutadapt5Second"] <- NA
+
+  #Linked adapters are both required by default - read1
+  lFirst <- grepl("\\.\\.\\.", exp_design[,"cutadapt3First"])
+  l5First_required <- grepl(";required\\.\\.\\.", exp_design[,"cutadapt3First"])
+  l5First_optional <- grepl(";optional\\.\\.\\.", exp_design[,"cutadapt3First"])
+  l3First_required <- grepl(";required$", exp_design[,"cutadapt3First"])
+  l3First_optional <- grepl(";optional$", exp_design[,"cutadapt3First"])
+  exp_design[lFirst & !l5First_required & !l5First_optional,"cutadapt3First"] <- gsub("\\.\\.\\.", ";required\\.\\.\\.", exp_design[lFirst & !l5First_required & !l5First_optional,"cutadapt3First"])
+  exp_design[lFirst & !l3First_required & !l3First_optional,"cutadapt3First"] <- paste0(exp_design[lFirst & !l3First_required & !l3First_optional,"cutadapt3First"], ";required")
+
+  #Linked adapters are both required by default - read2
+  lSecond <- grepl("\\.\\.\\.", exp_design[,"cutadapt3Second"])
+  l5Second_required <- grepl(";required\\.\\.\\.", exp_design[,"cutadapt3Second"])
+  l5Second_optional <- grepl(";optional\\.\\.\\.", exp_design[,"cutadapt3Second"])
+  l3Second_required <- grepl(";required$", exp_design[,"cutadapt3Second"])
+  l3Second_optional <- grepl(";optional$", exp_design[,"cutadapt3Second"])
+  exp_design[lSecond & !l5Second_required & !l5Second_optional,"cutadapt3Second"] <- gsub("\\.\\.\\.", ";required\\.\\.\\.", exp_design[lSecond & !l5Second_required & !l5Second_optional,"cutadapt3Second"])
+  exp_design[lSecond & !l3Second_required & !l3Second_optional,"cutadapt3Second"] <- paste0(exp_design[lSecond & !l3Second_required & !l3Second_optional,"cutadapt3Second"], ";required")
+
   #Indicate for which samples cutadapt should be run
   num_cutadapt_options <- apply(!is.na(exp_design[,c("cutadapt5First", "cutadapt5Second", "cutadapt3First", "cutadapt3Second")]), 1, sum)
   num_cutadaptCut_options <- apply(!is.na(exp_design[,c("cutadaptCut5First", "cutadaptCut5Second", "cutadaptCut3First", "cutadaptCut3Second")]), 1, sum)

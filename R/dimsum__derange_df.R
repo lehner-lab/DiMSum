@@ -15,7 +15,11 @@ dimsum__derange_df <- function(input_df){
     output_list[max_ind_all] <- input_df[,1]
     for(i in 1:length(output_list)){
         if(is.na(output_list[[i]])){
-            output_list[[i]] <- output_list[[i-1]]
+            if(i==1){
+                output_list[[i]] <- NA
+            }else{
+                output_list[[i]] <- output_list[[i-1]]
+            }
         }
     }
     output_df <- do.call("rbind", output_list)

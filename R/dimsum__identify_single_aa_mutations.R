@@ -22,6 +22,12 @@ dimsum__identify_single_aa_mutations <- function(
 
   #Single AA mutants and all silent mutants
   singles_silent <- input_dt[Nham_aa==1 | (is.na(WT) & Nham_aa==0),]
+
+  #If no single AA mutants or silent mutants, return empty data.table
+  if(nrow(singles_silent)==0){
+    return(data.table())
+  }
+
   #Add position, mutant AA, WT AA and mean input count
   singles_silent[,Pos := which(strsplit(aa_seq,"")[[1]] !=wt_AAseq_split),aa_seq]
   singles_silent[,Mut := strsplit(aa_seq,"")[[1]][Pos],aa_seq]

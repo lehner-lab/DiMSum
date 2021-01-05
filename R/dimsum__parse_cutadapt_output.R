@@ -56,23 +56,16 @@ dimsum__parse_cutadapt_output <- function(
     adapter_type <- c("unlinked", "linked")[as.numeric(grepl("Type: linked", temp_out[grep("Sequence: ", temp_out)]))+1]
     #Read number
     trim_counts <- as.numeric(sapply(lapply(strsplit(temp_out[grep("Sequence: ", temp_out)], ' '), rev), '[', 2))
+    trim_counts_linked_a5 <- as.numeric(sapply(lapply(strsplit(temp_out[grep("Sequence: .*linked", temp_out)], ' '), rev), '[', 6))
     #Final totals
     total_read1_a3 <- ifelse(sum(read_number=="read1" & adapter_position=="a3"),trim_counts[read_number=="read1" & adapter_position=="a3"],0)
     total_read1_a5 <- ifelse(sum(read_number=="read1" & adapter_position=="a5"),trim_counts[read_number=="read1" & adapter_position=="a5"],0)
+    total_read1_a5 <- ifelse(sum(read_number=="read1" & adapter_type=="linked"),trim_counts_linked_a5[read_number=="read1" & adapter_type=="linked"],total_read1_a5)
     total_read1_both <- total_read1_a3+total_read1_a5-total_read1_trimmed
     total_read2_a3 <- ifelse(sum(read_number=="read2" & adapter_position=="a3"),trim_counts[read_number=="read2" & adapter_position=="a3"],0)
     total_read2_a5 <- ifelse(sum(read_number=="read2" & adapter_position=="a5"),trim_counts[read_number=="read2" & adapter_position=="a5"],0)
+    total_read2_a5 <- ifelse(sum(read_number=="read2" & adapter_type=="linked"),trim_counts_linked_a5[read_number=="read2" & adapter_type=="linked"],total_read2_a5)
     total_read2_both <- total_read2_a3+total_read2_a5-total_read2_trimmed
-    #Read1 adapters linked
-    if(unique(adapter_type[read_number=="read1"])=="linked"){
-      total_read1_a5 <- total_read1_a3
-      total_read1_both <- total_read1_a3
-    }
-    #Read2 adapters linked
-    if(unique(adapter_type[read_number=="read2"])=="linked"){
-      total_read2_a5 <- total_read2_a3
-      total_read2_both <- total_read2_a3
-    }
   }
   return(list(
     name_read1 = name_read1,
