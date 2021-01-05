@@ -26,7 +26,7 @@ curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 sh Miniconda3-latest-Linux-x86_64.sh
 ```
 
-**IMPORTANT:** If in doubt, respond with "yes" when prompted during installation.
+**IMPORTANT:** If in doubt, respond with "yes" to the following question during installation: "Do you wish the installer to initialize Miniconda3 by running conda init?". In this case Conda will modify your shell scripts (*~/.bashrc* or *~/.bash_profile*) to initialize Miniconda3 on startup. Ensure that any future modifications to your *$PATH* variable in your shell scripts occur **before** this code to initialize Miniconda3.
 
 After installing Conda you will need to add the bioconda channel as well as the other channels bioconda depends on. Start a new console session (e.g. by closing the current window and opening a new one) and run the following:
 ```
@@ -35,7 +35,7 @@ conda config --add channels bioconda
 conda config --add channels conda-forge
 ```
 
-Next, optionally, create a dedicated environment for DiMSum and it's dependencies. This is recommended if you already have _R_ and/or _Python_ installations that you need to maintain separately.
+Next, optionally, create a dedicated environment for DiMSum and it's dependencies. This is recommended if you already have _R_ and/or _Python_ installations that you would like to maintain in a separate environment.
 ```
 conda create --name dimsum
 conda activate dimsum

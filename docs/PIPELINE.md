@@ -32,15 +32,15 @@ Align overlapping read pairs using *[VSEARCH](INSTALLATION.md)* and filter resul
 
 Combine sample-wise variant counts and statistics to produce a unified results data.table. After aggregating counts across technical replicates, variants are processed and filtered according to user specifications (see [stage-specific arguments](ARGUMENTS.md#process-arguments)):
 * **4.1** For [Barcoded library designs](ARGUMENTS.md#barcoded-library-design), read counts are aggregated at the variant level for barcode/variant mappings specified in the [Variant Identity File](FILEFORMATS.md#variant-identity-file). Undefined/misread barcodes are ignored.
-* **4.2** Indel variants (defined as those not matching the wild-type nucleotide sequence length) are removed.
-* **4.3** If internal constant region(s) are specified, these are excised from all variants if a perfect match is found (see ['_--wildtypeSequence_' argument](ARGUMENTS.md#process-arguments)).
-* **4.4** Variants with mutations inconsistent with the library design are removed (see ['_--permittedSequences_' argument](ARGUMENTS.md#process-arguments)).
-* **4.5** Variants with more substitutions than desired are also removed (see ['_--maxSubstitutions_' argument](ARGUMENTS.md#process-arguments)).
-* **4.6** Finally, nonsynonymous variants with synonymous substitutions in other codons are removed if necessary (see ['_--mixedSubstitutions_' argument](ARGUMENTS.md#process-arguments)).
+* **4.2** Indel variants (defined as those not matching the wild-type nucleotide sequence length) are removed if necessary (see ['_--indels_' argument](ARGUMENTS.md#process-arguments)).
+* **4.3** If internal constant region(s) are specified, these are excised from all substitution variants if a perfect match is found (see ['_--wildtypeSequence_' argument](ARGUMENTS.md#process-arguments)).
+* **4.4** Substitution variants with mutations inconsistent with the library design are removed (see ['_--permittedSequences_' argument](ARGUMENTS.md#process-arguments)).
+* **4.5** Substitution variants with more substitutions than desired are also removed (see ['_--maxSubstitutions_' argument](ARGUMENTS.md#process-arguments)).
+* **4.6** Finally, nonsynonymous substitution variants with synonymous substitutions in other codons are removed if necessary (see ['_--mixedSubstitutions_' argument](ARGUMENTS.md#process-arguments)).
 
 ## Stage 5: **ANALYSE** counts (_STEAM_)
 
-Calculate fitness and error estimates for a user-specified subset of substitution variants (see [stage-specific arguments](ARGUMENTS.md#analyse-arguments)):
+Calculate fitness and error estimates for a user-specified subset of variants (see [stage-specific arguments](ARGUMENTS.md#analyse-arguments)):
 * **5.1** Optionally remove low count variants according to user-specified soft/hard thresholds to minimise the impact of "fictional" variants from sequencing errors.
 * **5.2** Calculate replicate normalisation parameters (scale and shift) to minimise inter-replicate fitness differences.
 * **5.3** Fit the error model to a high confidence subset of variants to determine additive and multiplicative error terms.
