@@ -29,8 +29,8 @@
 
 ## TRIM Arguments
 
-* **_--cutadapt5First_** Sequence of 5' constant region to be trimmed from first (or only) read (optional)
-* **_--cutadapt5Second_** Sequence of 5' constant region to be trimmed from second read in pair (optional)
+* **_--cutadapt5First_** Sequence of 5' constant region to be trimmed from first (or only) read (optional). Alternatively, both 5' and 3' optional/required constant region sequences can be specified with this argument e.g. '_--cutadapt5First_'='ACGT;optional...GGCC;required'.
+* **_--cutadapt5Second_** Sequence of 5' constant region to be trimmed from second read in pair (optional). Alternatively, both 5' and 3' optional/required constant region sequences can be specified with this argument '_--cutadapt5Second_'='ACGT;optional...GGCC;required'.
 * **_--cutadapt3First_** Sequence of 3' constant region to be trimmed from first (or only) read (default: reverse complement of '_--cutadapt5Second_')
 * **_--cutadapt3Second_** Sequence of 3' constant region to be trimmed from second read in pair (default: reverse complement of '_--cutadapt5First_')
 * **_--cutadaptMinLength_** Discard reads shorter than LENGTH after trimming (default:50)
@@ -49,7 +49,7 @@
 
 ## PROCESS Arguments
 
-* **_--reverseComplement_** Reverse complement variant sequences before processing? (default:F)
+* **_--reverseComplement_** Reverse complement sequences before variant processing? (default:F)
 * **_--wildtypeSequence_** Wild-type nucleotide sequence (A/C/G/T). Lower-case bases (a/c/g/t) indicate internal constant regions to be removed (required if '_--runDemo_'=F)
 * **_--permittedSequences_** Nucleotide sequence of IUPAC ambiguity codes (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N) with length matching the number of mutated positions (i.e upper-case letters) in '_--wildtypeSequence_' (default:N i.e. any substitution mutation allowed)
 * **_--sequenceType_** Coding potential of sequence: either 'noncoding', 'coding' or 'auto'. If the specified wild-type nucleotide sequence ('_--wildtypeSequence_') has a valid translation without a premature STOP codon, it is assumed to be 'coding' (default:'auto')
@@ -60,10 +60,10 @@
 
 ## ANALYSE Arguments
 
-* **_--fitnessMinInputCountAll_** Minimum input read count (in all replicates) to be retained during fitness calculations (default:0)
-* **_--fitnessMinInputCountAny_** Minimum input read count (in any replicate) to be retained during fitness calculations (default:0)
-* **_--fitnessMinOutputCountAll_** Minimum output read count (in all replicates) to be retained during fitness calculations (default:0)
-* **_--fitnessMinOutputCountAny_** Minimum output read count (in any replicates) to be retained during fitness calculations (default:0)
+* **_--fitnessMinInputCountAll_** Minimum input read count (in all replicates) to be retained during fitness calculations (default:0). Alternatively, thresholds can be applied to variants with specific numbers of nucleotide substitutions as follows '_edit_distance:threshold_' e.g. '_--fitnessMinInputCountAll_'='1:100,2:10,3:10' (unspecified variants are discarded).
+* **_--fitnessMinInputCountAny_** Minimum input read count (in any replicate) to be retained during fitness calculations (default:0). Alternatively, thresholds can be applied to variants with specific numbers of nucleotide substitutions as follows '_edit_distance:threshold_' e.g. '_--fitnessMinInputCountAny_'='1:100,2:10,3:10' (unspecified variants are discarded).
+* **_--fitnessMinOutputCountAll_** Minimum output read count (in all replicates) to be retained during fitness calculations (default:0). Alternatively, thresholds can be applied to variants with specific numbers of nucleotide substitutions as follows: '_edit_distance:threshold_' e.g. '_--fitnessMinOutputCountAll_'='1:100,2:10,3:10' (unspecified variants are discarded).
+* **_--fitnessMinOutputCountAny_** Minimum output read count (in any replicates) to be retained during fitness calculations (default:0). Alternatively, thresholds can be applied to variants with specific numbers of nucleotide substitutions as follows: '_edit_distance:threshold_' e.g. '_--fitnessMinOutputCountAny_'='1:100,2:10,3:10' (unspecified variants are discarded).
 * **_--fitnessNormalise_** Normalise fitness values to minimise inter-replicate differences (default:T)
 * **_--fitnessErrorModel_** Fit fitness error model (default:T)
 * **_--retainedReplicates_** Comma-separated list of (integer) experiment replicates to retain or 'all' (default:'all')
