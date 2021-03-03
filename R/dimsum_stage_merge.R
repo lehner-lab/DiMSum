@@ -34,7 +34,7 @@ dimsum_stage_merge <- function(
 
   #Create merge directory (if doesn't already exist)
   merge_outpath <- gsub("/$", "", merge_outpath)
-  dimsum__create_dir(merge_outpath, execute = execute, message = "DiMSum STAGE 4: PROCESS VARIANT SEQUENCES", overwrite_dir = FALSE)  
+  dimsum__create_dir(merge_outpath, execute = execute, message = "DiMSum STAGE 4 (STEAM): PROCESS VARIANT SEQUENCES", overwrite_dir = FALSE)  
 
   #Input files
   if(!is.null(dimsum_meta[["countPath"]])){
@@ -126,8 +126,16 @@ dimsum_stage_merge <- function(
   dimsum_meta_new <- dimsum_meta
   #Merged variant data path
   dimsum_meta_new[["variant_data_merge_path"]] <- file.path(merge_outpath, paste0(dimsum_meta[["projectName"]], '_variant_data_merge.RData')) 
+
+  #Check if mutation stats file exists
+  dimsum__check_files_exist(
+    required_files = file.path(dimsum_meta[["tmp_path"]], "mutation_stats_dicts.RData"),
+    stage_number = this_stage,
+    execute = execute)
+
   #Load previously saved mutation statistics
   load(file.path(dimsum_meta[["tmp_path"]], "mutation_stats_dicts.RData"))
+
   #Add to metadata
   dimsum_meta_new[["aa_subst_counts"]] <- mutation_stats_dicts[["aa_subst_dict"]]
   dimsum_meta_new[["nuc_subst_counts"]] <- mutation_stats_dicts[["nuc_subst_dict"]]

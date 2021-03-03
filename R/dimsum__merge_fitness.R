@@ -83,12 +83,12 @@ dimsum__merge_fitness <- function(
     #Set nucleotide sequence to NA when fitness and error aggregated at AA level
     if(dimsum_meta[["mixedSubstitutions"]]){
       input_dt[, nt_seq := NA]
-      singles_dt[, nt_seq := NA]
+      if(nrow(singles_dt)!=0){singles_dt[, nt_seq := NA]}
     }else{
       input_dt[Nham_aa>0 | indel==T, nt_seq := NA]
-      singles_dt[Nham_aa>0, nt_seq := NA]
+      if(nrow(singles_dt)!=0){singles_dt[Nham_aa>0, nt_seq := NA]}
     }
-    doubles_dt[, nt_seq := NA]
+    if(nrow(doubles_dt)!=0){doubles_dt[, nt_seq := NA]}
     #Remove unnecessary columns
     unnecessary_cols <- c(
       "var_fitness",
@@ -137,7 +137,7 @@ dimsum__merge_fitness <- function(
   silent <- data.table()
   singles <- data.table()
   singles_mavedb <- data.table()
-  if(dim(singles_dt)[1]!=0){
+  if(nrow(singles_dt)!=0){
     if(dimsum_meta[["sequenceType"]]=="coding"){
       silent <- singles_dt[Nham_aa==0,.(Pos,WT_AA,Mut,nt_seq,aa_seq,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
       singles <- singles_dt[Nham_aa==1,.(Pos,WT_AA,Mut,nt_seq,aa_seq,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
@@ -151,7 +151,7 @@ dimsum__merge_fitness <- function(
   }
 
   #for doubles #add single mutant fitness/sigma values to double mutant table
-  if(dim(doubles_dt)[1]!=0 & dim(singles)[1]!=0){
+  if(nrow(doubles_dt)!=0 & nrow(singles)!=0){
     doubles_dt[,fitness1 := singles[Pos == Pos1 & Mut == Mut1,fitness],.(Pos1,Mut1)]
     doubles_dt[,sigma1 := singles[Pos == Pos1 & Mut == Mut1,sigma],.(Pos1,Mut1)]
     doubles_dt[,fitness2 := singles[Pos == Pos2 & Mut == Mut2,fitness],.(Pos2,Mut2)]

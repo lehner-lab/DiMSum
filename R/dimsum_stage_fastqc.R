@@ -33,7 +33,7 @@ dimsum_stage_fastqc <- function(
 
   #Create/overwrite FASTQC directory (if executed)
   fastqc_outpath <- gsub("/$", "", fastqc_outpath)
-  dimsum__create_dir(fastqc_outpath, execute = execute, message = "DiMSum STAGE 1: ASSESS READ QUALITY")  
+  dimsum__create_dir(fastqc_outpath, execute = execute, message = "DiMSum STAGE 1 (WRAP): ASSESS READ QUALITY")  
 
   #Input files
   all_fastq <- file.path(dimsum_meta[['exp_design']][1,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,'pair1'], dimsum_meta[['exp_design']][,'pair2'])))

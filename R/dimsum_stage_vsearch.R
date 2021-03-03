@@ -33,7 +33,7 @@ dimsum_stage_vsearch <- function(
 
   #Create/overwrite vsearch directory (if executed)
   vsearch_outpath <- gsub("/$", "", vsearch_outpath)
-  dimsum__create_dir(vsearch_outpath, execute = execute, message = "DiMSum STAGE 3: ALIGN PAIRED-END READS") 
+  dimsum__create_dir(vsearch_outpath, execute = execute, message = "DiMSum STAGE 3 (WRAP): ALIGN PAIRED-END READS") 
 
   #Input files
   all_fastq <- file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))

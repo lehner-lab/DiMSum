@@ -33,7 +33,7 @@ dimsum_stage_cutadapt <- function(
 
   #Create/overwrite cutadapt directory (if executed)
   cutadapt_outpath <- gsub("/$", "", cutadapt_outpath)
-  dimsum__create_dir(cutadapt_outpath, execute = execute, message = "DiMSum STAGE 2: TRIM CONSTANT REGIONS")  
+  dimsum__create_dir(cutadapt_outpath, execute = execute, message = "DiMSum STAGE 2 (WRAP): TRIM CONSTANT REGIONS")  
 
   #If not trans library: convert to linked adapters if 3' constant region expected to be sequenced
   if(!dimsum_meta[["transLibrary"]]){

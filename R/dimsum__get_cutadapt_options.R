@@ -41,10 +41,17 @@ dimsum__get_cutadapt_options <- function(
   #Options for swapping read1 and read2
   if(option_type=="swap"){
     temp_options_swap <- ''
-    if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt5First"]) & !is.na(dimsum_meta[['exp_design']][i,"cutadapt5Second"]) ){
-      temp_options_swap <- paste0(' -g forward="', dimsum_meta[['exp_design']][i,"cutadapt5First"], '" -g reverse="', dimsum_meta[['exp_design']][i,"cutadapt5Second"], '"')
-    }else if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt3First"]) & !is.na(dimsum_meta[['exp_design']][i,"cutadapt3Second"]) ){
-      temp_options_swap <- paste0(' -a forward="', dimsum_meta[['exp_design']][i,"cutadapt3First"], '" -a reverse="', dimsum_meta[['exp_design']][i,"cutadapt3Second"], '"')
+    #Read 1
+    if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt5First"]) ){
+      temp_options_swap <- paste0(temp_options_swap, ' -g forward="', dimsum_meta[['exp_design']][i,"cutadapt5First"], '"')
+    }else{
+      temp_options_swap <- paste0(temp_options_swap, ' -a forward="', dimsum_meta[['exp_design']][i,"cutadapt3First"], '"')
+    }
+    #Read 2
+    if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt5Second"]) ){
+      temp_options_swap <- paste0(temp_options_swap, ' -g reverse="', dimsum_meta[['exp_design']][i,"cutadapt5Second"], '"')
+    }else{
+      temp_options_swap <- paste0(temp_options_swap, ' -a reverse="', dimsum_meta[['exp_design']][i,"cutadapt3Second"], '"')
     }
     return(temp_options_swap)
   }

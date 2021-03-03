@@ -42,7 +42,7 @@ dimsum_stage_counts_to_fitness <- function(
 
   #Create/overwrite fitness directory (if executed)
   fitness_outpath <- gsub("/$", "", fitness_outpath)
-  dimsum__create_dir(fitness_outpath, execute = execute, message = "DiMSum STAGE 5: ANALYSE VARIANT COUNTS", overwrite_dir = FALSE) 
+  dimsum__create_dir(fitness_outpath, execute = execute, message = "DiMSum STAGE 5 (STEAM): ANALYSE VARIANT COUNTS", overwrite_dir = FALSE) 
 
   #Check if all input files exist
   dimsum__check_files_exist(

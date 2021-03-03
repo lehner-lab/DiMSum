@@ -8,7 +8,7 @@
 #' @return a single ranged data.frame 
 #' @export
 dimsum__range_df <- function(input_df){
-    output_df <- input_df[!duplicated(input_df),]
+    output_df <- unique(input_df)
     rn <- as.numeric(rownames(output_df))
     rn_list <- as.list(rn)
     for(i in 1:length(rn)){

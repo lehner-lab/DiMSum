@@ -29,7 +29,7 @@ dimsum_stage_demultiplex <- function(
 
   #Create/overwrite demultiplex directory (if executed)
   demultiplex_outpath <- gsub("/$", "", demultiplex_outpath)
-  dimsum__create_dir(demultiplex_outpath, execute = execute, message = "DiMSum STAGE 0: DEMULTIPLEX READS")  
+  dimsum__create_dir(demultiplex_outpath, execute = execute, message = "DiMSum STAGE 0 (WRAP): DEMULTIPLEX READS")  
 
   #Demultiplex parameters specified?
   if( !'barcode_design' %in% names(dimsum_meta) ){

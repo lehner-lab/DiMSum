@@ -109,8 +109,8 @@ dimsum__get_experiment_design <- function(
 
   #Check that each sample has 5' adapters (constant regions) specified (if unstranded library)
   if(!dimsum_meta[["stranded"]]){
-    if(sum(is.na(exp_design[,"cutadapt5First"]))!=0 | sum(is.na(exp_design[,"cutadapt5Second"]))!=0){
-      stop("Unstranded library but sequence of 5' constant regions not found for some samples. Please check that the corresponding experiment design file columns are correct.", call. = FALSE)
+    if(sum(is.na(exp_design[,"cutadapt5First"]) & is.na(exp_design[,"cutadapt3First"]))!=0 | sum(is.na(exp_design[,"cutadapt5Second"]) & is.na(exp_design[,"cutadapt3Second"]))!=0){
+      stop("Unstranded library but constant regions not found for one or more FASTQ files. Please check that the corresponding experiment design file columns are correct.", call. = FALSE)
     }
   }
 

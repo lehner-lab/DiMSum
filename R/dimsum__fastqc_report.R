@@ -77,15 +77,19 @@ dimsum__fastqc_report <- function(
     #Decode Inf as NA
     fastqc_df[is.infinite(as.matrix(fastqc_df))] <- NA
     #Split
-    fastqc_df1 <- fastqc_df[,1:dim(fastqc_df1)[2]]
-    fastqc_df1[,'base_position'] <- 1:length(rownames(fastqc_df1))
-    fastqc_df2 <- fastqc_df[,(dim(fastqc_df2)[2]+1):dim(fastqc_df)[2]]
-    fastqc_df2[,'base_position'] <- 1:length(rownames(fastqc_df2))
+    fastqc_df1_plot <- data.frame(fastqc_df[,1:dim(fastqc_df1)[2]])
+    rownames(fastqc_df1_plot) <- rownames(fastqc_df)
+    colnames(fastqc_df1_plot) <- colnames(fastqc_df)[1:dim(fastqc_df1)[2]]
+    fastqc_df1_plot[,'base_position'] <- 1:length(rownames(fastqc_df1_plot))
+    fastqc_df2_plot <- data.frame(fastqc_df[,(dim(fastqc_df2)[2]+1):dim(fastqc_df)[2]])
+    rownames(fastqc_df2_plot) <- rownames(fastqc_df)
+    colnames(fastqc_df2_plot) <- colnames(fastqc_df)[(dim(fastqc_df2)[2]+1):dim(fastqc_df)[2]]    
+    fastqc_df2_plot[,'base_position'] <- 1:length(rownames(fastqc_df2_plot))
 
     #Plot
-    plot_df1 <- reshape2::melt(fastqc_df1, id="base_position")
+    plot_df1 <- reshape2::melt(fastqc_df1_plot, id="base_position")
     plot_df1[,'statistic'] <- 'Mean'
-    plot_df2 <- reshape2::melt(fastqc_df2, id="base_position")
+    plot_df2 <- reshape2::melt(fastqc_df2_plot, id="base_position")
     plot_df2[,'statistic'] <- '10th Percentile'
     plot_df <- rbind(plot_df1, plot_df2)
     plot_df[,'Read_name'] <- factor(plot_df[,'variable'])
@@ -105,7 +109,7 @@ dimsum__fastqc_report <- function(
     if(length(vr_3)!=0){vr_3 <- range(vr_3)}
     vr_boundaries <- unique(c(vr_5, vr_3))
     #Plot axis position
-    pos_start <- as.numeric(sapply(strsplit(rownames(fastqc_df1), "-"), '[', 1))
+    pos_start <- as.numeric(sapply(strsplit(rownames(fastqc_df1_plot), "-"), '[', 1))
     vr_boundaries_pos <- NULL
     for(b in vr_boundaries){
       vr_boundaries_pos <- c(vr_boundaries_pos, which(pos_start/b>=1)[1])
@@ -121,8 +125,8 @@ dimsum__fastqc_report <- function(
         ggplot2::coord_cartesian(ylim = c(0, max(plot_df[,'value']))) + ggplot2::geom_vline(xintercept = vr_boundaries_pos, linetype = 2) +
         #ggplot2::annotate("text", label = "variable region" , x = median(unique(plot_df[,"base_position"])), y = 0) + 
         ggplot2::scale_x_continuous(
-        breaks = (1:length(rownames(fastqc_df1)))[seq(1, length(rownames(fastqc_df1)), 5)],
-        label = rownames(fastqc_df1)[seq(1, length(rownames(fastqc_df1)), 5)]) +
+        breaks = (1:length(rownames(fastqc_df1_plot)))[seq(1, length(rownames(fastqc_df1_plot)), 5)],
+        label = rownames(fastqc_df1_plot)[seq(1, length(rownames(fastqc_df1_plot)), 5)]) +
         #ggplot2::labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Read ", gsub("pair|_fastqc", "", col_name), " quality scores across all bases (", encoding_format, ")"))
         ggplot2::labs(x = "Position in read (bp)", y = "Quality score", title = paste0("Base quality score encoding: ", encoding_format))
       d <- d + ggplot2::facet_wrap(~statistic, nrow=2, ncol=1)
