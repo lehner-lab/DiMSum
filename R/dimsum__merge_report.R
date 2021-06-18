@@ -42,7 +42,8 @@ dimsum__merge_report <- function(
     'nuc_indel_sum'=sapply(dimsum_meta[['nuc_indel_counts']], sum),
     'nuc_nbarc_sum'=sapply(dimsum_meta[['nuc_nbarc_counts']], sum))
   nuc_subst_df[is.na(nuc_subst_df)] <- 0
-  nuc_subst_df[,'pairname'] <- dimsum__plot_samplename(unique(sapply(strsplit(merge_df[,'aligned_pair'], '_t'), '[', 1)))
+  # nuc_subst_df[,'pairname'] <- dimsum__plot_samplename(unique(sapply(strsplit(merge_df[,'aligned_pair'], '_t'), '[', 1)))
+  nuc_subst_df[,'pairname'] <- dimsum__plot_samplename(unique(sapply(strsplit(rownames(nuc_subst_df), '_t'), '[', 1)))
   nuc_subst_df_collapse <- plyr::ddply(nuc_subst_df, "pairname", plyr::summarise, 
     nuc_subst_0 = sum(nuc_subst_0), 
     nuc_subst_1 = sum(nuc_subst_1), 
@@ -141,7 +142,8 @@ dimsum__merge_report <- function(
     'nuc_indel_sum'=sapply(dimsum_meta[['nuc_indel_counts']], sum),
     'nuc_nbarc_sum'=sapply(dimsum_meta[['nuc_nbarc_counts']], sum))
   aa_subst_df[is.na(aa_subst_df)] <- 0
-  aa_subst_df[,'pairname'] <- dimsum__plot_samplename(unique(sapply(strsplit(merge_df[,'aligned_pair'], '_t'), '[', 1)))
+  # aa_subst_df[,'pairname'] <- dimsum__plot_samplename(unique(sapply(strsplit(merge_df[,'aligned_pair'], '_t'), '[', 1)))
+  aa_subst_df[,'pairname'] <- dimsum__plot_samplename(unique(sapply(strsplit(rownames(aa_subst_df), '_t'), '[', 1)))
   aa_subst_df_collapse <- plyr::ddply(aa_subst_df, "pairname", plyr::summarise, 
     aa_subst_0 = sum(aa_subst_0), 
     aa_subst_1 = sum(aa_subst_1), 

@@ -68,6 +68,27 @@ dimsum__merge_fitness <- function(
 
   dimsum__status_message("Done\n")
 
+  ### Add growth rates if cell_density and selection_time (in hours) supplied
+  ###########################
+
+  #Check that selection_time supplied for all output samples
+  if(sum(is.na(dimsum_meta[["exp_design"]][dimsum_meta[["exp_design"]][,"selection_id"]==1,"selection_time"]))==0){
+    #Check that cell_density supplied for all samples
+    if(sum(is.na(dimsum_meta[["exp_design"]][,"cell_density"]))==0){
+
+      dimsum__status_message("Inferring growth rates...\n")
+
+      input_dt <- dimsum__infer_growth_rates(
+        dimsum_meta = dimsum_meta,
+        input_dt = input_dt,
+        all_reps = all_reps
+        )
+
+      dimsum__status_message("Done\n")
+
+    }
+  }
+
   ### Output replicate data files
   ###########################
 

@@ -188,6 +188,49 @@ dimsum__check_experiment_design <- function(
     stop(paste0("Generations values not identical for technical output replicates. Generations values must be specified for all output samples (or none)."), call. = FALSE)
   }
 
+  ### Selection time checks
+  #Check selection_time column is of type double (or logical i.e. all empty/NA)
+  if(!typeof(exp_design[,"selection_time"]) %in% c("double", "logical")){
+    stop(paste0("One or more invalid selection_time values. Only positive doubles allowed (zero exclusive)."), call. = FALSE)
+  }
+  #Check selection_time column is strictly positive
+  if(sum(exp_design[,"selection_time"]<=0, na.rm=T)!=0){
+    stop(paste0("One or more invalid selection_time values. Only positive doubles allowed (zero exclusive)."), call. = FALSE)
+  }
+  #Check that all output samples have a selection_time value (if one or more specified)
+  if(typeof(exp_design[,"selection_time"])=="double" & sum(is.na(exp_design[exp_design[,"selection_id"]==1,"selection_time"]))!=0){
+    stop(paste0("One or more missing selection_time values. Selection time values must be specified for all output samples (or none)."), call. = FALSE)
+  }
+  #Check that selection_time values are identical for technical output replicates (if one or more specified)
+  temp_n_output_replicates <- length(unique(exp_design[exp_design[,"selection_id"]!=0,c("sample_name")]))
+  if(typeof(exp_design[,"selection_time"])=="double" & dim(unique(exp_design[exp_design[,"selection_id"]!=0,c("sample_name", "selection_time")]))[1]!=temp_n_output_replicates){
+    stop(paste0("Selection time values not identical for technical output replicates. Selection time values must be specified for all output samples (or none)."), call. = FALSE)
+  }
+
+  ### Cell density checks
+  #Check cell_density column is of type double (or logical i.e. all empty/NA)
+  if(!typeof(exp_design[,"cell_density"]) %in% c("double", "logical")){
+    stop(paste0("One or more invalid cell_density values. Only positive doubles allowed (zero exclusive)."), call. = FALSE)
+  }
+  #Check cell_density column is strictly positive
+  if(sum(exp_design[,"cell_density"]<=0, na.rm=T)!=0){
+    stop(paste0("One or more invalid cell_density values. Only positive doubles allowed (zero exclusive)."), call. = FALSE)
+  }
+  #Check that all samples have a cell_density value (if one or more specified)
+  if(typeof(exp_design[,"cell_density"])=="double" & sum(is.na(exp_design[,"cell_density"]))!=0){
+    stop(paste0("One or more missing cell_density values. Cell density values must be specified for all samples (or none)."), call. = FALSE)
+  }
+  #Check that cell_density values are identical for all input technical replicates (if one or more specified)
+  temp_n_input_replicates <- length(unique(exp_design[exp_design[,"selection_id"]==0,c("sample_name")]))
+  if(typeof(exp_design[,"cell_density"])=="double" & dim(unique(exp_design[exp_design[,"selection_id"]==0,c("sample_name", "cell_density")]))[1]!=temp_n_input_replicates){
+    stop(paste0("Cell density values not identical for technical input replicates. Cell density values must be specified for all samples (or none)."), call. = FALSE)
+  }
+  #Check that cell_density values are identical for all output technical replicates (if one or more specified)
+  temp_n_output_replicates <- length(unique(exp_design[exp_design[,"selection_id"]!=0,c("sample_name")]))
+  if(typeof(exp_design[,"cell_density"])=="double" & dim(unique(exp_design[exp_design[,"selection_id"]!=0,c("sample_name", "cell_density")]))[1]!=temp_n_output_replicates){
+    stop(paste0("Cell density values not identical for technical output replicates. Cell density values must be specified for all samples (or none)."), call. = FALSE)
+  }
+
 }
 
 
