@@ -64,7 +64,7 @@ Pandoc comes bundled with [RStudio](https://rstudio.com/products/rstudio/downloa
 
 * **[_FastQC_](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) >=v0.11.3**
 * **[_Cutadapt_](https://cutadapt.readthedocs.io/en/stable/) v2.4**
-* **[_VSEARCH_](https://github.com/torognes/vsearch) v2.14.2**
+* **[_VSEARCH_](https://github.com/torognes/vsearch) >=v2.17**
 * **[_Starcode_](https://github.com/gui11aume/starcode) v1.3**
 
 **NOTE:** Please ensure that the *$PATH* vairable is set so that these external binaries are available from the command-line prompt. You can add a directory (containing an external binary or symblic link) to your path by adding the following line at the bottom of your *~/.bashrc* or *~/.bash_profile* file:
