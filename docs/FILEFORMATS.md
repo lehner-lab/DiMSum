@@ -20,17 +20,22 @@ Your file must have the following columns:
 * **sample_name** A sensible sample name e.g. 'input1' (alphanumeric characters only).
 * **experiment_replicate** An integer identifier denoting distinct experiments (e.g. distinct plasmid library transformations) i.e. a set of input and output replicates originating from the same input biological replicate (strictly positive integer).
 * **selection_id** An integer inidicating whether samples were sequenced before (0) or after (1) selection. Subsequent (serial) rounds of selection are indicated by higher numbers i.e. 2, 3, etc. (positive integer, zero included).
-* **selection_replicate** An integer denoting distinct replicate selections (or biological output replicates) each derived from the same input sample (strictly positive integer). Entries should be blank (empty string) for all input samples (each input sample corresponds to a unique experiment).
+* **selection_replicate** (Output samples only) An integer denoting distinct replicate selections (or biological output replicates) each derived from the same input sample (strictly positive integer). Entries should be blank (empty string) for all input samples (each input sample corresponds to a unique experiment).
 * **technical_replicate** An integer denoting technical replicates (a strictly positive integer) corresponding to sample re-sequencing i.e. extracted DNA originating from the same sample split between separate sequencing lanes or files. Leave this column blank (empty string) when no technical replicates are present.
 * **pair1** (_WRAP_ only) [FASTQ file](#fastq-files) name of the first read in a given pair.
 * **pair2** (_WRAP_ only) [FASTQ file](#fastq-files) name of the second read in a given pair (omit for single-end library designs, see [arguments](ARGUMENTS.md#fastq-files)).
+
+Optional columns for growth-rate based assays:
+* **generations** (Output samples only) An estimate of the number of generations in order to normalize fitness and error estimates accordingly.
+* **cell_density** An estimate of the cell density (optical density or similar) in order to estimate variant growth rates.
+* **selection_time** (Output samples only) The selection time in hours in order to estimate variant growth rates.
 
 Below is a schematic of a generic deep mutational scanning experiment indicating the corresponding entries which should be made in the experimental design file (red text). 
 <p align="left">
   <img src="../DMS_experiment.png" width="600">
 </p>
 
-In addition to these mandatory columns, additional columns may be included to specify [Stage 2](PIPELINE.md#stage-2-trim-constant-regions-wrap)-specific options (see [arguments](ARGUMENTS.md#trim-arguments)), which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments provided on the command-line. In the case of a growth-rate based assay, a 'generations' column can be supplied (for all output samples) in order to normalize fitness and error estimates accordingly.
+In addition to these mandatory columns, additional columns may be included to specify [Stage 2](PIPELINE.md#stage-2-trim-constant-regions-wrap)-specific options (see [arguments](ARGUMENTS.md#trim-arguments)), which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments provided on the command-line.
 
 ## FASTQ Files
 
