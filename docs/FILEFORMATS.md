@@ -25,7 +25,7 @@ Your file must have the following columns:
 * **pair1** (_WRAP_ only) [FASTQ file](#fastq-files) name of the first read in a given pair.
 * **pair2** (_WRAP_ only) [FASTQ file](#fastq-files) name of the second read in a given pair (omit for single-end library designs, see [arguments](ARGUMENTS.md#fastq-files)).
 
-Optional columns for growth-rate based assays:
+Optional columns for growth-rate based assays (download template file [here](../examples/example_experimentDesign_gr.txt)):
 * **generations** (Output samples only) An estimate of the number of generations in order to normalize fitness and error estimates accordingly.
 * **cell_density** An estimate of the cell density (optical density or similar) in order to estimate variant growth rates.
 * **selection_time** (Output samples only) The selection time in hours in order to estimate variant growth rates.
