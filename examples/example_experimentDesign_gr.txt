@@ -1,0 +1,13 @@
+sample_name	experiment_replicate	selection_id	selection_replicate	technical_replicate	pair1	pair2	generations	cell_density	selection_time
+input1	1	0		1	Input_Rep1_t1_read1.fastq	Input_Rep1_t1_read2.fastq		0.05	
+input1	1	0		2	Input_Rep1_t2_read1.fastq	Input_Rep1_t2_read2.fastq		0.05	
+input2	2	0		1	Input_Rep2_t1_read1.fastq	Input_Rep2_t1_read2.fastq		0.05	
+input2	2	0		2	Input_Rep2_t2_read1.fastq	Input_Rep2_t2_read2.fastq		0.05	
+input3	3	0		1	Input_Rep3_t1_read1.fastq	Input_Rep3_t1_read2.fastq		0.05	
+input3	3	0		2	Input_Rep3_t2_read1.fastq	Input_Rep3_t2_read2.fastq		0.05	
+output1A	1	1	1	1	Output1_Rep1_t1_read1.fastq	Output1_Rep1_t1_read2.fastq	5.078951341	1.69	25.67
+output1A	1	1	1	2	Output1_Rep1_t2_read1.fastq	Output1_Rep1_t2_read2.fastq	5.078951341	1.69	25.67
+output2A	2	1	1	1	Output1_Rep2_t1_read1.fastq	Output1_Rep2_t1_read2.fastq	4.925999419	1.52	25.67
+output2A	2	1	1	2	Output1_Rep2_t2_read1.fastq	Output1_Rep2_t2_read2.fastq	4.925999419	1.52	25.67
+output3A	3	1	1	1	Output1_Rep3_t1_read1.fastq	Output1_Rep3_t1_read2.fastq	4.733354341	1.33	25.67
+output3A	3	1	1	2	Output1_Rep3_t2_read1.fastq	Output1_Rep3_t2_read2.fastq	4.733354341	1.33	25.67
