@@ -95,25 +95,25 @@ dimsum__fastqc_report <- function(
     plot_df[,'Read_name'] <- factor(plot_df[,'variable'])
     #Remove NAs
     plot_df <- plot_df[!is.na(plot_df[,'value']),]
-    #Variable region boundaries
-    temp_adapt5 <- c("cutadapt5First", "cutadapt5Second")[as.numeric(gsub("pair|_fastqc", "", col_name))]
-    temp_cut5 <- c("cutadaptCut5First", "cutadaptCut5Second")[as.numeric(gsub("pair|_fastqc", "", col_name))]
-    #Positions of 5' and 3' boundaries of constant regions
-    vr_5 <- apply(cbind(nchar(dimsum_meta[['exp_design']][,temp_adapt5]), dimsum_meta[['exp_design']][,temp_cut5]), 1, sum, na.rm = T)
-    vr_3 <- vr_5 + nchar(dimsum_meta[["wildtypeSequence"]])
-    #Only show sequenced boundaries
-    vr_5 <- vr_5[vr_5<=dimsum_meta[['exp_design']][,gsub("_fastqc", "_length", col_name)]]
-    vr_3 <- vr_3[vr_3<=dimsum_meta[['exp_design']][,gsub("_fastqc", "_length", col_name)]]
-    #Min and max boundary positions
-    vr_5 <- range(vr_5)
-    if(length(vr_3)!=0){vr_3 <- range(vr_3)}
-    vr_boundaries <- unique(c(vr_5, vr_3))
-    #Plot axis position
-    pos_start <- as.numeric(sapply(strsplit(rownames(fastqc_df1_plot), "-"), '[', 1))
-    vr_boundaries_pos <- NULL
-    for(b in vr_boundaries){
-      vr_boundaries_pos <- c(vr_boundaries_pos, which(pos_start/b>=1)[1])
-    }
+    # #Variable region boundaries
+    # temp_adapt5 <- c("cutadapt5First", "cutadapt5Second")[as.numeric(gsub("pair|_fastqc", "", col_name))]
+    # temp_cut5 <- c("cutadaptCut5First", "cutadaptCut5Second")[as.numeric(gsub("pair|_fastqc", "", col_name))]
+    # #Positions of 5' and 3' boundaries of constant regions
+    # vr_5 <- apply(cbind(nchar(dimsum_meta[['exp_design']][,temp_adapt5]), dimsum_meta[['exp_design']][,temp_cut5]), 1, sum, na.rm = T)
+    # vr_3 <- vr_5 + nchar(dimsum_meta[["wildtypeSequence"]])
+    # #Only show sequenced boundaries
+    # vr_5 <- vr_5[vr_5<=dimsum_meta[['exp_design']][,gsub("_fastqc", "_length", col_name)]]
+    # vr_3 <- vr_3[vr_3<=dimsum_meta[['exp_design']][,gsub("_fastqc", "_length", col_name)]]
+    # #Min and max boundary positions
+    # vr_5 <- range(vr_5)
+    # if(length(vr_3)!=0){vr_3 <- range(vr_3)}
+    # vr_boundaries <- unique(c(vr_5, vr_3))
+    # #Plot axis position
+    # pos_start <- as.numeric(sapply(strsplit(rownames(fastqc_df1_plot), "-"), '[', 1))
+    # vr_boundaries_pos <- NULL
+    # for(b in vr_boundaries){
+    #   vr_boundaries_pos <- c(vr_boundaries_pos, which(pos_start/b>=1)[1])
+    # }
     #Encoding
     encoding_format <- paste(unique(unlist(encoding)), collapse = ", ")
     #Plot (if not pair2 or paired design)
@@ -122,7 +122,8 @@ dimsum__fastqc_report <- function(
         ggplot2::geom_line() +
         ggplot2::geom_hline(yintercept=c(20, 28), linetype = 2) +
         ggplot2::theme_bw() +
-        ggplot2::coord_cartesian(ylim = c(0, max(plot_df[,'value']))) + ggplot2::geom_vline(xintercept = vr_boundaries_pos, linetype = 2) +
+        ggplot2::coord_cartesian(ylim = c(0, max(plot_df[,'value']))) + 
+        # ggplot2::geom_vline(xintercept = vr_boundaries_pos, linetype = 2) +
         #ggplot2::annotate("text", label = "variable region" , x = median(unique(plot_df[,"base_position"])), y = 0) + 
         ggplot2::scale_x_continuous(
         breaks = (1:length(rownames(fastqc_df1_plot)))[seq(1, length(rownames(fastqc_df1_plot)), 5)],

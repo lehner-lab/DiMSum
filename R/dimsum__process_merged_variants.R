@@ -85,7 +85,7 @@ dimsum__process_merged_variants <- function(
   variant_dt[indel==F, Nham_nt := mapply(dimsum__hamming_distance, nt_seq, wt_ntseq)]
 
   #Determine amino acid sequence
-  suppressWarnings(variant_dt[, aa_seq := as.character(Biostrings::translate(Biostrings::DNAStringSet(nt_seq)))])
+  suppressWarnings(variant_dt[, aa_seq := as.character(Biostrings::translate(Biostrings::DNAStringSet(nt_seq), no.init.codon=T))])
   #Calculate amino acid hamming distance
   variant_dt[indel==F, Nham_aa := mapply(dimsum__hamming_distance, aa_seq, wt_AAseq)]
   #Reorder

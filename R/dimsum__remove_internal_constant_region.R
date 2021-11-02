@@ -33,7 +33,7 @@ dimsum__remove_internal_constant_region <- function(
 
   #Update nucleotide and amino acid sequences
   input_dt[indel==F & constant_region==T, nt_seq := nt_seq_wcnst]
-  suppressWarnings(input_dt[indel==F & constant_region==T, aa_seq := as.character(Biostrings::translate(Biostrings::DNAStringSet(nt_seq)))])
+  suppressWarnings(input_dt[indel==F & constant_region==T, aa_seq := as.character(Biostrings::translate(Biostrings::DNAStringSet(nt_seq), no.init.codon=T))])
 
   #Remove unnecessary columns
   output_dt <- input_dt[,.SD,,.SDcols = names(input_dt)[!names(input_dt) %in% c("nt_seq_cnst", "nt_seq_wcnst")]]

@@ -47,6 +47,11 @@ dimsum__check_countfile <- function(
     stop(paste0("Invalid type of sample count column in variant count file specified by 'countPath'. Only positive integers allowed (zero inclusive)."), call. = FALSE)
   }
 
+  ### Duplicated variants check
+  if(input_dt[,sum(duplicated(nt_seq))]!=0){
+    stop(paste0("Duplicated 'nt_seq' values not allowed in variant count file specified by 'countPath'."), call. = FALSE)
+  }
+
   #Sample names (ignore 'technical_replicate' column)
   sample_names <- as.list(paste0(
     dimsum_meta[["exp_design"]][,"sample_name"], '_e', 
