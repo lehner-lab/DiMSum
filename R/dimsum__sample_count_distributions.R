@@ -24,7 +24,7 @@ dimsum__sample_count_distributions <- function(
   seq_length){
 
   #Check if something to plot
-  if(dim(input_dt)[1]==0){
+  if(input_dt[is.na(WT),.N]==0){
     warning("dimsum__sample_count_distributions.R: No data to plot (empty data.table 'input_dt').", call. = FALSE, immediate. = TRUE, noBreaks. = TRUE)
     return(NULL)
   }

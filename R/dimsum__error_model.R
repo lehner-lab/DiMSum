@@ -148,6 +148,11 @@ dimsum__error_model <- function(
   #Normalise to first replicate (set scaling factor of first replicate to unity)
   p[1:nchar(all_reps_str)] <- p[1:nchar(all_reps_str)]/p[1]
 
+  #Check for negative scaling factors
+  if(sum(p[1:nchar(all_reps_str)]<0)!=0){
+    warning("dimsum__error_model.R: Some scaling factors from replicate normalisation are less than zero. Check that input/output samples are not mistakenly switched/misspecified in experimentDesign file!", call. = FALSE, immediate. = TRUE, noBreaks. = TRUE)
+  }
+
   #Save normalisation model
   fitness_norm_model <- data.table(t(p))
   names(fitness_norm_model) <- c(paste0("scale_", all_reps), paste0("shift_", all_reps))
@@ -223,7 +228,7 @@ dimsum__error_model <- function(
       .SDcols = c(grep(paste0("count_e", j, "_s0"),names(work_data)),grep(paste0("count_e", j, "_s1"),names(work_data)))])
 
     if(dimsum_meta[["fitnessNormalise"]]){
-      work_data[,paste0("cbe",j) := sqrt(unlist(fitness_norm_model[,.SD,.SDcols = paste0("scale_", j)])) * sqrt(1/.SD[,2] + 1/.SD[,1] + wt_corr),,
+      work_data[,paste0("cbe",j) := sqrt(abs(unlist(fitness_norm_model[,.SD,.SDcols = paste0("scale_", j)]))) * sqrt(1/.SD[,2] + 1/.SD[,1] + wt_corr),,
         .SDcols = c(grep(paste0("count_e", j, "_s0"),names(work_data)),grep(paste0("count_e", j, "_s1"),names(work_data)))]
     }else{
       work_data[,paste0("cbe",j) := sqrt(1/.SD[,2] + 1/.SD[,1] + wt_corr),,

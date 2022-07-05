@@ -44,6 +44,10 @@ dimsum__check_experiment_design <- function(
   if(sum(!grepl("^[A-Za-z0-9]+$", exp_design[,"sample_name"], perl = T))!=0){
     stop(paste0("One or more invalid 'sample_name' values in experimentDesign file (only alphanumeric characters allowed)"), call. = FALSE)
   }
+  #Check first character alphabetic
+  if(sum(!grepl("^[A-Za-z]+$", substr(exp_design[,"sample_name"], 1, 1), perl = T))!=0){
+    stop(paste0("One or more invalid 'sample_name' values in experimentDesign file (first character must be alphabetic)"), call. = FALSE)
+  }
   #Check that all input sample names for the same experiment_replicate are identical
   experiment_input <- unique(exp_design[exp_design[,"selection_id"]==0,c("sample_name", "experiment_replicate")])
   if(sum(duplicated(experiment_input[,"experiment_replicate"]))!=0){
@@ -67,6 +71,10 @@ dimsum__check_experiment_design <- function(
   # if(length(unique(exp_design[,"experiment_replicate"]))<2){
   #   stop(paste0("One or more invalid 'experiment_replicate' values in experimentDesign file (at least two replicates required)"), call. = FALSE)
   # }
+  #Check that less than 10 experimental replicates exist (more than 9 not supported)
+  if(length(unique(exp_design[,"experiment_replicate"]))>9){
+    stop(paste0("One or more invalid 'experiment_replicate' values in experimentDesign file (more than 9 not supported)"), call. = FALSE)
+  }
 
   ### Selection id checks (selection_id column)
   #Check selection_id strictly positive integer (zero inclusive)

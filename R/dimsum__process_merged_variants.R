@@ -72,6 +72,11 @@ dimsum__process_merged_variants <- function(
     names(variant_dt)[grepl("_count$", names(variant_dt))],
     "barcode_valid")]
 
+  #Check if variants remaining
+  if(variant_dt[,.N]==0){
+    stop(paste0("Cannot proceed with variant processing: No valid variant barcodes found"), call. = FALSE)
+  }
+
   #Define indel variants as those with length different from WT
   variant_dt[, indel := F]
   variant_dt[nchar(nt_seq)!=nchar(wt_ntseq), indel := T]
@@ -134,6 +139,11 @@ dimsum__process_merged_variants <- function(
   #Indicate WT sequence
   variant_dt[nt_seq == wt_ntseq,WT := TRUE]
 
+  #Check if variants remaining
+  if(variant_dt[,.N]==0){
+    stop(paste0("Cannot proceed with variant processing: No variants found after indel variant filtering"), call. = FALSE)
+  }
+
   #Check if WT sequence exists
   if(variant_dt[WT==T,.N]==0){
     variant_dt[, all_reads := rowSums(.SD > 0) == length(grep("_count$", names(variant_dt))),,.SDcols = grep("_count$", names(variant_dt))]
@@ -180,6 +190,11 @@ dimsum__process_merged_variants <- function(
   #Recalculate amino acid hamming distance
   variant_dt[indel==F, Nham_aa := mapply(dimsum__hamming_distance, aa_seq, variant_dt[WT==T,aa_seq])]
 
+  #Check if variants remaining
+  if(variant_dt[,.N]==0){
+    stop(paste0("Cannot proceed with variant processing: No variants found after mutated constant region filtering"), call. = FALSE)
+  }
+
   ### Rejected variants (forbidden mutations)
   ###########################
 
@@ -204,6 +219,11 @@ dimsum__process_merged_variants <- function(
 
   #Remaining variants with permitted mutations (or with indels if retained)
   variant_dt <- variant_dt[permitted==T | (indel==T & dimsum_meta[["indels"]]),]
+
+  #Check if variants remaining
+  if(variant_dt[,.N]==0){
+    stop(paste0("Cannot proceed with variant processing: No variants found after forbidden mutation filtering"), call. = FALSE)
+  }
 
   ### Rejected variants (too many substitutions)
   ###########################
@@ -232,6 +252,11 @@ dimsum__process_merged_variants <- function(
 
   #Remaining variants without too many substitutions (or with indels if retained)
   variant_dt <- variant_dt[too_many_substitutions==F | (indel==T & dimsum_meta[["indels"]]),]
+
+  #Check if variants remaining
+  if(variant_dt[,.N]==0){
+    stop(paste0("Cannot proceed with variant processing: No variants found after too many substitutions filtering"), call. = FALSE)
+  }
 
   ### Rejected variants (mixed substitutions)
   ###########################
@@ -276,6 +301,11 @@ dimsum__process_merged_variants <- function(
     "nt_seq", "aa_seq", "WT", "STOP", "STOP_readthrough", "Nham_nt", "Nham_aa", "Nmut_codons",
     names(variant_dt)[grepl("_count$", names(variant_dt))],
     "barcode_valid", "indel", "constant_region", "permitted", "too_many_substitutions", "mixed_substitutions")]
+
+  #Check if variants remaining
+  if(variant_dt[,.N]==0){
+    stop(paste0("Cannot proceed with variant processing: No variants found after mixed substitutions filtering"), call. = FALSE)
+  }
 
   #Filtered variant nucleotide distributions
   for(count_column in names(variant_dt)[grepl("_count$", names(variant_dt))]){

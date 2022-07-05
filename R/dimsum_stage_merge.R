@@ -103,9 +103,13 @@ dimsum_stage_merge <- function(
     #Replace NA counts with zeros
     variant_data[is.na(variant_data)] <- 0
 
-    #Merge counts from technical replicates
-    split_base <- unique(sapply(strsplit(colnames(variant_data)[grep('_count', colnames(variant_data))], "_t"), '[', 1))
-    variant_data_merge <- dimsum__sum_datatable_columns(dt=variant_data, column_patterns=split_base, suffix="_count")
+    #Merge counts from technical replicates (if count file not specified)
+    if(!is.null(dimsum_meta[["countPath"]])){
+      variant_data_merge <- variant_data
+    }else{
+      split_base <- unique(sapply(strsplit(colnames(variant_data)[grep('_count', colnames(variant_data))], "_t"), '[', 1))
+      variant_data_merge <- dimsum__sum_datatable_columns(dt=variant_data, column_patterns=split_base, suffix="_count")
+    }
 
     #Process variants to separate into indel, rejected and retained variants data.tables
     variant_list <- dimsum__process_merged_variants(dimsum_meta = dimsum_meta, input_dt = variant_data_merge)
