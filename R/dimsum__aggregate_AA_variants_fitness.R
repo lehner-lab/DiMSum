@@ -37,7 +37,7 @@ dimsum__aggregate_AA_variants_fitness <- function(
   synseq_refs <- unique(c(dimsum_meta[["synonym_sequences"]], input_dt[WT==T,aa_seq]))
 
   #Pick out reference-like variants
-  syn_dt <- input_dt[aa_seq %in% synseq_refs]
+  syn_dt <- input_dt[aa_seq %in% synseq_refs & nchar(nt_seq)==(3*nchar(aa_seq))]
   syn_dt[,merge_seq := nt_seq,nt_seq]
   syn_dt[, error_model := F]
   syn_dt <- syn_dt[,.SD,merge_seq,.SDcols = c(

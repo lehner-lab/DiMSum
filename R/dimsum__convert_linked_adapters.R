@@ -28,7 +28,7 @@ dimsum__convert_linked_adapters <- function(
     #Check if constant regions specified
     if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt5First"]) & !is.na(dimsum_meta[['exp_design']][i,"cutadapt3First"]) & !grepl("\\.\\.\\.", dimsum_meta[['exp_design']][i,"cutadapt3First"]) ){
       if( (dimsum_meta[['exp_design']][i,"pair1_length"]-num_cut5f-num_cut3f) > (nchar(dimsum_meta[['exp_design']][i,"cutadapt5First"]) + len_shortest) ){
-        dimsum_meta[['exp_design']][i,"cutadapt3First"] <- paste0(dimsum_meta[['exp_design']][i,"cutadapt5First"], ";required...", dimsum_meta[['exp_design']][i,"cutadapt3First"], ";required")
+        dimsum_meta[['exp_design']][i,"cutadapt3First"] <- paste0(dimsum_meta[['exp_design']][i,"cutadapt5First"], ";required...", dimsum_meta[['exp_design']][i,"cutadapt3First"], ";optional")
         dimsum_meta[['exp_design']][i,"cutadapt5First"] <- NA
       }
     }
@@ -36,7 +36,7 @@ dimsum__convert_linked_adapters <- function(
     #Check if constant regions specified
     if( !is.na(dimsum_meta[['exp_design']][i,"cutadapt5Second"]) & !is.na(dimsum_meta[['exp_design']][i,"cutadapt3Second"]) & !grepl("\\.\\.\\.", dimsum_meta[['exp_design']][i,"cutadapt3Second"]) ){
       if( (dimsum_meta[['exp_design']][i,"pair2_length"]-num_cut5s-num_cut3s) > (nchar(dimsum_meta[['exp_design']][i,"cutadapt5Second"]) + len_shortest) ){
-        dimsum_meta[['exp_design']][i,"cutadapt3Second"] <- paste0(dimsum_meta[['exp_design']][i,"cutadapt5Second"], ";required...", dimsum_meta[['exp_design']][i,"cutadapt3Second"], ";required")
+        dimsum_meta[['exp_design']][i,"cutadapt3Second"] <- paste0(dimsum_meta[['exp_design']][i,"cutadapt5Second"], ";required...", dimsum_meta[['exp_design']][i,"cutadapt3Second"], ";optional")
         dimsum_meta[['exp_design']][i,"cutadapt5Second"] <- NA
       }
     }

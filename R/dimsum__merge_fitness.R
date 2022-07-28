@@ -155,9 +155,9 @@ dimsum__merge_fitness <- function(
   wildtype <- all_variants[WT==T]
   doubles <- doubles_dt
 
-  #Remove synonymous variants from all_variants for coding sequences
+  #Remove synonymous variants (in WT) from all_variants for coding sequences (with mixedSubstitutions==F, these are included in error modelling)
   if(dimsum_meta[["sequenceType"]]=="coding"){  
-    all_variants <- all_variants[WT==T | Nham_aa>0]
+    all_variants <- all_variants[WT==T | Nham_aa>0 | indel==T]
   }
 
   ### Output plain text files
