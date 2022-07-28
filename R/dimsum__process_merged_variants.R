@@ -48,8 +48,8 @@ dimsum__process_merged_variants <- function(
 
   if(!is.null(dimsum_meta[["barcodeIdentityPath"]])){
     variant_dt <- dimsum__debarcode_variants(
-      input_dt = variant_dt,
-      barcode_path = dimsum_meta[["barcodeIdentityPath"]])
+      dimsum_meta = dimsum_meta,
+      input_dt = variant_dt)
   }
 
   #No barcode variant count statistics

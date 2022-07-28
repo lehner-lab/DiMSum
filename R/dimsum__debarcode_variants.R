@@ -3,19 +3,19 @@
 #'
 #' Debarcode variants.
 #'
+#' @param dimsum_meta an experiment metadata object (required)
 #' @param input_dt input data.table (required)
-#' @param barcode_path path to barcode identity file (required)
 #'
 #' @return A data.table with variants debarcoded
 #' @export
 #' @import data.table
 dimsum__debarcode_variants <- function(
-  input_dt,
-  barcode_path
+  dimsum_meta,
+  input_dt
   ){
 
   #Load barcode to variant mapping
-  barcode_dt <- data.table::fread(barcode_path)
+  barcode_dt <- dimsum__check_barcodeidentityfile(dimsum_meta = dimsum_meta, return_data = TRUE)
   barcode_list <- as.list(tolower(unlist(barcode_dt[,variant])))
   names(barcode_list) <- tolower(unlist(barcode_dt[,barcode]))
   

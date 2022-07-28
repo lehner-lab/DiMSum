@@ -67,8 +67,7 @@ dimsum_stage_merge <- function(
       
       #load variant data from user-specified count file
       if(!is.null(dimsum_meta[["countPath"]])){
-        variant_data <- data.table::fread(count_file)
-        variant_data <- dimsum__check_countfile(dimsum_meta = dimsum_meta, input_dt = variant_data)
+        variant_data <- dimsum__check_countfile(dimsum_meta = dimsum_meta, return_data = TRUE)
         break
       }
 

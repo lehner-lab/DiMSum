@@ -17,6 +17,7 @@ dimsum(
   experimentDesignPairDuplicates = F,
   barcodeIdentityPath = NULL,
   countPath = NULL,
+  synonymSequencePath = NULL,
   cutadaptCut5First = NULL,
   cutadaptCut5Second = NULL,
   cutadaptCut3First = NULL,
@@ -85,6 +86,8 @@ dimsum(
 \item{barcodeIdentityPath}{Path to Variant Identity File (tab-separated plain text file mapping barcodes to variants)}
 
 \item{countPath}{Path to Variant Count File for analysis with STEAM only (tab-separated plain text file with sample counts for all variants)}
+
+\item{synonymSequencePath}{Path to Synonym Sequences File with coding sequences for which synonymous variant fitness should be quantified (default: plain text file with one coding nucleotide sequence per line)}
 
 \item{cutadaptCut5First}{Remove fixed number of bases from start (5') of first (or only) read before constant region trimming (optional)}
 

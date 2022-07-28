@@ -1,6 +1,6 @@
 Package: DiMSum
 Title: A pipeline for processing deep mutational scanning data
-Version: 1.2.10
+Version: 1.2.11
 Authors@R: c(
     person("Andre", "Faure", email = "ajfaure@gmail.com", role = c("aut", "cre")),
     person("Joern", "Schmiedel", email = "joern.schmiedel@gmail.com", role = c("aut")))

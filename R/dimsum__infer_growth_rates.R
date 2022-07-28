@@ -38,12 +38,12 @@ dimsum__infer_growth_rates <- function(
 
   #Infer growth rates from fitness
   for (E in all_reps) {
-    input_dt[, paste0("growthrate", E) := log((.SD[[2]]/sum(.SD[[2]], na.rm = T)*cell_density_output_mean[paste0("e", E)]) / (.SD[[1]]/sum(.SD[[1]], na.rm = T)*cell_density_input_mean[paste0("e", E)])) / selection_time_mean[paste0("e", E)],,.SDcols = paste0("count_e", E, "_s", c(0, 1))]
+    input_dt[error_model==T, paste0("growthrate", E) := log((.SD[[2]]/sum(.SD[[2]], na.rm = T)*cell_density_output_mean[paste0("e", E)]) / (.SD[[1]]/sum(.SD[[1]], na.rm = T)*cell_density_input_mean[paste0("e", E)])) / selection_time_mean[paste0("e", E)],,.SDcols = paste0("count_e", E, "_s", c(0, 1))]
 
-    gr_cor <- input_dt[!is.na(get(paste0("growthrate", E))) & !is.infinite(get(paste0("growthrate", E))),cor(.SD[[1]], .SD[[2]], use = "pairwise.complete"),,.SDcols = c(paste0("growthrate", E), paste0("fitness", E, "_uncorr"))]
+    gr_cor <- input_dt[!is.na(get(paste0("growthrate", E))) & !is.infinite(get(paste0("growthrate", E))) & error_model==T,cor(.SD[[1]], .SD[[2]], use = "pairwise.complete"),,.SDcols = c(paste0("growthrate", E), paste0("fitness", E, "_uncorr"))]
     dimsum__status_message(paste0("Fitness vs. growth rate correlation for replicate ", E, ": ", round(gr_cor, 2), "\n"))
 
-    gr_lm <- lm(y~x, input_dt[!is.na(get(paste0("growthrate", E))) & !is.infinite(get(paste0("growthrate", E))),.(y = .SD[[1]], x = .SD[[2]]),,.SDcols = c(paste0("growthrate", E), paste0("fitness", E, "_uncorr"))])$coefficients
+    gr_lm <- lm(y~x, input_dt[!is.na(get(paste0("growthrate", E))) & !is.infinite(get(paste0("growthrate", E))) & error_model==T,.(y = .SD[[1]], x = .SD[[2]]),,.SDcols = c(paste0("growthrate", E), paste0("fitness", E, "_uncorr"))])$coefficients
     input_dt[, paste0("growthrate", E) := .SD[[1]]*gr_lm[2]+gr_lm[1],,.SDcols = paste0("fitness", E, "_uncorr")]
     input_dt[, paste0("growthrate", E, "_sigma") := .SD[[1]]*gr_lm[2],,.SDcols = paste0("sigma", E, "_uncorr")]
   }
@@ -53,7 +53,7 @@ dimsum__infer_growth_rates <- function(
   fitness_rx <- input_dt[,.SD,.SDcols = grep(paste0("growthrate[", all_reps_str, "]$"),colnames(input_dt))]
   sigma_rx <- input_dt[,.SD,.SDcols = grep(paste0("growthrate[", all_reps_str, "]_sigma"),colnames(input_dt))]
   input_dt[,growthrate := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
-  gr_lm <- lm(growthrate~fitness, input_dt)$coefficients
+  gr_lm <- lm(growthrate~fitness, input_dt[error_model==T])$coefficients
   input_dt[, growthrate := .SD[[1]]*gr_lm[2]+gr_lm[1],,.SDcols = "fitness"]
   input_dt[, growthrate_sigma := .SD[[1]]*gr_lm[2],,.SDcols = "sigma"]
 

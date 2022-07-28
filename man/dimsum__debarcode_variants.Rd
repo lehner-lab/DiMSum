@@ -4,12 +4,12 @@
 \alias{dimsum__debarcode_variants}
 \title{dimsum__debarcode_variants}
 \usage{
-dimsum__debarcode_variants(input_dt, barcode_path)
+dimsum__debarcode_variants(dimsum_meta, input_dt)
 }
 \arguments{
-\item{input_dt}{input data.table (required)}
+\item{dimsum_meta}{an experiment metadata object (required)}
 
-\item{barcode_path}{path to barcode identity file (required)}
+\item{input_dt}{input data.table (required)}
 }
 \value{
 A data.table with variants debarcoded

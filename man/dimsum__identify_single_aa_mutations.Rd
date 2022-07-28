@@ -12,7 +12,7 @@ dimsum__identify_single_aa_mutations(input_dt, wt_AAseq)
 \item{wt_AAseq}{WT amino acid sequence (required)}
 }
 \value{
-data.table with single amino acid variants (and all silent variants)
+data.table with single amino acid variants
 }
 \description{
 Identify and annotate single AA substitutions.

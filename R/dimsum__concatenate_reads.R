@@ -65,9 +65,13 @@ dimsum__concatenate_reads <- function(
     #Subset to sequences with all base qualities not less than specified
     fq1 <- fq1[non_merge_num_bases_too_low_qual==0]
     fq2 <- fq2[non_merge_num_bases_too_low_qual==0]
+    
+    #Read quality matrices
+    qmat1 <- as(Biostrings::quality(fq1), "matrix")
+    qmat2 <- as(Biostrings::quality(fq2), "matrix")
     #Read error probability matrices
-    emat1 <- 10^(qmat1[non_merge_num_bases_too_low_qual==0,]/(-10))
-    emat2 <- 10^(qmat2[non_merge_num_bases_too_low_qual==0,]/(-10))
+    emat1 <- 10^(qmat1/(-10))
+    emat2 <- 10^(qmat2/(-10))
     #Expected number of read errors
     exp_num_read_errors <- apply(emat1, 1, sum, na.rm = T) + apply(emat2, 1, sum, na.rm = T)
     #Update statistics

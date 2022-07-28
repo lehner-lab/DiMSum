@@ -30,9 +30,17 @@ dimsum__aggregate_AA_variants <- function(
   #Set merge_seq to nt_seq
   input_dt[,merge_seq := aa_seq,nt_seq]
 
-  #Define silent/synonymous variants as WT
-  input_dt[Nham_aa==0,WT := T]
-  input_dt[Nham_aa==0,Nham_nt := 0]
+  #Reference AA sequences for synonymous sequences
+  synseq_refs <- unique(c(dimsum_meta[["synonym_sequences"]], input_dt[WT==T,aa_seq]))
+
+  #Pick out reference-like variants
+  syn_dt <- input_dt[aa_seq %in% synseq_refs]
+  syn_dt[,merge_seq := nt_seq,nt_seq]
+  syn_dt[, error_model := F]
+  syn_dt <- syn_dt[,.SD,merge_seq,.SDcols = c(
+    "nt_seq","aa_seq","Nham_nt","Nham_aa",
+    "Nmut_codons","WT","indel","STOP","STOP_readthrough","error_model",
+    c(input_samples, output_samples))]
 
   #For all count columns
   for(j in c(input_samples, output_samples)){
@@ -45,18 +53,24 @@ dimsum__aggregate_AA_variants <- function(
   #Retain only one row per AA variant
   output_dt <- input_dt[!duplicated(merge_seq),.SD,merge_seq,.SDcols = c(
     "nt_seq","aa_seq","Nham_nt","Nham_aa",
-    "Nmut_codons","WT","indel","STOP","STOP_readthrough",
+    "Nmut_codons","WT","indel","STOP","STOP_readthrough","error_model",
     names(input_dt)[grep(names(input_dt),pattern="_agg$")])]
 
   #Revert to original names of aggregated count columns
   names(output_dt)[grep(names(output_dt),pattern="_agg$")] <- gsub("_agg$", "", names(output_dt)[grep(names(output_dt),pattern="_agg$")])
 
-  #Nham_nt and Nmut_codons columns are meaningless for nonsynonymous variants after aggregation
-  output_dt[Nham_aa!=0, Nham_nt := NA]
-  output_dt[Nham_aa!=0, Nmut_codons := NA]
+  #Nham_nt and Nmut_codons columns are meaningless after aggregation at AA level
+  output_dt[, Nham_nt := NA]
+  output_dt[, Nmut_codons := NA]
+
+  #Define WT at AA level
+  output_dt[Nham_aa==0, WT := T]
 
   #nt_seq column is meaningless after aggregation
   output_dt[, nt_seq := NA]
+
+  #Add back silent/synonymous variants
+  output_dt <- rbind(syn_dt, output_dt)
 
   dimsum__status_message("Done\n")
 

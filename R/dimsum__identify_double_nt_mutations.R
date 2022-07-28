@@ -40,8 +40,8 @@ dimsum__identify_double_nt_mutations <- function(
 
   #Mean counts
   if(nrow(singles_dt)!=0){
-    doubles <- merge(doubles,singles_dt[,.(Pos,Mut,s1_mean_count = mean_count)],by.x = c("Pos1","Mut1"),by.y = c("Pos","Mut"))
-    doubles <- merge(doubles,singles_dt[,.(Pos,Mut,s2_mean_count = mean_count)],by.x = c("Pos2","Mut2"),by.y = c("Pos","Mut"))
+    doubles <- merge(doubles,singles_dt[,.(Pos,Mut,s1_mean_count = mean_count)],by.x = c("Pos1","Mut1"),by.y = c("Pos","Mut"), all.x = T)
+    doubles <- merge(doubles,singles_dt[,.(Pos,Mut,s2_mean_count = mean_count)],by.x = c("Pos2","Mut2"),by.y = c("Pos","Mut"), all.x = T)
   }else{
     doubles[, s1_mean_count := NA]
     doubles[, s2_mean_count := NA]

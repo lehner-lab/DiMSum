@@ -33,6 +33,20 @@ dimsum__aggregate_AA_variants_fitness <- function(
   #Set merge_seq to nt_seq if WT or silent/synonymous variants
   input_dt[Nham_aa==0,merge_seq := nt_seq,nt_seq]
 
+  #Reference AA sequences for synonymous sequences
+  synseq_refs <- unique(c(dimsum_meta[["synonym_sequences"]], input_dt[WT==T,aa_seq]))
+
+  #Pick out reference-like variants
+  syn_dt <- input_dt[aa_seq %in% synseq_refs]
+  syn_dt[,merge_seq := nt_seq,nt_seq]
+  syn_dt[, error_model := F]
+  syn_dt <- syn_dt[,.SD,merge_seq,.SDcols = c(
+    "aa_seq","Nham_nt","Nham_aa",
+    "Nmut_codons","WT","indel","STOP","STOP_readthrough","error_model",
+    "mean_count",
+    c(input_samples, output_samples),
+    names(syn_dt)[grep(names(syn_dt),pattern="^fitness|^sigma")])]
+
   #For all count columns
   for(j in c(input_samples, output_samples)){
     #Aggregate counts accross identical AA variants
@@ -59,7 +73,7 @@ dimsum__aggregate_AA_variants_fitness <- function(
   #Retain only one row per AA variant
   output_dt <- input_dt[!duplicated(merge_seq),.SD,merge_seq,.SDcols = c(
     "aa_seq","Nham_nt","Nham_aa",
-    "Nmut_codons","WT","indel","STOP","STOP_readthrough",
+    "Nmut_codons","WT","indel","STOP","STOP_readthrough","error_model",
     "mean_count",
     names(input_dt)[grep(names(input_dt),pattern="_agg$")])]
 
@@ -68,6 +82,10 @@ dimsum__aggregate_AA_variants_fitness <- function(
 
   #Nham_nt column is meaningless for nonsynonymous variants after aggregation
   output_dt[Nham_aa!=0, Nham_nt := NA]
+  output_dt[Nham_aa!=0, Nmut_codons := NA]
+
+  #Add back silent/synonymous variants
+  output_dt <- rbind(syn_dt, output_dt)
 
   dimsum__status_message("Done\n")
 

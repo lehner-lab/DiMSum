@@ -4,12 +4,12 @@
 \alias{dimsum__check_countfile}
 \title{dimsum__check_countfile}
 \usage{
-dimsum__check_countfile(dimsum_meta, input_dt)
+dimsum__check_countfile(dimsum_meta, return_data = FALSE)
 }
 \arguments{
 \item{dimsum_meta}{an experiment metadata object (required)}
 
-\item{input_dt}{input data.table (required)}
+\item{return_data}{whether or not to return data (default: FALSE)}
 }
 \value{
 Reformatted data.table

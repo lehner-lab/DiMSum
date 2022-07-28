@@ -15,6 +15,7 @@
 #' @param experimentDesignPairDuplicates Are multiple instances of FASTQ files in the Experimental Design File permitted? (default:F)
 #' @param barcodeIdentityPath Path to Variant Identity File (tab-separated plain text file mapping barcodes to variants)
 #' @param countPath Path to Variant Count File for analysis with STEAM only (tab-separated plain text file with sample counts for all variants)
+#' @param synonymSequencePath Path to Synonym Sequences File with coding sequences for which synonymous variant fitness should be quantified (default: plain text file with one coding nucleotide sequence per line)
 #' @param cutadaptCut5First Remove fixed number of bases from start (5') of first (or only) read before constant region trimming (optional)
 #' @param cutadaptCut5Second Remove fixed number of bases from start (5') of second read in pair before constant region trimming (optional)
 #' @param cutadaptCut3First Remove fixed number of bases from end (3') of first (or only) read before constant region trimming (optional)
@@ -73,6 +74,7 @@ dimsum <- function(
   experimentDesignPairDuplicates=F,
   barcodeIdentityPath=NULL,
   countPath=NULL,
+  synonymSequencePath=NULL,
   cutadaptCut5First=NULL,
   cutadaptCut5Second=NULL,
   cutadaptCut3First=NULL,
@@ -204,6 +206,7 @@ dimsum <- function(
     "experimentDesignPairDuplicates" = list(experimentDesignPairDuplicates, c("logical")), #logical -- checked in dimsum__validate_input
     "barcodeIdentityPath" = list(barcodeIdentityPath, c("character", "NULL")), #file exists (if not NULL) -- checked in dimsum__validate_input
     "countPath" = list(countPath, c("character", "NULL")), #file exists (if not NULL) -- checked in dimsum__validate_input
+    "synonymSequencePath" = list(synonymSequencePath, c("character", "NULL")), #file exists (if not NULL) -- checked in dimsum__validate_input
     "cutadaptCut5First" = list(cutadaptCut5First, c("integer", "NULL")), #strictly positive integer (if not NULL) -- checked in dimsum__check_experiment_design
     "cutadaptCut5Second" = list(cutadaptCut5Second, c("integer", "NULL")), #strictly positive integer (if not NULL) -- checked in dimsum__check_experiment_design
     "cutadaptCut3First" = list(cutadaptCut3First, c("integer", "NULL")), #strictly positive integer (if not NULL) -- checked in dimsum__check_experiment_design
@@ -256,6 +259,15 @@ dimsum <- function(
 
   #Get and check experiment design
   exp_metadata[["exp_design"]] <- dimsum__get_experiment_design(exp_metadata)
+
+  #Check count file
+  dimsum__check_countfile(exp_metadata)
+
+  #Check barcode identity file
+  dimsum__check_barcodeidentityfile(exp_metadata)
+
+  #Get and check synonym sequences
+  exp_metadata[["synonym_sequences"]] <- dimsum__get_synonymsequences(exp_metadata)
 
   #Create project directory (if doesn't already exist)
   exp_metadata[["project_path"]] <- file.path(exp_metadata[["outputPath"]], exp_metadata[["projectName"]])

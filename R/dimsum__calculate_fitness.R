@@ -29,7 +29,7 @@ dimsum__calculate_fitness <- function(
 
   #Calculate fitness
   for(j in all_reps){
-    wt_corr <- as.numeric(input_dt[WT==T, log(.SD[,2]/.SD[,1]),,
+    wt_corr <- as.numeric(input_dt[WT==T & error_model==T, log(.SD[,2]/.SD[,1]),,
       .SDcols = c(grep(paste0("count_e", j, "_s0"), names(input_dt)), grep(paste0("count_e", j, "_s1"), names(input_dt)))])
     input_dt[, paste0("fitness", j, "_uncorr") := log(.SD[,2]/.SD[,1]) - wt_corr,,
       .SDcols = c(
@@ -42,7 +42,7 @@ dimsum__calculate_fitness <- function(
   #Normalize fitness if necessary
   if(dimsum_meta[["fitnessNormalise"]]){
     #Wild-type correction such that mean(wild-type) = 0
-    wt_corr <- input_dt[WT == T, rowMeans((.SD + 
+    wt_corr <- input_dt[WT == T & error_model==T, rowMeans((.SD + 
         unlist(norm_model_dt[,.SD,,.SDcols = grep(paste0("shift_[", all_reps_str, "]$"), names(norm_model_dt))])) * 
         unlist(norm_model_dt[,.SD,,.SDcols = grep(paste0("scale_[", all_reps_str, "]$"), names(norm_model_dt))])),,
       .SDcols = grep(paste0("fitness[", all_reps_str, "]_uncorr$"), names(input_dt))]
@@ -72,7 +72,7 @@ dimsum__calculate_fitness <- function(
           grep(paste0("count_e", j, "_s1"), names(input_dt)))]
     }else{
       #Calculate count-based error per replicate
-      wt_corr = as.numeric(input_dt[WT==T,1/.SD[,2] + 1/.SD[,1],,
+      wt_corr = as.numeric(input_dt[WT==T & error_model==T,1/.SD[,2] + 1/.SD[,1],,
         .SDcols = c(grep(paste0("count_e", j, "_s0"),names(input_dt)),grep(paste0("count_e", j, "_s1"),names(input_dt)))])
 
       input_dt[,paste0("sigma", j, "_uncorr") := sqrt(1/.SD[,2] + 1/.SD[,1] + wt_corr),,
@@ -86,7 +86,7 @@ dimsum__calculate_fitness <- function(
   #Remove unnecessary columns
   output_dt <- input_dt[,.SD,,.SDcols = c(
     "merge_seq","nt_seq","aa_seq","Nham_nt","Nham_aa",
-    "Nmut_codons","WT","indel","STOP","STOP_readthrough",names(input_dt)[grep(names(input_dt),pattern="^count|^fitness|^sigma")])]
+    "Nmut_codons","WT","indel","STOP","STOP_readthrough","error_model",names(input_dt)[grep(names(input_dt),pattern="^count|^fitness|^sigma")])]
 
   #Remove variants without fitness estimates in any replicates
   fitness_cols <- names(output_dt)[grep(paste0("fitness[", all_reps_str, "]_uncorr"), names(output_dt))]

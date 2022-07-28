@@ -4,15 +4,21 @@
 #' Check whether user-specified count file correctly formatted.
 #'
 #' @param dimsum_meta an experiment metadata object (required)
-#' @param input_dt input data.table (required)
+#' @param return_data whether or not to return data (default: FALSE)
 #'
 #' @return Reformatted data.table
 #' @export
 #' @import data.table
 dimsum__check_countfile <- function(
   dimsum_meta,
-  input_dt
+  return_data = FALSE
   ){
+
+  ### Abort if no count file supplied
+  if(is.null(dimsum_meta[["countPath"]])){return(NULL)}
+
+  ### Load variant data
+  input_dt <- data.table::fread(dimsum_meta[["countPath"]])
 
   ### Nucleotide sequence checks (nt_seq column)
   #Check if mandatory columns present
@@ -52,16 +58,19 @@ dimsum__check_countfile <- function(
     stop(paste0("Duplicated 'nt_seq' values not allowed in variant count file specified by 'countPath'."), call. = FALSE)
   }
 
-  #Sample names (ignore 'technical_replicate' column)
-  sample_names <- as.list(paste0(
-    dimsum_meta[["exp_design"]][,"sample_name"], '_e', 
-    dimsum_meta[["exp_design"]][,"experiment"], '_s', 
-    dimsum_meta[["exp_design"]][,"selection_id"], '_b', 
-    dimsum_meta[["exp_design"]][,"biological_replicate"], '_tNA_count', sep = ""))
-  names(sample_names) <- dimsum_meta[["exp_design"]][,"sample_name"]
+  ### Return data if required
+  if(return_data){
+    #Sample names (ignore 'technical_replicate' column)
+    sample_names <- as.list(paste0(
+      dimsum_meta[["exp_design"]][,"sample_name"], '_e', 
+      dimsum_meta[["exp_design"]][,"experiment"], '_s', 
+      dimsum_meta[["exp_design"]][,"selection_id"], '_b', 
+      dimsum_meta[["exp_design"]][,"biological_replicate"], '_tNA_count', sep = ""))
+    names(sample_names) <- dimsum_meta[["exp_design"]][,"sample_name"]
 
-  #Reformat count column names
-  names(input_dt)[names(input_dt)!="nt_seq"] <- unlist(sample_names[names(input_dt)[names(input_dt)!="nt_seq"]])
+    #Reformat count column names
+    names(input_dt)[names(input_dt)!="nt_seq"] <- unlist(sample_names[names(input_dt)[names(input_dt)!="nt_seq"]])
 
-  return(input_dt)
+    return(input_dt)
+  }
 }

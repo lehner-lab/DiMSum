@@ -86,6 +86,11 @@ dimsum_stage_counts_to_fitness <- function(
     input_dt = all_data,
     all_reps = all_reps)
 
+  ### Identify variants to use for error modelling
+  ###########################
+
+  nf_data[, error_model := T]
+
   ### Aggregate counts at the AA level (if coding sequence and "mixedSubstitutions"==T)
   ###########################
 
@@ -112,7 +117,7 @@ dimsum_stage_counts_to_fitness <- function(
   }
   nf_data <- nf_data[,.SD,,.SDcols = c(
     "merge_seq","nt_seq","aa_seq","Nham_nt","Nham_aa",
-    "Nmut_codons","WT","indel","STOP","STOP_readthrough",names(nf_data)[grep(names(nf_data),pattern="^count")])]
+    "Nmut_codons","WT","indel","STOP","STOP_readthrough","error_model",names(nf_data)[grep(names(nf_data),pattern="^count")])]
 
   dimsum__status_message("Done\n")
 
@@ -122,7 +127,7 @@ dimsum_stage_counts_to_fitness <- function(
   #Fit error model
   model_result <- dimsum__error_model(
     dimsum_meta = dimsum_meta,
-    input_dt = data.table::copy(nf_data),
+    input_dt = data.table::copy(nf_data[error_model==T]),
     all_reps = all_reps,
     report_outpath = report_outpath)
 
@@ -136,12 +141,10 @@ dimsum_stage_counts_to_fitness <- function(
     error_model_dt = model_result[["error_model"]],
     norm_model_dt = model_result[["norm_model"]])
 
-  ### Remove variants with both synonymous and nonsynonymous substutions (if coding sequence and "mixedSubstitutions"==F)
   ### Merge fitness and error at the AA level (if coding sequence and "mixedSubstitutions"==F)
   ###########################
 
-  #For coding sequences (without indels) remove nonsynonymous variants with silent/synonymous substitutions in other codons
-  #and aggregate nonsynonymous variant fitness and error at the AA level
+  #Aggregate nonsynonymous variant fitness and error at the AA level
   if(dimsum_meta[["sequenceType"]]=="coding" & !dimsum_meta[["mixedSubstitutions"]]){
     nff_data <- dimsum__aggregate_AA_variants_fitness(
       dimsum_meta = dimsum_meta,      
@@ -151,7 +154,7 @@ dimsum_stage_counts_to_fitness <- function(
     if(dimsum_meta[["sequenceType"]]!="coding"){nff_data[,merge_seq := nt_seq,nt_seq]}
     nff_data <- nff_data[,.SD,merge_seq,.SDcols = c(
       "aa_seq","Nham_nt","Nham_aa",
-      "Nmut_codons","WT","indel","STOP","STOP_readthrough",
+      "Nmut_codons","WT","indel","STOP","STOP_readthrough", "error_model",
       names(nff_data)[grep(names(nff_data),pattern="^count")],
       "mean_count",
       names(nff_data)[grep(names(nff_data),pattern="^fitness|sigma")])]
@@ -160,18 +163,18 @@ dimsum_stage_counts_to_fitness <- function(
   ### Wild type
   ###########################
 
-  wildtype <- nff_data[WT==TRUE,]
+  wildtype <- nff_data[WT==TRUE & error_model==TRUE,]
 
   ### Identify position and identity of single AA/NT mutations (and all silent mutants in the case of AA mutations)
   ###########################
 
   if(dimsum_meta[["sequenceType"]]=="coding"){
-    singles_silent <- dimsum__identify_single_aa_mutations(
-      input_dt = nff_data,
+    singles <- dimsum__identify_single_aa_mutations(
+      input_dt = nff_data[error_model==T],
       wt_AAseq = wt_AAseq)
   }else{
-    singles_silent <- dimsum__identify_single_nt_mutations(
-      input_dt = nff_data,
+    singles <- dimsum__identify_single_nt_mutations(
+      input_dt = nff_data[error_model==T],
       wt_ntseq = wt_ntseq)    
   }
 
@@ -180,13 +183,13 @@ dimsum_stage_counts_to_fitness <- function(
 
   if(dimsum_meta[["sequenceType"]]=="coding"){
     doubles <- dimsum__identify_double_aa_mutations(
-      input_dt = nff_data,
-      singles_dt = singles_silent,
+      input_dt = nff_data[error_model==T],
+      singles_dt = singles,
       wt_AAseq = wt_AAseq)
   }else{
     doubles <- dimsum__identify_double_nt_mutations(
-      input_dt = nff_data,
-      singles_dt = singles_silent,
+      input_dt = nff_data[error_model==T],
+      singles_dt = singles,
       wt_ntseq = wt_ntseq)
   }
 
@@ -204,7 +207,7 @@ dimsum_stage_counts_to_fitness <- function(
     doubles <- dimsum__bayesian_double_fitness(
       dimsum_meta = dimsum_meta,
       doubles_dt = doubles,
-      singles_dt = singles_silent,
+      singles_dt = singles,
       wt_dt = wildtype,
       all_reps = all_reps,
       report_outpath = report_outpath)
@@ -228,9 +231,9 @@ dimsum_stage_counts_to_fitness <- function(
       all_reps = all_reps,
       fitness_suffix="_uncorr"
       )
-    singles_silent <- dimsum__normalise_fitness(
+    singles <- dimsum__normalise_fitness(
       dimsum_meta = dimsum_meta,
-      input_dt = singles_silent,
+      input_dt = singles,
       all_reps = all_reps
       )
     doubles <- dimsum__normalise_fitness(
@@ -259,7 +262,7 @@ dimsum_stage_counts_to_fitness <- function(
     dimsum_meta = dimsum_meta,
     input_dt = nff_data,
     doubles_dt = doubles,
-    singles_dt = singles_silent,
+    singles_dt = singles,
     all_reps = all_reps,
     fitness_outpath = fitness_outpath,
     report = TRUE,

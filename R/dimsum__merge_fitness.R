@@ -103,10 +103,10 @@ dimsum__merge_fitness <- function(
   if(dimsum_meta[["sequenceType"]]=="coding"){
     #Set nucleotide sequence to NA when fitness and error aggregated at AA level
     if(dimsum_meta[["mixedSubstitutions"]]){
-      input_dt[, nt_seq := NA]
+      input_dt[error_model==T, nt_seq := NA]
       if(nrow(singles_dt)!=0){singles_dt[, nt_seq := NA]}
     }else{
-      input_dt[Nham_aa>0 | indel==T, nt_seq := NA]
+      input_dt[(Nham_aa>0 | indel==T) & error_model==T, nt_seq := NA]
       if(nrow(singles_dt)!=0){singles_dt[Nham_aa>0, nt_seq := NA]}
     }
     if(nrow(doubles_dt)!=0){doubles_dt[, nt_seq := NA]}
@@ -146,21 +146,28 @@ dimsum__merge_fitness <- function(
     names(doubles_dt)[grep("^WT_AA", names(doubles_dt))] <- gsub("WT_AA", "WT_nt", names(doubles_dt)[grep("^WT_AA", names(doubles_dt))])
   }
 
+  #Separate synonymous variants
+  synonymous <- input_dt[error_model==F,.SD,,.SDcols = names(input_dt)[names(input_dt)!="error_model"]]
+  input_dt <- input_dt[error_model==T,.SD,,.SDcols = names(input_dt)[names(input_dt)!="error_model"]]
+
   #Rename objects
   all_variants <- input_dt
-  wildtype <- all_variants[WT==T,,,.SDcols = names(all_variants)[!grepl("^count_", names(all_variants))]]
+  wildtype <- all_variants[WT==T]
   doubles <- doubles_dt
+
+  #Remove synonymous variants from all_variants for coding sequences
+  if(dimsum_meta[["sequenceType"]]=="coding"){  
+    all_variants <- all_variants[WT==T | Nham_aa>0]
+  }
 
   ### Output plain text files
   ###########################
 
   ##### finalize data.tables
-  silent <- data.table()
   singles <- data.table()
   singles_mavedb <- data.table()
   if(nrow(singles_dt)!=0){
     if(dimsum_meta[["sequenceType"]]=="coding"){
-      silent <- singles_dt[Nham_aa==0,.(Pos,WT_AA,Mut,nt_seq,aa_seq,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
       singles <- singles_dt[Nham_aa==1,.(Pos,WT_AA,Mut,nt_seq,aa_seq,Nham_nt,Nham_aa,Nmut_codons,STOP,STOP_readthrough,mean_count,fitness,sigma)]
       singles_mavedb <- singles[,.(hgvs_pro = NA, score = fitness, se = sigma)]
       singles_mavedb[, hgvs_pro := paste0("p.", aa_list[singles[,WT_AA]], singles[,Pos], aa_list[singles[,Mut]])]
@@ -189,7 +196,7 @@ dimsum__merge_fitness <- function(
     #write data to files
     write.table(x = wildtype, file = file.path(fitness_outpath, "fitness_wildtype.txt"),
                 quote = F,row.names = F, col.names = T)
-    write.table(x = silent, file = file.path(fitness_outpath, "fitness_silent.txt"),
+    write.table(x = synonymous, file = file.path(fitness_outpath, "fitness_synonymous.txt"),
                 quote = F,row.names = F, col.names = T)
     write.table(x = singles, file = file.path(fitness_outpath, "fitness_singles.txt"),
                 quote = F,row.names = F, col.names = T)
@@ -220,11 +227,11 @@ dimsum__merge_fitness <- function(
   ###########################
 
   if(dimsum_meta[["sequenceType"]]=="coding"){
-    save(all_variants, wildtype, silent, singles, doubles, 
+    save(all_variants, wildtype, synonymous, singles, doubles,
       file = file.path(fitness_outpath, paste0(dimsum_meta[["projectName"]], '_fitness_replicates.RData')),
       version = 2)
   }else{
-    save(all_variants, wildtype, singles, doubles, 
+    save(all_variants, wildtype, singles, doubles,
       file = file.path(fitness_outpath, paste0(dimsum_meta[["projectName"]], '_fitness_replicates.RData')),
       version = 2)
   }
