@@ -68,7 +68,7 @@ Your file must have the following columns:
 
 ## Synonym Sequences File
 
-**OPTIONAL:** In order to obtain fitness and error estimates for synonymous substitution variants corresponding to additional reference variants (other than the wild-type), simply include them in a plain text file with one nucleotide sequence per line (single column, no header, A/C/G/T characters only). You can download [this](../examples/example_synonymSequences.txt) file to use as a template. 
+**OPTIONAL:** In order to obtain fitness and error estimates for synonymous substitution variants corresponding to additional reference variants (other than the wild-type), simply include them in a plain text file with one coding nucleotide sequence per line (single column, no header, A/C/G/T characters only). You can download [this](../examples/example_synonymSequences.txt) file to use as a template. 
 
 ## Output Files
 
