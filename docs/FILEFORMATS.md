@@ -10,6 +10,7 @@
 * **[Variant Count File](#variant-count-file)**
 * **[Barcode Design File](#barcode-design-file)**
 * **[Variant Identity File](#variant-identity-file)**
+* **[Synonym Sequences File](#synonym-sequences-file)**
 * **[Output Files](#output-files)**
 
 ## Experimental Design File 
@@ -57,6 +58,10 @@ Your file must have the following columns:
 
 When including a Barcode Design File, ensure that all 'new_pair_prefix' column entries correspond to 'pair1' and 'pair2' column entries in the [Experimental Design File](#experimental-design-file) by appending '1.fastq' and '2.fastq' to the prefix for the first and second read respectively.
 
+## Synonym Sequences File
+
+**OPTIONAL:** In order to obtain fitness and error estimates for synonymous substitution variants corresponding to additional reference variants (other than the wild-type), simply include them in a plain text file with one nucleotide sequence per line (single column, no header, A/C/G/T characters only). You can download [this](../examples/example_synonymSequences.txt) file to use as a template. 
+
 ## Variant Identity File
 
 **OPTIONAL:** If the supplied sequences (supplied in the [FASTQ Files](#fastq-files) or [Variant Count File](#variant-count-file)) contain variant barcodes, DiMSum requires a table (e.g. using Microsoft Excel) describing how barcodes map to variants that has been saved as tab-separated plain text file (see [arguments](ARGUMENTS.md#barcoded-library-design)). You can download [this](../examples/example_variantIdentity.txt) file to use as a template. 
@@ -78,7 +83,7 @@ Additional output files:
 * **fitness_wildtype.txt** Wild-type fitness score and associated error.
 * **fitness_singles.txt** Single amino acid or nucleotide substitution variant fitness scores and associated errors.
 * **fitness_doubles.txt** Double amino acid or nucleotide substitution variant fitness scores and associated errors.
-* **fitness_silent.txt** Silent (synonymous) substitution variant fitness scores and associated errors (for coding sequences only).
+* **fitness_synonymous.txt** Synonymous substitution variant fitness scores and associated errors (for coding sequences only).
 * **fitness_singles_MaveDB.csv** [MaveDB](https://www.mavedb.org/) compatible .csv file with single amino acid or nucleotide substitution variant fitness scores and associated errors.
 * **DiMSum_Project_variant_data_merge.tsv** Tab-separated plain text file with variant counts and statistics.
 * **DiMSum_Project_nobarcode_variant_data_merge.tsv** Tab-separated plain text file with sequenced barcodes that were not found in the variant identity file.
