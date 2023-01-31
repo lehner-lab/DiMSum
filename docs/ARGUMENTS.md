@@ -90,6 +90,10 @@
 
 * **_--barcodeIdentityPath_** Path to [Variant Identity File](FILEFORMATS.md#variant-identity-file) (tab-separated plain text file mapping barcodes to variants)
 
+## Alternative Reference Sequences
+
+* **_--synonymSequencePath_** Path to [Synonym Sequences File](FILEFORMATS.md#synonym-sequences-file) (plain text file with one coding nucleotide sequence per line)
+
 ## Trans Library Design
 
 * **_--transLibrary_** Paired-end reads correspond to distinct molecules? (default:F)

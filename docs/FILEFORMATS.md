@@ -19,7 +19,7 @@
 
 Your file must have the following columns:
 * **sample_name** A sensible sample name e.g. 'input1' (alphanumeric characters only).
-* **experiment_replicate** An integer identifier denoting distinct experiments (e.g. distinct plasmid library transformations) i.e. a set of input and output replicates originating from the same input biological replicate (strictly positive integer).
+* **experiment_replicate** An integer identifier denoting distinct experiments (e.g. distinct plasmid library transformations) i.e. a set of input and output replicates originating from the same input biological replicate (strictly positive integer 1-9). DiMSum can only handle up to 9 experiment replicates in a single run.
 * **selection_id** An integer inidicating whether samples were sequenced before (0) or after (1) selection.
 * **selection_replicate** (Output samples only) An integer denoting distinct replicate selections (or biological output replicates) each derived from the same input sample (strictly positive integer). Entries should be blank (empty string) for all input samples (each input sample corresponds to a unique experiment).
 * **technical_replicate** An integer denoting technical replicates (a strictly positive integer) corresponding to sample re-sequencing i.e. extracted DNA originating from the same sample split between separate sequencing lanes or files. Leave this column blank (empty string) when no technical replicates are present.
@@ -58,10 +58,6 @@ Your file must have the following columns:
 
 When including a Barcode Design File, ensure that all 'new_pair_prefix' column entries correspond to 'pair1' and 'pair2' column entries in the [Experimental Design File](#experimental-design-file) by appending '1.fastq' and '2.fastq' to the prefix for the first and second read respectively.
 
-## Synonym Sequences File
-
-**OPTIONAL:** In order to obtain fitness and error estimates for synonymous substitution variants corresponding to additional reference variants (other than the wild-type), simply include them in a plain text file with one nucleotide sequence per line (single column, no header, A/C/G/T characters only). You can download [this](../examples/example_synonymSequences.txt) file to use as a template. 
-
 ## Variant Identity File
 
 **OPTIONAL:** If the supplied sequences (supplied in the [FASTQ Files](#fastq-files) or [Variant Count File](#variant-count-file)) contain variant barcodes, DiMSum requires a table (e.g. using Microsoft Excel) describing how barcodes map to variants that has been saved as tab-separated plain text file (see [arguments](ARGUMENTS.md#barcoded-library-design)). You can download [this](../examples/example_variantIdentity.txt) file to use as a template. 
@@ -69,6 +65,10 @@ When including a Barcode Design File, ensure that all 'new_pair_prefix' column e
 Your file must have the following columns:
 * **barcode** DNA barcode (A/C/G/T characters only).
 * **variant** Associated DNA variant (A/C/G/T characters only).
+
+## Synonym Sequences File
+
+**OPTIONAL:** In order to obtain fitness and error estimates for synonymous substitution variants corresponding to additional reference variants (other than the wild-type), simply include them in a plain text file with one coding nucleotide sequence per line (single column, no header, A/C/G/T characters only). You can download [this](../examples/example_synonymSequences.txt) file to use as a template. 
 
 ## Output Files
 
