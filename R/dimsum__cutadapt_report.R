@@ -62,7 +62,7 @@ dimsum__cutadapt_report <- function(
   #First read
   cutadapt_read1_df <- as.data.frame(do.call('rbind', cutadapt_read1_list))
   colnames(cutadapt_read1_df) <- c('five_prime', 'three_prime', 'both', 'total_reads')
-  cutadapt_read1_df[,'fastq'] <- sapply(strsplit(rownames(cutadapt_read1_df), '.split'), '[', 1)
+  cutadapt_read1_df[,'fastq'] <- rownames(cutadapt_read1_df)
   cutadapt_read1_df_collapse <- plyr::ddply(cutadapt_read1_df, "fastq", plyr::summarise, 
     five_prime = sum(five_prime), 
     three_prime = sum(three_prime), 
@@ -84,7 +84,7 @@ dimsum__cutadapt_report <- function(
   if(dimsum_meta[["paired"]]){
     cutadapt_read2_df <- as.data.frame(do.call('rbind', cutadapt_read2_list))
     colnames(cutadapt_read2_df) <- c('five_prime', 'three_prime', 'both', 'total_reads')
-    cutadapt_read2_df[,'fastq'] <- sapply(strsplit(rownames(cutadapt_read2_df), '.split'), '[', 1)
+    cutadapt_read2_df[,'fastq'] <- rownames(cutadapt_read2_df)
     cutadapt_read2_df_collapse <- plyr::ddply(cutadapt_read2_df, "fastq", plyr::summarise, 
       five_prime = sum(five_prime), 
       three_prime = sum(three_prime), 

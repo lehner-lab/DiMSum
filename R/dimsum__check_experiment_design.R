@@ -71,10 +71,10 @@ dimsum__check_experiment_design <- function(
   # if(length(unique(exp_design[,"experiment_replicate"]))<2){
   #   stop(paste0("One or more invalid 'experiment_replicate' values in experimentDesign file (at least two replicates required)"), call. = FALSE)
   # }
-  #Check that less than 10 experimental replicates exist (more than 9 not supported)
-  if(length(unique(exp_design[,"experiment_replicate"]))>9){
-    stop(paste0("One or more invalid 'experiment_replicate' values in experimentDesign file (more than 9 not supported)"), call. = FALSE)
-  }
+  # #Check that less than 10 experimental replicates exist (more than 9 not supported)
+  # if(length(unique(exp_design[,"experiment_replicate"]))>9){
+  #   stop(paste0("One or more invalid 'experiment_replicate' values in experimentDesign file (more than 9 not supported)"), call. = FALSE)
+  # }
 
   ### Selection id checks (selection_id column)
   #Check selection_id strictly positive integer (zero inclusive)

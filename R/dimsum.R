@@ -291,19 +291,13 @@ dimsum <- function(
   ### Stage 0 (WRAP): Run demultiplex on all fastq files
   pipeline[['0_demultiplex']] <- dimsum_stage_demultiplex(dimsum_meta = pipeline[['initial']], demultiplex_outpath = file.path(pipeline[['initial']][["tmp_path"]], "0_demultiplex"))
 
-  ### Stage 1.1 (WRAP): Run FASTQC on all fastq files
+  ### Stage 1 (WRAP): Run FASTQC on all fastq files
   pipeline[['1_qualitycontrol']] <- dimsum_stage_fastqc(dimsum_meta = pipeline[['0_demultiplex']], fastqc_outpath = file.path(pipeline[['0_demultiplex']][["tmp_path"]], "1_qualitycontrol"), 
     report_outpath = file.path(pipeline[['0_demultiplex']][["project_path"]], "reports"))
 
-  ### Stage 1.2 (WRAP): Unzip FASTQ files if necessary
-  pipeline[['1_unzip']] <- dimsum_stage_unzip(dimsum_meta = pipeline[['1_qualitycontrol']], fastq_outpath = file.path(pipeline[['1_qualitycontrol']][["tmp_path"]], "1_unzip"))
-
-  ### Stage 1.3 (WRAP): Split FASTQ files
-  pipeline[['1_split']] <- dimsum_stage_split(dimsum_meta = pipeline[['1_unzip']], split_outpath = file.path(pipeline[['1_unzip']][["tmp_path"]], "1_split"))
-
   ### Stage 2 (WRAP): Remove constant regions from FASTQ files with cutadapt if necessary
-  pipeline[['2_trim']] <- dimsum_stage_cutadapt(dimsum_meta = pipeline[['1_split']], cutadapt_outpath = file.path(pipeline[['1_split']][["tmp_path"]], "2_trim"), 
-    report_outpath = file.path(pipeline[['1_split']][["project_path"]], "reports"))
+  pipeline[['2_trim']] <- dimsum_stage_cutadapt(dimsum_meta = pipeline[['1_qualitycontrol']], cutadapt_outpath = file.path(pipeline[['1_qualitycontrol']][["tmp_path"]], "2_trim"), 
+    report_outpath = file.path(pipeline[['1_qualitycontrol']][["project_path"]], "reports"))
 
   ### Stage 3.1 (WRAP): Merge paired-end reads with VSEARCH
   pipeline[['3_align']] <- dimsum_stage_vsearch(dimsum_meta = pipeline[['2_trim']], vsearch_outpath = file.path(pipeline[['2_trim']][["tmp_path"]], "3_align"), 

@@ -114,9 +114,14 @@ dimsum__validate_input <- function(
     stop("Invalid 'permittedSequences' argument. Only valid nucleotide codes allowed (A/C/G/T/R/Y/S/W/K/M/B/D/H/V/N).", call. = FALSE)
   }
 
-  #Check strictly positive integer vsearch... arguments
-  if(sum(unlist(dimsum_meta[c("vsearchMinQual", "vsearchMinovlen")])<=0)!=0){
-    stop("Invalid 'vsearch...' arguments. Only positive integers allowed (zero exclusive).", call. = FALSE)
+  #Check strictly positive integer vsearchMinQual arguments
+  if(dimsum_meta[["vsearchMinQual"]]<=0){
+    stop("Invalid 'vsearchMinQual' argument. Only positive integers allowed (zero exclusive).", call. = FALSE)
+  }
+
+  #Check strictly positive integer vsearchMinovlen arguments
+  if(dimsum_meta[["vsearchMinovlen"]]<5){
+    stop("Invalid 'vsearchMinovlen' argument. Only integers greater than 4 allowed.", call. = FALSE)
   }
 
   #Check positive integer fitnessHighConfidenceCount and fitnessDoubleHighConfidenceCount arguments

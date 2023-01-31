@@ -18,9 +18,9 @@ dimsum__writeFastq <- function(
     if(file.exists(outputFile)){
       stop("file output path exists", call. = FALSE)
     }else{
-      ShortRead::writeFastq(shortreads, outputFile, mode="w", compress=FALSE, full = FALSE)
+      ShortRead::writeFastq(shortreads, outputFile, mode="w", compress=TRUE, full = FALSE)
     }
   }else{
-    ShortRead::writeFastq(shortreads, outputFile, mode="a", compress=FALSE, full = FALSE)
+    ShortRead::writeFastq(shortreads, outputFile, mode="a", compress=TRUE, full = FALSE)
   }
 }

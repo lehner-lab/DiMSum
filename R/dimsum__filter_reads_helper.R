@@ -11,9 +11,9 @@ dimsum__filter_reads_helper <- function(
   i
   ){
   temp_out <- dimsum__filter_reads(
-    input_FASTQ = file.path(vsearch_outpath, paste0(sample_names[i], '.vsearch.prefilter')),
+    input_FASTQ = file.path(vsearch_outpath, paste0(sample_names[i], '.vsearch.prefilter.gz')),
     input_REPORT = file.path(vsearch_outpath, paste0(sample_names[i], '.report.prefilter')),
-    output_FASTQ = file.path(vsearch_outpath, paste0(sample_names[i], '.vsearch')),
+    output_FASTQ = file.path(vsearch_outpath, paste0(sample_names[i], '.vsearch.gz')),
     output_REPORT = file.path(vsearch_outpath, paste0(sample_names[i], '.report')),
     min_qual = dimsum_meta[["vsearchMinQual"]])
 }

@@ -61,7 +61,7 @@ dimsum_stage_cutadapt <- function(
   #Check if all input files exist
   if(!dimsum_meta[["stranded"]] & dimsum_meta[["paired"]]){
     #Input files (after swapping)
-    swap_fastq <- file.path(cutadapt_outpath, unique(c(paste0(dimsum_meta[['exp_design']][,"pair1"], ".cutadapt2"), paste0(dimsum_meta[['exp_design']][,"pair1"], ".cutadapt2"))))
+    swap_fastq <- file.path(cutadapt_outpath, unique(c(paste0(dimsum_meta[['exp_design']][,"pair1"], ".cutadapt2.gz"), paste0(dimsum_meta[['exp_design']][,"pair1"], ".cutadapt2.gz"))))
     dimsum__check_files_exist(
       required_files = swap_fastq,
       stage_number = this_stage,
@@ -85,11 +85,11 @@ dimsum_stage_cutadapt <- function(
         #Copy files  
         file.copy(
           from = file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
-          to = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt")))
+          to = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz")))
         if(dimsum_meta[["paired"]]){
           file.copy(
             from = file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
-            to = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt")))
+            to = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt.gz")))
           #Total number of FASTQ records
           temp_out <- system(paste0(
             "wc -l ",
@@ -97,14 +97,14 @@ dimsum_stage_cutadapt <- function(
             " ",
             file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
             " > ",
-            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.stdout")))) 
+            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz.stdout")))) 
         }else{
           #Total number of FASTQ records
           temp_out <- system(paste0(
             "wc -l ",
             file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
             " > ",
-            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.stdout")))) 
+            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz.stdout")))) 
         }
       #Not stranded library (and paired-end)
       }else if( !dimsum_meta[["stranded"]] & dimsum_meta[["paired"]]){
@@ -121,17 +121,17 @@ dimsum_stage_cutadapt <- function(
           " -j ",
           dimsum_meta[['numCores']],
           " -o ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt")),
+          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz")),
           " -p ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt")),
+          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt.gz")),
           " ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt2")),
+          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt2.gz")),
           " ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt2")),
+          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt2.gz")),
           " > ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.stdout")),
+          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz.stdout")),
           " 2> ",
-          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.stderr")))) 
+          file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz.stderr")))) 
       #Stranded library   
       }else{
         if(dimsum_meta[["paired"]]){
@@ -148,17 +148,17 @@ dimsum_stage_cutadapt <- function(
             " -j ",
             dimsum_meta[['numCores']],
             " -o ",
-            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt")),
+            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz")),
             " -p ",
-            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt")),
+            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt.gz")),
             " ",
             file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
             " ",
             file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
             " > ",
-            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.stdout")),
+            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz.stdout")),
             " 2> ",
-            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.stderr"))))
+            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz.stderr"))))
         }else{
           temp_out <- system(paste0(
             "cutadapt",
@@ -173,13 +173,13 @@ dimsum_stage_cutadapt <- function(
             " -j ",
             dimsum_meta[['numCores']],
             " -o ",
-            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt")),
+            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz")),
             " ",
             file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
             " > ",
-            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.stdout")),
+            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz.stdout")),
             " 2> ",
-            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.stderr"))))          
+            file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz.stderr"))))          
         }
       }
     }
@@ -187,7 +187,7 @@ dimsum_stage_cutadapt <- function(
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Update fastq metadata
-  temp_suffix <- ".cutadapt"
+  temp_suffix <- ".cutadapt.gz"
   dimsum_meta_new[["exp_design"]][,"pair1"] <- paste0(dimsum_meta_new[["exp_design"]][,"pair1"], temp_suffix)
   dimsum_meta_new[["exp_design"]][,"pair2"] <- paste0(dimsum_meta_new[["exp_design"]][,"pair2"], temp_suffix)
   dimsum_meta_new[['exp_design']][,"pair_directory"] <- cutadapt_outpath
@@ -199,8 +199,8 @@ dimsum_stage_cutadapt <- function(
     }else{
       dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], 
         file.path(cutadapt_outpath, dir(cutadapt_outpath, "*.fastq$")),
-        file.path(cutadapt_outpath, dir(cutadapt_outpath, "*.cutadapt$")),
-        file.path(cutadapt_outpath, dir(cutadapt_outpath, "*.cutadapt2$")))
+        file.path(cutadapt_outpath, dir(cutadapt_outpath, "*.cutadapt.gz$")),
+        file.path(cutadapt_outpath, dir(cutadapt_outpath, "*.cutadapt2.gz$")))
     }
   }
   #Generate cutadapt report

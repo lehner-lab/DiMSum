@@ -30,7 +30,7 @@ dimsum__bayesian_double_fitness <- function(
   lam_d <- dimsum_meta[["bayesianDoubleFitnessLamD"]]
 
   #Number of input and output replicates
-  all_reps_str <- paste0(all_reps, collapse="")
+  all_reps_str <- paste0(all_reps, collapse="|")
 
   #Plot fitness densities for different mean count bins (replicate 1)
   doubles_dt[,fitness_for_bins := .SD[[1]],,.SDcols = paste0("fitness",all_reps[1],"_uncorr")]
@@ -123,14 +123,14 @@ dimsum__bayesian_double_fitness <- function(
     #Scatterplot matrix - doubles, uncorrected
     set.seed(1)
     d <- GGally::ggpairs(doubles_dt[apply(abs(doubles_dt[,.SD,,.SDcols = paste0("fitness",all_reps,"_uncorr")])==Inf, 1, sum)==0
-      ][sample(x = .N,min(c(.N,1000))),grep(names(doubles_dt),pattern=paste0("fitness[", all_reps_str, "]_uncorr")),with=F],
+      ][sample(x = .N,min(c(.N,1000))),grep(names(doubles_dt),pattern=paste0("fitness(", all_reps_str, ")_uncorr")),with=F],
       upper=list(continuous = "cor"))
     dimsum__save_png(file.path(report_outpath, "dimsum_stage_fitness_report_4_doubles_bayesian_framework_scattermatrix_doubles_uncorr.png"), d, width = 10, height = 10)
 
     #Scatterplot matrix - doubles, conditional
     set.seed(1)
     d <- GGally::ggpairs(doubles_dt[apply(abs(doubles_dt[,.SD,,.SDcols = paste0("fitness",all_reps,"_cond")])==Inf, 1, sum)==0
-      ][sample(x = .N,min(c(.N,1000))),grep(names(doubles_dt),pattern=paste0("fitness[", all_reps_str, "]_cond")),with=F],
+      ][sample(x = .N,min(c(.N,1000))),grep(names(doubles_dt),pattern=paste0("fitness(", all_reps_str, ")_cond")),with=F],
       upper=list(continuous = "cor"))
     dimsum__save_png(file.path(report_outpath, "dimsum_stage_fitness_report_4_doubles_bayesian_framework_scattermatrix_doubles_cond.png"), d, width = 10, height = 10)
   }

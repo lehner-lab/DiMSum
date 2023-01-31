@@ -132,9 +132,15 @@ dimsum__get_experiment_design <- function(
     }
   }
 
+  #Add .gz extension to demultiplexed FASTQ file names for backwards compatibility
+  if(!is.null(dimsum_meta[["barcodeDesignPath"]])){
+    exp_design[,"pair1"] = paste0(exp_design[,"pair1"], c(".gz", "")[as.numeric(grepl(".gz$", exp_design[,"pair1"]))+1])
+    exp_design[,"pair2"] = paste0(exp_design[,"pair2"], c(".gz", "")[as.numeric(grepl(".gz$", exp_design[,"pair2"]))+1])
+  }
+
   #Check that all FASTQ file prefices exist in barcodeDesign file (if barcodeDesignPath supplied)
   if(!is.null(dimsum_meta[["barcodeDesignPath"]])){
-    all_prefices <- unique(gsub("1.fastq|2.fastq", "", unlist(exp_design[,c("pair1", "pair2")])))
+    all_prefices <- unique(gsub("1.fastq.gz|2.fastq.gz", "", unlist(exp_design[,c("pair1", "pair2")])))
     if(sum(!all_prefices %in% dimsum_meta[["barcode_design"]][,"new_pair_prefix"])!=0){
       stop(paste0("One or more FASTQ file names in experimentDesign file didn't match a 'new_pair_prefix' value in barcodeDesign file"), call. = FALSE)
     }

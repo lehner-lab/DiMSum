@@ -33,7 +33,7 @@ dimsum__check_countfile <- function(
   #Set nucleotide sequence to lower case
   input_dt[, nt_seq := tolower(nt_seq)]
   #Check nucleotide sequences are valid (ACGT characters only)
-  if(sum(!input_dt[,unique(unlist(strsplit(nt_seq, "")))] %in% c('a', 'c', 'g', 't'))!=0){
+  if(sum(input_dt[,grepl("[^acgt]", nt_seq)])!=0){
     stop("One or more invalid 'nt_seq' values in variant count file specified by 'countPath'. Only valid nucleotide sequences allowed (A/C/T/G).", call. = FALSE)
   }
 

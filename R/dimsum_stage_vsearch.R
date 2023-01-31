@@ -49,8 +49,9 @@ dimsum_stage_vsearch <- function(
     dimsum_meta[["exp_design"]][,"experiment"], '_s', 
     dimsum_meta[["exp_design"]][,"selection_id"], '_b', 
     dimsum_meta[["exp_design"]][,"biological_replicate"], '_t', 
-    dimsum_meta[["exp_design"]][,"technical_replicate"], '_split', 
-    dimsum_meta[["exp_design"]][,"split"], sep = "")
+    dimsum_meta[["exp_design"]][,"technical_replicate"], sep = "")
+    # dimsum_meta[["exp_design"]][,"technical_replicate"], '_split', 
+    # dimsum_meta[["exp_design"]][,"split"], sep = "")
 
   #Additional vsearch options related to alignment length
   temp_options <- paste0(' -fastq_minovlen ', dimsum_meta[["vsearchMinovlen"]])
@@ -96,8 +97,7 @@ dimsum_stage_vsearch <- function(
           file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair1"]),
           " -reverse ",
           file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair2"]),
-          " -fastqout ",
-          file.path(vsearch_outpath, paste0(sample_names[i], '.vsearch.prefilter')),
+          " -fastqout - ",
           " -quiet ",
           # " -fastq_minqual ",
           # as.character(dimsum_meta[["vsearchMinQual"]]),
@@ -109,17 +109,17 @@ dimsum_stage_vsearch <- function(
           " -threads ",
           dimsum_meta[['numCores']],
           " --fastq_allowmergestagger ",
-          " > ",
-          file.path(vsearch_outpath, paste0(sample_names[i], '.vsearch.stdout')),
           " 2> ",
-          file.path(vsearch_outpath, paste0(sample_names[i], '.report.prefilter'))))
+          file.path(vsearch_outpath, paste0(sample_names[i], '.report.prefilter')),
+          " | gzip > ",
+          file.path(vsearch_outpath, paste0(sample_names[i], '.vsearch.prefilter.gz'))))
       }
     }
     dimsum__status_message("Filtering aligned reads...\n")
     if(execute){
       #Input files
       input_files <- c(
-        file.path(vsearch_outpath, paste0(sample_names, '.vsearch.prefilter')),
+        file.path(vsearch_outpath, paste0(sample_names, '.vsearch.prefilter.gz')),
         file.path(vsearch_outpath, paste0(sample_names, '.report.prefilter')))
       #Check if all input files exist
       dimsum__check_files_exist(
@@ -137,7 +137,7 @@ dimsum_stage_vsearch <- function(
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
   #Merged fastq filenames
-  dimsum_meta_new[["exp_design"]][,"aligned_pair"] <- paste0(sample_names, ".vsearch")
+  dimsum_meta_new[["exp_design"]][,"aligned_pair"] <- paste0(sample_names, ".vsearch.gz")
   dimsum_meta_new[['exp_design']][,"aligned_pair_directory"] <- vsearch_outpath
   #Delete files when last stage complete
   if(!dimsum_meta_new[["retainIntermediateFiles"]]){
@@ -147,8 +147,8 @@ dimsum_stage_vsearch <- function(
     }else{
       dimsum_meta_new[["deleteIntermediateFiles"]] <- c(
         dimsum_meta_new[["deleteIntermediateFiles"]], 
-        file.path(vsearch_outpath, dir(vsearch_outpath, "*.vsearch$")),
-        file.path(vsearch_outpath, dir(vsearch_outpath, "*.vsearch.prefilter$")))
+        file.path(vsearch_outpath, dir(vsearch_outpath, "*.vsearch.gz$")),
+        file.path(vsearch_outpath, dir(vsearch_outpath, "*.vsearch.prefilter.gz$")))
     }
   }
   #Generate vsearch report

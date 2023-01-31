@@ -29,13 +29,13 @@ dimsum__swap_reads <- function(
       " -e ",
       as.character(dimsum_meta[['exp_design']][i,"cutadaptErrorRate"]),
       " --untrimmed-output ",
-      file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.untrimmed.fastq")),
+      file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.untrimmed.fastq.gz")),
       " --untrimmed-paired-output ",
-      file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt.untrimmed.fastq")),
+      file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt.untrimmed.fastq.gz")),
       " -o ",
-      file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt1-{name}.fastq")),
+      file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt1-{name}.fastq.gz")),
       " -p ",
-      file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt1-{name}.fastq")),
+      file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt1-{name}.fastq.gz")),
       " ",
       file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
       " ",
@@ -46,24 +46,24 @@ dimsum__swap_reads <- function(
       file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt1.stderr"))))
     #New read1 file
     file.copy(
-      from = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt1-reverse.fastq")),
-      to = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt2")))
+      from = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt1-reverse.fastq.gz")),
+      to = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt2.gz")))
     file.append(
-      file1 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt2")),
-      file2 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt1-forward.fastq")))
+      file1 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt2.gz")),
+      file2 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt1-forward.fastq.gz")))
     file.append(
-      file1 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt2")),
-      file2 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.untrimmed.fastq")))
+      file1 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt2.gz")),
+      file2 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.untrimmed.fastq.gz")))
     #New read2 file
     file.copy(
-      from = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt1-reverse.fastq")),
-      to = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt2")))
+      from = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt1-reverse.fastq.gz")),
+      to = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt2.gz")))
     file.append(
-      file1 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt2")),
-      file2 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt1-forward.fastq")))
+      file1 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt2.gz")),
+      file2 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt1-forward.fastq.gz")))
     file.append(
-      file1 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt2")),
-      file2 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt.untrimmed.fastq")))
+      file1 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt2.gz")),
+      file2 = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt.untrimmed.fastq.gz")))
   }
   # Setup cluster
   clust <- parallel::makeCluster(dimsum_meta[['numCores']])

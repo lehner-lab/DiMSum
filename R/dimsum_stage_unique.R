@@ -49,22 +49,16 @@ dimsum_stage_unique <- function(
   for(i in 1:dim(dimsum_meta[["exp_design"]])[1]){dimsum__status_message(paste0("\t", dimsum_meta[["exp_design"]][i,"aligned_pair"], "\n"))}
   #Check if this system command should be executed
   if(execute){
-    # Setup cluster
-    clust <- parallel::makeCluster(dimsum_meta[['numCores']])
-    # make variables available to each core's workspace
-    parallel::clusterExport(clust, list("dimsum_meta","unique_outpath"), envir = environment())
-    parallel::parSapply(clust,X = 1:length(unique(dimsum_meta[["exp_design"]][,"sample_code"])), dimsum__unique_helper)
-    parallel::stopCluster(clust)
     #Run starcode to count unique variants
     for(this_sample_code in unique(dimsum_meta[["exp_design"]][,"sample_code"])){
       read_pairs <- dimsum_meta[["exp_design"]][dimsum_meta[["exp_design"]][,"sample_code"]==this_sample_code,"aligned_pair"]
-      output_file1 <- gsub("_split1.vsearch$", ".vsearch", read_pairs[1])
-      output_file2 <- gsub("_split1.vsearch$", ".vsearch.unique", read_pairs[1])
+      output_file1 <- read_pairs[1]
+      output_file2 <- gsub(".vsearch.gz$", ".vsearch.unique", read_pairs[1])
       temp_out <- system(paste0(
-        "starcode -d 0 -s -t ",
+        "gunzip -c ",
+        file.path(dimsum_meta[["exp_design"]][,"aligned_pair_directory"][1], output_file1),
+        " | starcode -d 0 -s -t ",
         dimsum_meta[['numCores']],
-        " -i ",
-        file.path(unique_outpath, output_file1),
         " -o ",
         file.path(unique_outpath, output_file2),
         " > ",
@@ -75,7 +69,7 @@ dimsum_stage_unique <- function(
   }
   #New experiment metadata
   dimsum_meta_new <- dimsum_meta
-  dimsum_meta_new[["exp_design"]][,"aligned_pair_unique"] <- gsub("_split.*.vsearch$", ".vsearch.unique", dimsum_meta_new[["exp_design"]][,"aligned_pair"])
+  dimsum_meta_new[["exp_design"]][,"aligned_pair_unique"] <- gsub(".vsearch.gz$", ".vsearch.unique", dimsum_meta_new[["exp_design"]][,"aligned_pair"])
   dimsum_meta_new[['exp_design']][,"aligned_pair_unique_directory"] <- unique_outpath
   #Delete files when last stage complete
   if(!dimsum_meta_new[["retainIntermediateFiles"]]){
@@ -84,7 +78,7 @@ dimsum_stage_unique <- function(
       if(!is.null(dimsum_meta_new[["touchIntermediateFiles"]])){suppressWarnings(temp_out <- file.create(dimsum_meta_new[["touchIntermediateFiles"]]))}
     }else{
       dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], 
-        file.path(unique_outpath, dir(unique_outpath, "*.vsearch$")),
+        file.path(unique_outpath, dir(unique_outpath, "*.vsearch.gz$")),
         file.path(unique_outpath, dir(unique_outpath, "*.unique$")))
     }
   }

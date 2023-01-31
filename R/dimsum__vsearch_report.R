@@ -18,7 +18,7 @@ dimsum__vsearch_report <- function(
   suppressWarnings(dir.create(report_outpath))
 
   #Input files
-  vsearch_files <- file.path(dimsum_meta[['exp_design']][,'aligned_pair_directory'], gsub('.vsearch$', '.report', dimsum_meta[['exp_design']][,'aligned_pair']))
+  vsearch_files <- file.path(dimsum_meta[['exp_design']][,'aligned_pair_directory'], gsub('.vsearch.gz$', '.report', dimsum_meta[['exp_design']][,'aligned_pair']))
   #Check if all input files exist
   dimsum__check_files_exist(
     required_files = vsearch_files,
@@ -53,7 +53,7 @@ dimsum__vsearch_report <- function(
   vsearch_df <- cbind(dimsum_meta[['exp_design']][,c('aligned_pair', 'total_read_pairs')], vsearch_df)
   vsearch_df[,'cutadapt_not_written'] <- vsearch_df[,'total_read_pairs'] - vsearch_df[,'vsearch_total_read_pairs']
   #Plot 1: read pair count statistics
-  vsearch_df[,'pairname'] <- dimsum__plot_samplename(sapply(strsplit(vsearch_df[,'aligned_pair'], '.split'), '[', 1))
+  vsearch_df[,'pairname'] <- dimsum__plot_samplename(sapply(strsplit(vsearch_df[,'aligned_pair'], '.vsearch.gz'), '[', 1))
   vsearch_df_collapse <- plyr::ddply(vsearch_df, "pairname", plyr::summarise, 
     total_read_pairs = sum(total_read_pairs), 
     vsearch_aligned = sum(vsearch_merged), 
@@ -81,7 +81,7 @@ dimsum__vsearch_report <- function(
   plot_df <- reshape2::melt(vsearch_df[,grep('pairname|vsearch_merge_', colnames(vsearch_df))], id="pairname")
   plot_df[,'Length_quantile'] <- factor(plot_df[,'variable'])
   d <- ggplot2::ggplot(plot_df, ggplot2::aes(pairname, value)) +
-    ggplot2::geom_boxplot(ggplot2::aes(color = Length_quantile)) +
+    ggplot2::geom_point(ggplot2::aes(color = Length_quantile)) +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
     # ggplot2::coord_cartesian(ylim = c(0, max(plot_df[,'value'], na.rm = T))) +

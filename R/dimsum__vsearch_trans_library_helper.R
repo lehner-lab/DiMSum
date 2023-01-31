@@ -13,7 +13,7 @@ dimsum__vsearch_trans_library_helper <- function(
   temp_out <- dimsum__concatenate_reads(
     input_FASTQ1 = file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair1"]),
     input_FASTQ2 = file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[["exp_design"]][i,"pair2"]),
-    output_FASTQ = file.path(vsearch_outpath, paste0(sample_names[i], '.vsearch')),
+    output_FASTQ = file.path(vsearch_outpath, paste0(sample_names[i], '.vsearch.gz')),
     output_REPORT = file.path(vsearch_outpath, paste0(sample_names[i], '.report')),
     min_qual = dimsum_meta[["vsearchMinQual"]],
     max_ee = dimsum_meta[["vsearchMaxee"]],

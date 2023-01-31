@@ -26,20 +26,20 @@ dimsum__fit_error_model <- function(
   ){
 
   #Number of input and output replicates
-  all_reps_str <- paste0(all_reps, collapse="")
+  all_reps_str <- paste0(all_reps, collapse="|")
 
   #Fitness correction for normalisation (scaling) factors
   Fcorr <- NULL
   if(dimsum_meta[["fitnessNormalise"]]){
-    Fcorr <- unlist(norm_dt[,.SD,.SDcols = grep(paste0("scale_[", all_reps_str, "]"), names(norm_dt))])
+    Fcorr <- unlist(norm_dt[,.SD,.SDcols = grep(paste0("scale_(", all_reps_str, ")$"), names(norm_dt))])
   }
 
   #Set up fitting parameters
   Nreps <- length(all_reps)
   #Calculate all combinations of replicates of length >= 2
   idx <- list()
-  for(i in (nchar(all_reps_str)):2){
-    idx <- c(idx, combn(nchar(all_reps_str), i, function(x) list(x)))
+  for(i in (length(all_reps)):2){
+    idx <- c(idx, combn(length(all_reps), i, function(x) list(x)))
   }
 
   #Setup cluster

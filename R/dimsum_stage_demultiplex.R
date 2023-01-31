@@ -60,8 +60,8 @@ dimsum_stage_demultiplex <- function(
   if(dimsum_meta[["fastqFileExtension"]]!=".fastq"){
     for(pair_name in rownames(fastq_pair_list)){
       #New FASTQ file names
-      new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], fastq_pair_list[pair_name,][1])
-      new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], fastq_pair_list[pair_name,][2])
+      new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), ".fastq.gz", fastq_pair_list[pair_name,][1])
+      new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), ".fastq.gz", fastq_pair_list[pair_name,][2])
       #Update names in list
       fastq_pair_list[pair_name,][1] <- new_fastq_name1
       fastq_pair_list[pair_name,][2] <- new_fastq_name2
@@ -88,7 +88,7 @@ dimsum_stage_demultiplex <- function(
   dimsum_meta_new <- dimsum_meta
   #Delete files when last stage complete
   if(!dimsum_meta_new[["retainIntermediateFiles"]]){
-    dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], file.path(demultiplex_outpath, dir(demultiplex_outpath, "*.fastq$")))
+    dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], file.path(demultiplex_outpath, dir(demultiplex_outpath, "*.fastq.gz$")))
     if(dimsum_meta[["fastqFileExtension"]]!=".fastq"){
       dimsum_meta_new[["deleteIntermediateFiles"]] <- c(dimsum_meta_new[["deleteIntermediateFiles"]], unique(all_fastq))
     }
@@ -96,7 +96,6 @@ dimsum_stage_demultiplex <- function(
   #Update fastq metadata
   dimsum_meta_new[['exp_design']][,"pair_directory"] <- demultiplex_outpath
   dimsum_meta_new[["fastqFileExtension"]] <- ".fastq"
-  dimsum_meta_new[["gzipped"]] <- FALSE
   return(dimsum_meta_new)
 }
 

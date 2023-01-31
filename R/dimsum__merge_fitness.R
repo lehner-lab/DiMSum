@@ -33,18 +33,18 @@ dimsum__merge_fitness <- function(
   aa_list["*"] <- "*"
 
   #Number of input and output replicates
-  all_reps_str <- paste0(all_reps, collapse="")
+  all_reps_str <- paste0(all_reps, collapse="|")
 
   #### all variants
-  fitness_rx <- input_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]"),colnames(input_dt))]
-  sigma_rx <- input_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]"),colnames(input_dt))]
+  fitness_rx <- input_dt[,.SD,.SDcols = grep(paste0("fitness(", all_reps_str, ")_uncorr"),colnames(input_dt))]
+  sigma_rx <- input_dt[,.SD,.SDcols = grep(paste0("sigma(", all_reps_str, ")_uncorr"),colnames(input_dt))]
   input_dt[,fitness := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
   input_dt[,sigma := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
 
   #### singles
   if(nrow(singles_dt)!=0){
-    fitness_rx <- singles_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]"),colnames(singles_dt))]
-    sigma_rx <- singles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]"),colnames(singles_dt))]
+    fitness_rx <- singles_dt[,.SD,.SDcols = grep(paste0("fitness(", all_reps_str, ")$"),colnames(singles_dt))]
+    sigma_rx <- singles_dt[,.SD,.SDcols = grep(paste0("sigma(", all_reps_str, ")$"),colnames(singles_dt))]
     singles_dt[,fitness := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
     singles_dt[,sigma := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
   }
@@ -52,16 +52,16 @@ dimsum__merge_fitness <- function(
   #### doubles
   #uncorrected fitness
   if(nrow(doubles_dt)!=0){
-    fitness_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]_uncorr"),colnames(doubles_dt))]
-    sigma_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]_uncorr"),colnames(doubles_dt))]
+    fitness_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("fitness(", all_reps_str, ")_uncorr"),colnames(doubles_dt))]
+    sigma_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("sigma(", all_reps_str, ")_uncorr"),colnames(doubles_dt))]
     doubles_dt[,fitness_uncorr := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
     doubles_dt[,sigma_uncorr := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
   }
 
   #conditioned fitness
   if(dimsum_meta[["bayesianDoubleFitness"]] & nrow(doubles_dt)!=0){
-    fitness_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("fitness[", all_reps_str, "]_cond"),colnames(doubles_dt))]
-    sigma_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("sigma[", all_reps_str, "]_cond"),colnames(doubles_dt))]
+    fitness_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("fitness(", all_reps_str, ")_cond"),colnames(doubles_dt))]
+    sigma_rx <- doubles_dt[,.SD,.SDcols = grep(paste0("sigma(", all_reps_str, ")_cond"),colnames(doubles_dt))]
     doubles_dt[,fitness_cond := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
     doubles_dt[,sigma_cond := sqrt(1/rowSums(1/(sigma_rx^2),na.rm=T))]
   }

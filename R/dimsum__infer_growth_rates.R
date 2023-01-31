@@ -49,9 +49,9 @@ dimsum__infer_growth_rates <- function(
   }
 
   #Merge replicate growth rates and errors
-  all_reps_str <- paste0(all_reps, collapse="")
-  fitness_rx <- input_dt[,.SD,.SDcols = grep(paste0("growthrate[", all_reps_str, "]$"),colnames(input_dt))]
-  sigma_rx <- input_dt[,.SD,.SDcols = grep(paste0("growthrate[", all_reps_str, "]_sigma"),colnames(input_dt))]
+  all_reps_str <- paste0(all_reps, collapse="|")
+  fitness_rx <- input_dt[,.SD,.SDcols = grep(paste0("growthrate(", all_reps_str, ")$"),colnames(input_dt))]
+  sigma_rx <- input_dt[,.SD,.SDcols = grep(paste0("growthrate(", all_reps_str, ")_sigma"),colnames(input_dt))]
   input_dt[,growthrate := rowSums(fitness_rx/(sigma_rx^2),na.rm=T)/rowSums(1/(sigma_rx^2),na.rm=T)]
   gr_lm <- lm(growthrate~fitness, input_dt[error_model==T])$coefficients
   input_dt[, growthrate := .SD[[1]]*gr_lm[2]+gr_lm[1],,.SDcols = "fitness"]

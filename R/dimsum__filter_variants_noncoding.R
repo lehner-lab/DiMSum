@@ -20,13 +20,13 @@ dimsum__filter_variants_noncoding <- function(
   # dimsum__status_message("Filtering for desired non-coding variants...\n")
 
   # #Number of input and output replicates
-  # all_reps_str <- paste0(all_reps, collapse="")
+  # all_reps_str <- paste0(all_reps, collapse="|")
 
   # #WT nucleotide sequences
   # wt_ntseq_split <- strsplit(wt_ntseq,"")[[1]]
 
   # #Sample names
-  # input_samples <- names(input_dt)[grep(paste0("e[", all_reps_str, "]_s0_b.*_count$"), names(input_dt))]
+  # input_samples <- names(input_dt)[grep(paste0("e(", all_reps_str, ")_s0_b.*_count$"), names(input_dt))]
 
   ### Retain nucleotide variants with max dimsum_meta[["maxSubstitutions"]] nucleotide mutations only
   ###########################

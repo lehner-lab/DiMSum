@@ -19,11 +19,11 @@ dimsum__filter_nuc_variants <- function(
   dimsum__status_message("Filtering out low count nucleotide variants...\n")
 
   #Number of input and output replicates
-  all_reps_str <- paste0(all_reps, collapse="")
+  all_reps_str <- paste0(all_reps, collapse="|")
 
   #Sample names
-  input_samples <- names(input_dt)[grep(paste0("e[", all_reps_str, "]_s0_b.*_count$"), names(input_dt))]
-  output_samples <- names(input_dt)[grep(paste0("e[", all_reps_str, "]_s1_b.*_count$"), names(input_dt))]
+  input_samples <- names(input_dt)[grep(paste0("e(", all_reps_str, ")_s0_b.*_count$"), names(input_dt))]
+  output_samples <- names(input_dt)[grep(paste0("e(", all_reps_str, ")_s1_b.*_count$"), names(input_dt))]
 
   #### Retain variants with input/output read counts > "fitnessMinInputCountAny" in ANY biological replicates 
   #### Retain variants with input/output read counts > "fitnessMinInputCountAll" in ALL biological replicates

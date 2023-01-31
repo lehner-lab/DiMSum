@@ -95,6 +95,9 @@ dimsum__filter_reads <- function(
   report_list <- append(report_list, paste0('\t ', a_stats[['Exp.errs._too_high']], '  Exp.errs. too high\n'))
   report_list <- append(report_list, paste0('\t ', a_stats[['Min_Q_too_low']], '  Min Q too low\n'))
   write(paste0(unlist(report_list), collapse = ""), file = output_REPORT, sep = "")
+
+  #Delete input FASTQ file
+  suppressWarnings(temp_out <- file.remove(input_FASTQ))
 }
 
 

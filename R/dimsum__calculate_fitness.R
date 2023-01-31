@@ -25,7 +25,7 @@ dimsum__calculate_fitness <- function(
   if(verbose){dimsum__status_message("Calculating fitness and error...\n")}
 
   #Number of input and output replicates
-  all_reps_str <- paste0(all_reps, collapse="")
+  all_reps_str <- paste0(all_reps, collapse="|")
 
   #Calculate fitness
   for(j in all_reps){
@@ -43,9 +43,9 @@ dimsum__calculate_fitness <- function(
   if(dimsum_meta[["fitnessNormalise"]]){
     #Wild-type correction such that mean(wild-type) = 0
     wt_corr <- input_dt[WT == T & error_model==T, rowMeans((.SD + 
-        unlist(norm_model_dt[,.SD,,.SDcols = grep(paste0("shift_[", all_reps_str, "]$"), names(norm_model_dt))])) * 
-        unlist(norm_model_dt[,.SD,,.SDcols = grep(paste0("scale_[", all_reps_str, "]$"), names(norm_model_dt))])),,
-      .SDcols = grep(paste0("fitness[", all_reps_str, "]_uncorr$"), names(input_dt))]
+        unlist(norm_model_dt[,.SD,,.SDcols = grep(paste0("shift_(", all_reps_str, ")$"), names(norm_model_dt))])) * 
+        unlist(norm_model_dt[,.SD,,.SDcols = grep(paste0("scale_(", all_reps_str, ")$"), names(norm_model_dt))])),,
+      .SDcols = grep(paste0("fitness(", all_reps_str, ")_uncorr$"), names(input_dt))]
     #Shift and scale
     for(j in all_reps){
       input_dt[, paste0("fitness", j, "_uncorr") := (.SD + 
@@ -89,7 +89,7 @@ dimsum__calculate_fitness <- function(
     "Nmut_codons","WT","indel","STOP","STOP_readthrough","error_model",names(input_dt)[grep(names(input_dt),pattern="^count|^fitness|^sigma")])]
 
   #Remove variants without fitness estimates in any replicates
-  fitness_cols <- names(output_dt)[grep(paste0("fitness[", all_reps_str, "]_uncorr"), names(output_dt))]
+  fitness_cols <- names(output_dt)[grep(paste0("fitness(", all_reps_str, ")_uncorr"), names(output_dt))]
   output_dt <- output_dt[!is.nan(rowMeans(output_dt[,fitness_cols,with=F], na.rm = T))]
 
   #Calculate mean input counts

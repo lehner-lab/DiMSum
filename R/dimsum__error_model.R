@@ -30,7 +30,7 @@ dimsum__error_model <- function(
   dimsum__status_message("Fit error model...\n")
 
   #Number of input and output replicates
-  all_reps_str <- paste0(all_reps, collapse="")
+  all_reps_str <- paste0(all_reps, collapse="|")
   
   work_data <- input_dt[,.SD,.SDcols = c("Nham_nt","Nham_aa","WT",names(input_dt)[grep(names(input_dt),pattern="^count")])]
 
@@ -47,19 +47,27 @@ dimsum__error_model <- function(
   }  
 
   #Flag variants that don't have reads in all input/output replicates
-  work_data[, all_reads := rowSums(.SD > 0) == (2*nchar(all_reps_str)),,.SDcols = grep(paste0("count_e[", all_reps_str, "]_s[01]"), names(work_data))]
+  work_data[, all_reads := rowSums(.SD > 0) == (2*length(all_reps)),,.SDcols = grep(paste0("count_e(", all_reps_str, ")_s[01]"), names(work_data))]
 
   #Check if WT data present in all input/output replicates
   if(work_data[WT == T & all_reads == T,.N]==0){
-    input_dt[, all_reads := rowSums(.SD > 0) == (2*nchar(all_reps_str)),,.SDcols = grep(paste0("count_e[", all_reps_str, "]_s[01]"), names(input_dt))]
-    input_dt[, mean_count := rowMeans(.SD),,.SDcols = grep(paste0("count_e[", all_reps_str, "]_s0"), names(input_dt))]
-    dimsum__status_message(paste0("WT variant has zero count in at least one input/output replicate. Did you mean to specify one of the following?\n"))
-    if(dimsum_meta[["sequenceType"]]=="coding" & dimsum_meta[["mixedSubstitutions"]]){
-      print(input_dt[all_reads == T,][order(mean_count, decreasing = T)[1:5],.(aa_seq, all_reads, mean_count)])
-    }else if(dimsum_meta[["sequenceType"]]=="coding"){
-      print(input_dt[all_reads == T,][order(mean_count, decreasing = T)[1:5],.(nt_seq = toupper(nt_seq), aa_seq, all_reads, mean_count)])
+    input_dt[, all_reads := rowSums(.SD > 0) == (2*length(all_reps)),,.SDcols = grep(paste0("count_e(", all_reps_str, ")_s[01]"), names(input_dt))]
+    input_dt[, mean_count := rowMeans(.SD),,.SDcols = grep(paste0("count_e(", all_reps_str, ")_s0"), names(input_dt))]
+    dimsum__status_message(paste0("WT variant has zero count in at least one input/output replicate.\n"))
+    all_reads_n = input_dt[all_reads == T,.N]
+    if(all_reads_n==0){
+      dimsum__status_message(paste0("No variants without zero counts in all input/output replicates.\n"))
     }else{
-      print(input_dt[all_reads == T,][order(mean_count, decreasing = T)[1:5],.(nt_seq = toupper(nt_seq), all_reads, mean_count)])
+      if(dimsum_meta[["sequenceType"]]=="coding" & dimsum_meta[["mixedSubstitutions"]]){
+        dimsum__status_message(paste0("Did you mean to specify one of the following?\n"))
+        print(input_dt[all_reads == T,][order(mean_count, decreasing = T)[1:all_reads_n],.(aa_seq, all_reads, mean_count)])
+      }else if(dimsum_meta[["sequenceType"]]=="coding"){
+        dimsum__status_message(paste0("Did you mean to specify one of the following?\n"))
+        print(input_dt[all_reads == T,][order(mean_count, decreasing = T)[1:all_reads_n],.(nt_seq = toupper(nt_seq), aa_seq, all_reads, mean_count)])
+      }else{
+        dimsum__status_message(paste0("Did you mean to specify one of the following?\n"))
+        print(input_dt[all_reads == T,][order(mean_count, decreasing = T)[1:all_reads_n],.(nt_seq = toupper(nt_seq), all_reads, mean_count)])
+      }
     }
     stop(paste0("Cannot proceed with error modelling: WT variant has zero count in at least one input/output replicate"), call. = FALSE)
   }
@@ -69,7 +77,7 @@ dimsum__error_model <- function(
 
   input_count_threshold <- work_data[all_reads == T,exp(-quantile(.SD,probs = 0.01,na.rm=T)),,.SDcols = grep("fitness",names(work_data))]
   #Define variants above threshold for later use
-  work_data[,input_above_threshold := rowSums(.SD > input_count_threshold) == nchar(all_reps_str),,.SDcols = grep(paste0("count_e[", all_reps_str, "]_s0"),names(work_data))]
+  work_data[,input_above_threshold := rowSums(.SD > input_count_threshold) == length(all_reps),,.SDcols = grep(paste0("count_e(", all_reps_str, ")_s0"),names(work_data))]
 
   #Correct for WT fitness
   for(j in all_reps){
@@ -139,17 +147,17 @@ dimsum__error_model <- function(
   ###########################
 
   #Fitness data
-  F_data <- work_data[input_above_threshold == T & all_reads == T, as.matrix(.SD),.SDcols = grep(paste0("fitness[", all_reps_str, "]$"),names(work_data))]
+  F_data <- work_data[input_above_threshold == T & all_reads == T, as.matrix(.SD),.SDcols = grep(paste0("fitness(", all_reps_str, ")$"),names(work_data))]
   
   #Calculate replicate normalisation parameters using non-linear minimization
   set.seed(1603)
-  p <- nlm(f = dimsum__replicate_fitness_deviation, p = rep(c(1,0), each = nchar(all_reps_str)), fitness_mat = F_data, all_reps = all_reps)[["estimate"]]
+  p <- nlm(f = dimsum__replicate_fitness_deviation, p = rep(c(1,0), each = length(all_reps)), fitness_mat = F_data, all_reps = all_reps)[["estimate"]]
   
   #Normalise to first replicate (set scaling factor of first replicate to unity)
-  p[1:nchar(all_reps_str)] <- p[1:nchar(all_reps_str)]/p[1]
+  p[1:length(all_reps)] <- p[1:length(all_reps)]/p[1]
 
   #Check for negative scaling factors
-  if(sum(p[1:nchar(all_reps_str)]<0)!=0){
+  if(sum(p[1:length(all_reps)]<0)!=0){
     warning("dimsum__error_model.R: Some scaling factors from replicate normalisation are less than zero. Check that input/output samples are not mistakenly switched/misspecified in experimentDesign file!", call. = FALSE, immediate. = TRUE, noBreaks. = TRUE)
   }
 
@@ -161,9 +169,9 @@ dimsum__error_model <- function(
   
   #Wild-type correction such that mean(wild-type) = 0
   wt_corr <- work_data[WT == T, rowMeans((.SD + 
-      unlist(fitness_norm_model[,.SD,,.SDcols = grep(paste0("shift_[", all_reps_str, "]$"), names(fitness_norm_model))])) * 
-      unlist(fitness_norm_model[,.SD,,.SDcols = grep(paste0("scale_[", all_reps_str, "]$"), names(fitness_norm_model))])),,
-    .SDcols = grep(paste0("fitness[", all_reps_str, "]$"), names(work_data))]
+      unlist(fitness_norm_model[,.SD,,.SDcols = grep(paste0("shift_(", all_reps_str, ")$"), names(fitness_norm_model))])) * 
+      unlist(fitness_norm_model[,.SD,,.SDcols = grep(paste0("scale_(", all_reps_str, ")$"), names(fitness_norm_model))])),,
+    .SDcols = grep(paste0("fitness(", all_reps_str, ")$"), names(work_data))]
   
   #Normalize fitness
   for (j in all_reps){
@@ -194,9 +202,9 @@ dimsum__error_model <- function(
 
     #Fitness replicate deviations (all replicates)
     X <- work_data[all_reads == T & input_above_threshold == T & is.na(WT), cbind(.SD - rowMeans(.SD), M = rowMeans(.SD)),
-      .SDcols = grep(paste0("fitness[", all_reps_str, "]$"), names(work_data))]
+      .SDcols = grep(paste0("fitness(", all_reps_str, ")$"), names(work_data))]
     Xnorm <- work_data[all_reads == T & input_above_threshold == T & is.na(WT), cbind(.SD - rowMeans(.SD), M = rowMeans(.SD)),
-      .SDcols = grep(paste0("fitness[", all_reps_str, "]_norm$"), names(work_data))]
+      .SDcols = grep(paste0("fitness(", all_reps_str, ")_norm$"), names(work_data))]
     Y <- rbind(reshape2::melt(X, id.vars = "M"), reshape2::melt(Xnorm, id.vars = "M"))
     Y[, replicate := strsplit(as.character(variable), "_")[[1]][1], variable]
     Y[, normalised := grepl('norm', variable), variable]
@@ -240,7 +248,7 @@ dimsum__error_model <- function(
 
   #Calculate density of data along mean count based error
   bins <- 50
-  work_data[,mean_cbe := rowMeans(.SD),.SDcols = grep(paste0("^cbe[",all_reps_str,"]$"), names(work_data))]
+  work_data[,mean_cbe := rowMeans(.SD),.SDcols = grep(paste0("^cbe(",all_reps_str,")$"), names(work_data))]
   error_range <- seq(work_data[input_above_threshold == T & all_reads == T, log10(quantile(mean_cbe^2, probs=0.001))], 0, length.out = bins)
   work_data[,bin_error := findInterval(mean_cbe^2,vec = 10^error_range)]
   #weight variants according to how many other variants with same # of mutations are around
@@ -324,7 +332,7 @@ dimsum__error_model <- function(
 
     #For plot, calculate average variance of fitness values per bin
     bs_data <- work_data[is.na(WT) & input_above_threshold == T & all_reads ==T]
-    bs_data[,v := apply(.SD,1,var),.SDcols = grep(paste0("^fitness[", all_reps_str, "]$"), names(bs_data))]
+    bs_data[,v := apply(.SD,1,var),.SDcols = grep(paste0("^fitness(", all_reps_str, ")$"), names(bs_data))]
     bs_data[,bin_mean_var := mean(v), bin_error]
     bs_data[,bin_N := .N, bin_error]
     bs_data[,bin_mean_error := mean(mean_cbe^2), bin_error]

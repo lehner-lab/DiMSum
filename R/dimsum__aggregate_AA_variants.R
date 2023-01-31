@@ -19,11 +19,11 @@ dimsum__aggregate_AA_variants <- function(
   dimsum__status_message("Aggregating counts for identical amino acid variants...\n")
 
   #Number of input and output replicates
-  all_reps_str <- paste0(all_reps, collapse="")
+  all_reps_str <- paste0(all_reps, collapse="|")
 
   #Sample names
-  input_samples <- names(input_dt)[grep(paste0("e[", all_reps_str, "]_s0_b.*_count$"), names(input_dt))]
-  output_samples <- names(input_dt)[grep(paste0("e[", all_reps_str, "]_s1_b.*_count$"), names(input_dt))]
+  input_samples <- names(input_dt)[grep(paste0("e(", all_reps_str, ")_s0_b.*_count$"), names(input_dt))]
+  output_samples <- names(input_dt)[grep(paste0("e(", all_reps_str, ")_s1_b.*_count$"), names(input_dt))]
 
   dimsum__check_variants(dimsum_meta = dimsum_meta, input_dt = input_dt)
 

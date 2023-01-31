@@ -23,15 +23,15 @@ dimsum__error_model_qqplot <- function(
   ){
 
   #Number of input and output replicates
-  all_reps_str <- paste0(all_reps, collapse="")
+  all_reps_str <- paste0(all_reps, collapse="|")
   
   #Calculate error and fitness on training replicates and compare to fitness in leftout replicate
   for (i in seq_along(all_reps)) {
     
-    training_reps <- paste0(strsplit(all_reps_str,"")[[1]][-i],collapse="")
+    training_reps <- paste0(strsplit(all_reps_str,"\\|")[[1]][-i],collapse="")
     training_reps_num <- as.numeric(strsplit(training_reps,"")[[1]])
     NTreps <- nchar(training_reps)
-    test_rep <- strsplit(all_reps_str,"")[[1]][i]
+    test_rep <- strsplit(all_reps_str,"\\|")[[1]][i]
     training_data <- data.table::copy(input_dt)
 
     #Use error model parameters to calculate replicate-specific errors per variant
