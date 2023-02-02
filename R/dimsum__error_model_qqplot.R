@@ -21,17 +21,14 @@ dimsum__error_model_qqplot <- function(
   error_dt,
   report_outpath = NULL
   ){
-
-  #Number of input and output replicates
-  all_reps_str <- paste0(all_reps, collapse="|")
   
   #Calculate error and fitness on training replicates and compare to fitness in leftout replicate
   for (i in seq_along(all_reps)) {
     
-    training_reps <- paste0(strsplit(all_reps_str,"\\|")[[1]][-i],collapse="")
-    training_reps_num <- as.numeric(strsplit(training_reps,"")[[1]])
-    NTreps <- nchar(training_reps)
-    test_rep <- strsplit(all_reps_str,"\\|")[[1]][i]
+    training_reps <- paste0(all_reps[-i],collapse="|")
+    training_reps_num <- all_reps[-i]
+    NTreps <- length(training_reps_num)
+    test_rep <- as.character(all_reps[i])
     training_data <- data.table::copy(input_dt)
 
     #Use error model parameters to calculate replicate-specific errors per variant
@@ -52,11 +49,11 @@ dimsum__error_model_qqplot <- function(
     #Merged fitness values
     training_data[,fitness := rowSums(.SD[,1:NTreps]/(.SD[,(NTreps+1):(2*NTreps)]^2),na.rm=T) / 
                     rowSums(1/(.SD[,(NTreps+1):(2*NTreps)]^2),na.rm=T),
-                  ,.SDcols = c(grep(paste0("^fitness[", training_reps, "]$"),names(training_data)),
-                               grep(paste0("^error[", training_reps, "]$"),names(training_data)))]
+                  ,.SDcols = c(grep(paste0("^fitness(", training_reps, ")$"),names(training_data)),
+                               grep(paste0("^error(", training_reps, ")$"),names(training_data)))]
     #Merged error
     training_data[,error := sqrt(1/rowSums(1/.SD^2)),,
-                  .SDcols = grep(paste0("^error[", training_reps, "]$"),names(training_data))]
+                  .SDcols = grep(paste0("^error(", training_reps, ")$"),names(training_data))]
     
     #Predict test replicate ###
     #Only use variants that have non-NA fitness and error values

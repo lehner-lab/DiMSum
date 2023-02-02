@@ -39,9 +39,9 @@ dimsum__fit_error_model_bootstrap <- function(
       C_data_list <- list() #inverse count data
       NR <- list() # simple counter for how many replicates are in each data row
       for(i in 1:length(idx)){
-        F_data_list[[i]] <- bs_data[,.SD,.SDcols = grep(paste0("^fitness[", paste0(all_reps[idx[[i]]], collapse = ""), "]$"), names(input_dt))]
-        E_data_list[[i]] <- bs_data[,.SD,.SDcols = grep(paste0("^cbe[", paste0(all_reps[idx[[i]]], collapse = ""), "]$"), names(input_dt))]
-        C_data_list[[i]] <- bs_data[,1/.SD,.SDcols = grep(paste0("count_e[", paste0(all_reps[idx[[i]]], collapse = ""), "]_s"), names(input_dt))]
+        F_data_list[[i]] <- bs_data[,.SD,.SDcols = grep(paste0("^fitness(", paste0(all_reps[idx[[i]]], collapse = "|"), ")$"), names(input_dt))]
+        E_data_list[[i]] <- bs_data[,.SD,.SDcols = grep(paste0("^cbe(", paste0(all_reps[idx[[i]]], collapse = "|"), ")$"), names(input_dt))]
+        C_data_list[[i]] <- bs_data[,1/.SD,.SDcols = grep(paste0("count_e(", paste0(all_reps[idx[[i]]], collapse = "|"), ")_s"), names(input_dt))]
         NR[[i]] <- data.table(rep(length(idx[[i]]),nrow(bs_data)))
       }
 

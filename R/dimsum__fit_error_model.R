@@ -42,6 +42,11 @@ dimsum__fit_error_model <- function(
     idx <- c(idx, combn(length(all_reps), i, function(x) list(x)))
   }
 
+  #Subset to maximum 500 combinations (preferably highest order combinations)
+  if(length(idx)>500){
+    idx <- idx[1:500]
+  }
+
   #Setup cluster
   clust <- parallel::makeCluster(dimsum_meta[['numCores']])
   #Set cluster seed
