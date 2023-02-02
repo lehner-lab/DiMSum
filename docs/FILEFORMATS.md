@@ -19,7 +19,7 @@
 
 Your file must have the following columns:
 * **sample_name** A sensible sample name e.g. 'input1' (alphanumeric characters only).
-* **experiment_replicate** An integer identifier denoting distinct experiments (e.g. distinct plasmid library transformations) i.e. a set of input and output replicates originating from the same input biological replicate (strictly positive integer 1-9). DiMSum can only handle up to 9 experiment replicates in a single run.
+* **experiment_replicate** An integer identifier denoting distinct experiments (e.g. distinct plasmid library transformations) i.e. a set of input and output replicates originating from the same input biological replicate (strictly positive integer).
 * **selection_id** An integer inidicating whether samples were sequenced before (0) or after (1) selection.
 * **selection_replicate** (Output samples only) An integer denoting distinct replicate selections (or biological output replicates) each derived from the same input sample (strictly positive integer). Entries should be blank (empty string) for all input samples (each input sample corresponds to a unique experiment).
 * **technical_replicate** An integer denoting technical replicates (a strictly positive integer) corresponding to sample re-sequencing i.e. extracted DNA originating from the same sample split between separate sequencing lanes or files. Leave this column blank (empty string) when no technical replicates are present.
