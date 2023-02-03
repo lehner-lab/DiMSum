@@ -1,8 +1,8 @@
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/r-dimsum/README.html)
-[![Anaconda-Server Badge](https://anaconda.org/bioconda/r-dimsum/badges/version.svg)](https://anaconda.org/bioconda/r-dimsum)
-[![Anaconda-Server Badge](https://anaconda.org/bioconda/r-dimsum/badges/latest_release_relative_date.svg)](https://anaconda.org/bioconda/r-dimsum)
-[![Anaconda-Server Badge](https://anaconda.org/bioconda/r-dimsum/badges/downloads.svg)](https://anaconda.org/bioconda/r-dimsum)
-[![DOI](https://zenodo.org/badge/58115412.svg)](https://zenodo.org/badge/latestdoi/58115412)
+[![Anaconda-Server Badge](https://anaconda.org/bioconda/r-dimsum/badges/version.svg?branch=master&kill_cache=1)](https://anaconda.org/bioconda/r-dimsum)
+[![Anaconda-Server Badge](https://anaconda.org/bioconda/r-dimsum/badges/latest_release_relative_date.svg?branch=master&kill_cache=1)](https://anaconda.org/bioconda/r-dimsum)
+[![Anaconda-Server Badge](https://anaconda.org/bioconda/r-dimsum/badges/downloads.svg?branch=master&kill_cache=1)](https://anaconda.org/bioconda/r-dimsum)
+[![DOI](https://zenodo.org/badge/58115412.svg?branch=master&kill_cache=1)](https://zenodo.org/badge/latestdoi/58115412)
 
 <p align="left">
   <img src="./Dumpling.png" width="100">
