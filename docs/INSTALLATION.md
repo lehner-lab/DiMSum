@@ -59,7 +59,7 @@ git clone https://github.com/lehner-lab/DiMSum.git
 ```
 Then use it to create the environment for DiMSum dependencies and activate it:
 ```
-conda env create -f dimsum.yaml
+conda env create -f DiMSum/dimsum.yaml
 conda activate dimsum
 ```
 
