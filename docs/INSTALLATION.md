@@ -9,7 +9,7 @@
 
 DiMSum is expected to work on all Unix-like operating systems.
 
-## Installing DiMSum using Conda (recommended)
+## Installing DiMSum and its dependencies using Conda (recommended)
 
 The easiest way to install DiMSum is by using the [bioconda package](http://bioconda.github.io/recipes/r-dimsum/README.html).
 
@@ -49,11 +49,27 @@ conda install -c bioconda r-dimsum
 
 To check that you have a working installation of DiMSum, run the [Demo](DEMO.md)
 
-## Installing DiMSum dependencies
+## Installing DiMSum dependencies using Conda
+
+Alternatively, once Conda is installed (or if you already have it) you can install DiMSum dependencies alone by creating a Conda environment from the [dimsum.yaml](../dimsum.yaml) file.
+
+Firstly, clone the DiMSum repository:
+```
+git clone https://github.com/lehner-lab/DiMSum.git
+```
+Then use it to create the environment for DiMSum dependencies and activate it:
+```
+conda env create -f dimsum.yaml
+conda activate dimsum
+```
+
+Once DiMSum dependencies have been installed successfully you can then [install DiMSum from source](#installing-dimsum-from-source-github) (you can skip the first step to clone the DiMSum repository).
+
+## Installing DiMSum dependencies manually
 
 Installing DiMSum dependencies manually is not recommended. The easiest way to install DiMSum (and its dependencies) is by using the [DiMSum bioconda package](http://bioconda.github.io/recipes/r-dimsum/README.html). See [Installing DiMSum using Conda](#installing-dimsum-using-conda-recommended).
 
-**REQUIRED:** Before [installing DiMSum from GitHub](#installing-dimsum-from-github), please ensure that the following required software is installed:
+**REQUIRED:** Before [installing DiMSum from source](#installing-dimsum-from-source-github), please ensure that the following required software is installed:
 
 * **[_R_](https://www.r-project.org/) >=v3.6**
 * **[_Pandoc_](https://pandoc.org/installing.html) >=v1.17.2**
@@ -72,11 +88,11 @@ Pandoc comes bundled with [RStudio](https://rstudio.com/products/rstudio/downloa
 export PATH=EXTERNAL_BINARY_DIRECTORY:$PATH
 ```
 
-## Installing DiMSum from GitHub
+## Installing DiMSum from source (GitHub)
 
-Installing DiMSum from GiHub is not recommended. The easiest way to install DiMSum (and its dependencies) is by using the [DiMSum bioconda package](http://bioconda.github.io/recipes/r-dimsum/README.html). See [Installing DiMSum using Conda](#installing-dimsum-using-conda-recommended).
+Installing DiMSum from source is not recommended. The easiest way to install DiMSum (and its dependencies) is by using the [DiMSum bioconda package](http://bioconda.github.io/recipes/r-dimsum/README.html). See [Installing DiMSum using Conda](#installing-dimsum-using-conda-recommended).
 
-Before installing DiMSum from GitHub, please ensure that the required [software dependencies](#installing-dimsum-dependencies) are available.
+Before installing DiMSum from source, please ensure that the required [software dependencies](#installing-dimsum-dependencies-using-conda) are available.
 
 Firstly, clone the DiMSum repository:
 ```
@@ -85,7 +101,7 @@ git clone https://github.com/lehner-lab/DiMSum.git
 Then, from the same location run R and enter:
 ```
 if(!require(devtools)) install.packages("devtools")
-devtools::install_deps('DiMSum')
+#devtools::install_deps('DiMSum') #Uncomment this line to install DiMSum dependencies
 devtools::install('DiMSum')
 ```
 Finally, add the cloned DiMSum repository base directory to your path. You can do this by adding the following line at the bottom of your *~/.bashrc* or *~/.bash_profile* file:
