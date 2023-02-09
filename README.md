@@ -38,6 +38,14 @@ Further details of individual DiMSum pipeline stages can be found [here](docs/PI
 # Installation
 
 The easiest way to install DiMSum is by using the [bioconda package](http://bioconda.github.io/recipes/r-dimsum/README.html).
+
+First, ensure you have the Mamba Solver for Conda:
+```
+conda update -n base conda
+conda install -n base conda-libmamba-solver
+conda config --set solver libmamba
+```
+Then install DiMSum:
 ```
 conda install -c bioconda r-dimsum
 ```
