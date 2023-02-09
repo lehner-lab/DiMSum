@@ -35,13 +35,6 @@ conda config --add channels bioconda
 conda config --add channels conda-forge
 ```
 
-Then, ensure you have the Mamba Solver for Conda:
-```
-conda update -n base conda
-conda install -n base conda-libmamba-solver
-conda config --set solver libmamba
-```
-
 Next, optionally, create a dedicated environment for DiMSum and it's dependencies. This is recommended if you already have _R_ and/or _Python_ installations that you would like to maintain in a separate environment.
 ```
 conda create --name dimsum
