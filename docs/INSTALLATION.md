@@ -38,6 +38,7 @@ conda config --add channels conda-forge
 Next, create a dedicated Conda environment to install the [DiMSum bioconda package](http://bioconda.github.io/recipes/r-dimsum/README.html) and it's dependencies:
 ```
 conda create -n dimsum r-base=4.0 r-dimsum
+conda activate dimsum
 ```
 **TIP:** See [here](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) for more information about managing conda environments.
 
