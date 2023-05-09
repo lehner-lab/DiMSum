@@ -39,7 +39,7 @@ Further details of individual DiMSum pipeline stages can be found [here](docs/PI
 
 The easiest way to install DiMSum is by using the [bioconda package](http://bioconda.github.io/recipes/r-dimsum/README.html) to create a dedicated Conda environment:
 ```
-conda create -n dimsum r-base=4.0 r-dimsum
+conda create -n dimsum r-base=4.0 fastqc=0.11 r-dimsum
 ```
 
 See the full [Installation Instructions](docs/INSTALLATION.md) for further details and alternative installation options.
