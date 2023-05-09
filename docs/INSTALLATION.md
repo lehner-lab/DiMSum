@@ -37,7 +37,7 @@ conda config --add channels conda-forge
 
 Next, create a dedicated Conda environment to install the [DiMSum bioconda package](http://bioconda.github.io/recipes/r-dimsum/README.html) and it's dependencies:
 ```
-conda create -n dimsum r-base=4.0 r-dimsum
+conda create -n dimsum r-base=4.0 fastqc=0.11 r-dimsum
 conda activate dimsum
 ```
 **TIP:** See [here](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) for more information about managing conda environments.
@@ -73,7 +73,7 @@ Pandoc comes bundled with [RStudio](https://rstudio.com/products/rstudio/downloa
 
 **OPTIONAL:** Additionally, if raw FASTQ files will be processed (with DiMSum *WRAP*), the following software needs to be installed:
 
-* **[_FastQC_](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) >=v0.11.3**
+* **[_FastQC_](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) v0.11**
 * **[_Cutadapt_](https://cutadapt.readthedocs.io/en/stable/) v2.4**
 * **[_VSEARCH_](https://github.com/torognes/vsearch) >=v2.17**
 * **[_Starcode_](https://github.com/gui11aume/starcode) v1.3**
