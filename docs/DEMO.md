@@ -13,7 +13,7 @@ Simply type the following on the command-line:
 ```
 DiMSum --runDemo T
 ```
-A table of variant counts included in the DiMSum R package is processed and results are saved to a folder named 'DiMSum_Project' in the current working directory. 
+A table of variant counts included in the DiMSum R package is processed and results are saved to a folder named 'DiMSum_Project' in the current working directory. Expected run time <10min.
 
 ## Full DiMSum Demo (_WRAP+STEAM_)
 
@@ -24,5 +24,5 @@ Then, unzip the FASTQ folder and run the full demo from the command-line as foll
 unzip FASTQ.zip
 DiMSum --runDemo T -i FASTQ
 ```
-Results are saved to a folder named 'DiMSum_Project' in the current working directory.
+Results are saved to a folder named 'DiMSum_Project' in the current working directory. Expected run time <10min. 
 
