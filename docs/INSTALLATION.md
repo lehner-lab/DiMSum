@@ -44,6 +44,11 @@ conda activate dimsum
 
 To check that you have a working installation of DiMSum, run the [Demo](DEMO.md)
 
+**NOTE:** If you're having [graphics issues](https://github.com/lehner-lab/DiMSum/issues/18), try installing [R Cairo](https://anaconda.org/conda-forge/r-cairo) v1.5:
+```
+conda install -c conda-forge r-cairo=1.5
+```
+
 ## Installing DiMSum dependencies using Conda
 
 Alternatively, once Conda is installed (or if you already have it) you can install DiMSum dependencies alone by creating a Conda environment from the [dimsum.yaml](../dimsum.yaml) file.
