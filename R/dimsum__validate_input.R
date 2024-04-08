@@ -179,6 +179,11 @@ dimsum__validate_input <- function(
     stop("Invalid 'vsearchMaxee' argument. Only positive doubles allowed (zero exclusive).", call. = FALSE)
   }
 
+  #Check vsearchMaxQual argument
+  if(dimsum_meta[["vsearchMaxQual"]]>93){
+    stop("Invalid 'vsearchMaxQual' argument. Cannot be greater than 93.", call. = FALSE)
+  }
+
   #Disable bayesianDoubleFitness option (TEMPORARY FIX: still in development)
   dimsum_meta[["bayesianDoubleFitness"]] <- FALSE
 

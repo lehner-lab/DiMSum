@@ -28,6 +28,7 @@
 #' @param cutadaptErrorRate Maximum allowed error rate for trimming constant regions (default:0.2)
 #' @param cutadaptOverlap Minimum overlap between read and constant region for trimming (default:3)
 #' @param vsearchMinQual Minimum Phred base quality score required to retain read or read pair (default:30)
+#' @param vsearchMaxQual Maximum Phred base quality score accepted when reading (and used when writing) FASTQ files; cannot be greater than 93 (default:41)
 #' @param vsearchMaxee Maximum number of expected errors tolerated to retain read or read pair (default:0.5)
 #' @param vsearchMinovlen Discard read pair if the alignment length is shorter than this (default:10)
 #' @param outputPath Path to directory to use for output files (default:'./' i.e. current working directory)
@@ -87,6 +88,7 @@ dimsum <- function(
   cutadaptErrorRate=0.2,
   cutadaptOverlap=3,
   vsearchMinQual=30,
+  vsearchMaxQual=41,
   vsearchMaxee=0.5,
   vsearchMinovlen=10,
   outputPath="./",
@@ -219,6 +221,7 @@ dimsum <- function(
     "cutadaptErrorRate" = list(cutadaptErrorRate, c("double")), #positive double less than 1 (zero inclusive) -- checked in dimsum__check_experiment_design
     "cutadaptOverlap" = list(cutadaptOverlap, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__check_experiment_design
     "vsearchMinQual" = list(vsearchMinQual, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
+    "vsearchMaxQual" = list(vsearchMaxQual, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
     "vsearchMaxee" = list(vsearchMaxee, c("double")), #strictly positive double -- checked in dimsum__validate_input
     "vsearchMinovlen" = list(vsearchMinovlen, c("integer")), #strictly positive integer -- checked in dimsum__validate_input
     "outputPath" = list(outputPath, c("character")), #directory exists -- checked in dimsum__validate_input

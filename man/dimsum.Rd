@@ -30,6 +30,7 @@ dimsum(
   cutadaptErrorRate = 0.2,
   cutadaptOverlap = 3,
   vsearchMinQual = 30,
+  vsearchMaxQual = 41,
   vsearchMaxee = 0.5,
   vsearchMinovlen = 10,
   outputPath = "./",
@@ -112,6 +113,8 @@ dimsum(
 \item{cutadaptOverlap}{Minimum overlap between read and constant region for trimming (default:3)}
 
 \item{vsearchMinQual}{Minimum Phred base quality score required to retain read or read pair (default:30)}
+
+\item{vsearchMaxQual}{Maximum Phred base quality score accepted when reading (and used when writing) FASTQ files; cannot be greater than 93 (default:41)}
 
 \item{vsearchMaxee}{Maximum number of expected errors tolerated to retain read or read pair (default:0.5)}
 
