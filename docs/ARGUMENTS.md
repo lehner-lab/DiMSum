@@ -44,6 +44,7 @@
 ## ALIGN Arguments
 
 * **_--vsearchMinQual_** Minimum Phred base quality score required to retain read or read pair (default:30)
+* **_--vsearchMaxQual_** Maximum Phred base quality score accepted when reading (and used when writing) FASTQ files; cannot be greater than 93 (default:41)
 * **_--vsearchMaxee_** Maximum number of expected errors tolerated to retain read or read pair (default:0.5)
 * **_--vsearchMinovlen_** Discard read pair if the alignment length is shorter than this (default:10)
 
