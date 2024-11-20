@@ -141,6 +141,11 @@ dimsum__validate_input <- function(
     }
   }
 
+  #Check fitnessDropoutPseudocount argument
+  if(dimsum_meta[["fitnessDropoutPseudocount"]]<0){
+    stop("Invalid 'fitnessDropoutPseudocount' argument. Only positive integers allowed (zero inclusive).", call. = FALSE)
+  }
+
   #Check strictly positive double splitChunkSize argument
   if(dimsum_meta[["splitChunkSize"]]<=0){
     stop("Invalid 'splitChunkSize' argument. Only positive integers allowed (zero exclusive).", call. = FALSE)

@@ -52,6 +52,7 @@ dimsum(
   fitnessDoubleHighConfidenceCount = 50,
   fitnessNormalise = T,
   fitnessErrorModel = T,
+  fitnessDropoutPseudocount = 0,
   indels = "none",
   maxSubstitutions = 2,
   mixedSubstitutions = F,
@@ -157,6 +158,8 @@ dimsum(
 \item{fitnessNormalise}{Normalise fitness values to minimise inter-replicate differences (default:T)}
 
 \item{fitnessErrorModel}{Fit fitness error model (default:T)}
+
+\item{fitnessDropoutPseudocount}{Pseudocount added to output replicates with dropout i.e. variants present in input but absent from output (default:0)}
 
 \item{indels}{Indel variants to be retained: either 'all', 'none' or a comma-separated list of sequence lengths (default:'none')}
 

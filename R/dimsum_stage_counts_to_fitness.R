@@ -131,12 +131,20 @@ dimsum_stage_counts_to_fitness <- function(
     all_reps = all_reps,
     report_outpath = report_outpath)
 
+  ### Add psuedocounts to output samples with dropout
+  ###########################
+
+  nf_data_pseudo <- dimsum__add_dropout_pseudocount(
+    dimsum_meta = dimsum_meta,
+    input_dt = nf_data,
+    all_reps = all_reps)
+
   ### Calculate fitness and count-based error (and remove variants without fitness estimates in any replicate)
   ###########################
 
   nff_data <- dimsum__calculate_fitness(
     dimsum_meta = dimsum_meta,
-    input_dt = nf_data,
+    input_dt = nf_data_pseudo,
     all_reps = all_reps,
     error_model_dt = model_result[["error_model"]],
     norm_model_dt = model_result[["norm_model"]])

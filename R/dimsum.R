@@ -50,6 +50,7 @@
 #' @param fitnessDoubleHighConfidenceCount In development: minimum input replicate read count for doubles used to derive prior for Bayesian doubles correction (default:50)
 #' @param fitnessNormalise Normalise fitness values to minimise inter-replicate differences (default:T)
 #' @param fitnessErrorModel Fit fitness error model (default:T)
+#' @param fitnessDropoutPseudocount Pseudocount added to output replicates with dropout i.e. variants present in input but absent from output (default:0)
 #' @param indels Indel variants to be retained: either 'all', 'none' or a comma-separated list of sequence lengths (default:'none')
 #' @param maxSubstitutions Maximum number of nucleotide or amino acid substitutions for coding or non-coding sequences respectively (default:2)
 #' @param mixedSubstitutions For coding sequences, are nonsynonymous variants with silent/synonymous substitutions in other codons allowed? (default:F)
@@ -110,6 +111,7 @@ dimsum <- function(
   fitnessDoubleHighConfidenceCount=50,
   fitnessNormalise=T,
   fitnessErrorModel=T,
+  fitnessDropoutPseudocount=0,
   indels='none',
   maxSubstitutions=2,
   mixedSubstitutions=F,
@@ -243,6 +245,7 @@ dimsum <- function(
     "fitnessDoubleHighConfidenceCount" = list(fitnessDoubleHighConfidenceCount, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "fitnessNormalise" = list(fitnessNormalise, c("logical")), #logical -- checked in dimsum__validate_input
     "fitnessErrorModel" = list(fitnessErrorModel, c("logical")), #logical -- checked in dimsum__validate_input
+    "fitnessDropoutPseudocount" = list(fitnessDropoutPseudocount, c("integer")), #positive integer (zero inclusive) -- checked in dimsum__validate_input
     "indels" = list(indels, c("character")), #character string; either all/none or a comma-separated list of sequence lengths -- checked in dimsum__validate_input
     "maxSubstitutions" = list(maxSubstitutions, c("integer")), #positive integer (greater than 1) -- checked in dimsum__validate_input
     "mixedSubstitutions" = list(mixedSubstitutions, c("logical")), #logical -- checked in dimsum__validate_input
