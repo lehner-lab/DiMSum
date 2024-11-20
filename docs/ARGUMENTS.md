@@ -67,6 +67,7 @@
 * **_--fitnessMinOutputCountAny_** Minimum output read count (in any replicates) to be retained during fitness calculations (default:0). Alternatively, thresholds can be applied to variants with specific numbers of nucleotide substitutions as follows: '_edit_distance:threshold_' e.g. '_--fitnessMinOutputCountAny_'='1:100,2:10,3:10' (unspecified variants are discarded).
 * **_--fitnessNormalise_** Normalise fitness values to minimise inter-replicate differences (default:T)
 * **_--fitnessErrorModel_** Fit fitness error model (default:T)
+* **_--fitnessDropoutPseudocount_** Pseudocount added to output replicates with dropout i.e. variants present in input but absent from output (default:0)
 * **_--retainedReplicates_** Comma-separated list of (integer) experiment replicates to retain or 'all' (default:'all')
 
 ## [FASTQ files](FILEFORMATS.md#fastq-files)
