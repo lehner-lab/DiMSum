@@ -26,7 +26,7 @@ Welcome to the GitHub repository for DiMSum: An error model and pipeline for ana
 
 # Overview
 
-The DiMSum pipeline processes raw sequencing reads (in FASTQ format) or variant counts from deep mutational scanning (DMS) experiments to calculate estimates of variant fitness (and assocated error). These estimates are suitable for use in downstream analyses of epistasis and [protein structure determination](https://github.com/lehner-lab/DMS2structure).
+The DiMSum pipeline processes raw sequencing reads (in FASTQ format) or variant counts from deep mutational scanning (DMS) experiments to calculate estimates of variant fitness (and assocated error). These estimates are suitable for use in downstream analyses of epistasis, [fitting interpretable models](https://github.com/lehner-lab/MoCHI) and [protein structure determination](https://github.com/lehner-lab/DMS2structure).
 
 The DiMSum pipeline consists of five stages grouped into two modules that can be run independently:
 
