@@ -2,7 +2,6 @@ name: dimsum
 channels:
   - conda-forge
   - bioconda
-  - defaults
 dependencies:
   - r-base >=3.6,<4.1
   - pandoc >=1.17.2
