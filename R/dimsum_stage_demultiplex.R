@@ -38,10 +38,9 @@ dimsum_stage_demultiplex <- function(
   }
 
   #Input files
-  fastq_pair_list <- unique(cbind(
-    file.path(dimsum_meta[['barcode_design']][,"pair_directory"], dimsum_meta[['barcode_design']][,'pair1']),
-    file.path(dimsum_meta[['barcode_design']][,"pair_directory"], dimsum_meta[['barcode_design']][,'pair2'])))
-  names(fastq_pair_list) <- c("pair1", "pair2")
+  fastq_pair_list <- unique(data.frame(
+    "pair1" = file.path(dimsum_meta[['barcode_design']][,"pair_directory"], dimsum_meta[['barcode_design']][,'pair1']),
+    "pair2" = file.path(dimsum_meta[['barcode_design']][,"pair_directory"], dimsum_meta[['barcode_design']][,'pair2'])))
   rownames(fastq_pair_list) = 1:dim(fastq_pair_list)[1]
   #Check if all input files exist
   dimsum__check_files_exist(
