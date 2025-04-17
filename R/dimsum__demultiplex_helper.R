@@ -24,21 +24,21 @@ dimsum__demultiplex_helper <- function(
       " --no-indels ",
       " --pair-adapters ",
       " --untrimmed-output ",
-      file.path(demultiplex_outpath, paste0(basename(fastq_pair_list[pair_name,][1]), ".demultiplex.unknown.fastq.gz")),
+      file.path(demultiplex_outpath, paste0(basename(fastq_pair_list[pair_name,][[1]]), ".demultiplex.unknown.fastq.gz")),
       " --untrimmed-paired-output ",
-      file.path(demultiplex_outpath, paste0(basename(fastq_pair_list[pair_name,][2]), ".demultiplex.unknown.fastq.gz")),
+      file.path(demultiplex_outpath, paste0(basename(fastq_pair_list[pair_name,][[2]]), ".demultiplex.unknown.fastq.gz")),
       " -o ",
       file.path(demultiplex_outpath, "{name}1.fastq.gz"),
       " -p ",
       file.path(demultiplex_outpath, "{name}2.fastq.gz"),
       " ",
-      fastq_pair_list[pair_name,][1],
+      fastq_pair_list[pair_name,][[1]],
       " ",
-      fastq_pair_list[pair_name,][2],
+      fastq_pair_list[pair_name,][[2]],
       " > ",
-      file.path(demultiplex_outpath, paste0(basename(fastq_pair_list[pair_name,][1]), ".demultiplex.stdout")),
+      file.path(demultiplex_outpath, paste0(basename(fastq_pair_list[pair_name,][[1]]), ".demultiplex.stdout")),
       " 2> ",
-      file.path(demultiplex_outpath, paste0(basename(fastq_pair_list[pair_name,][1]), ".demultiplex.stderr"))))
+      file.path(demultiplex_outpath, paste0(basename(fastq_pair_list[pair_name,][[1]]), ".demultiplex.stderr"))))
   }else{
     temp_out <- system(paste0(
       "cutadapt",
@@ -48,14 +48,14 @@ dimsum__demultiplex_helper <- function(
       as.character(dimsum_meta[["barcodeErrorRate"]]),
       " --no-indels ",
       " --untrimmed-output ",
-      file.path(demultiplex_outpath, paste0(basename(fastq_pair_list[pair_name,][1]), ".demultiplex.unknown.fastq.gz")),
+      file.path(demultiplex_outpath, paste0(basename(fastq_pair_list[pair_name,][[1]]), ".demultiplex.unknown.fastq.gz")),
       " -o ",
       file.path(demultiplex_outpath, "{name}1.fastq.gz"),
       " ",
-      fastq_pair_list[pair_name,][1],
+      fastq_pair_list[pair_name,][[1]],
       " > ",
-      file.path(demultiplex_outpath, paste0(basename(fastq_pair_list[pair_name,][1]), ".demultiplex.stdout")),
+      file.path(demultiplex_outpath, paste0(basename(fastq_pair_list[pair_name,][[1]]), ".demultiplex.stdout")),
       " 2> ",
-      file.path(demultiplex_outpath, paste0(basename(fastq_pair_list[pair_name,][1]), ".demultiplex.stderr"))))        
+      file.path(demultiplex_outpath, paste0(basename(fastq_pair_list[pair_name,][[1]]), ".demultiplex.stderr"))))        
   }
 }

@@ -23,18 +23,18 @@ dimsum__demultiplex_cp_helper <- function(
   #Check if file extension incompatible with cutadapt (i.e. NOT ".fastq" or ".fastq.gz")
   if(dimsum_meta[["fastqFileExtension"]]!=".fastq"){
     #Copy FASTQ files to temp directory and format extension
-    new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], basename(fastq_pair_list[pair_name,][1]))
-    new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], basename(fastq_pair_list[pair_name,][2]))
+    new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], basename(fastq_pair_list[pair_name,][[1]]))
+    new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), c(".fastq", ".fastq.gz")[as.numeric(dimsum_meta[["gzipped"]])+1], basename(fastq_pair_list[pair_name,][[2]]))
     if(dimsum_meta[["gzipped"]]){
       #Just copy
       file.copy(
-        from = fastq_pair_list[pair_name,][1],
+        from = fastq_pair_list[pair_name,][[1]],
         to = file.path(demultiplex_outpath, new_fastq_name1))
     }else{
       #Gzip
       temp_out <- system(paste0(
         "gzip -c ",
-        fastq_pair_list[pair_name,][1],
+        fastq_pair_list[pair_name,][[1]],
         " > ",
         file.path(demultiplex_outpath, paste0(new_fastq_name1, ".gz"))))
     }
@@ -43,13 +43,13 @@ dimsum__demultiplex_cp_helper <- function(
       if(dimsum_meta[["gzipped"]]){
         #Just copy
         file.copy(
-          from = fastq_pair_list[pair_name,][2],
+          from = fastq_pair_list[pair_name,][[2]],
           to = file.path(demultiplex_outpath, new_fastq_name2))
       }else{
         #Gzip
         temp_out <- system(paste0(
           "gzip -c ",
-          fastq_pair_list[pair_name,][2],
+          fastq_pair_list[pair_name,][[2]],
           " > ",
           file.path(demultiplex_outpath, paste0(new_fastq_name2, ".gz"))))
       }
