@@ -4,7 +4,7 @@
 #' This function runs the DiMSum pipeline.
 #'
 #' @param runDemo Run the DiMSum demo (default:F)
-#' @param fastqFileDir Path to directory containing input FASTQ files (required for WRAP)
+#' @param fastqFileDir Path to directory containing input FASTQ files (required for WRAP, default:'./' i.e. current working directory)
 #' @param fastqFileExtension FASTQ file extension (default:'.fastq')
 #' @param gzipped Are FASTQ files are gzipped? (default:T)
 #' @param stranded Is the library design stranded? (default:T)
@@ -65,7 +65,7 @@
 #' @export
 dimsum <- function(
   runDemo=F,
-  fastqFileDir=NULL,
+  fastqFileDir="./",
   fastqFileExtension=".fastq",
   gzipped=T,
   stranded=T,

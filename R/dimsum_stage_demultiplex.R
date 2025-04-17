@@ -38,11 +38,14 @@ dimsum_stage_demultiplex <- function(
   }
 
   #Input files
-  fastq_pair_list <- unique(dimsum_meta[['barcode_design']][,c('pair1', 'pair2')])
+  fastq_pair_list <- unique(cbind(
+    file.path(dimsum_meta[['barcode_design']][,"pair_directory"], dimsum_meta[['barcode_design']][,'pair1']),
+    file.path(dimsum_meta[['barcode_design']][,"pair_directory"], dimsum_meta[['barcode_design']][,'pair2'])))
+  names(fastq_pair_list) <- c("pair1", "pair2")
   rownames(fastq_pair_list) = 1:dim(fastq_pair_list)[1]
   #Check if all input files exist
   dimsum__check_files_exist(
-    required_files = file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], unlist(fastq_pair_list)),
+    required_files = unlist(fastq_pair_list),
     stage_number = this_stage,
     execute = execute)
   
@@ -60,18 +63,18 @@ dimsum_stage_demultiplex <- function(
   if(dimsum_meta[["fastqFileExtension"]]!=".fastq"){
     for(pair_name in rownames(fastq_pair_list)){
       #New FASTQ file names
-      new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), ".fastq.gz", fastq_pair_list[pair_name,][1])
-      new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), ".fastq.gz", fastq_pair_list[pair_name,][2])
+      new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), ".fastq.gz", basename(fastq_pair_list[pair_name,][1]))
+      new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), ".fastq.gz", basename(fastq_pair_list[pair_name,][2]))
       #Update names in list
-      fastq_pair_list[pair_name,][1] <- new_fastq_name1
-      fastq_pair_list[pair_name,][2] <- new_fastq_name2
+      fastq_pair_list[pair_name,][1] <- file.path(demultiplex_outpath, new_fastq_name1)
+      fastq_pair_list[pair_name,][2] <- file.path(demultiplex_outpath, new_fastq_name2)
     }
     #Update FASTQ file directory in list
     dimsum_meta[["exp_design"]][,"pair_directory"] <- demultiplex_outpath
   }
   #Demultiplex FASTQ files
   dimsum__status_message("Demultiplexing FASTQ files with cutadapt:\n")
-  all_fastq <- file.path(dimsum_meta[["exp_design"]][,"pair_directory"][1], unlist(fastq_pair_list))
+  all_fastq <- unlist(fastq_pair_list)
   dimsum__status_message(paste0(unique(all_fastq), "\n"))
   dimsum__status_message("Processing...\n")
   for(i in 1:dim(fastq_pair_list)[1]){dimsum__status_message(paste0("\t", unique(unlist(fastq_pair_list[i,])), "\n"))}

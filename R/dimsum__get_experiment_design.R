@@ -35,7 +35,11 @@ dimsum__get_experiment_design <- function(
   }
 
   #Add original FASTQ directory
-  exp_design[,"pair_directory"] <- dimsum_meta[["fastqFileDir"]]
+  if("fastqFileDir" %in% names(exp_design)){
+    names(exp_design)[names(exp_design)=="fastqFileDir"] <- "pair_directory"
+  }else{
+    exp_design[,"pair_directory"] <- dimsum_meta[["fastqFileDir"]]
+  }
 
   #Add sample-specific cutadapt options
   # if((!"cutadapt5First" %in% colnames(exp_design) & is.null(dimsum_meta[["cutadapt5First"]])) | (!"cutadapt5Second" %in% colnames(exp_design) & is.null(dimsum_meta[["cutadapt5Second"]]))){
@@ -119,14 +123,14 @@ dimsum__get_experiment_design <- function(
   #Check FASTQ files exist (if no count file provided and demultiplexed FASTQ files supplied i.e. no barcodeDesignPath supplied)
   if(is.null(dimsum_meta[["barcodeDesignPath"]]) & is.null(dimsum_meta[["countPath"]])){
     #Pair1 files
-    for(i in unlist(exp_design[,c("pair1")])){
-      if(!file.exists(file.path(dimsum_meta[["fastqFileDir"]], i))){
+    for(i in unlist(file.path(exp_design[,"pair_directory"], exp_design[,"pair1"]))){
+      if(!file.exists(i)){
         stop(paste0("Invalid FASTQ file name '", i, "' in experimentDesign file (file not found)"), call. = FALSE)
       }
     }
     #Pair2 files
-    for(i in unlist(exp_design[,c("pair2")])){
-      if(!file.exists(file.path(dimsum_meta[["fastqFileDir"]], i))){
+    for(i in unlist(file.path(exp_design[,"pair_directory"], exp_design[,"pair2"]))){
+      if(!file.exists(i)){
         stop(paste0("Invalid FASTQ file name '", i, "' in experimentDesign file (file not found)"), call. = FALSE)
       }
     }

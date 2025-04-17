@@ -42,7 +42,10 @@ dimsum_stage_cutadapt <- function(
 
   #Input files
   fastq_pair_list_nunique <- dimsum_meta[['exp_design']][,c('pair1', 'pair2')]
-  all_fastq <- file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
+  all_fastq <- unique(c(
+    file.path(dimsum_meta[['exp_design']][,"pair_directory"], dimsum_meta[['exp_design']][,'pair1']),
+    file.path(dimsum_meta[['exp_design']][,"pair_directory"], dimsum_meta[['exp_design']][,'pair2'])))
+
   #Check if all input files exist
   dimsum__check_files_exist(
     required_files = all_fastq,
@@ -84,25 +87,25 @@ dimsum_stage_cutadapt <- function(
       if(!dimsum_meta[['exp_design']][i,"run_cutadapt"]){
         #Copy files  
         file.copy(
-          from = file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
+          from = file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
           to = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz")))
         if(dimsum_meta[["paired"]]){
           file.copy(
-            from = file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
+            from = file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
             to = file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt.gz")))
           #Total number of FASTQ records
           temp_out <- system(paste0(
             "wc -l ",
-            file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
+            file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
             " ",
-            file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
+            file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
             " > ",
             file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz.stdout")))) 
         }else{
           #Total number of FASTQ records
           temp_out <- system(paste0(
             "wc -l ",
-            file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
+            file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
             " > ",
             file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz.stdout")))) 
         }
@@ -152,9 +155,9 @@ dimsum_stage_cutadapt <- function(
             " -p ",
             file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair2"], ".cutadapt.gz")),
             " ",
-            file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
+            file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
             " ",
-            file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
+            file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[['exp_design']][i,"pair2"]),
             " > ",
             file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz.stdout")),
             " 2> ",
@@ -175,7 +178,7 @@ dimsum_stage_cutadapt <- function(
             " -o ",
             file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz")),
             " ",
-            file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
+            file.path(dimsum_meta[["exp_design"]][i,"pair_directory"], dimsum_meta[['exp_design']][i,"pair1"]),
             " > ",
             file.path(cutadapt_outpath, paste0(dimsum_meta[['exp_design']][i,"pair1"], ".cutadapt.gz.stdout")),
             " 2> ",

@@ -28,6 +28,14 @@ dimsum__check_barcode_design <- function(
   if(sum(duplicated(unique_pairs[,"pair1"]))!=0 | sum(duplicated(unique_pairs[,"pair2"]))!=0){
     stop(paste0("FASTQ files not correctly paired in barcodeDesign file columns: 'pair1' and 'pair2'"), call. = FALSE)
   }
+  #Check for FASTQ files with same name in different directories - pair1
+  if(sum(duplicated(basename(unique(file.path(exp_design[,"pair_directory"], exp_design[,"pair1"])))))!=0){
+    stop(paste0("FASTQ files with same name in different directories not allowed in barcodeDesign file columns: 'pair1' and 'pair2'"), call. = FALSE)
+  }
+  #Check for FASTQ files with same name in different directories - pair2
+  if(sum(duplicated(basename(unique(file.path(exp_design[,"pair_directory"], exp_design[,"pair2"])))))!=0){
+    stop(paste0("FASTQ files with same name in different directories not allowed in barcodeDesign file columns: 'pair1' and 'pair2'"), call. = FALSE)
+  }
 
   ### Barcode checks
   #Check barcode column is of type character 

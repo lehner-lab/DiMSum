@@ -30,6 +30,13 @@ dimsum__get_barcode_design <- function(
     }
   }
 
+  #Add original FASTQ directory
+  if("fastqFileDir" %in% names(barcode_design)){
+    names(barcode_design)[names(barcode_design)=="fastqFileDir"] <- "pair_directory"
+  }else{
+    barcode_design[,"pair_directory"] <- dimsum_meta[["fastqFileDir"]]
+  }
+
   #Set barcode1 column equal to barcode column (backwards compatibility)
   if("barcode" %in% colnames(barcode_design)){
     barcode_design[,"barcode1"] <- barcode_design[,"barcode"]
@@ -45,14 +52,14 @@ dimsum__get_barcode_design <- function(
 
   #Check FASTQ files exist
   #Pair1 files
-  for(i in unlist(barcode_design[,c("pair1")])){
-    if(!file.exists(file.path(dimsum_meta[["fastqFileDir"]], i))){
+  for(i in unlist(file.path(barcode_design[,"pair_directory"], barcode_design[,"pair1"]))){
+    if(!file.exists(i)){
       stop(paste0("Invalid FASTQ file name '", i, "' in barcodeDesign file (file not found)"), call. = FALSE)
     }
   }
   #Pair2 files
-  for(i in unlist(barcode_design[,c("pair2")])){
-    if(!file.exists(file.path(dimsum_meta[["fastqFileDir"]], i))){
+  for(i in unlist(file.path(barcode_design[,"pair_directory"], barcode_design[,"pair2"]))){
+    if(!file.exists(i)){
       stop(paste0("Invalid FASTQ file name '", i, "' in barcodeDesign file (file not found)"), call. = FALSE)
     }
   }

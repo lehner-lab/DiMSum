@@ -29,6 +29,14 @@ dimsum__check_experiment_design <- function(
   if(sum(duplicated(exp_design[,c("pair1", "pair2")]))!=0 & !dimsum_meta[["experimentDesignPairDuplicates"]]){
     stop(paste0("Duplicate FASTQ files not allowed in experimentDesign file columns: 'pair1' and 'pair2'"), call. = FALSE)
   }
+  #Check for FASTQ files with same name in different directories - pair1
+  if(sum(duplicated(basename(unique(file.path(exp_design[,"pair_directory"], exp_design[,"pair1"])))))!=0){
+    stop(paste0("FASTQ files with same name in different directories not allowed in experimentDesign file columns: 'pair1' and 'pair2'"), call. = FALSE)
+  }
+  #Check for FASTQ files with same name in different directories - pair2
+  if(sum(duplicated(basename(unique(file.path(exp_design[,"pair_directory"], exp_design[,"pair2"])))))!=0){
+    stop(paste0("FASTQ files with same name in different directories not allowed in experimentDesign file columns: 'pair1' and 'pair2'"), call. = FALSE)
+  }
 
   ### Sample name checks (sample_name column)
   #Check sample name column is of type character 

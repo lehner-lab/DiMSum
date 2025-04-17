@@ -36,7 +36,10 @@ dimsum_stage_vsearch <- function(
   dimsum__create_dir(vsearch_outpath, execute = execute, message = "DiMSum STAGE 3 (WRAP): ALIGN PAIRED-END READS") 
 
   #Input files
-  all_fastq <- file.path(dimsum_meta[["exp_design"]][1,"pair_directory"], unique(c(dimsum_meta[['exp_design']][,"pair1"], dimsum_meta[['exp_design']][,"pair2"])))
+  all_fastq <- unique(c(
+    file.path(dimsum_meta[['exp_design']][,"pair_directory"], dimsum_meta[['exp_design']][,'pair1']),
+    file.path(dimsum_meta[['exp_design']][,"pair_directory"], dimsum_meta[['exp_design']][,'pair2'])))
+
   #Check if all input files exist
   dimsum__check_files_exist(
     required_files = all_fastq,

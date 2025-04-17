@@ -24,7 +24,7 @@ status_message <- function(...){cat(sprintf(...), sep='', file=stdout())}
 
 option_list <- list(
   optparse::make_option(opt_str=c("--runDemo"), type="logical", default=F, help = "Run the DiMSum demo (default:F)"),
-  optparse::make_option(opt_str=c("--fastqFileDir", "-i"), help = "Path to directory containing input FASTQ files (required for WRAP)"),
+  optparse::make_option(opt_str=c("--fastqFileDir", "-i"), default='./', help = "Path to directory containing input FASTQ files (default:'./' i.e. current working directory)"),
   optparse::make_option(opt_str=c("--fastqFileExtension", "-l"), default='.fastq', help = "FASTQ file extension (default:'.fastq')"),
   optparse::make_option(opt_str=c("--gzipped", "-g"), type="logical", default=T, help = "Are FASTQ files are gzipped? (default:T)"),
   optparse::make_option(opt_str=c("--stranded"), type="logical", default=T, help = "Is the library design stranded? (default:T)"),

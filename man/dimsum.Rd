@@ -6,7 +6,7 @@
 \usage{
 dimsum(
   runDemo = F,
-  fastqFileDir = NULL,
+  fastqFileDir = "./",
   fastqFileExtension = ".fastq",
   gzipped = T,
   stranded = T,
@@ -67,7 +67,7 @@ dimsum(
 \arguments{
 \item{runDemo}{Run the DiMSum demo (default:F)}
 
-\item{fastqFileDir}{Path to directory containing input FASTQ files (required for WRAP)}
+\item{fastqFileDir}{Path to directory containing input FASTQ files (required for WRAP, default:'./' i.e. current working directory)}
 
 \item{fastqFileExtension}{FASTQ file extension (default:'.fastq')}
 
