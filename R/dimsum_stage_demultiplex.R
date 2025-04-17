@@ -62,8 +62,8 @@ dimsum_stage_demultiplex <- function(
   if(dimsum_meta[["fastqFileExtension"]]!=".fastq"){
     for(pair_name in rownames(fastq_pair_list)){
       #New FASTQ file names
-      new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), ".fastq.gz", basename(fastq_pair_list[pair_name,][1]))
-      new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), ".fastq.gz", basename(fastq_pair_list[pair_name,][2]))
+      new_fastq_name1 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), ".fastq.gz", basename(fastq_pair_list[pair_name,][[1]]))
+      new_fastq_name2 <- gsub(paste0(dimsum_meta[["fastqFileExtension"]], c("$", ".gz$")[as.numeric(dimsum_meta[["gzipped"]])+1]), ".fastq.gz", basename(fastq_pair_list[pair_name,][[2]]))
       #Update names in list
       fastq_pair_list[pair_name,][1] <- file.path(demultiplex_outpath, new_fastq_name1)
       fastq_pair_list[pair_name,][2] <- file.path(demultiplex_outpath, new_fastq_name2)
