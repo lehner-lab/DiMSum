@@ -38,6 +38,12 @@ dimsum__check_experiment_design <- function(
     stop(paste0("FASTQ files with same name in different directories not allowed in experimentDesign file columns: 'pair1' and 'pair2'"), call. = FALSE)
   }
 
+  ### FASTQ file directory checks (pair_directory column)
+  #Check pair_directory column is of type character 
+  if(typeof(exp_design[,"pair_directory"])!="character"){
+    stop(paste0("One or more invalid 'fastqFileDir' values in experimentDesign file (only characters allowed)"), call. = FALSE)
+  }
+
   ### Sample name checks (sample_name column)
   #Check sample name column is of type character 
   if(typeof(exp_design[,"sample_name"])!="character"){

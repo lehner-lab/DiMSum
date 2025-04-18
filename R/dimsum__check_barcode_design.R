@@ -37,6 +37,12 @@ dimsum__check_barcode_design <- function(
     stop(paste0("FASTQ files with same name in different directories not allowed in barcodeDesign file columns: 'pair1' and 'pair2'"), call. = FALSE)
   }
 
+  ### FASTQ file directory checks (pair_directory column)
+  #Check pair_directory column is of type character 
+  if(typeof(barcode_design[,"pair_directory"])!="character"){
+    stop(paste0("One or more invalid 'fastqFileDir' values in barcodeDesign file (only characters allowed)"), call. = FALSE)
+  }
+
   ### Barcode checks
   #Check barcode column is of type character 
   if(typeof(barcode_design[,"barcode1"])!="character" | typeof(barcode_design[,"barcode2"])!="character"){
