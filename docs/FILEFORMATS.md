@@ -36,11 +36,11 @@ Below is a schematic of a generic deep mutational scanning experiment indicating
   <img src="../DMS_experiment.png" width="600">
 </p>
 
-In addition to these mandatory columns, additional columns may be included to specify [Stage 2](PIPELINE.md#stage-2-trim-constant-regions-wrap)-specific options (see [arguments](ARGUMENTS.md#trim-arguments)), which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments provided on the command-line.
+In addition to these mandatory columns, additional columns may be included to specify [Stage 2](PIPELINE.md#stage-2-trim-constant-regions-wrap)-specific options (see [arguments](ARGUMENTS.md#trim-arguments)), which relate to constant region trimming. This allows sample-specific trimming behaviour if necessary. Options specified by columns in the experimental design file override global arguments provided on the command-line. Furthermore, a 'fastqFileDir' column can be included if FASTQ files for different samples are located in different input directories, where the paths specified in this column override that supplied to the corresponding [command-line option](ARGUMENTS.md#fastq-files).
 
 ## FASTQ Files
 
-**OPTIONAL:** If processing of raw sequencing reads is required (with *WRAP*), DiMSum requires FASTQ files saved in a common directory and with a common file extension (see [arguments](ARGUMENTS.md#fastq-files)). Either FASTQ files or a [Variant Count File](#variant-count-file) can be supplied (not both).
+**OPTIONAL:** If processing of raw sequencing reads is desired (with *WRAP*), DiMSum requires that FASTQ files have a consistent file extension (see [arguments](ARGUMENTS.md#fastq-files)). Either FASTQ files or a [Variant Count File](#variant-count-file) can be supplied (not both). FASTQ files with the same filename located in different input directories (see above) are not permitted.
 
 ## Variant Count File
 
